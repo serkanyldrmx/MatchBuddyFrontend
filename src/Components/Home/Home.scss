@@ -10,3 +10,83 @@
     background-image: url("../../images/pexels-grizzlybear-399187.jpg");
     background-size: cover;
 }
+.ai-button {
+    position: absolute;
+    top: 50%; /* Sayfanın ortasına hizala */
+    left: 50px; /* Sağdan mesafe */
+    transform: translateY(-50%); /* Ortalamak için */
+    background: linear-gradient(45deg, #da13af, #2575fc); /* Gradient renkler */
+    color: white; /* Beyaz yazı */
+    border: none; /* Çerçeve yok */
+    padding: 15px 30px; /* İç boşluk */
+    border-radius: 50px; /* Yuvarlak köşeler */
+    font-size: 16px; /* Yazı boyutu */
+    font-weight: bold; /* Kalın yazı */
+    display: flex; /* Simge ve yazıyı hizala */
+    align-items: center; /* Dikey hizalama */
+    justify-content: center; /* Yatay hizalama */
+    gap: 10px; /* Simge ile yazı arasında boşluk */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+    cursor: pointer; /* El simgesi */
+    transition: all 0.3s ease; /* Hover efekti için geçiş */
+}
+.ai-button:hover {
+    background: linear-gradient(45deg, #2575fc, #6a11cb); /* Gradient yönünü değiştir */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Gölge büyüt */
+    transform: scale(1.05); /* Hafif büyüme efekti */
+}
+
+.ai-icon {
+    font-size: 24px; /* Simge boyutu */
+}
+
+.external-link {
+    position: absolute;
+    top: 50%; /* Sayfanın ortasına hizala */
+    right: 50px; /* Sağdan mesafe */
+    transform: translateY(-50%); /* Ortalamak için */
+    background: linear-gradient(45deg, rgba(218, 19, 175, 0.8), rgba(37, 117, 252, 0.8)); /* Gradient renkler ve şeffaflık */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px; /* Daha köşeli bir yapı */
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column; /* Yan yana değil, alt alta */
+    align-items: flex-start; /* İkonları sola hizala */
+    justify-content: flex-start; /* İkonları sola hizala */
+    gap: 15px; /* Butonlar arası mesafe */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.external-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* İkonları sola hizala */
+    gap: 10px;
+    padding: 10px 20px;
+    width: 100%; /* Butonları eşit genişlikte yap */
+    border: none;
+    border-radius: 10px;
+    background: white;
+    color: #ffffff; /* Burada renk değiştirildi (örnek: kırmızı) */
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+
+.external-link-btn:hover {
+    background: #f5f5f5;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.external-link-icon {
+    height: 30px;
+    width: 30px;
+}

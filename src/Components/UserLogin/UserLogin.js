@@ -11,7 +11,11 @@ const UserLogin = () => {
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
-      navigate("/home", { state: { user: storedUser } });
+      if (storedUser.isAdmin === 1) {
+        navigate("/AdminPanel", { state: { user: storedUser } });
+      } else {
+        navigate("/home", { state: { user: storedUser } });
+      }
     }
   }, [navigate]);
 
@@ -41,7 +45,11 @@ const UserLogin = () => {
       success();
 
       setTimeout(() => {
-        navigate("/home", { state: { user: data } });
+        if (data.isAdmin === 1) {
+          navigate("/AdminPanel", { state: { user: data } });
+        } else {
+          navigate("/home", { state: { user: data } });
+        }
       }, 1500);
     } catch (err) {
       error();

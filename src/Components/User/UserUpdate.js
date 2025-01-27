@@ -64,7 +64,7 @@ function UserUpdate() {
   return (
     <div className="user" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", padding: '20px', backgroundColor: "#f0f2f5" }}>
       <Navbar />
-      <Card className="card" style={{ width: 340, borderRadius: 10, boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
+      <Card className="card1" style={{ width: 340, borderRadius: 10, boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "10px 0" }}>
           <Avatar size={64} icon={<UserOutlined />} style={{ marginBottom: "20px" }} />
           <Text style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px', color: '#000' }}>Kullanıcı Bilgileri</Text>

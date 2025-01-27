@@ -1,0 +1,170 @@
+/* Player icon stilleri */
+.player-icon {
+    width: 30px;  /* Oyuncu ikonunun genişliği */
+    height: 30px; /* Oyuncu ikonunun yüksekliği */
+    margin-right: 10px; /* Sağdan boşluk */
+    border-radius: 50%; /* İkonları daire şeklinde yapar */
+}
+
+/* Ana kapsayıcı */
+.match-reservation-container {
+    display: flex; /* Flexbox düzeni */
+    height: 82vh; /* Görünüm yüksekliğinin %82'si kadar */
+    background-color: #f4f4f4; /* Açık gri arka plan */
+    font-family: Arial, sans-serif; /* Yazı tipi */
+    overflow: hidden; /* Taşmaları gizler */
+}
+
+/* Stadyum listesi (sol alan) */
+.stadium-tree {
+    width: 25%; /* Soldaki alanın genişliği */
+    background-color: #ffffff; /* Beyaz arka plan */
+    border-left: 1px solid #ddd; /* Sağ kenarlık */
+    padding: 20px; /* İçerik boşluğu */
+    overflow-y: auto; /* Dikey kaydırma */
+}
+
+.stadium-tree h3 {
+    margin-bottom: 10px; /* Başlığın alt boşluğu */
+    color: #333; /* Koyu gri metin rengi */
+}
+
+/* Stadyum listesi stili */
+.stadium-tree ul {
+    list-style-type: none; /* Liste işaretlerini kaldırır */
+    padding: 0; /* İç boşluk */
+}
+
+/* Stadyum öğesi */
+.stadium-item {
+    margin: 10px 0; /* Yukarı-aşağı boşluk */
+    padding: 10px; /* İçerik boşluğu */
+    border: 1px solid #ddd; /* Kenarlık */
+    border-radius: 10px; /* Köşeleri yuvarlatır */
+    justify-content: flex-start; /* Sola hizalama */
+    cursor: pointer; /* İmleci el simgesine dönüştürür */
+    display: flex; /* Flex düzeni */
+    align-items: center; /* Dikey hizalama */
+    text-align: left; /* Metni sola hizalar */
+    transition: background-color 0.3s ease; /* Arka plan geçiş efekti */
+}
+
+.stadium-item:hover {
+    background-color: #f0f0f0; /* Üzerine gelindiğinde açık gri arka plan */
+}
+
+/* Stadyumlara bağlı bildirimler (kırmızı rozet) */
+.badge {
+    background-color: red; /* Kırmızı arka plan */
+    color: white; /* Beyaz metin */
+    padding: 5px 10px; /* İçerik boşluğu */
+    border-radius: 50%; /* Daire şekli */
+    font-size: 12px; /* Yazı boyutu */
+}
+
+/* Maç detayları */
+.match-item {
+    font-size: 14px; /* Yazı boyutu */
+    padding-left: 20px; /* Soldan boşluk */
+    cursor: pointer; /* İmleci el simgesine dönüştürür */
+}
+
+.match-item:hover {
+    background-color: #f0f0f0; /* Üzerine gelindiğinde açık gri arka plan */
+}
+
+/* Sağdaki detay alanı */
+.stadium-details {
+    flex: 1; /* Esnek genişlik */
+    padding: 20px; /* İçerik boşluğu */
+    overflow-y: auto; /* Dikey kaydırma */
+}
+
+.stadium-details h3 {
+    margin-bottom: 10px; /* Başlığın alt boşluğu */
+    color: #333; /* Koyu gri metin rengi */
+}
+
+.stadium-details p {
+    margin-bottom: 20px; /* Paragraflar arası boşluk */
+}
+
+/* Butonlar */
+.btn {
+    padding: 10px 15px; /* İçerik boşluğu */
+    border: none; /* Kenarlık kaldırılır */
+    border-radius: 5px; /* Köşeleri yuvarlatır */
+    margin-right: 10px; /* Sağdan boşluk */
+    cursor: pointer; /* İmleci el simgesine dönüştürür */
+    transition: background-color 0.3s ease; /* Arka plan geçiş efekti */
+}
+
+.btn:hover {
+    opacity: 0.9; /* Üzerine gelindiğinde opaklık */
+}
+
+.btn-approve {
+    background-color: green; /* Onay butonu: yeşil */
+    color: white; /* Beyaz metin */
+}
+
+.btn-reject {
+    background-color: red; /* Reddet butonu: kırmızı */
+    color: white; /* Beyaz metin */
+}
+
+/* Süresi geçmiş maç stili */
+.expired-match {
+    color: red; /* Kırmızı metin */
+    font-weight: bold; /* Kalın yazı */
+    font-size: 16px; /* Yazı boyutu */
+    background-color: #ffcccc; /* Açık kırmızı arka plan */
+    padding: 10px; /* İçerik boşluğu */
+    border-radius: 5px; /* Köşeleri yuvarlatır */
+}
+
+/* Takımlar kapsayıcısı */
+.teams-container {
+    display: flex; /* Yan yana yerleştirme */
+    justify-content: space-between; /* Eşit boşluk */
+    margin-top: 20px; /* Yukarıdan boşluk */
+    overflow-x: auto; /* Yatay kaydırma */
+}
+
+/* Her bir takım kutusu */
+.team {
+    width: 45%; /* Takım kutusunun genişliği */
+}
+
+/* Takım içindeki liste */
+.team ul {
+    list-style-type: none; /* Liste işaretlerini kaldırır */
+    padding: 0; /* İç boşluk */
+    margin-top: 10px; /* Üstten boşluk */
+}
+
+/* Takım listesi öğeleri */
+.team li {
+    margin: 5px 0; /* Yukarı-aşağı boşluk */
+    font-size: 14px; /* Yazı boyutu */
+}
+
+/* Takım başlığı (en üstte yer alır) */
+.team h5 {
+    text-align: center; /* Ortalanır */
+    font-size: 18px; /* Yazı boyutu */
+    font-weight: bold; /* Kalın yazı */
+    color: #333; /* Koyu gri renk */
+    margin-bottom: 10px; /* Alt boşluk */
+}
+
+/* Takım başlıkları için görsel çizgiler */
+.team h5:before,
+.team h5:after {
+    content: ""; /* İçerik boş */
+    display: inline-block; /* Yan yana yerleştirme */
+    width: 120px; /* Çizgi genişliği */
+    height: 2px; /* Çizgi kalınlığı */
+    background-color: #333; /* Çizgi rengi */
+    margin: 0 10px; /* Çizgi boşlukları */
+}

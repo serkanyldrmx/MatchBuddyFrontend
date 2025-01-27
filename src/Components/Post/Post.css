@@ -7,3 +7,9 @@
 .savePost{
     background-size: cover;
 }
+
+.postCard .MuiCardHeader-root {
+    background-color: rgba(0, 0, 0, 0.3); /* Şeffaflık */
+    border-radius: 8px;
+    padding: 8px;
+  }

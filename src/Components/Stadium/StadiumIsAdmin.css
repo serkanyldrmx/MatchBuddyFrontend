@@ -1,0 +1,117 @@
+.adminContainer {
+  display: flex; /* Flexbox düzeni */
+  height: 82vh; /* Görünüm yüksekliğinin %82'si kadar */
+  background-color: #f4f4f4; /* Açık gri arka plan */
+  font-family: Arial, sans-serif; /* Yazı tipi */
+  overflow: hidden; /* Taşmaları gizler */
+  }
+  
+  .controlsContainer {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Aralardaki boşlukları azalttık */
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff; /* Beyaz arka plan */
+    border-right: 1px solid #ddd; /* Sağ kenarlık */
+    overflow-y: auto; /* Dikey kaydırma */
+    /*height: 500vh;  Set the initial height */
+  }
+  
+  .comboBox, .inputField, .saveButton, .searchButton, .textareaField {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .comboBox:focus, .inputField:focus, .textareaField:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  .inputField, .textareaField {
+    margin-bottom: 5px;
+  }
+
+  .textareaField {
+    height: 300px; /* Set the initial height of the textarea */
+}
+  
+  .inputLabel {
+    margin-bottom: 0; /* Boşluk bırakmamak için */
+    font-size: 12px; /* Yazı boyutunu küçülttük */
+    color: #555;
+    text-align: left; /* Sol kısımdan başlaması için */
+  }
+  
+  .saveButton, .searchButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+    border-radius: 20px;
+  }
+  
+  .saveButton:hover, .searchButton:hover {
+    background-color: #0056b3;
+  }
+  
+  .stadiumMapContainer {
+    width: 88%;
+    height: 600px; /* Yüksekliği artırdık */
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .searchContainer {
+    position: absolute;
+    margin-top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+  
+  .searchInput {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .searchInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  .searchButton {
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .searchButton:hover {
+    background-color: #0056b3;
+  }

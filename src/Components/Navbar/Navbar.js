@@ -125,7 +125,7 @@ function Navbar() {
             component="div"
             sx={{ display: { xs: 'none', sm: 'block' } }}
           >
-            <Link className="link" to="/"><HomeOutlined style={{ color: 'white' }} />Match Buddy</Link>
+            <Link className="link" to="/home"><HomeOutlined style={{ color: 'white' }} />Match Buddy</Link>
           </Typography>
           <Search>
             <SearchIconWrapper>
@@ -138,7 +138,14 @@ function Navbar() {
           </Search>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button type="link" className="white-button" href='/stadium'><GatewayOutlined />Stadyumlar</Button>
+            <Button type="link" className="white-button" href='/
+            
+            
+            
+            
+            
+            
+            '><GatewayOutlined />Stadyumlar</Button>
             <Button type="link" className="white-button" href='/players'><TeamOutlined />Oyuncular</Button>     
             <Button type="link" className="white-button" href='/team'><TableOutlined />Takımlar</Button>        
             {/* <Button type="link" className="white-button" href='/players'><BorderInnerOutlined />Takımlar</Button> */}

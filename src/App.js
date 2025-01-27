@@ -12,16 +12,23 @@ import CreatTeam from './Components/Team/CreatTeam';
 import ChatPage from './Components/Chat/ChatPage';
 import ChatWindow from './Components/Chat/ChatWindow';
 import MatchDetails from './Components/Home/MatchDetails';
+import AdminPanel from './Components/Home/AdminPanel';
+import StadiumIsAdmin from './Components/Stadium/StadiumIsAdmin';
+import About from './Components/Information/About';
+import AboutPage from './Components/Information/AboutPage';
+import Communication from './Components/Information/Communication';
+import MatchAll from './Components/Post/MatchAll';
 //import GroupMessages from './Components/Chat/GroupMessages';
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
+      <BrowserRouter >
         <Routes>
           <Route path="/" element={<UserLogin />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/adminPanel" element={<AdminPanel />} />
           <Route path="/user" element={<User />} />
           <Route path="/stadium" element={<Stadium />} />
           <Route path="/players" element={<Players />} />
@@ -31,6 +38,11 @@ function App() {
           <Route path="/chat" element={<ChatPage />} /> {/* Yeni eklenen sohbet sayfası */}
           <Route path="/chatWindow" element={<ChatWindow />} />
           <Route path="/match-details/:matchId" element={<MatchDetails />} />
+          <Route path="/stadiumIsAdmin" element={<StadiumIsAdmin />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/aboutPage" element={<AboutPage />} />
+          <Route path="/communication" element={<Communication />} />
+          <Route path="/matchAll" element={<MatchAll />} />
           {/* <Route path="/groupMessages" element={<GroupMessages />} /> */}
         </Routes>
       </BrowserRouter>

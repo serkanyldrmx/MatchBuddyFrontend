@@ -30,9 +30,6 @@
   transition: transform 0.2s ease-in-out;
 }
 
-.team-card:hover {
-  transform: scale(1.05);
-}
 
 .team-card .MuiTypography-body1 {
   color: #555;
