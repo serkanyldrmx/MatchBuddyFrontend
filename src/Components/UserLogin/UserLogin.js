@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Row, Col, message } from "antd";
+import { Button, Checkbox, Form, Input, Row, Col, message, Card } from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect } from "react";
 import "./Login.css";
@@ -59,68 +59,71 @@ const UserLogin = () => {
 
   const renderForm = (
     <div className="login-background">
-      <Form
-        name="normal_login"
-        className="login-form"
-        initialValues={{
-          remember: true,
-        }}
-        onFinish={onFinish}
-      >
-        <Form.Item
-          name="username"
-          rules={[
-            {
-              required: true,
-              message: "Lütfen Kullanıcı adınızı giriniz!",
-            },
-          ]}
+      <Card className="login-card">
+      <h1 className="login-title">Log In</h1>
+        <Form
+          name="normal_login"
+          className="login-form"
+          initialValues={{
+            remember: true,
+          }}
+          onFinish={onFinish}
         >
-          <Input
-            style={{
-              borderRadius: "1.2rem",
-              color: "#f4a261",
-              fontSize: "bold",
-            }}
-            prefix={<UserOutlined className="site-form-item-icon" />}
-            placeholder="Kullanıcı Adı"
-            autoFocus
-          />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Lütfen Şifrenizi Giriniz!",
-            },
-          ]}
-        >
-          <Input
-            style={{ borderRadius: "1.2rem", color: "#f4a261" }}
-            prefix={<LockOutlined className="site-form-item-icon" />}
-            type="password"
-            placeholder="Şifre"
-          />
-        </Form.Item>
-        <Form.Item>
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Beni Hatırla</Checkbox>
-          </Form.Item>
-          <Link to="#">Parolanızı mı unuttunuz?</Link>
-        </Form.Item>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="login-form-button"
-            style={{ margin: "1rem" }}
+          <Form.Item
+            name="username"
+            rules={[
+              {
+                required: true,
+                message: "Lütfen Kullanıcı adınızı giriniz!",
+              },
+            ]}
           >
-            Giriş Yap
-          </Button>
-          <Link to="/register">Şimdi Üye Ol!</Link>
-        </Form.Item>
-      </Form>
+            <Input
+              style={{
+                borderRadius: "1.2rem",
+                color: "#f4a261",
+                fontSize: "bold",
+              }}
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Kullanıcı Adı"
+              autoFocus
+            />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            rules={[
+              {
+                required: true,
+                message: "Lütfen Şifrenizi Giriniz!",
+              },
+            ]}
+          >
+            <Input
+              style={{ borderRadius: "1.2rem", color: "#f4a261" }}
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              placeholder="Şifre"
+            />
+          </Form.Item>
+          <Form.Item>
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox>Beni Hatırla</Checkbox>
+            </Form.Item>
+            <Link to="#">Parolanızı mı unuttunuz?</Link>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+              style={{ margin: "1rem" }}
+            >
+              Giriş Yap
+            </Button>
+            <Link to="/register">Şimdi Üye Ol!</Link>
+          </Form.Item>
+        </Form>
+      </Card>
     </div>
   );
 

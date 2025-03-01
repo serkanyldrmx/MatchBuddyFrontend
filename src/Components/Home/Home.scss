@@ -1,19 +1,22 @@
-.container{
+.container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     background-color: #3cc1b8;
-    height: '100vh';
-}
-
-.container{
+    min-height: 100vh; /* Tüm ekranı kaplasın */
+    width: 100%; /* Genişliği tam sayfa yapsın */
+    
     background-image: url("../../images/pexels-grizzlybear-399187.jpg");
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Arka plan sabit kalsın */
 }
+
 .ai-button {
-    position: absolute;
-    top: 50%; /* Sayfanın ortasına hizala */
-    left: 50px; /* Sağdan mesafe */
+    position: fixed;
+    top: 40%; /* Sayfanın ortasına hizala */
+    left: 50px; /* Sol kenardan mesafe */
     transform: translateY(-50%); /* Ortalamak için */
     background: linear-gradient(45deg, #da13af, #2575fc); /* Gradient renkler */
     color: white; /* Beyaz yazı */
@@ -30,6 +33,7 @@
     cursor: pointer; /* El simgesi */
     transition: all 0.3s ease; /* Hover efekti için geçiş */
 }
+
 .ai-button:hover {
     background: linear-gradient(45deg, #2575fc, #6a11cb); /* Gradient yönünü değiştir */
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Gölge büyüt */
@@ -40,8 +44,37 @@
     font-size: 24px; /* Simge boyutu */
 }
 
+.ai-team-button {
+    position: fixed;
+    top: 60%; /* Sayfanın ortasından biraz daha aşağıya hizala */
+    left: 50px; /* Sol kenardan mesafe */
+    transform: translateY(-50%); /* Ortalamak için */
+    background: linear-gradient(45deg, #12fd01, #009ffd); /* Koyu mavi ve açık yeşil */
+
+    color: white; /* Beyaz yazı */
+    border: none; /* Çerçeve yok */
+    padding: 15px 30px; /* İç boşluk */
+    border-radius: 50px; /* Yuvarlak köşeler */
+    font-size: 16px; /* Yazı boyutu */
+    font-weight: bold; /* Kalın yazı */
+    display: flex; /* Simge ve yazıyı hizala */
+    align-items: center; /* Dikey hizalama */
+    justify-content: center; /* Yatay hizalama */
+    gap: 10px; /* Simge ile yazı arasında boşluk */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+    cursor: pointer; /* El simgesi */
+    transition: all 0.3s ease; /* Hover efekti için geçiş */
+}
+
+.ai-team-button:hover {
+    background: linear-gradient(45deg, #f6e300, #f78c42); /* Gradient yönünü değiştir */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Gölge büyüt */
+    transform: scale(1.05); /* Hafif büyüme efekti */
+}
+
+
 .external-link {
-    position: absolute;
+    position: fixed;
     top: 50%; /* Sayfanın ortasına hizala */
     right: 50px; /* Sağdan mesafe */
     transform: translateY(-50%); /* Ortalamak için */

@@ -42,6 +42,9 @@ function Home() {
     const handleButtonClick = () => {
         message.success("Yapay Zeka ile Sıralama Başlatıldı!");
     };
+    const handleButtonTeamClick = () => {
+        message.success("Yapay Zeka ile Takım OLuşturmaya yönlendiriliyorsunuz!");
+    };
 
     if (error) {
         return <div>Error!!!</div>;
@@ -60,23 +63,31 @@ function Home() {
                             userCount={5}
                             matchDate={'2024-04-12 18:34:45.1600000'}
                         />
-                        {postList.map(post => (
-                            <Post
-                                matchId={post.matchId}
-                                key={post.id}
-                                matchName={post.matchName}
-                                description={post.description}
-                                userCount={post.userCount}
-                                status={post.isActive}
-                                matchDate={post.matchDate}
-                            />
-                        ))}
+                        <div className="post-container">
+                            {postList.map(post => (
+                                <div className="post-item" key={post.id}>
+                                    <Post
+                                        matchId={post.matchId}
+                                        matchName={post.matchName}
+                                        description={post.description}
+                                        userCount={post.userCount}
+                                        status={post.isActive}
+                                        matchDate={post.matchDate}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </Container>
                 </div>
                 {/* Sağ tarafa buton */}
                 <button className="ai-button" onClick={handleButtonClick}>
                     <AutoAwesomeIcon className="ai-icon" />
-                    Yapay Zeka ile Sırala
+                    Yapay Zeka ile Maçları Sırala
+                </button>
+
+                <button className="ai-team-button" onClick={handleButtonTeamClick}>
+                    <AutoAwesomeIcon className="ai-icon" />
+                    Yapay Zeka ile Takımları Oluştur
                 </button>
 
                 {/* Card ile Butonlar */}
