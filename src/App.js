@@ -18,6 +18,7 @@ import About from './Components/Information/About';
 import AboutPage from './Components/Information/AboutPage';
 import Communication from './Components/Information/Communication';
 import MatchAll from './Components/Post/MatchAll';
+import TeamAICreate from './Components/AIComponents/TeamAICreate';
 //import GroupMessages from './Components/Chat/GroupMessages';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/aboutPage" element={<AboutPage />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/matchAll" element={<MatchAll />} />
+          <Route path="/teamAICreate" element={<TeamAICreate />} />
           {/* <Route path="/groupMessages" element={<GroupMessages />} /> */}
         </Routes>
       </BrowserRouter>

@@ -1,12 +1,13 @@
 import Post from "../Post/Post";
 import React, { useState, useEffect } from 'react';
 import { message } from "antd";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import '../Home/Home.scss'; // Home.scss dosyasını import ediyoruz
 import Container from '@mui/material/Container';
 import Navbar from "../Navbar/Navbar";
+import TeamAICreate from "../AIComponents/TeamAICreate";
 import PostForm from "../Post/PostForm";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'; // Yapay zeka simgesi
 import mackolikIcon from '../../images/Mackolik.png'; // Mackolik ikonunu ekleyin
@@ -17,6 +18,7 @@ import { Card, CardContent, Typography, Button } from '@mui/material'; // Card b
 
 function Home() {
     const location = useLocation();
+    const navigate = useNavigate();
     const { user } = location.state || {};
     console.log(user);
 
@@ -42,8 +44,10 @@ function Home() {
     const handleButtonClick = () => {
         message.success("Yapay Zeka ile Sıralama Başlatıldı!");
     };
+
     const handleButtonTeamClick = () => {
-        message.success("Yapay Zeka ile Takım OLuşturmaya yönlendiriliyorsunuz!");
+        message.success("Yapay Zeka ile Takım Oluşturmaya yönlendiriliyorsunuz!");
+        navigate('/teamAICreate');
     };
 
     if (error) {
@@ -87,7 +91,7 @@ function Home() {
 
                 <button className="ai-team-button" onClick={handleButtonTeamClick}>
                     <AutoAwesomeIcon className="ai-icon" />
-                    Yapay Zeka ile Takımları Oluştur
+                    Yapay Zeka ile Turnuva Oluştur
                 </button>
 
                 {/* Card ile Butonlar */}

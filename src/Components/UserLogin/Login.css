@@ -1,5 +1,5 @@
 .login{
-    background-image: url("../../images/futbol-yapay-zeka.png");
+    background-image: url("../../images/Login-ArkaPlan.jpg");
     background-size: cover;
 }
 
@@ -38,9 +38,9 @@
 }
 
 .register {
-    background-image: url("../../images/foto3.jpg");
+    background-image: url("../../images/Login-ArkaPlan.jpg");
     /*background-size: 100% 100%; /* Resmi tamamen kaplayacak şekilde boyutlandırır */
-    background-position: center center; /* Resmi ekranda ortalar */
+    background-size: cover; /* Resmi ekranda ortalar */
 }
   /* .login-card {
     border: 1px solid;

@@ -1,10 +1,19 @@
-.postCard{
-    background-image: url("../../images/stadyumm.jpg");
-    background-size: cover;
-    
+.postContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-.savePost{
+.postCard {
+    background-image: url("../../images/stadyumm.jpg");
+    background-size: cover;
+    width: 600px;
+    margin-bottom: 20px; /* Altındaki post ile arasına boşluk bırak */
+    position: relative;
+}
+
+.savePost {
     background-size: cover;
 }
 
@@ -12,4 +21,59 @@
     background-color: rgba(0, 0, 0, 0.3); /* Şeffaflık */
     border-radius: 8px;
     padding: 8px;
-  }
+}
+
+.commentSection {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 600px; /* PostCard ile aynı genişlik */
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 0; /* Üstteki post ile arasında boşluk olmasın */
+}
+
+.commentSectionTitle {
+    font-weight: 900; /* Maksimum kalınlık */
+    margin-bottom: 10px;
+    font-size: 24px; /* Yazı tipi büyüklüğü */
+    text-align: left; /* Sola hizalama */
+    text-transform: uppercase; /* Harfleri büyük yaparak daha belirgin hale getirme (opsiyonel) */
+    letter-spacing: 0.5px; /* Harf aralığını artırarak daha dolgun görünmesini sağlama (opsiyonel) */
+}
+
+.commentCard {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    box-sizing: border-box; /* Genişlik hesaplamasında padding ve border'ı dahil et */
+    position: relative; /* Silme ikonunu sağ üste yerleştirmek için */
+}
+
+.commentCard .avatar {
+    margin-right: 10px;
+}
+
+.commentContent {
+    display: flex;
+    text-align: left; /* Sola hizalama */
+    flex-direction: column;
+    width: 100%; /* İçerik genişliği */
+}
+
+.commentUserName {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.commentCard .deleteIcon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: red; /* Rengi kırmızı yap */
+}

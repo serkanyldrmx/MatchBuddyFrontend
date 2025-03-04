@@ -22,7 +22,11 @@ import Avatar from '@mui/material/Avatar';
 import Collapse from '@mui/material/Collapse';
 import { message } from "antd";
 import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
 import Comment from "../Comment/Comment";
+import DeleteIcon from '@mui/icons-material/Delete';
+// ...existing code...
+
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -44,7 +48,8 @@ function Post(props) {
   const [error, setError] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false); // Dialog kontrolü için state
   const isInitialMount = useRef(true);
-  const [player, setPlayer] = useState();
+  const [player, setPlayer] = useState(null);
+  const [newComment, setNewComment] = useState("");
 
   const currentDate = new Date();
   const matchDateObj = new Date(matchDate);
@@ -58,7 +63,8 @@ function Post(props) {
   }).format(matchDateObj);
 
   useEffect(() => {
-    setPlayer(JSON.parse(localStorage.getItem("user")));
+    const user = JSON.parse(localStorage.getItem("user"));
+    setPlayer(user);
   }, []);
 
   const handleExpandClick = () => {
@@ -97,6 +103,32 @@ function Post(props) {
       });
   };
 
+  const handleCommentDelete = (commentId) => {
+    fetch(`http://localhost:5033/api/MatchComment/DeleteMatchComment?commentId=${commentId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          message.success(data.message || "Yorum başarıyla silindi.");
+          refreshComments();
+        } else {
+          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+        }
+      })
+      .catch((error) => {
+        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+      });
+  };
+
   const handleDialogOpen = () => {
     setDialogOpen(true); // Popup'u aç
   };
@@ -113,7 +145,7 @@ function Post(props) {
   };
 
   const refreshComments = () => {
-    fetch(`http://localhost:5033/api/Match/GetMatchComments?matchId=${matchId}`)
+    fetch(`http://localhost:5033/api/MatchComment/GetMatchComments?matchId=${matchId}`)
       .then(res => res.json())
       .then(
         (result) => {
@@ -157,103 +189,185 @@ function Post(props) {
   
   const statusMessage = getStatusMessage();
 
-return (
-  <div className="postContainer">
-    <Card className="postCard" sx={{ margin: '20px', width: '500px', backgroundColor: '#3cc1b8', padding: '16px' }}>
-      <CardHeader
-        avatar={
-          <Link to={`/match-details/${matchId}`}>
-            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-              {matchName.charAt(0).toUpperCase()}
-            </Avatar>
-          </Link>
+  const handleCommentChange = (event) => {
+    setNewComment(event.target.value);
+  };
+
+  const handleCommentSubmit = () => {
+    if (newComment.trim() === "") {
+      message.error("Yorum boş olamaz.");
+      return;
+    }
+
+    const commentData = {
+      comment: newComment,
+      playerId: player?.playerId,
+      matchId: matchId,
+    };
+
+    fetch(`http://localhost:5033/api/MatchComment/SaveMatchComment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(commentData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
         }
-        action={
-          <IconButton onClick={handleDialogOpen} aria-label="delete">
-            <DeleteForeverIcon style={{ color: "red" }} />
-          </IconButton>
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          message.success(data.message || "Yorum başarıyla eklendi.");
+          setNewComment("");
+          refreshComments();
+        } else {
+          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
         }
-      />
-      {statusMessage && (
-        <Typography variant="body2" color={statusMessage.color} style={{ fontWeight: 'bold', fontSize: '16px' }}>
-          {statusMessage.message}
+      })
+      .catch((error) => {
+        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+      });
+  };
+
+  const getColorById = (id) => {
+    const colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF", "#33FFF5", "#F5FF33", "#FF8C33", "#8C33FF", "#33FF8C"];
+    return colors[id % 10];
+  };
+
+  return (
+    <div className="postContainer">
+      <Card className="postCard" sx={{ margin: '20px', width: '600px', backgroundColor: '#3cc1b8', padding: '16px' }}>
+        <CardHeader
+          avatar={
+            <Link to={`/match-details/${matchId}`}>
+              <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                {matchName ? matchName.charAt(0).toUpperCase() : "?"}
+              </Avatar>
+            </Link>
+          }
+          action={
+            <IconButton onClick={handleDialogOpen} aria-label="delete">
+              <DeleteForeverIcon style={{ color: "red" }} />
+            </IconButton>
+          }
+        />
+        {statusMessage && (
+          <Typography variant="body2" color={statusMessage.color} style={{ fontWeight: 'bold', fontSize: '16px' }}>
+            {statusMessage.message}
+          </Typography>
+        )}
+        <Typography variant="h6" component="div" style={{ marginTop: statusMessage ? '5px' : '0' }}>
+          {"Maç Adı: " + matchName}
         </Typography>
-      )}
-      <Typography variant="h6" component="div" style={{ marginTop: statusMessage ? '5px' : '0' }}>
-        {"Maç Adı: " + matchName}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {"Maç tarihi: " + formattedDate}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {"Maç Saati: " + formattedHour}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {"Katılımcı Sayısı: " + userCount}
-      </Typography>
-      <CardContent>
         <Typography variant="body2" color="text.secondary">
-          {description}
+          {"Maç tarihi: " + formattedDate}
         </Typography>
-        <Button
-          variant="contained"
-          style={{
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            color: 'white',
-            marginTop: '15px',
-          }}
-        >
-          <Link
-            to={`/match-details/${matchId}`}
-            style={{ textDecoration: 'none', color: 'white' }}
+        <Typography variant="body2" color="text.secondary">
+          {"Maç Saati: " + formattedHour}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {"Katılımcı Sayısı: " + userCount}
+        </Typography>
+        <CardContent>
+          <Typography variant="body2" color="text.secondary">
+            {description}
+          </Typography>
+          <Button
+            variant="contained"
+            style={{
+              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+              color: 'white',
+              marginTop: '15px',
+            }}
           >
-            Maçı İncele / Katıl
-          </Link>
-        </Button>
-      </CardContent>
-      <CardActions disableSpacing>
-        <IconButton onClick={handleLike} aria-label="add to favorites">
-          <FavoriteIcon style={liked ? { color: "red" } : null} />
-        </IconButton>
-        <ExpandMore
-          expand={expanded.toString()}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-        >
-          <CommentIcon />
-        </ExpandMore>
-      </CardActions>
+            <Link
+              to={`/match-details/${matchId}`}
+              style={{ textDecoration: 'none', color: 'white' }}
+            >
+              Maçı İncele / Katıl
+            </Link>
+          </Button>
+        </CardContent>
+        <CardActions disableSpacing>
+          <IconButton onClick={handleLike} aria-label="add to favorites">
+            <FavoriteIcon style={liked ? { color: "red" } : null} />
+          </IconButton>
+          <ExpandMore
+            expand={expanded.toString()}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more"
+          >
+            <CommentIcon />
+          </ExpandMore>
+        </CardActions>
+      </Card>
+
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Container fixed className="container">
-          {error ? "Error" :
-            isLoaded ? commentList.length > 0 ? commentList.map(comment => (
-              <Comment key={comment.id} userId={comment.userId} userName={comment.userName} text={comment.text} />
-            )) : "No comments yet" : "Loading..."}
+        <Container fixed className="commentSection">
+          <Typography variant="h6" component="div" className="commentSectionTitle">
+            Maç Yorumları
+          </Typography>
+          {isLoaded ? commentList.length > 0 ? commentList.map(comment => (
+            <div key={comment.commentsId} className="commentCard">
+              <Avatar className="avatar" sx={{ bgcolor: getColorById(comment.playerId) }}>
+                {comment.playerName.charAt(0).toUpperCase()}{comment.playerSurname.charAt(0).toUpperCase()}
+              </Avatar>
+              <div className="commentContent">
+                <div className="commentUserName">{comment.userName}</div>
+                <div>{comment.comment}</div>
+              </div>
+              <IconButton
+                aria-label="delete"
+                onClick={() => handleCommentDelete(comment.commentsId)}
+                style={{ marginLeft: 'auto', color: 'red' }} // Rengi kırmızı yap
+              >
+                <DeleteIcon />
+              </IconButton>
+            </div>
+          )) : "No comments yet" : "Loading..."}
+          <div style={{ marginTop: '20px' }}>
+            <TextField
+              label="Yorum Yaz"
+              variant="outlined"
+              fullWidth
+              value={newComment}
+              onChange={handleCommentChange}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ marginTop: '10px' }}
+              onClick={handleCommentSubmit}
+            >
+              Gönder
+            </Button>
+          </div>
         </Container>
       </Collapse>
-    </Card>
 
-    {/* Popup (Dialog) */}
-    <Dialog open={dialogOpen} onClose={() => handleDialogClose(false)}>
-      <DialogTitle>{"Maçı Sil"}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          Bu maçı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => handleDialogClose(false)} color="primary">
-          Vazgeç
-        </Button>
-        <Button onClick={() => handleDialogClose(true)} color="error" autoFocus>
-          Sil
-        </Button>
-      </DialogActions>
-    </Dialog>
-  </div>
-);
-
+      {/* Popup (Dialog) */}
+      <Dialog open={dialogOpen} onClose={() => handleDialogClose(false)}>
+        <DialogTitle>{"Maçı Sil"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bu maçı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleDialogClose(false)} color="primary">
+            Vazgeç
+          </Button>
+          <Button onClick={() => handleDialogClose(true)} color="error" autoFocus>
+            Sil
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 }
 
 export default Post;

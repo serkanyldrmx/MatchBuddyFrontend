@@ -140,11 +140,6 @@ function Navbar() {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             <Button type="link" className="white-button" href='/
             
-            
-            
-            
-            
-            
             '><GatewayOutlined />Stadyumlar</Button>
             <Button type="link" className="white-button" href='/players'><TeamOutlined />Oyuncular</Button>     
             <Button type="link" className="white-button" href='/team'><TableOutlined />Takımlar</Button>        
