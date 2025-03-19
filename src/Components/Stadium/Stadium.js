@@ -5,8 +5,8 @@ import L from 'leaflet';
 import 'leaflet-routing-machine';
 import axios from 'axios';
 import './Stadium.css';
-import LocationIcon from '../../images/Location.webp';
-import SelectedLocationIcon from '../../images/SelectedLocation.webp';
+import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
+import SelectedLocationIcon from '../../images/Vector-Location-PNG-Free-Image.png';
 
 // Leaflet için özel ikon oluşturma
 const customIcon = new L.Icon({
@@ -20,10 +20,10 @@ const customIcon = new L.Icon({
 // Seçilen stadyum için özel ikon oluşturma
 const selectedCustomIcon = new L.Icon({
   iconUrl: SelectedLocationIcon,
-  iconSize: [30, 45],
-  iconAnchor: [15, 45],
-  popupAnchor: [1, -34],
-  shadowSize: [45, 45],
+  iconSize: [60, 90], // Boyutu artırdık
+  iconAnchor: [30, 90], // İkonun alt ortasını konumlandırdık
+  popupAnchor: [0, -90], // Popup'ın ikonun üstünde görünmesini sağladık
+  shadowSize: [90, 90],
 });
 
 // Haritayı belirli bir konuma yakınlaştırmak için bir bileşen
@@ -60,9 +60,9 @@ function Routing({ userPosition, selectedStadium }) {
     setRoutingControl(newRoutingControl);
 
     return () => {
-      if (newRoutingControl) {
+      if (routingControl) {
         try {
-          map.removeControl(newRoutingControl);
+          map.removeControl(routingControl);
         } catch (error) {
           console.error('Routing kontrolü kaldırılırken hata oluştu:', error);
         }

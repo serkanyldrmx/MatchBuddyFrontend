@@ -6,7 +6,7 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
-import { UserOutlined } from "@ant-design/icons";
+import { UsergroupAddOutlined } from "@ant-design/icons";
 import Button from '@mui/material/Button';
 import axios from 'axios';
 import Navbar from "../Navbar/Navbar";
@@ -93,7 +93,7 @@ const Team = () => {
               <CardHeader
                 avatar={
                   <Avatar>
-                    <UserOutlined />
+                    <UsergroupAddOutlined />
                   </Avatar>
                 }
                 action={

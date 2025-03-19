@@ -27,7 +27,6 @@ import Comment from "../Comment/Comment";
 import DeleteIcon from '@mui/icons-material/Delete';
 // ...existing code...
 
-
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -40,9 +39,10 @@ const ExpandMore = styled((props) => {
 }));
 
 function Post(props) {
-  const { matchId, matchName, description, userCount, matchDate, status } = props;
+  const { matchId, matchName, description, userCount, matchDate, status, initialLikes } = props;
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(initialLikes || 0); // Beğeni sayısını state olarak tut
   const [commentList, setCommentList] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -142,6 +142,28 @@ function Post(props) {
 
   const handleLike = () => {
     setLiked(!liked);
+    setLikes(likes + (liked ? -1 : 1)); // Beğeni sayısını artır veya azalt
+
+    fetch(`http://localhost:5033/api/Match/MatchLiked?matchId=${matchId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (!data.success) {
+          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+        }
+      })
+      .catch((error) => {
+        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+      });
   };
 
   const refreshComments = () => {
@@ -179,7 +201,7 @@ function Post(props) {
       return { message: "Bu maç onayda", color: "blue" }; // Onay bekleyen maç
     }
     if (status === 2) {
-      return { message: "Maç onaylandı", color: "yellow" }; // Onaylanan maç
+      return { message: "Maç onaylandı ", color: "yellow" }; // Onaylanan maç
     }
     if (status === 3) {
       return { message: "Maç reddedildi", color: "orange" }; // Reddedilen maç
@@ -295,6 +317,9 @@ function Post(props) {
           <IconButton onClick={handleLike} aria-label="add to favorites">
             <FavoriteIcon style={liked ? { color: "red" } : null} />
           </IconButton>
+          <Typography variant="body2" color="text.secondary" style={{ marginLeft: '8px' }}>
+            {likes} {/* Beğeni sayısını göster */}
+          </Typography>
           <ExpandMore
             expand={expanded.toString()}
             onClick={handleExpandClick}
@@ -328,7 +353,7 @@ function Post(props) {
                 <DeleteIcon />
               </IconButton>
             </div>
-          )) : "No comments yet" : "Loading..."}
+          )) : "Bu Maça Henüz Yorum Eklenmedi" : "Loading..."}
           <div style={{ marginTop: '20px' }}>
             <TextField
               label="Yorum Yaz"

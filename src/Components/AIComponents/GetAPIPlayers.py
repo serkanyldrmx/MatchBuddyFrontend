@@ -1,4 +1,4 @@
-vimport requests
+import requests
 import random
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -48,73 +48,27 @@ def calculate_performance_score(player):
 
 # Oyuncuları analiz ederek dengeli takımlar oluşturma
 def create_balanced_teams(players, team_size):
-    # Performans skoru hesapla
+    # Öncelikle oyuncu listesini rastgele karıştıralım
+    random.shuffle(players)
+
+    # Performans skorlarını hesaplayalım
     for player in players:
         player["performanceScore"] = calculate_performance_score(player)
 
-    # Performans skorlarına göre oyuncuları sırala (yüksekten düşüğe)
+    # Performans skorlarına göre sıralayalım (yüksekten düşüğe)
     players.sort(key=lambda x: x["performanceScore"], reverse=True)
 
-    total_players = len(players)
+    # Takımları oluştur
+    team1 = []
+    team2 = []
 
-    # Eğer toplam oyuncu sayısı yeterli değilse, hata döndürüyoruz
-    if total_players < team_size * 2:
-        return f"Toplam oyuncu sayısı, her takımda {team_size} oyuncu olacak şekilde yeterli değil.", 400
-
-    # Takımları oluşturacak listeyi hazırlıyoruz
-    team1, team2 = [], []
-
-    total_score_team1 = 0
-    total_score_team2 = 0
-    total_weight_team1 = 0
-    total_weight_team2 = 0
-    total_age_team1 = 0
-    total_age_team2 = 0
-    total_height_team1 = 0
-    total_height_team2 = 0
-
-    # Alternatif dağıtım yaparak oyuncuları dengeli şekilde paylaştırıyoruz
-    for i in range(total_players):
-        player = players[i]
-        
-        # Performans skoru ve diğer faktörlere göre takımların dengede olması için alternatif dağıtım
-        if total_score_team1 <= total_score_team2:
-            team1.append(player)
-            total_score_team1 += player["performanceScore"]
-            total_weight_team1 += player["weight"]
-            total_age_team1 += player["age"]
-            total_height_team1 += player["size"]
+    for i in range(team_size * 2):  # İki takım için yeterli oyuncu al
+        if i % 2 == 0:
+            team1.append(players[i])
         else:
-            team2.append(player)
-            total_score_team2 += player["performanceScore"]
-            total_weight_team2 += player["weight"]
-            total_age_team2 += player["age"]
-            total_height_team2 += player["size"]
+            team2.append(players[i])
 
-    # Ortalama hesaplamalar
-    avg_weight_team1 = total_weight_team1 / len(team1)
-    avg_weight_team2 = total_weight_team2 / len(team2)
-    
-    avg_age_team1 = total_age_team1 / len(team1)
-    avg_age_team2 = total_age_team2 / len(team2)
-
-    avg_height_team1 = total_height_team1 / len(team1)
-    avg_height_team2 = total_height_team2 / len(team2)
-
-    # Takımların dengelenmesi için küçük değişiklikler yapalım
-    if avg_weight_team1 > avg_weight_team2:
-        player_to_swap = team1.pop()
-        team2.append(player_to_swap)
-
-    if avg_age_team1 > avg_age_team2:
-        player_to_swap = team1.pop()
-        team2.append(player_to_swap)
-
-    if avg_height_team1 > avg_height_team2:
-        player_to_swap = team1.pop()
-        team2.append(player_to_swap)
-
-    # Takımları daha farklı yapmak için bir karıştırma işlemi ekliyoruz
+    # Son olarak takımları tekrar rastgele karıştıralım
     random.shuffle(team1)
     random.shuffle(team2)
 
@@ -140,6 +94,3 @@ def create_teams():
 
 if __name__ == "__main__":
     app.run(port=5000)
-
-
-#her seferinde aynı takım oluşuyor

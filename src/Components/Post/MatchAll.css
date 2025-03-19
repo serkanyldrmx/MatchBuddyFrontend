@@ -1,0 +1,9 @@
+
+.scrollable-container {
+    max-height: 85vh; /* Maksimum yükseklik */
+    overflow-y: auto; /* Dikey kaydırma */
+    padding: 10px; /* İçerik boşluğu */
+    background-color: #f5f5f5; /* Arka plan rengi */
+    border: 1px solid #ddd; /* Kenarlık */
+    border-radius: 8px; /* Köşeleri yuvarlat */
+  }

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { message } from "antd";
 import { red } from '@mui/material/colors';
+import "./MatchAll.css";
 
 function MatchAll() {
   const [matchList, setMatchList] = useState([]);
@@ -63,61 +64,63 @@ function MatchAll() {
     return <div>Loading...</div>;
   } else {
     return (
-      <Container maxWidth="lg" style={{ marginTop: '50px' }}>
-        <Grid container spacing={3}>
-          {matchList.map((match) => {
-            const statusMessage = getStatusMessage(match.isActive); // Maç durumunu alıyoruz
-            const { date, time } = formatDateAndTime(match.matchDate); // Tarih ve saati ayırıyoruz
-            return (
-              <Grid item xs={12} sm={6} md={4} key={match.matchId}>
-                <Card sx={{ marginBottom: '20px', backgroundColor: '#3cc1b8' }}>
-                  <CardHeader
-                    avatar={
-                      <Link to={`/match-details/${match.matchId}`}>
-                        <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                          {match.matchName.charAt(0).toUpperCase()}
-                        </Avatar>
-                      </Link>
-                    }
-                    action={
-                      // Silme butonunu sadece admin için göster, kullanıcılar için gizli.
-                      <IconButton onClick={handleDelete} aria-label="delete" style={{ color: "red" }}>
-                        <DeleteForeverIcon />
-                      </IconButton>
-                    }
-                  />
-                  {/* Durumu burada yazıyoruz ve renkli olarak gösteriyoruz */}
-                  <CardContent>
-                    <Typography variant="body2" color={statusMessage.color} style={{ fontWeight: 'bold', fontSize: '16px' }}>
-                      {statusMessage.message}
-                    </Typography>
-                    <Typography variant="h6">{match.matchName}</Typography>
-                    {/* Tarih ve saati ayırarak gösteriyoruz */}
-                    <Typography variant="body2" color="text.secondary">{"Tarih: " + date}</Typography>
-                    <Typography variant="body2" color="text.secondary">{"Saat: " + time}</Typography>
-                    <Typography variant="body2" color="text.secondary">{"Katılımcı Sayısı: " + match.userCount}</Typography>
-                    <Button
-                      variant="contained"
-                      style={{
-                        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                        color: 'white',
-                        marginTop: '15px',
-                      }}
-                    >
-                      <Link
-                        to={`/match-details/${match.matchId}`}
-                        style={{ textDecoration: 'none', color: 'white' }}
+      <div className="scrollable-container">
+        <Container maxWidth="lg" style={{ marginTop: '50px' }}>
+          <Grid container spacing={3} className="match-all-list">
+            {matchList.map((match) => {
+              const statusMessage = getStatusMessage(match.isActive); // Maç durumunu alıyoruz
+              const { date, time } = formatDateAndTime(match.matchDate); // Tarih ve saati ayırıyoruz
+              return (
+                <Grid item xs={12} sm={6} md={4} key={match.matchId}>
+                  <Card sx={{ marginBottom: '20px', backgroundColor: '#3cc1b8' }}>
+                    <CardHeader
+                      avatar={
+                        <Link onClick={handleDelete}>
+                          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                            {match.matchName.charAt(0).toUpperCase()}
+                          </Avatar>
+                        </Link>
+                      }
+                      action={
+                        // Silme butonunu sadece admin için göster, kullanıcılar için gizli.
+                        <IconButton onClick={handleDelete} aria-label="delete" style={{ color: "red" }}>
+                          <DeleteForeverIcon />
+                        </IconButton>
+                      }
+                    />
+                    {/* Durumu burada yazıyoruz ve renkli olarak gösteriyoruz */}
+                    <CardContent>
+                      <Typography variant="body2" color={statusMessage.color} style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                        {statusMessage.message}
+                      </Typography>
+                      <Typography variant="h6">{match.matchName}</Typography>
+                      {/* Tarih ve saati ayırarak gösteriyoruz */}
+                      <Typography variant="body2" color="text.secondary">{"Tarih: " + date}</Typography>
+                      <Typography variant="body2" color="text.secondary">{"Saat: " + time}</Typography>
+                      <Typography variant="body2" color="text.secondary">{"Katılımcı Sayısı: " + match.userCount}</Typography>
+                      <Button
+                        variant="contained"
+                        style={{
+                          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                          color: 'white',
+                          marginTop: '15px',
+                        }}
                       >
-                        Maçı İncele / Katıl
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Container>
+                        <Link
+                          onClick={handleDelete}
+                          style={{ textDecoration: 'none', color: 'white' }}
+                        >
+                          Maçı İncele / Katıl
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Container>
+      </div>
     );
   }
 }

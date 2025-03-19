@@ -115,3 +115,20 @@
   .searchButton:hover {
     background-color: #0056b3;
   }
+
+  .comboBox {
+    position: relative;
+  }
+  
+  .comboBox::after {
+    content: '▼';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .comboBox option {
+    height: 20px; /* Option öğesinin yüksekliğini küçültme */
+  }

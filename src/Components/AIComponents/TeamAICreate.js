@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { message, Card, Avatar, Input, Button, Spin } from 'antd';
 import Navbar from "../Navbar/Navbar";
 import './TeamAICreate.css';
@@ -11,12 +11,23 @@ function TeamAICreate() {
     const [teamMembers, setTeamMembers] = useState({ team1: [], team2: [] });
     const [loading, setLoading] = useState(false);
     const [teamSize, setTeamSize] = useState(6); // Varsayılan değer olarak 6
+    const [team1Score, setTeam1Score] = useState(0);
+    const [team2Score, setTeam2Score] = useState(0);
     const { Meta } = Card; 
     
-    const handleCreateTeam = () => {
-        // Takım isimlerinin boş olup olmadığını kontrol et
-        
+    // Her takımın puanlarını toplama
+    const getTotalScore = (team) => {
+        return team.reduce((total, member) => total + member.userScore, 0);
+    };
 
+    // Takım üyeleri değiştiğinde toplam puanları güncelle
+    useEffect(() => {
+        setTeam1Score(getTotalScore(teamMembers.team1));
+        setTeam2Score(getTotalScore(teamMembers.team2));
+    }, [teamMembers]);
+
+    const handleCreateTeam = () => {
+        // Takım boyutunun geçerli olup olmadığını kontrol et
         if (teamSize < 4 || teamSize > 11) {
             message.error('Takım boyutu 4 ile 11 arasında olmalıdır!');
             return;
@@ -96,11 +107,6 @@ function TeamAICreate() {
         setLoading(false);
     };
 
-    // Her takımın puanlarını toplama
-    const getTotalScore = (team) => {
-        return team.reduce((total, member) => total + member.userScore, 0);
-    };
-
     return (
         <div className="team-ai-create">
             <Navbar />
@@ -142,7 +148,7 @@ function TeamAICreate() {
                 <div className="team-card-Ai">
                     <h3>{teamName1 || 'Takım 1'}</h3>
                     <div className="total-score">
-                        Toplam Puan: {getTotalScore(teamMembers.team1)}
+                        Toplam Puan: {team1Score}
                     </div>
                     {teamMembers.team1.map((member, index) => (
                         <Card key={index} className="team-member" bordered={false}>
@@ -161,7 +167,7 @@ function TeamAICreate() {
                 <div className="team-card-Ai">
                     <h3>{teamName2 || 'Takım 2'}</h3>
                     <div className="total-score">
-                        Toplam Puan: {getTotalScore(teamMembers.team2)}
+                        Toplam Puan: {team2Score}
                     </div>
                     {teamMembers.team2.map((member, index) => (
                         <Card key={index} className="team-member" bordered={false}>

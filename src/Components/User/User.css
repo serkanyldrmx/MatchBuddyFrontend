@@ -4,7 +4,10 @@
 }
 
 .card1{
-    background-image: url("../../images/foto2.jpg");
     background-size: cover;
     margin-top: 60px;
+    color: white;
+}
+.card1 h1, .card1 h2, .card1 p, .card1 span {
+    color: white;
 }

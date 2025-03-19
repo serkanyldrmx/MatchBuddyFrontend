@@ -94,21 +94,27 @@
   }
   
   .stadiumContainer {
-    display: flex;
+    /* display: flex;
       justify-content: space-between;
       padding: 20px;
       background-color: #f4f4f9;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow-y: auto; /* Kaydırılabilirlik eklendi */
-      max-height: 100vh; /* Yükseklik %80 olarak ayarlandı */
+      overflow-y: auto; 
+      max-height: 100vh; 
       width: 100%;
-    height: 540px; /* Yüksekliği artırdık */
+    height: 540px;  */
+
+    display: flex; /* Flexbox düzeni */
+  height: 82vh; /* Görünüm yüksekliğinin %82'si kadar */
+  background-color: #f4f4f4; /* Açık gri arka plan */
+  font-family: Arial, sans-serif; /* Yazı tipi */
+  overflow: hidden; /* Taşmaları gizler */
   }
   
   .stadiumList {
     width: 18%; /* Listenin genişliği %25 */
-    height: 540px;
+    height: 570px;
     display: flex;
     flex-direction: column;
     gap: 10px; /* Aralardaki boşlukları azalttık */
@@ -117,6 +123,7 @@
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     order: 1; /* Listenin solda olmasını sağlar */
+    overflow-y: auto; /* Dikey kaydırma */
   }
   
   
@@ -136,11 +143,20 @@
   .stadiumList h2 {
     font-size: 1.5em;
     margin-bottom: 10px;
+    border-bottom: 2px solid black; /* Siyah alt çizgi */
+    padding-bottom: 5px; /* Alt çizgi ile metin arasındaki boşluk */
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
   }
   
   .stadiumList ul {
     list-style: none;
     padding: 0;
+    margin: 0;
+    overflow-y: auto; /* Dikey kaydırma */
+    max-height: calc(100% - 50px); /* Başlık yüksekliğini çıkararak maksimum yüksekliği ayarlayın */
   }
   
   .stadiumList li {

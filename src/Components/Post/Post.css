@@ -41,10 +41,11 @@
     text-align: left; /* Sola hizalama */
     text-transform: uppercase; /* Harfleri büyük yaparak daha belirgin hale getirme (opsiyonel) */
     letter-spacing: 0.5px; /* Harf aralığını artırarak daha dolgun görünmesini sağlama (opsiyonel) */
+    border-bottom: 2px solid black; /* Altına siyah bir çizgi ekler */
 }
 
 .commentCard {
-    background-color: #f9f9f9;
+    background-color: #efecec;
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;

@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import React from "react";
 import "./Login.css";
 import axios from 'axios';
+import Logo from '../../images/mutch_buddy_Logo.png'; // Logoyu import edin
 
 const { Option } = Select;
 
@@ -13,7 +14,7 @@ const formItemLayout = {
       span: 24,
     },
     sm: {
-      span: 8,
+      span: 4,
     },
   },
   wrapperCol: {
@@ -21,7 +22,7 @@ const formItemLayout = {
       span: 24,
     },
     sm: {
-      span: 16,
+      span: 20,
     },
   },
 };
@@ -83,6 +84,10 @@ const RegisterForm = () => {
 
   const renderRegister = (
     <Card className="register-card">
+      <div className="register-header">
+        <img src={Logo} alt="Logo" className="logo-reg" />
+        <h1 className="register-title">Register</h1>
+      </div>
       <Form
         {...formItemLayout}
         form={form}
@@ -94,8 +99,7 @@ const RegisterForm = () => {
         }}
         scrollToFirstError
       >
-        <h1 className="login-title">Register</h1>
-        <Row gutter={16}>
+        <Row gutter={16} justify="center">
           <Col xs={24} sm={12}>
             <Form.Item
               name="name"
@@ -108,7 +112,7 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<UserOutlined />} placeholder="İsim" />
+              <Input prefix={<UserOutlined />} placeholder="İsim" className="input-large" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -121,12 +125,12 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Soyisim" />
+              <Input prefix={<UserOutlined />} placeholder="Soyisim" className="input-large" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        <Row gutter={16} justify="center">
           <Col xs={24} sm={12}>
             <Form.Item
               name="email"
@@ -141,7 +145,7 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<MailOutlined />} placeholder="E-mail" />
+              <Input prefix={<MailOutlined />} placeholder="E-mail" className="input-large" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -160,12 +164,13 @@ const RegisterForm = () => {
                   width: "100%",
                 }}
                 placeholder="Telefon Numarası"
+                className="input-large"
               />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        <Row gutter={16} justify="center">
           <Col xs={24} sm={12}>
             <Form.Item
               name="address"
@@ -176,7 +181,7 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<HomeOutlined />} placeholder="Adres" />
+              <Input prefix={<HomeOutlined />} placeholder="Adres" className="input-large" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -189,12 +194,12 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<NumberOutlined />} placeholder="Boy (cm)" />
+              <Input prefix={<NumberOutlined />} placeholder="Boy (cm)" className="input-large" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        <Row gutter={16} justify="center">
           <Col xs={24} sm={12}>
             <Form.Item
               name="weight"
@@ -205,7 +210,7 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<NumberOutlined />} placeholder="Kilo (kg)" />
+              <Input prefix={<NumberOutlined />} placeholder="Kilo (kg)" className="input-large" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -218,12 +223,12 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<NumberOutlined />} placeholder="Yaş" />
+              <Input prefix={<NumberOutlined />} placeholder="Yaş" className="input-large" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        <Row gutter={16} justify="center">
           <Col xs={24} sm={12}>
             <Form.Item
               name="username"
@@ -234,7 +239,7 @@ const RegisterForm = () => {
                 },
               ]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Kullanıcı Adı" />
+              <Input prefix={<UserOutlined />} placeholder="Kullanıcı Adı" className="input-large" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -244,7 +249,7 @@ const RegisterForm = () => {
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        <Row gutter={16} justify="center">
           <Col xs={24} sm={12}>
             <Form.Item
               name="password"
@@ -256,7 +261,7 @@ const RegisterForm = () => {
               ]}
               hasFeedback
             >
-              <Input.Password prefix={<EditOutlined />} placeholder="Şifre" />
+              <Input.Password prefix={<EditOutlined />} placeholder="Şifre" className="input-large" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -285,18 +290,19 @@ const RegisterForm = () => {
               <Input.Password
                 prefix={<EditOutlined />}
                 placeholder="Şifreyi Onayla"
+                className="input-large"
               />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item>
-          <Button block type="primary" htmlType="submit">
+        <Form.Item className="register-button">
+          <Button type="primary" htmlType="submit">
             Kayıt Ol
           </Button>
-          <hr />
-          Veya <Link to="/">Oturum Açmaya Git</Link>
         </Form.Item>
+        <hr />
+        Veya <Link to="/">Oturum Açmaya Git</Link>
       </Form>
     </Card>
   );

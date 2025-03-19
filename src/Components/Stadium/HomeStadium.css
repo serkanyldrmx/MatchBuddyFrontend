@@ -1,0 +1,57 @@
+.stadiumContainerHome {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .stadiumContentHome {
+    display: flex;
+    flex: 1;
+    margin-top: 60px; /* Navbar için boşluk bırak */
+  }
+  
+  .stadiumListHome {
+    width: 25%;
+    padding: 20px;
+    height: calc(100vh - 60px); /* Kartı aşağıdan uzatmak için */
+    background-color: #f4f4f4;
+    overflow-y: auto;
+  }
+  
+  .stadiumListHome h2 {
+    text-align: center;
+    border-bottom: 2px solid black; /* Siyah çizgi eklemek için */
+    padding-bottom: 10px; /* Çizgi ile metin arasına boşluk eklemek için */
+  }
+  
+  .stadiumListHome ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .stadiumListHome li {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    font-size: 1.2rem; /* Stadyum isimlerinin boyutunu artırmak için */
+  }
+  
+  .stadiumListHome li:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .stadiumMapContainerHome {
+    width: 75%;
+    height: calc(100vh - 60px); /* Kartı aşağıdan uzatmak için */
+    position: relative;
+  }
+  
+  .stadiumInfo {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }

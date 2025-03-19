@@ -6,6 +6,7 @@ import UserUpdate from './Components/User/UserUpdate';
 import UserLogin from './Components/UserLogin/UserLogin';
 import RegisterForm from './Components/UserLogin/Register';
 import Stadium from './Components/Stadium/Stadium';
+import HomeStadium from './Components/Stadium/HomeStadium';
 import Players from './Components/Players/Players';
 import Team from './Components/Team/Team';
 import CreatTeam from './Components/Team/CreatTeam';
@@ -19,32 +20,42 @@ import AboutPage from './Components/Information/AboutPage';
 import Communication from './Components/Information/Communication';
 import MatchAll from './Components/Post/MatchAll';
 import TeamAICreate from './Components/AIComponents/TeamAICreate';
+import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 //import GroupMessages from './Components/Chat/GroupMessages';
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter >
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<UserLogin />} />
           <Route path="/register" element={<RegisterForm />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/adminPanel" element={<AdminPanel />} />
-          <Route path="/user" element={<User />} />
-          <Route path="/stadium" element={<Stadium />} />
-          <Route path="/players" element={<Players />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/create-team" element={<CreatTeam />} />
-          <Route path="/userUpdate" element={<UserUpdate />} />
-          <Route path="/chat" element={<ChatPage />} /> {/* Yeni eklenen sohbet sayfası */}
-          <Route path="/chatWindow" element={<ChatWindow />} />
-          <Route path="/match-details/:matchId" element={<MatchDetails />} />
-          <Route path="/stadiumIsAdmin" element={<StadiumIsAdmin />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/aboutPage" element={<AboutPage />} />
-          <Route path="/communication" element={<Communication />} />
-          <Route path="/matchAll" element={<MatchAll />} />
-          <Route path="/teamAICreate" element={<TeamAICreate />} />
+          
+          {/* Normal kullanıcı rotaları */}
+          <Route element={<PrivateRoute adminOnly={false} />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/user" element={<User />} />
+            <Route path="/players" element={<Players />} />
+            <Route path="/homeStadium" element={<HomeStadium />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/create-team" element={<CreatTeam />} />
+            <Route path="/userUpdate" element={<UserUpdate />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chatWindow" element={<ChatWindow />} />
+            <Route path="/match-details/:matchId" element={<MatchDetails />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/aboutPage" element={<AboutPage />} />
+            <Route path="/communication" element={<Communication />} />
+            <Route path="/matchAll" element={<MatchAll />} />
+            <Route path="/teamAICreate" element={<TeamAICreate />} />
+          </Route>
+
+          {/* Admin kullanıcı rotaları */}
+          <Route element={<PrivateRoute adminOnly={true} />}>
+            <Route path="/adminPanel" element={<AdminPanel />} />
+            <Route path="/stadiumIsAdmin" element={<StadiumIsAdmin />} />
+          </Route>
+          
           {/* <Route path="/groupMessages" element={<GroupMessages />} /> */}
         </Routes>
       </BrowserRouter>

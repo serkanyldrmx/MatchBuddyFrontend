@@ -13,7 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Button, Dropdown } from 'antd';
-import { UsergroupAddOutlined, UserOutlined, HomeOutlined,TableOutlined , LogoutOutlined, BorderOuterOutlined, GatewayOutlined, TeamOutlined, QuestionCircleOutlined, CloudUploadOutlined,CommentOutlined } from '@ant-design/icons';
+import { UsergroupAddOutlined, UserOutlined, HomeOutlined,TableOutlined , LogoutOutlined, BorderOuterOutlined, GatewayOutlined, TeamOutlined, QuestionCircleOutlined, CloudUploadOutlined,CommentOutlined,BellOutlined } from '@ant-design/icons';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -138,9 +138,7 @@ function Navbar() {
           </Search>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button type="link" className="white-button" href='/
-            
-            '><GatewayOutlined />Stadyumlar</Button>
+            <Button type="link" className="white-button" href='/homeStadium'><GatewayOutlined />Stadyumlar</Button>
             <Button type="link" className="white-button" href='/players'><TeamOutlined />Oyuncular</Button>     
             <Button type="link" className="white-button" href='/team'><TableOutlined />Takımlar</Button>        
             {/* <Button type="link" className="white-button" href='/players'><BorderInnerOutlined />Takımlar</Button> */}
@@ -153,6 +151,7 @@ function Navbar() {
               <MailIcon />
             </Badge>
           </IconButton> */}
+          <Button type="link" className="white-button" href='/chat'><BellOutlined style={{ fontSize: '24px' }} /></Button> 
           <Button type="link" className="white-button" href='/chat'><CommentOutlined style={{ fontSize: '24px' }} /></Button> 
             
             <Dropdown menu={{ items }} placement="bottomRight">

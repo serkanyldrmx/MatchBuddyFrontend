@@ -1,8 +1,9 @@
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { LockOutlined, UserOutlined, EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Row, Col, message, Card } from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect } from "react";
 import "./Login.css";
+import Logo from '../../images/mutch_buddy_Logo.png'; // Logoyu import edin
 import axios from 'axios';
 
 const UserLogin = () => {
@@ -58,9 +59,12 @@ const UserLogin = () => {
   };
 
   const renderForm = (
-    <div className="login-background">
+    <div className="login-background">      
+      <img src={Logo} alt="Logo" className="logo" />
       <Card className="login-card">
-      <h1 className="login-title">Log In</h1>
+        <div className="login-header">
+          <h1 className="login-title">Log In</h1>
+        </div>
         <Form
           name="normal_login"
           className="login-form"
@@ -81,7 +85,7 @@ const UserLogin = () => {
             <Input
               style={{
                 borderRadius: "1.2rem",
-                color: "#f4a261",
+                color: "#0f0e0f",
                 fontSize: "bold",
               }}
               prefix={<UserOutlined className="site-form-item-icon" />}
@@ -98,11 +102,11 @@ const UserLogin = () => {
               },
             ]}
           >
-            <Input
-              style={{ borderRadius: "1.2rem", color: "#f4a261" }}
+            <Input.Password
+              style={{ borderRadius: "1.2rem", color: "#0f0e0f" }}
               prefix={<LockOutlined className="site-form-item-icon" />}
-              type="password"
               placeholder="Şifre"
+              iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
           <Form.Item>
@@ -112,15 +116,13 @@ const UserLogin = () => {
             <Link to="#">Parolanızı mı unuttunuz?</Link>
           </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="login-form-button"
-              style={{ margin: "1rem" }}
-            >
-              Giriş Yap
-            </Button>
-            <Link to="/register">Şimdi Üye Ol!</Link>
+            <Form.Item className="register-button">
+              <Button type="primary" htmlType="submit">
+                Giriş Yap
+              </Button>
+            </Form.Item>
+            <div className="divider"></div> {/* Beyaz çizgi */}
+            Veya <Link to="/register">Şimdi Üye Ol!</Link>
           </Form.Item>
         </Form>
       </Card>

@@ -12,11 +12,7 @@ import Avatar from '@mui/material/Avatar';
 import axios from 'axios';
 import { green } from '@mui/material/colors';
 import { UserOutlined } from "@ant-design/icons";
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import InputLabel from '@mui/material/InputLabel';
 import { message } from "antd";
-import FormControl from '@mui/material/FormControl';
 import Navbar from "../Navbar/Navbar";
 
 const TeamForm = styled('form')({
@@ -59,21 +55,11 @@ const CreateTeam = () => {
   const [players, setPlayers] = useState([]);
   const [teamName, setTeamName] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState([]);
-  const [stadiums, setStadiums] = useState([]);
-  const [selectedStadium, setSelectedStadium] = useState('');
 
   useEffect(() => {
     axios.get("http://localhost:5033/api/Players/GetPlayerList")
       .then(response => {
         setPlayers(response.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-
-    axios.get("http://localhost:5033/api/Stadium/GetStadiumList")
-      .then(response => {
-        setStadiums(response.data);
       })
       .catch(error => {
         console.log(error);
@@ -93,15 +79,10 @@ const CreateTeam = () => {
     );
   };
 
-  const handleStadiumChange = (event) => {
-    setSelectedStadium(event.target.value);
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const teamData = {
       teamName: teamName,
-      stadiumId: selectedStadium,
       playerId: selectedPlayers
     };
   
@@ -110,7 +91,6 @@ const CreateTeam = () => {
         alert('Takım başarıyla oluşturuldu!');
         setTeamName('');
         setSelectedPlayers([]);
-        setSelectedStadium('');
         message.success("Takım başarıyla oluşturuldu");
       })
       .catch((error) => {
@@ -129,20 +109,6 @@ const CreateTeam = () => {
           onChange={handleTeamNameChange}
           required
         />
-        <FormControl style={{ marginTop: '20px', minWidth: '200px' }}>
-          <InputLabel>Stadyum Seç</InputLabel>
-          <Select
-            value={selectedStadium}
-            onChange={handleStadiumChange}
-            required
-          >
-            {stadiums.map((stadium) => (
-              <MenuItem key={stadium.stadiumId} value={stadium.stadiumId}>
-                {stadium.stadiumName} - {stadium.city}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
         <Button type="submit" variant="contained" color="primary" style={{ marginTop: '10px' }}>
           Takım Oluştur
         </Button>
@@ -204,3 +170,6 @@ const CreateTeam = () => {
 }
 
 export default CreateTeam;
+
+
+

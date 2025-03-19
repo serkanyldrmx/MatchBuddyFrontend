@@ -4,18 +4,9 @@ import 'leaflet/dist/leaflet.css';
 import Navbar from '../Navbar/Navbar';
 import './StadiumIsAdmin.css';
 import axios from 'axios';
-import { message } from 'antd'; // Ant Design message bileşenini import edin
-import L from 'leaflet'; // Leaflet'i import edin
-import LocationIcon from '../../images/Location.webp'; // Location.webp dosyasını import edin
-
-// Sabit il ve ilçe verileri
-const cities = [
-  { id: 1, name: 'Ankara', districts: [{ id: 1, name: 'Çankaya' }, { id: 2, name: 'Keçiören' }] },
-  { id: 2, name: 'İstanbul', districts: [{ id: 3, name: 'Kadıköy' }, { id: 4, name: 'Beşiktaş' }] },
-  { id: 3, name: 'İzmir', districts: [{ id: 5, name: 'Konak' }, { id: 6, name: 'Bornova' }] },
-  { id: 4, name: 'Konya', districts: [{ id: 7, name: 'Selçuklu' }, { id: 8, name: 'Karatay' }, { id: 9, name: 'Meram' }] },
-  // Diğer iller ve ilçeler
-];
+import { message } from 'antd';
+import L from 'leaflet';
+import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
 
 // Leaflet için özel ikon oluşturma
 const customIcon = new L.Icon({
@@ -30,8 +21,8 @@ function StadiumIsAdmin() {
   const [userPosition, setUserPosition] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [stadiumName, setStadiumName] = useState('');
-  const [openingTime, setOpeningTime] = useState('');
-  const [closingTime, setClosingTime] = useState('');
+  const [openingTime, setOpeningTime] = useState('08:00'); // Varsayılan açılış saati
+  const [closingTime, setClosingTime] = useState('23:00'); // Varsayılan kapanış saati
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
   const [address, setAddress] = useState('');
@@ -40,6 +31,7 @@ function StadiumIsAdmin() {
   const [searchPlaceholder, setSearchPlaceholder] = useState('Konum Ara');
   const [mapCenter, setMapCenter] = useState([39.9334, 32.8597]); // Varsayılan konum (Ankara)
   const [zoomLevel, setZoomLevel] = useState(6); // Varsayılan zoom seviyesi
+  const [cities, setCities] = useState([]); // Dinamik il verileri
   const [districts, setDistricts] = useState([]); // Dinamik ilçe verileri
 
   useEffect(() => {
@@ -57,14 +49,28 @@ function StadiumIsAdmin() {
   }, []);
 
   useEffect(() => {
-    // İl seçildiğinde ilgili ilçeleri yükle
+    // Tüm illeri ve ilçeleri API'den çek
+    const fetchCities = async () => {
+      try {
+        const response = await axios.get('https://turkiyeapi.dev/api/v1/provinces');
+        setCities(response.data.data);
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+      }
+    };
+
+    fetchCities();
+  }, []);
+
+  useEffect(() => {
+    // İl seçildiğinde ilgili ilçeleri ayarla
     const selectedCity = cities.find(c => c.id === parseInt(city));
     if (selectedCity) {
       setDistricts(selectedCity.districts);
     } else {
       setDistricts([]);
     }
-  }, [city]);
+  }, [city, cities]);
 
   function LocationMarker() {
     useMapEvents({
@@ -123,8 +129,8 @@ function StadiumIsAdmin() {
         setCity('');
         setDistrict('');
         setAddress('');
-        setOpeningTime('');
-        setClosingTime('');
+        setOpeningTime('08:00'); // Varsayılan açılış saati
+        setClosingTime('23:00'); // Varsayılan kapanış saati
         setDescription('');
       } else {
         message.error('Stadyum kaydedilirken bir hata oluştu.');

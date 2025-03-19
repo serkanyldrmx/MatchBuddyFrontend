@@ -77,6 +77,7 @@ function Home() {
                                         userCount={post.userCount}
                                         status={post.isActive}
                                         matchDate={post.matchDate}
+                                        initialLikes={post.likes}
                                     />
                                 </div>
                             ))}
