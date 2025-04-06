@@ -1,20 +1,17 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // useNavigate eklendi
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
+import IconButton from '@mui/material/IconButton'; 
 import Badge from '@mui/material/Badge';
 import "./Navbar.css";
 import SearchIcon from '@mui/icons-material/Search';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Button, Dropdown } from 'antd';
-import { UsergroupAddOutlined, UserOutlined, HomeOutlined,TableOutlined , LogoutOutlined, BorderOuterOutlined, GatewayOutlined, TeamOutlined, QuestionCircleOutlined, CloudUploadOutlined,CommentOutlined,BellOutlined } from '@ant-design/icons';
-
+import { UsergroupAddOutlined, UserOutlined, HomeOutlined, TableOutlined, LogoutOutlined, BorderOuterOutlined, GatewayOutlined, TeamOutlined, QuestionCircleOutlined, CloudUploadOutlined, CommentOutlined, BellOutlined } from '@ant-design/icons';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -53,22 +50,18 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
       width: '20ch',
     },
   },
-  link: {
-    textDecoration: "none",
-    boxShadow: "none",
-    color: "red",
-  }
 }));
 
 const items = [
   {
     label: (
       <a href="/user">
-        Profil
+        Profilim
       </a>
     ),
     key: '1',
     icon: <QuestionCircleOutlined />,
+    style: { color: 'orange' },
   },
   {
     label: (
@@ -78,6 +71,7 @@ const items = [
     ),
     key: '2',
     icon: <CloudUploadOutlined />,
+    style: { color: 'green' },
   },
   {
     label: (
@@ -112,8 +106,9 @@ const items = [
 ];
 
 function Navbar() {
-
-  
+  const [notificationCount, setNotificationCount] = useState(3); // Bildirim sayısını state olarak tanımlayın
+  const [messageCount, setMessageCount] = useState(5); // Mesaj sayısını state olarak tanımlayın
+  const navigate = useNavigate(); // useNavigate hook'u ile yönlendirme yapılacak
 
   return (
     <div>
@@ -139,23 +134,34 @@ function Navbar() {
 
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             <Button type="link" className="white-button" href='/homeStadium'><GatewayOutlined />Stadyumlar</Button>
-            <Button type="link" className="white-button" href='/players'><TeamOutlined />Oyuncular</Button>     
-            <Button type="link" className="white-button" href='/team'><TableOutlined />Takımlar</Button>        
-            {/* <Button type="link" className="white-button" href='/players'><BorderInnerOutlined />Takımlar</Button> */}
+            <Button type="link" className="white-button" href='/players'><TeamOutlined />Oyuncular</Button>
+            <Button type="link" className="white-button" href='/team'><TableOutlined />Takımlar</Button>
           </Box>
 
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          {/* <IconButton size="large" aria-label="show 4 new mails" color="inherit" onClick={handleClick}>
-            <Badge badgeContent={4} color="error">
-              <MailIcon />
-            </Badge>
-          </IconButton> */}
-          <Button type="link" className="white-button" href='/chat'><BellOutlined style={{ fontSize: '24px' }} /></Button> 
-          <Button type="link" className="white-button" href='/chat'><CommentOutlined style={{ fontSize: '24px' }} /></Button> 
-            
+            {/* Bildirim simgesi */}
+            <IconButton size="large" aria-label="show notifications" color="inherit" title="Bildirimler">
+              <Badge badgeContent={notificationCount} color="error">
+                <BellOutlined style={{ fontSize: '24px', color: 'white' }} />
+              </Badge>
+            </IconButton>
+
+            {/* Mesaj simgesi */}
+            <IconButton
+              size="large"
+              aria-label="show messages"
+              color="inherit"
+              title="Mesajlar" // Mesajlar için araç ipucu
+              onClick={() => navigate('/chat')} // Mesaj simgesine tıklandığında '/chat' adresine yönlendirme
+            >
+              <Badge badgeContent={messageCount} color="error">
+                <CommentOutlined style={{ fontSize: '24px', color: 'white' }} />
+              </Badge>
+            </IconButton>
+
             <Dropdown menu={{ items }} placement="bottomRight">
-              <UserOutlined style={{ color: 'white' }} />
+              <UserOutlined style={{ color: 'white', fontSize: '22px', marginLeft: '10px' }} />
             </Dropdown>
           </Box>
         </Toolbar>

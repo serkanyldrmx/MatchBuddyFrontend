@@ -1,10 +1,16 @@
 .playersPostContainer {
-    background-image: url("../../images/stadyum5.jpg");
-    background-size: cover;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 60px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background-color: #3cc1b8;
+  min-height: 100vh; /* Tüm ekranı kaplasın */
+  width: 100%; /* Genişliği tam sayfa yapsın */
+  
+  background-image: url("../../images/pexels-grizzlybear-399187.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Arka plan sabit kalsın */
   }
   
   .playerCard {

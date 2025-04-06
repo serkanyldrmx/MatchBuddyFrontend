@@ -13,6 +13,7 @@ import Navbar from "../Navbar/Navbar";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import IconButton from '@mui/material/IconButton';
 import { message } from "antd";
+import './Team.css';
 
 const TeamsListContainer = styled('div')({
   display: 'flex',

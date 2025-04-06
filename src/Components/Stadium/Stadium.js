@@ -156,15 +156,7 @@ function Stadium() {
             <Routing userPosition={userPosition} selectedStadium={selectedStadium} />
           )}
         </MapContainer>
-        {selectedStadium && (
-          <div className="stadiumInfo">
-            <h3>{selectedStadium.stadiumName}</h3>
-            <p><strong>Adres:</strong> {selectedStadium.address}</p>
-            <p><strong>Açılış Saati:</strong> {selectedStadium.openingTime}</p>
-            <p><strong>Kapanış Saati:</strong> {selectedStadium.closingTime}</p>
-            <p><strong>Açıklama:</strong> {selectedStadium.description}</p>
-          </div>
-        )}
+       
       </div>
     </div>
   );

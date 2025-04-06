@@ -38,12 +38,22 @@
     flex-grow: 1; /* Listenin esneklik kazanması için */
   }
   
-  .sidebar ul li {
-    padding: 15px;
-    text-align: left;
-    cursor: pointer;
-    border-bottom: 1px solid #34495e;
-  }
+ /* Sidebar'daki liste öğeleri için düzenleme */
+.sidebar ul li {
+  display: flex; /* İkon ve yazıyı yan yana hizalamak için */
+  align-items: center; /* Dikey olarak ortalamak için */
+  padding: 15px;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid #34495e;
+}
+
+/* İkonlara özel stil */
+.player-icon {
+  width: 20px; /* İkon boyutunu ayarlayın */
+  height: 20px;
+  margin-right: 10px; /* İkon ile yazı arasına boşluk ekleyin */
+}
   
   .sidebar ul li:hover {
     background-color: #34495e;
@@ -72,10 +82,6 @@
     padding: 5px;
   }
   
-  .icons {
-    display: flex;
-    gap: 15px;
-  }
   
   /* İçerik alanı */
   .content-area {

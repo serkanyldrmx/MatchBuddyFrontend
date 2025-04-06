@@ -52,9 +52,9 @@ function UserUpdate() {
   };
 
   const labelStyle = {
-    color: "#ffffff",
+    color: "#000", // Change the color to black
     fontWeight: "bold",
-  };
+};
 
   const formItemLayout = {
     labelCol: { span: 12 },
