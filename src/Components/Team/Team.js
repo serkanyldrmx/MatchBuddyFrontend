@@ -13,6 +13,7 @@ import Navbar from "../Navbar/Navbar";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import IconButton from '@mui/material/IconButton';
 import { message } from "antd";
+import PlayerSelectionPopup from "./PlayerSelectionPopup"; // Popup bileşeni import edildi
 import './Team.css';
 
 const TeamsListContainer = styled('div')({
@@ -32,8 +33,11 @@ const ContentContainer = styled('div')({
 
 const Team = () => {
   const [teams, setTeams] = useState([]);
+  const [name, setName] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false); // Dialog kontrolü için state
   const [selectedTeamId, setSelectedTeamId] = useState(null); // Seçilen takım id'si
+  const [popupVisible, setPopupVisible] = useState(false); // Popup görünürlüğü
+  const [currentTeamPlayers, setCurrentTeamPlayers] = useState([]); // Mevcut takım oyuncuları
 
   useEffect(() => {
     axios.get("http://localhost:5033/api/Team/GetTeamList")
@@ -45,10 +49,7 @@ const Team = () => {
       });
   }, []);
 
-  // Takım silme fonksiyonu
   const handleDelete = (teamId) => {
-    console.log("Silinecek takım ID:", teamId); // teamId'nin doğru gelip gelmediğini kontrol et
-    
     fetch(`http://localhost:5033/api/Team/DeleteTeam?teamId=${teamId}`, {
       method: "POST",
     })
@@ -67,19 +68,33 @@ const Team = () => {
         message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
       });
   };
-  
 
   const handleDialogOpen = (teamId) => {
-    setSelectedTeamId(teamId); // Seçilen takım id'sini ayarla
-    setDialogOpen(true); // Dialog'u aç
+    setSelectedTeamId(teamId);
+    setDialogOpen(true);
   };
 
   const handleDialogClose = (confirm) => {
-    setDialogOpen(false); // Dialog'u kapat
+    setDialogOpen(false);
     if (confirm && selectedTeamId !== null) {
-      handleDelete(selectedTeamId); // Silme işlemini gerçekleştir
+      handleDelete(selectedTeamId);
     }
   };
+
+  const handlePlayerEdit = (team) => {
+    setCurrentTeamPlayers(team.playerName); // Mevcut takım oyuncularını ayarla
+    setSelectedTeamId(team.teamId); // Seçilen takım ID'sini ayarla
+    setName(team.teamName); // Seçilen takım ismini ayarla
+    setPopupVisible(true); // Popup'ı aç
+  };
+
+  const handleSavePlayers = () => {
+    // Popup kapatıldıktan sonra takımlar listesini yeniden yükle
+    axios.get("http://localhost:5033/api/Team/GetTeamList")
+      .then(response => {
+        setTeams(response.data); // Takımlar listesini güncelle
+      })
+};
 
   return (
     <div>
@@ -109,46 +124,40 @@ const Team = () => {
                 }
               />
               <CardContent>
-                {/* Oyuncu sayısını göster */}
                 <Typography variant="body2" color="textSecondary" sx={{ marginBottom: '8px' }}>
                   Oyuncu Sayısı: {team.playerName.length}
                 </Typography>
-                
-                {/* Oyuncu isimlerini listele */}
                 {team.playerName.map((player, index) => (
                   <Typography key={index} variant="body2" color="textSecondary">
                     {player}
                   </Typography>
                 ))}
+                <Button
+                  variant="contained"
+                  style={{
+                    background: 'linear-gradient(45deg,rgb(227, 74, 187) 30%,rgb(72, 152, 238) 90%)',
+                    color: 'white',
+                    marginTop: '15px',
+                  }}
+                  onClick={() => handlePlayerEdit(team)}
+                >
+                  Oyuncu ekle / sil
+                </Button>
               </CardContent>
             </Card>
           ))}
         </TeamsListContainer>
       </ContentContainer>
 
-      {/* Dialog */}
-      {dialogOpen && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)', // Ekranın tam ortasına yerleştirir
-          backgroundColor: 'white',
-          padding: '20px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-          borderRadius: '8px',
-          zIndex: 1000,
-          textAlign: 'center'
-        }}>
-          <h3>Bu takımı silmek istediğinize emin misiniz?</h3>
-          <Button variant="contained" color="secondary" onClick={() => handleDialogClose(true)} style={{ margin: '10px' }}>
-            Evet, Sil
-          </Button>
-          <Button variant="contained" onClick={() => handleDialogClose(false)} style={{ margin: '10px' }}>
-            Hayır, Vazgeç
-          </Button>
-        </div>
-      )}
+      {/* Oyuncu Seçim Popup */}
+      <PlayerSelectionPopup
+        visible={popupVisible}
+        onClose={() => setPopupVisible(false)}
+        teamPlayers={currentTeamPlayers}
+        teamId={selectedTeamId}
+        teamName={name || ""} // Seçilen takımın ismini al
+        onSave={handleSavePlayers}
+      />
     </div>
   );
 };

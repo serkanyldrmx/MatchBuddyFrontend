@@ -11,6 +11,7 @@ import Players from './Components/Players/Players';
 import Team from './Components/Team/Team';
 import CreatTeam from './Components/Team/CreatTeam';
 import ChatPage from './Components/Chat/ChatPage';
+import NotificationList from './Components/Notification/NotificationList';
 import ChatWindow from './Components/Chat/ChatWindow';
 import MatchDetails from './Components/Home/MatchDetails';
 import AdminPanel from './Components/Home/AdminPanel';
@@ -41,12 +42,14 @@ function App() {
             <Route path="/create-team" element={<CreatTeam />} />
             <Route path="/userUpdate" element={<UserUpdate />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat" element={<ChatPage />} />
             <Route path="/chatWindow" element={<ChatWindow />} />
             <Route path="/match-details/:matchId" element={<MatchDetails />} />
             <Route path="/about" element={<About />} />
             <Route path="/aboutPage" element={<AboutPage />} />
             <Route path="/communication" element={<Communication />} />
             <Route path="/matchAll" element={<MatchAll />} />
+            <Route path="/NotificationList" element={<NotificationList />} />
             <Route path="/teamAICreate" element={<TeamAICreate />} />
           </Route>
 
