@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
-import { Button, Dropdown } from 'antd';
+import { Button, Dropdown, Avatar } from 'antd';
 import { 
   UsergroupAddOutlined, 
   UserOutlined, 
@@ -109,9 +109,30 @@ const items = [
 function Navbar() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [messageCount, setMessageCount] = useState(5);
+  const [player, setPlayer] = useState(() => JSON.parse(localStorage.getItem("user")));
   const navigate = useNavigate();
-  const player = JSON.parse(localStorage.getItem("user"));
   const playerId = player?.playerId || player?.userId;
+
+  // localStorage değişimini dinle
+  useEffect(() => {
+    const handleStorage = () => {
+      setPlayer(JSON.parse(localStorage.getItem("user")));
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  // Profil güncelleme sonrası localStorage değiştiğinde Navbar'da da güncellenmesi için interval ile kontrol
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = JSON.stringify(player);
+      const latest = localStorage.getItem("user");
+      if (current !== latest) {
+        setPlayer(JSON.parse(latest));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [player]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -184,7 +205,18 @@ function Navbar() {
           </IconButton>
 
           <Dropdown menu={{ items }} placement="bottomRight">
-            <UserOutlined style={{ color: 'white', fontSize: '22px', marginLeft: '10px' }} />
+            {player?.profilePictureUrl ? (
+              <Avatar
+                src={
+                  player.profilePictureUrl.startsWith("http")
+                    ? player.profilePictureUrl
+                    : `http://localhost:5033${player.profilePictureUrl}`
+                }
+                style={{ width: 44, height: 44, marginLeft: '10px' }}
+              />
+            ) : (
+              <UserOutlined style={{ color: 'white', fontSize: '32px', marginLeft: '10px' }} />
+            )}
           </Dropdown>
         </Box>
       </Toolbar>

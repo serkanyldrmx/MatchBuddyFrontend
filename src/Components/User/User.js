@@ -102,7 +102,14 @@ function User() {
         >
           <Avatar
             size={64}
-            icon={<UserOutlined />}
+            src={
+              player?.profilePictureUrl
+                ? player.profilePictureUrl.startsWith("http")
+                  ? player.profilePictureUrl
+                  : `http://localhost:5033${player.profilePictureUrl}`
+                : undefined
+            }
+            icon={!player?.profilePictureUrl ? <UserOutlined /> : undefined}
             style={{ marginBottom: "20px" }}
           />
           <Text

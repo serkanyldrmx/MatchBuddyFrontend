@@ -129,7 +129,21 @@ const CreateTeam = () => {
               />
             </CheckboxContainer>
             <CardHeader
-              avatar={<Avatar icon={<UserOutlined />} />}
+              avatar={
+                player.profilePictureUrl ? (
+                  <Avatar
+                    src={
+                      player.profilePictureUrl.startsWith("http")
+                        ? player.profilePictureUrl
+                        : `http://localhost:5033${player.profilePictureUrl}`
+                    }
+                  />
+                ) : (
+                  <Avatar>
+                    <UserOutlined />
+                  </Avatar>
+                )
+              }
               title={
                 <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', marginTop: '10px' }}>
                   {player.playerName + " " + player.playerSurname}

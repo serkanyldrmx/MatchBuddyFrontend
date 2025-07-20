@@ -229,12 +229,21 @@ function MatchDetails() {
                           <Card key={index} className="player-card">
                             <CardHeader
                               avatar={
-                                <Avatar
-                                  sx={{ bgcolor: red[500] }}
-                                  aria-label="player"
-                                >
-                                  {team.playerName.charAt(0)}
-                                </Avatar>
+                                team.profilePictureUrl ? (
+                                  <Avatar
+                                    src={
+                                      team.profilePictureUrl.startsWith("http")
+                                        ? team.profilePictureUrl
+                                        : `http://localhost:5033${team.profilePictureUrl}`
+                                    }
+                                    sx={{ bgcolor: red[500] }}
+                                    aria-label="player"
+                                  />
+                                ) : (
+                                  <Avatar sx={{ bgcolor: red[500] }} aria-label="player">
+                                    {team.playerName.charAt(0)}
+                                  </Avatar>
+                                )
                               }
                               title={
                                 <Typography
@@ -285,12 +294,21 @@ function MatchDetails() {
                           <Card key={index} className="player-card">
                             <CardHeader
                               avatar={
-                                <Avatar
-                                  sx={{ bgcolor: blue[500] }}
-                                  aria-label="player"
-                                >
-                                  {team.playerName.charAt(0)}
-                                </Avatar>
+                                team.profilePictureUrl ? (
+                                  <Avatar
+                                    src={
+                                      team.profilePictureUrl.startsWith("http")
+                                        ? team.profilePictureUrl
+                                        : `http://localhost:5033${team.profilePictureUrl}`
+                                    }
+                                    sx={{ bgcolor: blue[500] }}
+                                    aria-label="player"
+                                  />
+                                ) : (
+                                  <Avatar sx={{ bgcolor: blue[500] }} aria-label="player">
+                                    {team.playerName.charAt(0)}
+                                  </Avatar>
+                                )
                               }
                               title={
                                 <Typography

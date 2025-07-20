@@ -159,7 +159,19 @@ function TeamAICreate() {
                     </div>
                     {teamMembers.team1.map((member, index) => (
                         <Card key={index} className="team-member" bordered={false}>
-                            <Avatar>{member.playerName?.[0] || '?'}</Avatar>
+                            <Avatar
+                                size={72}
+                                src={
+                                    member.profilePictureUrl
+                                        ? member.profilePictureUrl.startsWith("http")
+                                            ? member.profilePictureUrl
+                                            : `http://localhost:5033${member.profilePictureUrl}`
+                                        : undefined
+                                }
+                                style={{ marginBottom: 8 }}
+                            >
+                                {(!member.profilePictureUrl && member.playerName) ? member.playerName[0] : '?'}
+                            </Avatar>
                             <div>
                                 <h4>{member.playerName} {member.playerSurname}</h4>
                                 <p>Yaş: {member.age || 'Bilinmiyor'}</p>
@@ -177,7 +189,19 @@ function TeamAICreate() {
                     </div>
                     {teamMembers.team2.map((member, index) => (
                         <Card key={index} className="team-member" bordered={false}>
-                            <Avatar>{member.playerName?.[0] || '?'}</Avatar>
+                            <Avatar
+                                size={72}
+                                src={
+                                    member.profilePictureUrl
+                                        ? member.profilePictureUrl.startsWith("http")
+                                            ? member.profilePictureUrl
+                                            : `http://localhost:5033${member.profilePictureUrl}`
+                                        : undefined
+                                }
+                                style={{ marginBottom: 8 }}
+                            >
+                                {(!member.profilePictureUrl && member.playerName) ? member.playerName[0] : '?'}
+                            </Avatar>
                             <div>
                                 <h4>{member.playerName} {member.playerSurname}</h4>
                                 <p>Yaş: {member.age || 'Bilinmiyor'}</p>

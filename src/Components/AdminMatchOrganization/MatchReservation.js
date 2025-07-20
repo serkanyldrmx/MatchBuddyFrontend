@@ -156,11 +156,18 @@ const MatchReservation = ({ updateNotificationCount }) => {
                     <h5>{teamName}</h5>
                     <ul>
                       {players.map((player) => (
-                        <li key={player.userName}>
+                        <li key={player.userName} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <img
-                            src={image}
+                            src={
+                              player.profilePictureUrl
+                                ? player.profilePictureUrl.startsWith('http')
+                                  ? player.profilePictureUrl
+                                  : `http://localhost:5033${player.profilePictureUrl}`
+                                : image
+                            }
                             alt="Player Icon"
                             className="player-icon"
+                            style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
                           />
                           {player.playerName} {player.playerSurname} ({player.userName}) - Skor: {player.userScore}
                         </li>

@@ -410,10 +410,10 @@ def sort_matches():
         player_data = fetch_player_data(player_id)[0] if fetch_player_data(player_id) else {}
         logging.debug(f"Oyuncu verisi: maç sayısı={len(player_data.get('match', [])) if isinstance(player_data.get('match'), list) else 0}")
 
-        # İlk 30 maçı ayır
-        top_30_matches = matches[:30] if len(matches) >= 30 else matches
-        remaining_matches = matches[30:] if len(matches) > 30 else []
-        logging.debug(f"İlk 30 maç: {len(top_30_matches)}, kalan maçlar: {len(remaining_matches)}")
+        # Son 30 maçı ayır
+        top_30_matches = matches[-30:] if len(matches) >= 30 else matches
+        remaining_matches = matches[:-30] if len(matches) > 30 else []
+        logging.debug(f"Son 30 maç: {len(top_30_matches)}, kalan maçlar: {len(remaining_matches)}")
 
         # İlk 30 maça özel mesaj ekle
         final_matches = []

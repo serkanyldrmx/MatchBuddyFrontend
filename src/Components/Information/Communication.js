@@ -14,7 +14,7 @@ const Communication = () => {
                 <section className="contact-details">
                     <h2>İletişim Bilgilerimiz</h2>
                     <img src={SerkanYildirim} alt="Serkan Yıldırım" className="team-member-image" />
-                    <p><strong>Adres:</strong> Konya, Türkiye</p>
+                    <p><strong>Adres:</strong> Malazgirt, Türkiye</p>
                     <p><strong>Telefon:</strong> +90 545 521 82 49</p>
                     <p><strong>E-posta:</strong> bmserkanyildirim@matchbuddy.com</p>
                 </section>

@@ -350,8 +350,19 @@ function Post(props) {
           </Typography>
           {isLoaded ? commentList.length > 0 ? commentList.map(comment => (
             <div key={comment.commentsId} className="commentCard">
-              <Avatar className="avatar" sx={{ bgcolor: getColorById(comment.playerId) }}>
-                {comment.playerName.charAt(0).toUpperCase()}{comment.playerSurname.charAt(0).toUpperCase()}
+              <Avatar
+                className="avatar"
+                sx={{ bgcolor: getColorById(comment.playerId) }}
+                src={
+                  comment.profilePictureUrl
+                    ? comment.profilePictureUrl.startsWith("http")
+                      ? comment.profilePictureUrl
+                      : `http://localhost:5033${comment.profilePictureUrl}`
+                    : undefined
+                }
+              >
+                {(!comment.profilePictureUrl && comment.playerName && comment.playerSurname) &&
+                  `${comment.playerName.charAt(0).toUpperCase()}${comment.playerSurname.charAt(0).toUpperCase()}`}
               </Avatar>
               <div className="commentContent">
                 <div className="commentUserName">{comment.userName}</div>

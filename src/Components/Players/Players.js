@@ -71,7 +71,16 @@ function Players() {
         {players.map((player) => (
           <Card key={player.playerId} className="playerCard" sx={{ margin: '20px', width: '300px', backgroundColor: '#85a5d4' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', marginBottom: '20px' }}>
-              <Avatar size={64} icon={<UserOutlined />} />
+              <Avatar
+                src={
+                  player.profilePictureUrl
+                    ? `http://localhost:5033${player.profilePictureUrl}`
+                    : null
+                }
+                sx={{ width: 64, height: 64 }}
+              >
+                {!player.profilePictureUrl && <UserOutlined />}
+              </Avatar>
             </div>
             <CardHeader
               title={

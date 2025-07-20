@@ -128,9 +128,21 @@ const Team = () => {
                   Oyuncu Sayısı: {team.playerName.length}
                 </Typography>
                 {team.playerName.map((player, index) => (
-                  <Typography key={index} variant="body2" color="textSecondary">
-                    {player}
-                  </Typography>
+                  <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                    {team.profilePictureUrl && team.profilePictureUrl[index] ? (
+                      <Avatar
+                        src={team.profilePictureUrl[index].startsWith('http') ? team.profilePictureUrl[index] : `http://localhost:5033${team.profilePictureUrl[index]}`}
+                        sx={{ width: 32, height: 32, marginRight: 1 }}
+                      />
+                    ) : (
+                      <Avatar sx={{ width: 32, height: 32, marginRight: 1 }}>
+                        {player[0] || '?'}
+                      </Avatar>
+                    )}
+                    <Typography variant="body2" color="textSecondary">
+                      {player}
+                    </Typography>
+                  </div>
                 ))}
                 <Button
                   variant="contained"

@@ -77,7 +77,28 @@ const PlayerSelectionPopup = ({ visible, onClose, teamPlayers = [], onSave, team
                   checked={selectedPlayers.includes(player.userName)}
                   onChange={() => handleCheckboxChange(player.userName)}
                 >
-                  {player.userName} - {player.position} - {player.userScore} Puan
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {player.profilePictureUrl ? (
+                      <img
+                        src={player.profilePictureUrl.startsWith('http') ? player.profilePictureUrl : `http://localhost:5033${player.profilePictureUrl}`}
+                        alt={player.userName}
+                        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', marginRight: 8, background: '#eee' }}
+                        onError={e => {
+                          e.target.onerror = null;
+                          e.target.style.display = 'none';
+                          e.target.parentNode.appendChild(Object.assign(document.createElement('div'), {
+                            innerText: player.userName[0].toUpperCase(),
+                            style: 'width:32px;height:32px;border-radius:50%;background:#bdbdbd;color:#fff;display:flex;align-items:center;justify-content:center;margin-right:8px;font-weight:bold;'
+                          }));
+                        }}
+                      />
+                    ) : (
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#bdbdbd', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 8, fontWeight: 'bold' }}>
+                        {player.userName[0].toUpperCase()}
+                      </div>
+                    )}
+                    {player.userName} - {player.position} - {player.userScore} Puan
+                  </span>
                 </Checkbox>
               </List.Item>
             )}
