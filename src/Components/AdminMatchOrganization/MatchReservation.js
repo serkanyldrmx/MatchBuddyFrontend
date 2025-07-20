@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './MatchReservation.css';
-import image from "./image.png"; // Import the image
+import image from "./image.png";
 
-const MatchReservation = () => {
+const MatchReservation = ({ updateNotificationCount }) => {
   const [stadiums, setStadiums] = useState([]);
   const [selectedStadium, setSelectedStadium] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -54,7 +54,7 @@ const MatchReservation = () => {
       .catch((error) => console.error('Hata:', error));
   };
 
-  const handleStatusUpdate = (status) => {
+  const handleStatusUpdate = async (status) => {
     if (!selectedMatch) return;
 
     const payload = {
@@ -62,23 +62,39 @@ const MatchReservation = () => {
       status: status,
     };
 
-    fetch('http://localhost:5033/api/Match/MatchStatusUpdate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setMessage(data.message);
-      })
-      .catch((error) => console.error('Hata:', error));
+    try {
+      const response = await fetch('http://localhost:5033/api/Match/MatchStatusUpdate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Durum güncellenemedi');
+      }
+
+      setMessage(data.message);
+      updateNotificationCount(); // Bildirim sayısını güncelle
+
+      // Seçili maçı listeden sil
+      const updatedStadiums = stadiums.map((stadium) => ({
+        ...stadium,
+        matchModel: stadium.matchModel.filter((match) => match.matchId !== selectedMatch.matchId),
+      }));
+      setStadiums(updatedStadiums);
+      setSelectedMatch(null); // Seçili maçı sıfırla
+      setMatchTeams([]);
+    } catch (error) {
+      console.error('Hata:', error);
+      setMessage(`Hata: ${error.message}`);
+    }
   };
 
   return (
     <div className="match-reservation-container">
-      {/* Sol Panel */}
       <div className="stadium-tree">
         <h3>Stadyumlar</h3>
         <ul>
@@ -88,7 +104,7 @@ const MatchReservation = () => {
                 className="stadium-item"
                 onClick={() => toggleStadium(stadium.stadiumId)}
               >
-                <span className={`toggle-icon ${expandedStadiums[stadium.stadiumId] ? 'open' : 'closed'}`}>&#9660;</span>
+                <span className={`toggle-icon ${expandedStadiums[stadium.stadiumId] ? 'open' : 'closed'}`}>▼</span>
                 {stadium.stadiumName}
                 {stadium.matchModel.length > 0 && (
                   <span className="badge">{stadium.matchModel.length}</span>
@@ -112,13 +128,11 @@ const MatchReservation = () => {
         </ul>
       </div>
 
-      {/* Sağ Panel */}
       <div className="stadium-details">
         {selectedMatch ? (
           <div>
             <h3>{selectedMatch.matchName}</h3>
 
-            {/* Tarih kontrolü */}
             {isMatchExpired && (
               <div className="expired-match">
                 <p>Bu maçın tarihi geçmiştir.</p>
@@ -144,7 +158,7 @@ const MatchReservation = () => {
                       {players.map((player) => (
                         <li key={player.userName}>
                           <img
-                            src={image} // Resim yolu
+                            src={image}
                             alt="Player Icon"
                             className="player-icon"
                           />
@@ -171,7 +185,6 @@ const MatchReservation = () => {
         )}
       </div>
 
-      {/* Mesaj Alanı */}
       {message && <div className="message">{message}</div>}
     </div>
   );

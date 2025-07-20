@@ -3,93 +3,90 @@
     flex-wrap: wrap;
     justify-content: center;
     background-color: #3cc1b8;
-    min-height: 100vh; /* Tüm ekranı kaplasın */
-    width: 100%; /* Genişliği tam sayfa yapsın */
-    
+    min-height: 100vh;
+    width: 100%;
     background-image: url("../../images/pexels-grizzlybear-399187.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed; /* Arka plan sabit kalsın */
+    background-attachment: fixed;
 }
 
 .ai-button {
     position: fixed;
-    top: 40%; /* Sayfanın ortasına hizala */
-    left: 50px; /* Sol kenardan mesafe */
-    transform: translateY(-50%); /* Ortalamak için */
-    background: linear-gradient(45deg, #da13af, #2575fc); /* Gradient renkler */
-    color: white; /* Beyaz yazı */
-    border: none; /* Çerçeve yok */
-    padding: 15px 30px; /* İç boşluk */
-    border-radius: 50px; /* Yuvarlak köşeler */
-    font-size: 16px; /* Yazı boyutu */
-    font-weight: bold; /* Kalın yazı */
-    display: flex; /* Simge ve yazıyı hizala */
-    align-items: center; /* Dikey hizalama */
-    justify-content: center; /* Yatay hizalama */
-    gap: 10px; /* Simge ile yazı arasında boşluk */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Hafif gölge */
-    cursor: pointer; /* El simgesi */
-    transition: all 0.3s ease; /* Hover efekti için geçiş */
+    top: 40%;
+    left: 50px;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, #da13af, #2575fc);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .ai-button:hover {
-    background: linear-gradient(45deg, #2575fc, #6a11cb); /* Gradient yönünü değiştir */
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Gölge büyüt */
-    transform: scale(1.05); /* Hafif büyüme efekti */
+    background: linear-gradient(45deg, #2575fc, #6a11cb);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
 }
 
 .ai-icon {
-    font-size: 24px; /* Simge boyutu */
+    font-size: 24px;
 }
 
 .ai-team-button {
     position: fixed;
-    top: 60%; /* Sayfanın ortasından biraz daha aşağıya hizala */
-    left: 50px; /* Sol kenardan mesafe */
-    transform: translateY(-50%); /* Ortalamak için */
-    background: linear-gradient(45deg, #12fd01, #009ffd); /* Koyu mavi ve açık yeşil */
-
-    color: white; /* Beyaz yazı */
-    border: none; /* Çerçeve yok */
-    padding: 15px 30px; /* İç boşluk */
-    border-radius: 50px; /* Yuvarlak köşeler */
-    font-size: 16px; /* Yazı boyutu */
-    font-weight: bold; /* Kalın yazı */
-    display: flex; /* Simge ve yazıyı hizala */
-    align-items: center; /* Dikey hizalama */
-    justify-content: center; /* Yatay hizalama */
-    gap: 10px; /* Simge ile yazı arasında boşluk */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Hafif gölge */
-    cursor: pointer; /* El simgesi */
-    transition: all 0.3s ease; /* Hover efekti için geçiş */
-}
-
-.ai-team-button:hover {
-    background: linear-gradient(45deg, #f6e300, #f78c42); /* Gradient yönünü değiştir */
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Gölge büyüt */
-    transform: scale(1.05); /* Hafif büyüme efekti */
-}
-
-
-.external-link {
-    position: fixed;
-    top: 50%; /* Sayfanın ortasına hizala */
-    right: 50px; /* Sağdan mesafe */
-    transform: translateY(-50%); /* Ortalamak için */
-    background: linear-gradient(45deg, rgba(218, 19, 175, 0.8), rgba(37, 117, 252, 0.8)); /* Gradient renkler ve şeffaflık */
+    top: 60%;
+    left: 50px;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, #12fd01, #009ffd);
     color: white;
     border: none;
     padding: 15px 30px;
-    border-radius: 10px; /* Daha köşeli bir yapı */
+    border-radius: 50px;
     font-size: 16px;
     font-weight: bold;
     display: flex;
-    flex-direction: column; /* Yan yana değil, alt alta */
-    align-items: flex-start; /* İkonları sola hizala */
-    justify-content: flex-start; /* İkonları sola hizala */
-    gap: 15px; /* Butonlar arası mesafe */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ai-team-button:hover {
+    background: linear-gradient(45deg, #f6e300, #f78c42);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.external-link {
+    position: fixed;
+    top: 50%;
+    right: 50px;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, rgba(218, 19, 175, 0.8), rgba(37, 117, 252, 0.8));
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 15px;
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -98,21 +95,20 @@
 .external-link-btn {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* İkonları sola hizala */
+    justify-content: flex-start;
     gap: 10px;
     padding: 10px 20px;
-    width: 100%; /* Butonları eşit genişlikte yap */
+    width: 100%;
     border: none;
     border-radius: 10px;
     background: white;
-    color: #ffffff; /* Burada renk değiştirildi (örnek: kırmızı) */
+    color: #ffffff;
     font-weight: bold;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     cursor: pointer;
     text-decoration: none;
 }
-
 
 .external-link-btn:hover {
     background: #f5f5f5;
@@ -122,4 +118,56 @@
 .external-link-icon {
     height: 30px;
     width: 30px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Yarı şeffaf siyah arka plan */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Diğer içeriklerin üstünde */
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(45deg, #3cc1b8, #2575fc); /* Tema ile uyumlu gradient */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ffffff;
+    border-top: 5px solid #da13af; /* Gradientten bir renk */
+    border-radius: 50%;
+    animation: spin 1s linear infinite; /* Dönen animasyon */
+}
+
+.loading-icon {
+    font-size: 40px; /* Büyük yapay zeka ikonu */
+    animation: pulse 1.5s ease-in-out infinite; /* Hafif nabız efekti */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }

@@ -9,21 +9,19 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    min-height: 100vh; /* Tam ekran */
+    min-height: 100vh;
     padding-top: 60px;
-    background-attachment: fixed; /* Arka plan sabit kalsın */
+    background-attachment: fixed;
 }
 
-/* Takım kartlarını yan yana hizala */
 .team-container {
     display: flex;
-    justify-content: space-around; /* Eşit boşluklarla hizalama */
+    justify-content: space-around;
     gap: 20px;
     width: 80%;
     max-width: 1200px;
     margin-top: 20px;
 }
-
 
 .ai-header {
     display: flex;
@@ -31,79 +29,66 @@
     gap: 10px;
     justify-content: center;
     margin: 20px 0;
-    background: linear-gradient(45deg, #da13af, #2575fc); /* Gradient renkler */
-    color: white; /* Beyaz yazı */
-    border: none; /* Çerçeve yok */
-    padding: 15px 30px; /* İç boşluk */
-    border-radius: 50px; /* Yuvarlak köşeler */
-    font-size: 16px; /* Yazı boyutu */
-    font-weight: bold; /* Kalın yazı */
-    display: flex; /* Simge ve yazıyı hizala */
-    align-items: center; /* Dikey hizalama */
-    justify-content: center; /* Yatay hizalama */
-    gap: 10px; /* Simge ile yazı arasında boşluk */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+    background: linear-gradient(45deg, #da13af, #2575fc);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 .ai-icon1 {
-    color: #4CAF50; /* Yeşilimsi bir renk */
+    color: #4CAF50;
 }
 
 .ai-header h2 {
     font-size: 28px;
     font-weight: bold;
-    color: #ffffff; /* Koyu gri */
+    color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-  
-
-/* Takım kartlarının şeffaflık düzenlemesi */
 .team-card-Ai {
     background-color: transparent !important;
     width: 45%;
     border-radius: 15px;
     padding: 20px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-
-/* Takım başlığı */
-.team-card h3 {
+.team-card-Ai h3 {
     margin-bottom: 20px;
     font-size: 24px;
     font-weight: bold;
 }
 
-/* Oyuncu kartları alt alta sıralanacak */
-/* Takım oyuncu kartlarının şeffaflık düzenlemesi */
 .team-member {
-    background: rgba(255, 255, 255, 0.2); /* Şeffaf arka plan */
+    background: rgba(255, 255, 255, 0.2);
     padding: 12px;
     margin-bottom: 10px;
     border-radius: 10px;
     font-size: 16px;
     font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     gap: 10px;
-    backdrop-filter: blur(5px); /* Arka plan bulanıklığı */
+    backdrop-filter: blur(5px);
 }
 
-/* Avatar ve bilgiler */
 .team-member .ant-avatar {
     background-color: #87d068;
     font-size: 18px;
     font-weight: bold;
 }
 
-/* Takımları kaydet butonu */
 .save-teams-button {
     padding: 12px 25px;
     background-color: #28a745;
@@ -124,34 +109,105 @@
 .team-inputs {
     display: flex;
     justify-content: space-between;
-    gap: 20px; /* Alanlar arasındaki mesafe */
-    margin-top: 20px; /* Üstten biraz boşluk */
+    gap: 20px;
+    margin-top: 20px;
 }
 
 .team-inputs .ant-input {
-    width: 48%; /* Her input alanı genişliğini %48 olarak ayarlıyoruz */
+    width: 48%;
     padding: 10px;
     font-size: 16px;
-    border-radius: 8px; /* Yuvarlatılmış köşeler */
-    border: 2px solid #d9d9d9; /* Hafif gri kenarlık */
-    transition: border 0.3s ease; /* Sınır renk geçişi */
+    border-radius: 8px;
+    border: 2px solid #d9d9d9;
+    transition: border 0.3s ease;
 }
 
 .team-inputs .ant-input:focus {
-    border-color: #1890ff; /* Fokusa girdiğinde mavi renk sınır */
-    outline: none; /* Fokusta outline'ı kaldırma */
+    border-color: #1890ff;
+    outline: none;
 }
 
 .team-inputs .ant-input::placeholder {
-    color: #888; /* Placeholder yazısının rengi */
+    color: #888;
 }
-.team-card .total-score {
+
+.team-card-Ai .total-score {
     margin-top: 10px;
     font-size: 20px;
     font-weight: bold;
-    color: black;
+    color: white;
     text-align: center;
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     padding-top: 10px;
     width: 100%;
+}
+
+.team-size-input {
+    margin: 20px 0;
+    width: 200px;
+}
+
+.team-size-input .ant-input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 2px solid #d9d9d9;
+    transition: border 0.3s ease;
+}
+
+.team-size-input .ant-input:focus {
+    border-color: #1890ff;
+    outline: none;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(45deg, #da13af, #2575fc);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ffffff;
+    border-top: 5px solid #da13af;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-icon {
+    font-size: 40px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }

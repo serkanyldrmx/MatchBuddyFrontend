@@ -9,7 +9,7 @@ import Communication from '../Information/Communication';
 import MatchReservation from '../AdminMatchOrganization/MatchReservation';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import Badge from '@mui/material/Badge'; // Badge bileşeni
+import Badge from '@mui/material/Badge';
 import home from '../../images/home.png';
 import stadium from '../../images/stadium.png';
 import stadiumAdd from '../../images/status.png';
@@ -20,24 +20,23 @@ import list from '../../images/list.jpg';
 
 const AdminPanel = () => {
   const [activeContent, setActiveContent] = useState('aboutPage');
-  const [notificationCount, setNotificationCount] = useState(0); // Bildirim sayısını state olarak tanımlayın
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  // API'den maçları çek ve isActive === 1 olanların sayısını hesapla
-  useEffect(() => {
-    const fetchMatchList = async () => {
-      try {
-        const response = await fetch("http://localhost:5033/api/Match/GetMatchList");
-        if (!response.ok) {
-          throw new Error("API isteğinde bir hata oluştu");
-        }
-        const data = await response.json();
-        const activeMatches = data.filter(match => match.isActive === 1); // isActive === 1 olan maçları filtrele
-        setNotificationCount(activeMatches.length); // Bildirim sayısını güncelle
-      } catch (error) {
-        console.error("Hata:", error);
+  const fetchMatchList = async () => {
+    try {
+      const response = await fetch("http://localhost:5033/api/Match/GetMatchList");
+      if (!response.ok) {
+        throw new Error("API isteğinde bir hata oluştu");
       }
-    };
+      const data = await response.json();
+      const activeMatches = data.filter(match => match.isActive === 1);
+      setNotificationCount(activeMatches.length);
+    } catch (error) {
+      console.error("Hata:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchMatchList();
   }, []);
 
@@ -46,7 +45,7 @@ const AdminPanel = () => {
   };
 
   const handleNotificationClick = () => {
-    setActiveContent('matchReservation'); // Bildirim simgesine tıklandığında 'matchReservation' sekmesine geç
+    setActiveContent('matchReservation');
   };
 
   const menuItems = [
@@ -62,7 +61,7 @@ const AdminPanel = () => {
   const contentComponents = {
     stadium: <Stadium />,
     stadiumIsAdmin: <StadiumIsAdmin />,
-    matchReservation: <MatchReservation />,
+    matchReservation: <MatchReservation updateNotificationCount={fetchMatchList} />,
     about: <About />,
     matchAll: <MatchAll />,
     communication: <Communication />,
@@ -89,12 +88,11 @@ const AdminPanel = () => {
         <div className="top-bar">
           <input type="text" placeholder="Search for..." />
           <div className="icons">
-            {/* Bildirim simgesi */}
             <Badge badgeContent={notificationCount} color="error">
               <i
                 className="notification-icon"
                 style={{ cursor: 'pointer' }}
-                onClick={handleNotificationClick} // Tıklama ile 'matchReservation' sekmesine geç
+                onClick={handleNotificationClick}
               >
                 <NotificationsActiveIcon fontSize='medium'/>
               </i>

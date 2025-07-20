@@ -23,9 +23,7 @@ import Collapse from '@mui/material/Collapse';
 import { message } from "antd";
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import Comment from "../Comment/Comment";
 import DeleteIcon from '@mui/icons-material/Delete';
-// ...existing code...
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -39,14 +37,14 @@ const ExpandMore = styled((props) => {
 }));
 
 function Post(props) {
-  const { matchId, matchName, description, userCount, matchDate, status, initialLikes } = props;
+  const { matchId, matchName, description, userCount, matchDate, status, initialLikes, personalizedMessage } = props;
   const [expanded, setExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(initialLikes || 0); // Beğeni sayısını state olarak tut
+  const [likes, setLikes] = useState(initialLikes || 0);
   const [commentList, setCommentList] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false); // Dialog kontrolü için state
+  const [dialogOpen, setDialogOpen] = useState(false);
   const isInitialMount = useRef(true);
   const [player, setPlayer] = useState(null);
   const [newComment, setNewComment] = useState("");
@@ -57,9 +55,9 @@ function Post(props) {
   const isMatchPast = matchDateObj < currentDate;
   const formattedDate = new Intl.DateTimeFormat('en-US').format(matchDateObj);
   const formattedHour = new Intl.DateTimeFormat('en-US', {
-    hour: '2-digit', 
-    minute: '2-digit', 
-    hour12: false // 24 saat formatında göstermek isterseniz
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
   }).format(matchDateObj);
 
   useEffect(() => {
@@ -130,19 +128,19 @@ function Post(props) {
   };
 
   const handleDialogOpen = () => {
-    setDialogOpen(true); // Popup'u aç
+    setDialogOpen(true);
   };
 
   const handleDialogClose = (confirm) => {
-    setDialogOpen(false); // Popup'u kapat
+    setDialogOpen(false);
     if (confirm) {
-      handleDelete(); // Eğer kullanıcı onay verdiyse silme işlemini gerçekleştir
+      handleDelete();
     }
   };
 
   const handleLike = () => {
     setLiked(!liked);
-    setLikes(likes + (liked ? -1 : 1)); // Beğeni sayısını artır veya azalt
+    setLikes(likes + (liked ? -1 : 1));
 
     fetch(`http://localhost:5033/api/Match/MatchLiked?matchId=${matchId}`, {
       method: "GET",
@@ -193,22 +191,21 @@ function Post(props) {
     }
   }, []);
 
-  const getStatusMessage = () => {    
+  const getStatusMessage = () => {
     if (isMatchPast) {
-      return { message: "Maç Tarihi Geçti", color: "red" }; // Geçmiş maçlar
+      return { message: "Maç Tarihi Geçti", color: "red" };
     }
     if (status === 1) {
-      return { message: "Bu maç onayda", color: "blue" }; // Onay bekleyen maç
+      return { message: "Bu maç onayda", color: "blue" };
     }
     if (status === 2) {
-      return { message: "Maç onaylandı ", color: "yellow" }; // Onaylanan maç
+      return { message: "Maç onaylandı ", color: "yellow" };
     }
     if (status === 3) {
-      return { message: "Maç reddedildi", color: "orange" }; // Reddedilen maç
+      return { message: "Maç reddedildi", color: "orange" };
     }
-    //return null; // Durum yoksa null döndür
   };
-  
+
   const statusMessage = getStatusMessage();
 
   const handleCommentChange = (event) => {
@@ -293,6 +290,21 @@ function Post(props) {
         <Typography variant="body2" color="text.secondary">
           {"Katılımcı Sayısı: " + userCount}
         </Typography>
+        {personalizedMessage && (
+          <Typography
+            variant="body2"
+            style={{
+              marginTop: '8px',
+              fontStyle: 'italic',
+              color: '#004d40',
+              backgroundColor: '#e0f2f1',
+              padding: '8px',
+              borderRadius: '4px'
+            }}
+          >
+            {personalizedMessage}
+          </Typography>
+        )}
         <CardContent>
           <Typography variant="body2" color="text.secondary">
             {description}
@@ -318,7 +330,7 @@ function Post(props) {
             <FavoriteIcon style={liked ? { color: "red" } : null} />
           </IconButton>
           <Typography variant="body2" color="text.secondary" style={{ marginLeft: '8px' }}>
-            {likes} {/* Beğeni sayısını göster */}
+            {likes}
           </Typography>
           <ExpandMore
             expand={expanded.toString()}
@@ -348,7 +360,7 @@ function Post(props) {
               <IconButton
                 aria-label="delete"
                 onClick={() => handleCommentDelete(comment.commentsId)}
-                style={{ marginLeft: 'auto', color: 'red' }} // Rengi kırmızı yap
+                style={{ marginLeft: 'auto', color: 'red' }}
               >
                 <DeleteIcon />
               </IconButton>
@@ -374,7 +386,6 @@ function Post(props) {
         </Container>
       </Collapse>
 
-      {/* Popup (Dialog) */}
       <Dialog open={dialogOpen} onClose={() => handleDialogClose(false)}>
         <DialogTitle>{"Maçı Sil"}</DialogTitle>
         <DialogContent>
