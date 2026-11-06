@@ -3,8 +3,8 @@ import { EditOutlined, UserOutlined, MailOutlined, HomeOutlined, NumberOutlined,
 import { useNavigate, Link } from "react-router-dom";
 import React, { useState } from "react";
 import "./Login.css";
-import axios from "axios";
 import Logo from "../../images/mutch_buddy_Logo.png";
+import { api } from '../../api/config';
 
 const { Option } = Select;
 
@@ -56,7 +56,7 @@ const RegisterForm = () => {
     try {
       // Verileri ve fotoğrafı SavePlayer endpoint'ine gönder
       console.log("Sending FormData:", formData);
-      const response = await axios.post("http://localhost:5033/api/Players/SavePlayer", formData, {
+      const response = await api.post("/api/Players/SavePlayer", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("Response:", response.data);

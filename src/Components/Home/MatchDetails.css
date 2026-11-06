@@ -1,74 +1,781 @@
+/* ---------- Skor tabelası (hero) ---------- */
+.mb-match-hero {
+  padding: 22px 32px 26px;
+  border-radius: 24px;
+  border: 1px solid rgba(198, 244, 50, 0.16);
+  margin-bottom: 20px;
+}
 
-/* Navbar boşluğu */
-.match-info {
-  padding-top: 80px;
+.mb-match-hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.mb-ghost-link.ant-btn {
+  color: rgba(232, 238, 246, 0.8);
+  padding-left: 0;
+}
+
+.mb-match-hero__chips {
+  display: flex;
+  gap: 6px;
+}
+
+.mb-match-hero__title {
+  margin: 14px 0 6px;
+  text-align: center;
+  font-family: var(--mb-display);
+  font-size: clamp(34px, 4.5vw, 56px);
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #fff;
+}
+
+.mb-match-hero__meta {
+  text-align: center;
+  color: rgba(232, 238, 246, 0.75);
+  font-size: 13px;
+}
+
+.mb-scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+  max-width: 720px;
+  margin: 26px auto 22px;
+}
+
+.mb-scoreboard__team {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(7, 11, 18, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mb-scoreboard__team.is-home {
+  text-align: right;
+  border-right: 3px solid var(--mb-home);
+}
+
+.mb-scoreboard__team.is-away {
+  border-left: 3px solid var(--mb-away);
+}
+
+.mb-scoreboard__team span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+.mb-scoreboard__team strong {
+  font-family: var(--mb-display);
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.mb-scoreboard__center {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 6px;
 }
 
-/* Maç genel kart stili */
-.match-card {
-  width: 100%;
-  max-width: 800px;
-  background-color: #3cc1b8;
-  margin-top: 20px;
-  padding: 20px;
+.mb-scoreboard__score,
+.mb-scoreboard__time {
+  font-family: var(--mb-display);
+  font-weight: 800;
+  font-size: 72px;
+  line-height: 0.9;
+  padding: 10px 24px;
+  border-radius: 16px;
+  background: #05080e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  letter-spacing: 2px;
+  box-shadow: inset 0 0 24px rgba(198, 244, 50, 0.08);
+}
+
+.mb-scoreboard__score i {
+  font-style: normal;
+  color: var(--mb-primary);
+  margin: 0 10px;
+}
+
+.mb-scoreboard__time {
+  color: var(--mb-primary);
+}
+
+.mb-scoreboard__caption {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(232, 238, 246, 0.75);
+}
+
+.mb-match-hero__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mb-match-hero__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .mb-match-hero {
+    padding: 18px;
+  }
+  .mb-scoreboard {
+    gap: 10px;
+  }
+  .mb-scoreboard__score,
+  .mb-scoreboard__time {
+    font-size: 44px;
+    padding: 8px 12px;
+  }
+  .mb-scoreboard__team strong {
+    font-size: 16px;
+  }
+}
+
+/* ---------- Sekmeler ---------- */
+.mb-match-tabs .ant-tabs-tab {
+  font-family: var(--mb-display);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- Saha ---------- */
+.mb-pitch__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.mb-pitch__labels .is-home { color: var(--mb-home); }
+.mb-pitch__labels .is-away { color: var(--mb-away); }
+
+.mb-pitch__field {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 420px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  background:
+    repeating-linear-gradient(90deg, #13502c 0 9.09%, #0f4526 9.09% 18.18%);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.45);
+}
+
+.mb-pitch__lines {
+  position: absolute;
+  inset: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  pointer-events: none;
+  background:
+    /* orta çizgi */
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.28) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    /* orta yuvarlak */
+    radial-gradient(circle at 50% 50%, transparent 0 62px, rgba(255, 255, 255, 0.28) 63px 65px, transparent 66px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0 4px, transparent 5px);
+}
+
+.mb-pitch__lines::before,
+.mb-pitch__lines::after {
+  /* ceza sahaları */
+  content: '';
+  position: absolute;
+  top: 28%;
+  bottom: 28%;
+  width: 12%;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+}
+
+.mb-pitch__lines::before {
+  left: -2px;
+  border-left: none;
+}
+
+.mb-pitch__lines::after {
+  right: -2px;
+  border-right: none;
+}
+
+.mb-pitch__half {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 14px 10px;
+  padding: 36px 28px;
+}
+
+.mb-token-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.mb-token-btn:disabled {
+  cursor: default;
+}
+
+.mb-token {
+  width: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.15s;
+}
+
+.mb-token-btn:not(:disabled):hover .mb-token {
+  transform: translateY(-3px);
+}
+
+.mb-token__avatar {
+  position: relative;
+}
+
+.mb-pitch__half.is-home .mb-token__avatar .ant-avatar {
+  box-shadow: 0 0 0 3px var(--mb-home);
+}
+
+.mb-pitch__half.is-away .mb-token__avatar .ant-avatar {
+  box-shadow: 0 0 0 3px var(--mb-away);
+}
+
+.mb-token.is-me .mb-token__name {
+  background: var(--mb-primary);
+  color: var(--mb-primary-ink);
+}
+
+.mb-token__name {
+  max-width: 78px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: rgba(5, 8, 14, 0.78);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-token__score {
+  font-family: var(--mb-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mb-token__check {
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  color: var(--mb-pitch);
+  background: #05080e;
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+.mb-token__crown {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--mb-gold);
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.mb-token__goals {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #fff;
+  color: #05080e;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mb-token__goals::before {
+  content: '⚽';
+  font-size: 9px;
+  margin-right: 2px;
+}
+
+.mb-token.is-empty .mb-token__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 8, 14, 0.25);
+}
+
+.mb-token.is-empty .mb-token__name {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mb-token__plus {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mb-token-btn:not(:disabled):hover .mb-token.is-empty .mb-token__avatar {
+  border-color: var(--mb-primary);
+  background: rgba(198, 244, 50, 0.15);
+}
+
+@media (max-width: 720px) {
+  .mb-pitch__field {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    background: repeating-linear-gradient(180deg, #13502c 0 12.5%, #0f4526 12.5% 25%);
+  }
+  .mb-pitch__lines {
+    background:
+      linear-gradient(180deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.28) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+      radial-gradient(circle at 50% 50%, transparent 0 48px, rgba(255, 255, 255, 0.28) 49px 51px, transparent 52px);
+  }
+  .mb-pitch__lines::before,
+  .mb-pitch__lines::after {
+    display: none;
+  }
+}
+
+/* ---------- Yedekler / lejant ---------- */
+.mb-waitlist {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mb-waitlist li span {
+  margin-left: 8px;
+}
+
+.mb-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-legend span {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---------- Maç sonu ---------- */
+.mb-result-form {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 18px;
+}
+
+.mb-result-form__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.mb-result-form__side span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.mb-result-form__side.is-home span { color: var(--mb-home); }
+.mb-result-form__side.is-away span { color: var(--mb-away); }
+
+.mb-result-form__side .ant-input-number {
+  width: 100px;
+}
+
+.mb-result-form__side .ant-input-number-input {
+  font-family: var(--mb-display);
+  font-size: 32px;
+  font-weight: 800;
+  text-align: center;
+  height: 56px;
+}
+
+.mb-result-form__sep {
+  font-family: var(--mb-display);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--mb-primary);
+  padding-bottom: 6px;
+}
+
+.mb-inline-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mb-inline-player small {
+  color: var(--mb-text-2);
+}
+
+.mb-side-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.mb-side-dot.is-home { background: var(--mb-home); }
+.mb-side-dot.is-away { background: var(--mb-away); }
+
+.mb-mvp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.mb-mvp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 8px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--mb-border);
+  background: var(--mb-surface-2);
+  color: var(--mb-text);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.mb-mvp-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--mb-border-strong);
+}
+
+.mb-mvp-card span {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-mvp-card.is-voted {
+  border-color: var(--mb-gold);
+  background: var(--mb-gold-soft);
+}
+
+.mb-mvp-card.is-leader {
+  box-shadow: 0 0 0 1px var(--mb-gold), 0 8px 24px rgba(251, 191, 36, 0.18);
+}
+
+.mb-mvp-card__crown {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--mb-gold);
+}
+
+.mb-rate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mb-rate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--mb-border);
+}
+
+.mb-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--mb-text-3);
+  text-align: center;
+}
+
+/* ---------- Tekrar oynamak ister misin? ---------- */
+.mb-replay-card.ant-card {
+  border-color: rgba(198, 244, 50, 0.25) !important;
+  background: linear-gradient(135deg, var(--mb-primary-soft), transparent 60%), var(--mb-surface);
+}
+
+.mb-replay-card__text {
+  margin: 0 0 14px;
+  color: var(--mb-text-2);
+}
+
+.mb-replay-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.mb-replay-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
 }
 
-/* Takım kartları düzenleme */
-.team-section {
-  margin-top: 20px;
+.mb-replay-item__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
 }
 
-.team-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
+.mb-replay-item__name .mb-player-link {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-
-.team-card .MuiTypography-body1 {
-  color: #555;
+.mb-replay-item__name small {
+  font-size: 12px;
+  color: var(--mb-text-2);
 }
 
-/* Buton stili */
-.match-card .MuiButton-contained {
+/* ---------- Rakip aranıyor ---------- */
+.mb-scoreboard__team.is-seeking {
+  border-left-color: var(--mb-gold);
+  border-style: dashed;
+  align-items: flex-start;
+}
+
+.mb-scoreboard__team.is-seeking span,
+.mb-scoreboard__team.is-seeking strong {
+  color: var(--mb-gold);
+}
+
+.mb-scoreboard__claim.ant-btn {
+  margin-top: 4px;
+}
+
+/* ---------- Rezervasyon kartı ---------- */
+.mb-booking__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
   width: 100%;
-  margin-top: 15px;
+  margin-bottom: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-/* Kart başlıkları */
-.MuiCardHeader-root {
-  background-color: #f1f1f1;
-  border-radius: 8px 8px 0 0;
+.mb-booking__head img,
+.mb-booking__ph {
+  width: 96px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-.MuiAvatar-root {
-  background-color: #ff5722;
+.mb-booking__head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.match-card h6 {
-  font-weight: bold;
-  color: #333;
+.mb-booking__head-text strong {
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
-/* Genel düzen */
-.match-info h6 {
-  font-weight: bold;
-  margin-bottom: 10px;
+.mb-booking__head:hover .mb-booking__head-text strong {
+  color: var(--mb-primary);
 }
 
-.match-info button {
-  margin-top: 15px;
-  background-color: #2196F3;
-  color: white;
-  border-radius: 4px;
+.mb-booking__head-text span {
+  color: var(--mb-text-2);
+  font-size: 12px;
 }
 
-.match-info button:hover {
-  background-color: #1976D2;
+.mb-booking__lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--mb-border-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.mb-booking__lines > div > span:first-child {
+  display: flex;
+  flex-direction: column;
+  color: var(--mb-text-2);
+}
+
+.mb-booking__lines small {
+  color: var(--mb-text-3);
+}
+
+.mb-booking__lines .is-total {
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.mb-booking__lines .is-total span {
+  color: var(--mb-text);
+}
+
+.mb-booking__per {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 10px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--mb-primary-soft);
+  border: 1px solid rgba(198, 244, 50, 0.3);
+}
+
+.mb-booking__per span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--mb-primary);
+}
+
+.mb-booking__per strong {
+  font-family: var(--mb-display);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--mb-primary);
+}
+
+.mb-booking__policy {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-booking__policy .anticon {
+  color: var(--mb-info);
+  margin-top: 3px;
+}
+
+.mb-booking__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ---------- Tesis değerlendirme ---------- */
+.mb-venue-review-card {
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+
+.mb-venue-review {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.mb-venue-review img {
+  width: 140px;
+  height: 92px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+@media (max-width: 575px) {
+  .mb-venue-review {
+    flex-direction: column;
+  }
+}
+
+.mb-venue-review__form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.mb-venue-review__form > strong {
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mb-venue-review__rate.ant-rate {
+  font-size: 26px;
+  color: var(--mb-gold);
 }

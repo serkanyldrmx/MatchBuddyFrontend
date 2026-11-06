@@ -1,420 +1,193 @@
-import React, { useEffect, useRef, useState } from "react";
-import { styled } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import { red } from '@mui/material/colors';
-import { Link } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import "./Post.css";
-import CommentIcon from '@mui/icons-material/Comment';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import Avatar from '@mui/material/Avatar';
-import Collapse from '@mui/material/Collapse';
-import { message } from "antd";
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { App, Avatar, Button, Tooltip } from 'antd';
+import {
+  CheckOutlined,
+  ClockCircleOutlined,
+  CrownFilled,
+  EnvironmentOutlined,
+  HeartFilled,
+  HeartOutlined,
+  HomeOutlined,
+  SunOutlined,
+} from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { matchesApi, PARTICIPANT_STATUS } from '../../api/matches';
+import { formatPrice, SURFACE } from '../../api/venues';
+import { CapacityRing, MatchStatusTag, PlayerAvatar } from '../../ui';
+import { apiErrorMessage, fullName, isPast } from '../../utils/format';
+import './Post.css';
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-}));
+/**
+ * Fikstür kartı: ana sayfa akışındaki her maç.
+ * Gelecek maçta: tarih/saat bloğu, kadro doluluğu, katıl butonu.
+ * Bitmiş maçta: skor tabelası ve MVP.
+ */
+export default function MatchCard({ match, onChanged }) {
+  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [liked, setLiked] = useState(!!match.likedByMe);
+  const [likes, setLikes] = useState(match.likes || 0);
 
-function Post(props) {
-  const { matchId, matchName, description, userCount, matchDate, status, initialLikes, personalizedMessage } = props;
-  const [expanded, setExpanded] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(initialLikes || 0);
-  const [commentList, setCommentList] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const isInitialMount = useRef(true);
-  const [player, setPlayer] = useState(null);
-  const [newComment, setNewComment] = useState("");
+  const date = dayjs(match.matchDate);
+  const past = isPast(match.matchDate);
+  const hasResult = match.homeScore != null && match.awayScore != null;
+  const missing = Math.max((match.capacity || 0) - (match.goingCount || 0), 0);
+  const closed = past || match.isActive === 3;
+  const open = () => navigate(`/match-details/${match.matchId}`);
+  const venue = match.venue;
+  const lookingOpp = match.lookingForOpponent && !match.awayTeam && !closed;
+  const friendsGoing = match.followingGoingCount > 0 && match.followingPreview?.length > 0;
 
-  const currentDate = new Date();
-  const matchDateObj = new Date(matchDate);
-
-  const isMatchPast = matchDateObj < currentDate;
-  const formattedDate = new Intl.DateTimeFormat('en-US').format(matchDateObj);
-  const formattedHour = new Intl.DateTimeFormat('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  }).format(matchDateObj);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    setPlayer(user);
-  }, []);
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-    if (!expanded) {
-      refreshComments();
+  const join = async (e) => {
+    e.stopPropagation();
+    setBusy(true);
+    try {
+      const res = await matchesApi.join(match.matchId);
+      message.success(res?.message || 'Maça katıldın.');
+      onChanged?.();
+    } catch (err) {
+      message.error(apiErrorMessage(err, 'Maça katılamadın.'));
+    } finally {
+      setBusy(false);
     }
   };
 
-  const handleDelete = () => {
-    fetch(`http://localhost:5033/api/Match/DeleteMatch`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ matchId }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          message.success(data.message || "Başarıyla silindi.");
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-      })
-      .catch((error) => {
-        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-      });
-  };
-
-  const handleCommentDelete = (commentId) => {
-    fetch(`http://localhost:5033/api/MatchComment/DeleteMatchComment?commentId=${commentId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          message.success(data.message || "Yorum başarıyla silindi.");
-          refreshComments();
-        } else {
-          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-      })
-      .catch((error) => {
-        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-      });
-  };
-
-  const handleDialogOpen = () => {
-    setDialogOpen(true);
-  };
-
-  const handleDialogClose = (confirm) => {
-    setDialogOpen(false);
-    if (confirm) {
-      handleDelete();
-    }
-  };
-
-  const handleLike = () => {
+  const toggleLike = async (e) => {
+    e.stopPropagation();
+    const prev = { liked, likes };
     setLiked(!liked);
     setLikes(likes + (liked ? -1 : 1));
-
-    fetch(`http://localhost:5033/api/Match/MatchLiked?matchId=${matchId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (!data.success) {
-          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-      })
-      .catch((error) => {
-        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-      });
-  };
-
-  const refreshComments = () => {
-    fetch(`http://localhost:5033/api/MatchComment/GetMatchComments?matchId=${matchId}`)
-      .then(res => res.json())
-      .then(
-        (result) => {
-          setIsLoaded(true);
-          if (Array.isArray(result)) {
-            setCommentList(result);
-          } else {
-            setCommentList([]);
-          }
-        },
-        (error) => {
-          setIsLoaded(true);
-          setError(error);
-        }
-      );
-  };
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      refreshComments();
-    }
-  }, []);
-
-  const getStatusMessage = () => {
-    if (isMatchPast) {
-      return { message: "Maç Tarihi Geçti", color: "red" };
-    }
-    if (status === 1) {
-      return { message: "Bu maç onayda", color: "blue" };
-    }
-    if (status === 2) {
-      return { message: "Maç onaylandı ", color: "yellow" };
-    }
-    if (status === 3) {
-      return { message: "Maç reddedildi", color: "orange" };
+    try {
+      const res = await matchesApi.toggleLike(match.matchId);
+      setLiked(res.liked);
+      setLikes(res.likes);
+    } catch (err) {
+      setLiked(prev.liked);
+      setLikes(prev.likes);
+      message.error(apiErrorMessage(err));
     }
   };
 
-  const statusMessage = getStatusMessage();
-
-  const handleCommentChange = (event) => {
-    setNewComment(event.target.value);
-  };
-
-  const handleCommentSubmit = () => {
-    if (newComment.trim() === "") {
-      message.error("Yorum boş olamaz.");
-      return;
-    }
-
-    const commentData = {
-      comment: newComment,
-      playerId: player?.playerId,
-      matchId: matchId,
-    };
-
-    fetch(`http://localhost:5033/api/MatchComment/SaveMatchComment`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(commentData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          message.success(data.message || "Yorum başarıyla eklendi.");
-          setNewComment("");
-          refreshComments();
-        } else {
-          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-      })
-      .catch((error) => {
-        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-      });
-  };
-
-  const getColorById = (id) => {
-    const colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF", "#33FFF5", "#F5FF33", "#FF8C33", "#8C33FF", "#33FF8C"];
-    return colors[id % 10];
-  };
+  let action;
+  if (match.myStatus === PARTICIPANT_STATUS.GOING) {
+    action = (
+      <Button className="mb-fixture__mine" icon={<CheckOutlined />} onClick={(e) => { e.stopPropagation(); open(); }}>
+        Kadrodasın
+      </Button>
+    );
+  } else if (match.myStatus === PARTICIPANT_STATUS.WAITLIST) {
+    action = <Button onClick={(e) => { e.stopPropagation(); open(); }}>Yedektesin</Button>;
+  } else if (!closed) {
+    action = (
+      <Button type="primary" loading={busy} onClick={join}>
+        {missing > 0 ? 'Katıl' : 'Yedeğe yazıl'}
+      </Button>
+    );
+  } else {
+    action = <Button onClick={(e) => { e.stopPropagation(); open(); }}>{hasResult ? 'Maç raporu' : 'Detay'}</Button>;
+  }
 
   return (
-    <div className="postContainer">
-      <Card className="postCard" sx={{ margin: '20px', width: '600px', backgroundColor: '#3cc1b8', padding: '16px' }}>
-        <CardHeader
-          avatar={
-            <Link to={`/match-details/${matchId}`}>
-              <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                {matchName ? matchName.charAt(0).toUpperCase() : "?"}
-              </Avatar>
-            </Link>
-          }
-          action={
-            <IconButton onClick={handleDialogOpen} aria-label="delete">
-              <DeleteForeverIcon style={{ color: "red" }} />
-            </IconButton>
-          }
-        />
-        {statusMessage && (
-          <Typography variant="body2" color={statusMessage.color} style={{ fontWeight: 'bold', fontSize: '16px' }}>
-            {statusMessage.message}
-          </Typography>
-        )}
-        <Typography variant="h6" component="div" style={{ marginTop: statusMessage ? '5px' : '0' }}>
-          {"Maç Adı: " + matchName}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {"Maç tarihi: " + formattedDate}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {"Maç Saati: " + formattedHour}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {"Katılımcı Sayısı: " + userCount}
-        </Typography>
-        {personalizedMessage && (
-          <Typography
-            variant="body2"
-            style={{
-              marginTop: '8px',
-              fontStyle: 'italic',
-              color: '#004d40',
-              backgroundColor: '#e0f2f1',
-              padding: '8px',
-              borderRadius: '4px'
-            }}
-          >
-            {personalizedMessage}
-          </Typography>
-        )}
-        <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            {description}
-          </Typography>
-          <Button
-            variant="contained"
-            style={{
-              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-              color: 'white',
-              marginTop: '15px',
-            }}
-          >
-            <Link
-              to={`/match-details/${matchId}`}
-              style={{ textDecoration: 'none', color: 'white' }}
-            >
-              Maçı İncele / Katıl
-            </Link>
-          </Button>
-        </CardContent>
-        <CardActions disableSpacing>
-          <IconButton onClick={handleLike} aria-label="add to favorites">
-            <FavoriteIcon style={liked ? { color: "red" } : null} />
-          </IconButton>
-          <Typography variant="body2" color="text.secondary" style={{ marginLeft: '8px' }}>
-            {likes}
-          </Typography>
-          <ExpandMore
-            expand={expanded.toString()}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <CommentIcon />
-          </ExpandMore>
-        </CardActions>
-      </Card>
+    <article className={`mb-fixture ${past ? 'is-past' : ''} ${match.myStatus === 1 ? 'is-mine' : ''}`} onClick={open}>
+      {/* Sol: tarih/saat ya da skor */}
+      {hasResult ? (
+        <div className="mb-fixture__when is-score">
+          <span className="mb-fixture__score">
+            {match.homeScore}<i>:</i>{match.awayScore}
+          </span>
+          <span className="mb-fixture__date">{date.format('DD MMM')}</span>
+        </div>
+      ) : (
+        <div className="mb-fixture__when">
+          <span className="mb-fixture__dow">{date.format('ddd')}</span>
+          <span className="mb-fixture__day">{date.format('DD')}</span>
+          <span className="mb-fixture__month">{date.format('MMM')}</span>
+          <span className="mb-fixture__time">{date.format('HH:mm')}</span>
+        </div>
+      )}
 
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Container fixed className="commentSection">
-          <Typography variant="h6" component="div" className="commentSectionTitle">
-            Maç Yorumları
-          </Typography>
-          {isLoaded ? commentList.length > 0 ? commentList.map(comment => (
-            <div key={comment.commentsId} className="commentCard">
-              <Avatar
-                className="avatar"
-                sx={{ bgcolor: getColorById(comment.playerId) }}
-                src={
-                  comment.profilePictureUrl
-                    ? comment.profilePictureUrl.startsWith("http")
-                      ? comment.profilePictureUrl
-                      : `http://localhost:5033${comment.profilePictureUrl}`
-                    : undefined
-                }
-              >
-                {(!comment.profilePictureUrl && comment.playerName && comment.playerSurname) &&
-                  `${comment.playerName.charAt(0).toUpperCase()}${comment.playerSurname.charAt(0).toUpperCase()}`}
-              </Avatar>
-              <div className="commentContent">
-                <div className="commentUserName">{comment.userName}</div>
-                <div>{comment.comment}</div>
-              </div>
-              <IconButton
-                aria-label="delete"
-                onClick={() => handleCommentDelete(comment.commentsId)}
-                style={{ marginLeft: 'auto', color: 'red' }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </div>
-          )) : "Bu Maça Henüz Yorum Eklenmedi" : "Loading..."}
-          <div style={{ marginTop: '20px' }}>
-            <TextField
-              label="Yorum Yaz"
-              variant="outlined"
-              fullWidth
-              value={newComment}
-              onChange={handleCommentChange}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ marginTop: '10px' }}
-              onClick={handleCommentSubmit}
-            >
-              Gönder
-            </Button>
+      {/* Orta: bilgiler */}
+      <div className="mb-fixture__body">
+        <div className="mb-fixture__top">
+          {match.isActive === 3 && match.rejectReason ? (
+            <Tooltip title={`Red sebebi: ${match.rejectReason}`}>
+              <span>
+                <MatchStatusTag status={match.isActive} past={past} />
+              </span>
+            </Tooltip>
+          ) : (
+            <MatchStatusTag status={match.isActive} past={past} />
+          )}
+          {!past && missing > 0 && missing <= 3 && <span className="mb-chip is-live">{missing} kişi eksik</span>}
+          {lookingOpp && <span className="mb-chip is-pending">Rakip aranıyor</span>}
+          {match.perPlayer != null && !hasResult && <span className="mb-fixture__price">Kişi başı {formatPrice(match.perPlayer)}</span>}
+        </div>
+        <h3 className="mb-fixture__title">{match.matchName}</h3>
+        {match.homeTeam && (
+          <div className="mb-fixture__teams">
+            <strong className="is-home">{match.homeTeam.teamName}</strong>
+            <i>vs</i>
+            {match.awayTeam ? <strong className="is-away">{match.awayTeam.teamName}</strong> : <strong className="is-tbd">?</strong>}
           </div>
-        </Container>
-      </Collapse>
+        )}
+        <div className="mb-fixture__meta">
+          {venue ? (
+            <span>
+              <Tooltip title={`${SURFACE[venue.surface] || 'Saha'} · ${venue.isIndoor ? 'Kapalı' : 'Açık'}`}>
+                {venue.isIndoor ? <HomeOutlined /> : <SunOutlined />}
+              </Tooltip>{' '}
+              {venue.name}
+              {venue.pitchName ? ` · ${venue.pitchName}` : ''}
+            </span>
+          ) : (
+            <span><EnvironmentOutlined /> {match.stadiumName || 'Halı saha'}</span>
+          )}
+          {!hasResult && <span><ClockCircleOutlined /> {date.format('dddd, HH:mm')}</span>}
+        </div>
+        <div className="mb-fixture__people">
+          <Avatar.Group max={{ count: 5 }} size={28} className={friendsGoing ? 'mb-fixture__friends-avatars' : ''}>
+            {(friendsGoing ? match.followingPreview : match.participantsPreview || []).map((p) => (
+              <Tooltip key={p.playerId} title={fullName(p)}>
+                <PlayerAvatar player={p} size={28} />
+              </Tooltip>
+            ))}
+          </Avatar.Group>
+          {friendsGoing ? (
+            <span className="mb-fixture__friends">
+              <strong>{match.followingPreview[0].playerName || match.followingPreview[0].userName}</strong>
+              {match.followingGoingCount > 1 && <> ve {match.followingGoingCount - 1} arkadaşın</>}{' '}
+              {past ? 'oynadı' : 'katılıyor'}
+            </span>
+          ) : null}
+          {match.mvp ? (
+            <span className="mb-fixture__mvp">
+              <CrownFilled /> MVP: {fullName(match.mvp)}
+            </span>
+          ) : match.createdBy && !friendsGoing ? (
+            <span className="mb-fixture__host">Kurucu: {fullName(match.createdBy)}</span>
+          ) : null}
+        </div>
+      </div>
 
-      <Dialog open={dialogOpen} onClose={() => handleDialogClose(false)}>
-        <DialogTitle>{"Maçı Sil"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Bu maçı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleDialogClose(false)} color="primary">
-            Vazgeç
-          </Button>
-          <Button onClick={() => handleDialogClose(true)} color="error" autoFocus>
-            Sil
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+      {/* Sağ: kadro + aksiyon */}
+      <div className="mb-fixture__side">
+        {!hasResult && <CapacityRing going={match.goingCount} capacity={match.capacity} size={44} />}
+        <div className="mb-fixture__actions">
+          <Tooltip title={liked ? 'Beğenmekten vazgeç' : 'Beğen'}>
+            <Button
+              className="mb-like"
+              type="text"
+              onClick={toggleLike}
+              icon={liked ? <HeartFilled style={{ color: 'var(--mb-danger)' }} /> : <HeartOutlined />}
+            >
+              {likes}
+            </Button>
+          </Tooltip>
+          {action}
+        </div>
+      </div>
+    </article>
   );
 }
-
-export default Post;

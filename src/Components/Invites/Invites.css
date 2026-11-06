@@ -1,0 +1,280 @@
+/* ---------- Davetler sayfası ---------- */
+.mb-invites-section {
+  margin-bottom: 32px;
+}
+
+.mb-invites-section .mb-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mb-invites-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--mb-primary);
+  color: var(--mb-primary-ink);
+  font-size: 15px;
+  font-style: normal;
+}
+
+.mb-invites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mb-invite-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 18px 20px 18px 18px;
+  background: linear-gradient(180deg, var(--mb-surface) 0%, var(--mb-bg) 160%);
+  border: 1px solid var(--mb-border);
+  border-radius: var(--mb-radius);
+  overflow: hidden;
+  transition: border-color 0.18s ease;
+}
+
+.mb-invite-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--mb-info);
+  box-shadow: 0 0 12px var(--mb-info);
+}
+
+.mb-invite-card.is-team::before {
+  background: var(--mb-gold);
+  box-shadow: 0 0 12px var(--mb-gold);
+}
+
+.mb-invite-card:hover {
+  border-color: var(--mb-border-strong);
+}
+
+.mb-invite-card__stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  padding-right: 18px;
+  border-right: 1px dashed var(--mb-border-strong);
+  line-height: 1;
+}
+
+.mb-invite-card__dow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--mb-info);
+}
+
+.mb-invite-card__day {
+  font-family: var(--mb-display);
+  font-size: 44px;
+  font-weight: 800;
+  margin: 2px 0;
+}
+
+.mb-invite-card__month {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+.mb-invite-card__time {
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--mb-surface-3);
+  font-family: var(--mb-display);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mb-invite-card__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: var(--mb-gold-soft);
+  border: 1px solid var(--mb-gold);
+  color: var(--mb-gold);
+  font-family: var(--mb-display);
+  font-size: 34px;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.mb-invite-card__body {
+  min-width: 0;
+}
+
+.mb-invite-card__who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--mb-text-2);
+}
+
+.mb-invite-card__who .mb-player-link,
+.mb-invite-card__who strong {
+  color: var(--mb-text);
+  font-weight: 600;
+}
+
+.mb-invite-card__who small {
+  color: var(--mb-text-3);
+}
+
+.mb-invite-card__title {
+  margin: 8px 0 6px;
+  font-family: var(--mb-display);
+  font-size: 24px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.mb-invite-card.is-team .mb-invite-card__title {
+  cursor: default;
+}
+
+.mb-invite-card__meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--mb-text-2);
+}
+
+.mb-invite-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mb-invite-card__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.mb-invite-card__actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .mb-invite-card {
+    grid-template-columns: 72px 1fr;
+  }
+  .mb-invite-card__side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* ---------- Davet penceresi ---------- */
+.mb-invite-modal__title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.mb-invite-modal__title span {
+  font-family: var(--mb-display);
+  font-size: 24px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.mb-invite-modal__title small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mb-text-2);
+}
+
+.mb-invite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 380px;
+  overflow-y: auto;
+  margin: 0 -6px;
+  padding: 0 6px;
+}
+
+.mb-invite-list__none {
+  padding: 24px 0;
+  text-align: center;
+  color: var(--mb-text-3);
+}
+
+.mb-invite-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.mb-invite-row:hover {
+  background: var(--mb-surface-2);
+}
+
+.mb-invite-row.is-on {
+  background: var(--mb-primary-soft);
+  border-color: rgba(198, 244, 50, 0.3);
+}
+
+.mb-invite-row__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.mb-invite-row__name strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-invite-row__name small {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}

@@ -1,118 +1,124 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Checkbox, Button, List, Spin, Input, message } from "antd"; // message eklendi
-import axios from "axios";
-import "./PlayerSelectionPopup.css";
+import React, { useEffect, useMemo, useState } from 'react';
+import { App, Input, Modal, Table, Typography } from 'antd';
+import { SearchOutlined, StarFilled } from '@ant-design/icons';
+import { api } from '../../api/config';
+import { PlayerAvatar } from '../../ui';
+import { apiErrorMessage, fullName } from '../../utils/format';
 
-const PlayerSelectionPopup = ({ visible, onClose, teamPlayers = [], onSave, teamName, teamId }) => {
+const { Text } = Typography;
+
+/** Oyuncu seçim tablosu: takım oluşturma ve kadro düzenlemede ortak kullanılır */
+export function PlayerPickerTable({ players, selected, onChange, loading, height = 420 }) {
+  const [search, setSearch] = useState('');
+  const data = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return players.filter((p) => !q || fullName(p).toLowerCase().includes(q) || (p.userName || '').toLowerCase().includes(q));
+  }, [players, search]);
+
+  return (
+    <>
+      <Input
+        allowClear
+        prefix={<SearchOutlined />}
+        placeholder="Oyuncu ara"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: 12 }}
+      />
+      <Table
+        rowKey="playerId"
+        size="small"
+        loading={loading}
+        dataSource={data}
+        pagination={false}
+        scroll={{ y: height }}
+        rowSelection={{ selectedRowKeys: selected, onChange: (keys) => onChange(keys), preserveSelectedRowKeys: true }}
+        onRow={(p) => ({
+          onClick: () =>
+            onChange(selected.includes(p.playerId) ? selected.filter((id) => id !== p.playerId) : [...selected, p.playerId]),
+          style: { cursor: 'pointer' },
+        })}
+        columns={[
+          {
+            title: 'Oyuncu',
+            render: (_, p) => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <PlayerAvatar player={p} size={32} />
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                  <Text>{fullName(p)}</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>@{p.userName}</Text>
+                </div>
+              </div>
+            ),
+          },
+          { title: 'Yaş', dataIndex: 'age', width: 70, sorter: (a, b) => a.age - b.age },
+          {
+            title: 'Puan',
+            dataIndex: 'userScore',
+            width: 90,
+            sorter: (a, b) => a.userScore - b.userScore,
+            render: (v) => (
+              <span style={{ color: 'var(--mb-gold)' }}>
+                <StarFilled /> {v ?? 0}
+              </span>
+            ),
+          },
+        ]}
+      />
+    </>
+  );
+}
+
+/** Mevcut takımın kadrosunu düzenleme penceresi */
+const PlayerSelectionPopup = ({ visible, onClose, team, onSave }) => {
+  const { message } = App.useApp();
   const [players, setPlayers] = useState([]);
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Arama terimi için state
+  const [selected, setSelected] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Oyuncu listesini API'den al
-    axios.get("http://localhost:5033/api/Players/GetPlayerList")
-      .then(response => {
-        setPlayers(response.data);
-        setSelectedPlayers(teamPlayers || []); // Mevcut takım oyuncularını seçili yap
-      })
-      .catch(error => {
-        console.error("Oyuncular alınırken hata oluştu:", error);
-      });
-  }, [teamPlayers]);
+    if (!visible) return;
+    setSelected(team?.playerId || []);
+    setLoading(true);
+    api
+      .get('/api/Players/GetPlayerList')
+      .then((r) => setPlayers((r.data || []).filter((p) => p.isAdmin !== 1)))
+      .catch((e) => message.error(apiErrorMessage(e, 'Oyuncular yüklenemedi.')))
+      .finally(() => setLoading(false));
+  }, [visible, team, message]);
 
-  const handleCheckboxChange = (playerName) => {
-    if (selectedPlayers.includes(playerName)) {
-      setSelectedPlayers(selectedPlayers.filter(name => name !== playerName));
-    } else {
-      setSelectedPlayers([...selectedPlayers, playerName]);
+  const save = async () => {
+    if (selected.length === 0) {
+      message.warning('Takımda en az bir oyuncu olmalı.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.post('/api/Team/SaveTeamByPlayerId', { teamId: team.teamId, playerIds: selected });
+      message.success('Kadro güncellendi.');
+      onSave?.();
+      onClose();
+    } catch (e) {
+      message.error(apiErrorMessage(e, 'Kadro güncellenemedi.'));
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSave = () => {
-    // Tüm seçili oyuncuları API'ye gönder
-    const payload = {
-      teamId: teamId,
-      playerIds: selectedPlayers.map(playerName => {
-        const player = players.find(p => p.userName === playerName);
-        return player ? player.playerId : null;
-      }).filter(id => id !== null) // Geçerli playerId'leri filtrele
-    };
-
-    axios.post("http://localhost:5033/api/Team/SaveTeamByPlayerId", payload)
-      .then(response => {
-        message.success("Oyuncular başarıyla kaydedildi.");
-        onSave(selectedPlayers); // Seçilen oyuncuları üst bileşene aktar
-        onClose(); // Popup'ı kapat
-      })
-  };
-
-  // Arama filtresi
-  const filteredPlayers = players.filter(player =>
-    player.userName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <Modal
-      title={`Takım İsmi : ${teamName}`} // Takım ismini başlıkta göster
-      visible={visible}
+      title={`Kadroyu düzenle · ${team?.teamName || ''}`}
+      open={visible}
       onCancel={onClose}
-      footer={null}
-      className="player-selection-popup"
+      onOk={save}
+      okText={`Kaydet (${selected.length} oyuncu)`}
+      cancelText="Vazgeç"
+      confirmLoading={saving}
+      width={640}
+      destroyOnClose
     >
-      <Input
-        placeholder="Oyuncu ara..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: "15px" }}
-      />
-      {players.length === 0 ? (
-        <Spin tip="Yükleniyor..." />
-      ) : (
-        <div className="player-list-container">
-          <List
-            dataSource={filteredPlayers} // Filtrelenmiş oyuncuları göster
-            renderItem={(player) => (
-              <List.Item>
-                <Checkbox
-                  checked={selectedPlayers.includes(player.userName)}
-                  onChange={() => handleCheckboxChange(player.userName)}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {player.profilePictureUrl ? (
-                      <img
-                        src={player.profilePictureUrl.startsWith('http') ? player.profilePictureUrl : `http://localhost:5033${player.profilePictureUrl}`}
-                        alt={player.userName}
-                        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', marginRight: 8, background: '#eee' }}
-                        onError={e => {
-                          e.target.onerror = null;
-                          e.target.style.display = 'none';
-                          e.target.parentNode.appendChild(Object.assign(document.createElement('div'), {
-                            innerText: player.userName[0].toUpperCase(),
-                            style: 'width:32px;height:32px;border-radius:50%;background:#bdbdbd;color:#fff;display:flex;align-items:center;justify-content:center;margin-right:8px;font-weight:bold;'
-                          }));
-                        }}
-                      />
-                    ) : (
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#bdbdbd', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 8, fontWeight: 'bold' }}>
-                        {player.userName[0].toUpperCase()}
-                      </div>
-                    )}
-                    {player.userName} - {player.position} - {player.userScore} Puan
-                  </span>
-                </Checkbox>
-              </List.Item>
-            )}
-          />
-        </div>
-      )}
-      <div className="popup-footer">
-        <Button onClick={onClose} style={{ marginRight: "10px" }}>
-          İptal
-        </Button>
-        <Button type="primary" onClick={handleSave}>
-          Kaydet
-        </Button>
-      </div>
+      <PlayerPickerTable players={players} selected={selected} onChange={setSelected} loading={loading} height={360} />
     </Modal>
   );
 };

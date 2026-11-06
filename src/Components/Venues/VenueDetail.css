@@ -1,0 +1,511 @@
+.mb-vd-back.ant-btn {
+  margin-bottom: 12px;
+  color: var(--mb-text-2);
+}
+
+/* ---------- Hero ---------- */
+.mb-vd-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 28px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 20px;
+  background:
+    radial-gradient(900px 300px at 100% 0%, rgba(198, 244, 50, 0.08), transparent 60%),
+    var(--mb-surface);
+  border: 1px solid var(--mb-border);
+}
+
+@media (max-width: 991px) {
+  .mb-vd-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mb-vd-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mb-vd-gallery__cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--mb-surface-2);
+}
+
+.mb-vd-gallery__cover .ant-image,
+.mb-vd-gallery__thumb .ant-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mb-vd-gallery__cover .ant-image-img,
+.mb-vd-gallery__thumb .ant-image-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mb-vd-gallery__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.mb-vd-gallery__thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--mb-surface-2);
+}
+
+.mb-vd-gallery__more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 11, 18, 0.65);
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.mb-vd-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mb-vd-info__name {
+  margin: 0;
+  font-family: var(--mb-display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 44px;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--mb-text);
+}
+
+.mb-vd-info__addr {
+  color: var(--mb-text-2);
+}
+
+.mb-vd-info__desc {
+  margin: 0;
+  color: var(--mb-text-2);
+  line-height: 1.6;
+}
+
+.mb-vd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mb-vd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+  font-size: 12px;
+  color: var(--mb-text);
+}
+
+.mb-vd-chip .anticon {
+  color: var(--mb-primary);
+}
+
+.mb-vd-info__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.mb-vd-info__stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+}
+
+.mb-vd-info__stats strong {
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--mb-primary);
+  white-space: nowrap;
+}
+
+.mb-vd-info__stats span {
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+.mb-vd-info__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* ---------- Sekmeler ---------- */
+.mb-vd-tabs .ant-tabs-tab {
+  font-family: var(--mb-display);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.mb-vd-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mb-vd-howto {
+  padding: 16px;
+  border-radius: var(--mb-radius);
+  background: var(--mb-surface);
+  border: 1px solid var(--mb-border);
+}
+
+.mb-vd-howto h4 {
+  margin: 0 0 8px;
+  font-family: var(--mb-display);
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.mb-vd-howto ol {
+  margin: 0 0 6px;
+  padding-left: 18px;
+  color: var(--mb-text-2);
+  line-height: 1.8;
+}
+
+.mb-vd-policy.ant-alert {
+  border-radius: 12px;
+}
+
+/* ---------- Kampanya kartı ---------- */
+.mb-campaign {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  height: 100%;
+  padding: 14px;
+  border-radius: var(--mb-radius);
+  background:
+    radial-gradient(400px 160px at 0% 0%, rgba(251, 191, 36, 0.18), transparent 70%),
+    var(--mb-surface);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.mb-campaign__badge {
+  flex: 0 0 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--mb-gold);
+  color: var(--mb-primary-ink);
+  text-align: center;
+  padding: 6px;
+}
+
+.mb-campaign__badge strong {
+  font-family: var(--mb-display);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mb-campaign__badge span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.mb-campaign__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mb-campaign__text h4 {
+  margin: 0;
+  color: var(--mb-gold);
+  font-family: var(--mb-display);
+  font-size: 19px;
+  text-transform: uppercase;
+}
+
+.mb-campaign__text p {
+  margin: 0;
+  color: var(--mb-text);
+  font-size: 13px;
+}
+
+.mb-campaign__text span {
+  color: var(--mb-text-2);
+  font-size: 12px;
+}
+
+/* ---------- Saha kartları ---------- */
+.mb-pitch-card {
+  border-radius: var(--mb-radius);
+  overflow: hidden;
+  border: 1px solid var(--mb-border);
+  background: var(--mb-surface);
+}
+
+.mb-pitch-card__field {
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mb-pitch-card__size {
+  font-family: var(--mb-display);
+  font-size: 40px;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--mb-text);
+}
+
+.mb-pitch-card__body {
+  padding: 14px 16px 16px;
+}
+
+.mb-pitch-card__body h3 {
+  margin: 0 0 8px;
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mb-pitch-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.mb-pitch-card__tags span {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-pitch-card__price strong {
+  font-family: var(--mb-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--mb-primary);
+}
+
+.mb-pitch-card__price span {
+  color: var(--mb-text-2);
+  font-size: 12px;
+}
+
+/* ---------- Fiyatlar & saatler ---------- */
+.mb-vd-hours {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mb-vd-hours td {
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--mb-border);
+}
+
+.mb-vd-hours td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mb-vd-hours tr.is-today td {
+  color: var(--mb-primary);
+  font-weight: 700;
+}
+
+.mb-vd-hours__closed {
+  color: var(--mb-danger);
+}
+
+.mb-vd-pricelist {
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-vd-pricelist > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--mb-border-strong);
+}
+
+.mb-vd-pricelist span {
+  color: var(--mb-text-2);
+}
+
+.mb-vd-pricelist strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.mb-vd-subtitle {
+  margin: 4px 0 12px;
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* ---------- Yorumlar ---------- */
+.mb-vd-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.mb-vd-score strong {
+  font-family: var(--mb-display);
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--mb-gold);
+}
+
+.mb-vd-score .ant-rate {
+  color: var(--mb-gold);
+}
+
+.mb-vd-score span {
+  color: var(--mb-text-2);
+  font-size: 12px;
+}
+
+.mb-vd-bars__row {
+  display: grid;
+  grid-template-columns: 14px 1fr 28px;
+  gap: 8px;
+  align-items: center;
+}
+
+.mb-vd-bars__row .ant-progress {
+  margin: 0;
+}
+
+.mb-vd-bars__row em {
+  font-style: normal;
+  color: var(--mb-text-2);
+  text-align: right;
+  font-size: 12px;
+}
+
+.mb-vd-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mb-vd-review {
+  display: flex;
+  gap: 12px;
+}
+
+.mb-vd-review__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mb-vd-review__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.mb-vd-review__head > span {
+  color: var(--mb-text-3);
+  font-size: 12px;
+}
+
+.mb-vd-review__rate.ant-rate {
+  font-size: 12px;
+  color: var(--mb-gold);
+}
+
+.mb-vd-review__body p {
+  margin: 6px 0 0;
+  color: var(--mb-text);
+  line-height: 1.55;
+}
+
+.mb-vd-review__reply {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--mb-surface-2);
+  border-left: 3px solid var(--mb-primary);
+  font-size: 13px;
+}
+
+.mb-vd-review__reply strong {
+  color: var(--mb-primary);
+}
+
+.mb-vd-review__reply span {
+  color: var(--mb-text-3);
+}
+
+.mb-vd-review__reply p {
+  margin-top: 4px;
+  color: var(--mb-text-2);
+}
+
+/* ---------- Konum ---------- */
+.mb-vd-map {
+  height: 360px;
+  width: 100%;
+}
+
+.mb-vd-address {
+  margin: 0 0 4px;
+  font-size: 15px;
+}

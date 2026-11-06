@@ -1,189 +1,108 @@
-import React, { useState, useEffect } from "react";
-import { styled } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import axios from 'axios';
-import { green } from '@mui/material/colors';
-import { UserOutlined } from "@ant-design/icons";
-import { message } from "antd";
-import Navbar from "../Navbar/Navbar";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { App, Avatar, Button, Card, Col, Form, Input, Row, Space, Typography } from 'antd';
+import { ArrowLeftOutlined, TeamOutlined } from '@ant-design/icons';
+import { api } from '../../api/config';
+import { PageHeader, PlayerAvatar } from '../../ui';
+import { apiErrorMessage, getCurrentUser } from '../../utils/format';
+import { PlayerPickerTable } from './PlayerSelectionPopup';
 
-const TeamForm = styled('form')({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  marginBottom: '20px',
-  marginTop: '80px',
-});
-
-const PlayersListContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
-  marginTop: '20px',
-});
-
-const PlayerCard = styled(Card)({
-  margin: '20px',
-  width: '300px',
-  backgroundColor: '#3cc1b8',
-  position: 'relative',
-  paddingTop: '20px',
-});
-
-const CheckboxContainer = styled('div')({
-  position: 'absolute',
-  top: '10px',
-  right: '10px',
-});
-
-const GreenCheckbox = styled(Checkbox)({
-  color: green[400],
-  '&.Mui-checked': {
-    color: green[600],
-  },
-});
+const { Text } = Typography;
 
 const CreateTeam = () => {
+  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const me = getCurrentUser();
+  const [form] = Form.useForm();
   const [players, setPlayers] = useState([]);
-  const [teamName, setTeamName] = useState('');
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  // Takımı kuran kişi varsayılan olarak takımdadır (sonradan kadroyu yönetebilmesi için)
+  const [selected, setSelected] = useState(me?.playerId ? [me.playerId] : []);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    axios.get("http://localhost:5033/api/Players/GetPlayerList")
-      .then(response => {
-        setPlayers(response.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, []);
+    api
+      .get('/api/Players/GetPlayerList')
+      .then((r) => setPlayers((r.data || []).filter((p) => p.isAdmin !== 1)))
+      .catch((e) => message.error(apiErrorMessage(e, 'Oyuncular yüklenemedi.')))
+      .finally(() => setLoading(false));
+  }, [message]);
 
-  const handleTeamNameChange = (event) => {
-    setTeamName(event.target.value);
+  const selectedPlayers = players.filter((p) => selected.includes(p.playerId));
+
+  const submit = async ({ teamName }) => {
+    if (selected.length === 0) {
+      message.warning('En az bir oyuncu seçin.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await api.post('/api/Team/SaveTeam', { teamName: teamName.trim(), playerId: selected });
+      if (res.data?.success === false) {
+        message.error(res.data.message || 'Takım oluşturulamadı.');
+        return;
+      }
+      message.success('Takım oluşturuldu.');
+      navigate('/team');
+    } catch (e) {
+      message.error(apiErrorMessage(e, 'Takım oluşturulamadı.'));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handlePlayerSelection = (event) => {
-    const playerId = parseInt(event.target.value, 10);
-    setSelectedPlayers(prevSelected => 
-      prevSelected.includes(playerId)
-        ? prevSelected.filter(id => id !== playerId)
-        : [...prevSelected, playerId]
-    );
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const teamData = {
-      teamName: teamName,
-      playerId: selectedPlayers
-    };
-  
-    axios.post("http://localhost:5033/api/Team/SaveTeam", teamData)
-      .then((response) => {
-        alert('Takım başarıyla oluşturuldu!');
-        setTeamName('');
-        setSelectedPlayers([]);
-        message.success("Takım başarıyla oluşturuldu");
-      })
-      .catch((error) => {
-        console.error('Takım oluşturulurken bir hata oluştu!', error);
-        message.error("Takım oluşturulurken bir hata oluştu!");
-      });
-  };
-  
   return (
-    <div>
-      <Navbar></Navbar>
-      <TeamForm onSubmit={handleSubmit}>
-        <TextField
-          label="Takım Adı"
-          value={teamName}
-          onChange={handleTeamNameChange}
-          required
-        />
-        <Button type="submit" variant="contained" color="primary" style={{ marginTop: '10px' }}>
-          Takım Oluştur
-        </Button>
-      </TeamForm>
-      <PlayersListContainer>
-        {players.map((player) => (
-          <PlayerCard key={player.playerId}>
-            <CheckboxContainer>
-              <FormControlLabel
-                control={
-                  <GreenCheckbox
-                    value={player.playerId}
-                    onChange={handlePlayerSelection}
-                    checked={selectedPlayers.includes(player.playerId)}
-                  />
-                }
-                label=""
-              />
-            </CheckboxContainer>
-            <CardHeader
-              avatar={
-                player.profilePictureUrl ? (
-                  <Avatar
-                    src={
-                      player.profilePictureUrl.startsWith("http")
-                        ? player.profilePictureUrl
-                        : `http://localhost:5033${player.profilePictureUrl}`
-                    }
-                  />
+    <>
+      <Button type="link" icon={<ArrowLeftOutlined />} onClick={() => navigate('/team')} style={{ paddingLeft: 0, marginBottom: 8 }}>
+        Takımlara dön
+      </Button>
+      <PageHeader title="Takım oluştur" subtitle="Takımına bir isim ver ve oyuncularını seç." icon={<TeamOutlined />} />
+
+      <Form form={form} layout="vertical" onFinish={submit} requiredMark="optional">
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={8}>
+            <Card bordered={false} title="Takım bilgileri" style={{ position: 'sticky', top: 88 }}>
+              <Form.Item
+                name="teamName"
+                label="Takım adı"
+                rules={[
+                  { required: true, whitespace: true, message: 'Takım adı zorunludur.' },
+                  { min: 3, message: 'En az 3 karakter olmalıdır.' },
+                ]}
+              >
+                <Input placeholder="Örn. Kadıköy Kartalları" maxLength={40} showCount />
+              </Form.Item>
+
+              <Text type="secondary">Seçilen oyuncular ({selected.length})</Text>
+              <div style={{ margin: '8px 0 20px' }}>
+                {selectedPlayers.length ? (
+                  <Avatar.Group max={{ count: 8 }}>
+                    {selectedPlayers.map((p) => (
+                      <PlayerAvatar key={p.playerId} player={p} size={36} />
+                    ))}
+                  </Avatar.Group>
                 ) : (
-                  <Avatar>
-                    <UserOutlined />
-                  </Avatar>
-                )
-              }
-              title={
-                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', marginTop: '10px' }}>
-                  {player.playerName + " " + player.playerSurname}
-                </Typography>
-              }
-            />
-            <CardContent>
-              <Typography variant="subtitle1" component="div">
-                Kullanıcı Adı: {player.userName}
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Email: {player.email}
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Telefon: {player.phoneNumber}
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Adres: {player.address}
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Boy: {player.size} cm
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Kilo: {player.weight} kg
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Yaş: {player.age}
-              </Typography>
-              <Typography variant="subtitle1" component="div">
-                Kullanıcı Skoru: {player.userScore}
-              </Typography>
-            </CardContent>
-          </PlayerCard>
-        ))}
-      </PlayersListContainer>
-    </div>
+                  <Text type="secondary">Henüz oyuncu seçilmedi.</Text>
+                )}
+              </div>
+
+              <Space>
+                <Button onClick={() => navigate('/team')}>Vazgeç</Button>
+                <Button type="primary" htmlType="submit" loading={saving}>
+                  Takımı oluştur
+                </Button>
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} lg={16}>
+            <Card bordered={false} title="Oyuncular">
+              <PlayerPickerTable players={players} selected={selected} onChange={setSelected} loading={loading} />
+            </Card>
+          </Col>
+        </Row>
+      </Form>
+    </>
   );
-}
+};
 
 export default CreateTeam;
-
-
-

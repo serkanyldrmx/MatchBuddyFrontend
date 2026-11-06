@@ -4,19 +4,17 @@ import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect } from "react";
 import "./Login.css";
 import Logo from '../../images/mutch_buddy_Logo.png'; // Logoyu import edin
-import axios from 'axios';
+import { api, getToken } from '../../api/config';
+import { homePathFor } from '../../utils/roles';
 
 const UserLogin = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      if (storedUser.isAdmin === 1) {
-        navigate("/AdminPanel", { state: { user: storedUser } });
-      } else {
-        navigate("/home", { state: { user: storedUser } });
-      }
+    // Token yoksa oturum geçersiz sayılır
+    if (storedUser && getToken()) {
+      navigate(homePathFor(storedUser), { replace: true });
     }
   }, [navigate]);
 
@@ -24,36 +22,38 @@ const UserLogin = () => {
     message.success("Giriş başarılı, yönlendiriliyorsunuz");
   };
 
-  const error = () => {
-    message.error("Giriş başarısız");
+  const error = (text = "Giriş başarısız") => {
+    message.error(text);
   };
 
   const onFinish = async (values) => {
     const user = {
-      username: values.username,
+      userName: values.username,
       password: values.password,
     };
 
     try {
-      const response = await axios.post("http://localhost:5033/api/Players/PlayerLogin", user);
+      const response = await api.post("/api/Players/PlayerLogin", user);
       const data = response.data;
-      if (!data) {
+      if (!data || !data.token || !data.player) {
         error();
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(data));
+      // JWT token ve kullanıcı bilgisi saklanır
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.player));
       success();
 
       setTimeout(() => {
-        if (data.isAdmin === 1) {
-          navigate("/AdminPanel", { state: { user: data } });
-        } else {
-          navigate("/home", { state: { user: data } });
-        }
+        navigate(homePathFor(data.player), { replace: true });
       }, 1500);
     } catch (err) {
-      error();
+      if (err.response && err.response.status === 401) {
+        error("Kullanıcı adı veya şifre hatalı");
+      } else {
+        error();
+      }
       console.error(err);
     }
   };

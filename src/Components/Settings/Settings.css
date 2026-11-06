@@ -1,0 +1,186 @@
+.mb-settings {
+  max-width: 860px;
+}
+
+.mb-settings > .ant-card {
+  margin-bottom: 20px;
+}
+
+.mb-settings .ant-card-head-title .anticon {
+  margin-right: 6px;
+  color: var(--mb-primary);
+}
+
+.mb-settings__saving {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-settings__group + .mb-settings__group {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--mb-border);
+}
+
+.mb-settings__group h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mb-text);
+}
+
+.mb-settings__hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--mb-text-3);
+}
+
+/* Seçenek kartları */
+.mb-option-cards.ant-radio-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.mb-option-card.ant-radio-wrapper {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--mb-border);
+  background: var(--mb-surface-2);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.mb-option-card.ant-radio-wrapper:hover {
+  border-color: var(--mb-border-strong);
+}
+
+.mb-option-card.is-active.ant-radio-wrapper {
+  border-color: var(--mb-primary);
+  background: var(--mb-primary-soft);
+}
+
+.mb-option-card .ant-radio {
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+.mb-option-card > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mb-option-card__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--mb-text);
+}
+
+.mb-option-card__tag.ant-tag {
+  margin: 0;
+  border: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mb-primary-ink);
+  background: var(--mb-primary);
+}
+
+.mb-option-card__desc {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+/* Bildirim anahtarları */
+.mb-settings__switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--mb-border);
+}
+
+.mb-settings__switch:last-child {
+  border-bottom: 0;
+}
+
+.mb-settings__switch div,
+.mb-settings__danger-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mb-settings__switch span,
+.mb-settings__danger-row span {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+/* Engellenenler */
+.mb-settings__blocked-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--mb-border);
+}
+
+.mb-settings__blocked-row:last-child {
+  border-bottom: 0;
+}
+
+.mb-settings__blocked-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.mb-settings__blocked-name span {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+/* Tehlikeli bölge */
+.mb-settings__danger.ant-card {
+  border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
+.mb-settings__danger .ant-card-head-title,
+.mb-settings__danger .ant-card-head-title .anticon {
+  color: var(--mb-danger);
+}
+
+.mb-settings__danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mb-settings__danger-row div {
+  flex: 1;
+  min-width: 240px;
+}
+
+.mb-settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.mb-settings__field label {
+  font-size: 13px;
+  color: var(--mb-text-2);
+}

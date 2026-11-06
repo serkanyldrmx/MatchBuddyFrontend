@@ -1,176 +1,217 @@
-import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import { UsergroupAddOutlined } from "@ant-design/icons";
-import Button from '@mui/material/Button';
-import axios from 'axios';
-import Navbar from "../Navbar/Navbar";
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import IconButton from '@mui/material/IconButton';
-import { message } from "antd";
-import PlayerSelectionPopup from "./PlayerSelectionPopup"; // Popup bileşeni import edildi
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { App, Avatar, Button, Card, Dropdown, Input, Segmented, Skeleton, Tooltip, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, MoreOutlined, PlusOutlined, RobotOutlined, SearchOutlined, SendOutlined, TeamOutlined } from '@ant-design/icons';
+import { api } from '../../api/config';
+import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
+import { apiErrorMessage, getCurrentUser } from '../../utils/format';
+import PlayerSelectionPopup from './PlayerSelectionPopup';
+import InviteModal from '../Invites/InviteModal';
 import './Team.css';
 
-const TeamsListContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
-  marginTop: '20px',
-});
+const { Text, Title } = Typography;
 
-const ContentContainer = styled('div')({
-  marginTop: '70px',
-  display: 'flex',
-  justifyContent: 'center',
-  flexDirection: 'column',
-  alignItems: 'center',
-});
+// GetTeamList cevabı oyuncuları paralel diziler olarak döner; tek listeye çevir
+const membersOf = (team) =>
+  (team.playerId || []).map((id, i) => ({
+    playerId: id,
+    userName: team.playerName?.[i],
+    playerName: team.playerName?.[i],
+    profilePictureUrl: team.profilePictureUrl?.[i],
+  }));
 
 const Team = () => {
+  const { message, modal } = App.useApp();
+  const navigate = useNavigate();
+  const me = getCurrentUser();
   const [teams, setTeams] = useState([]);
-  const [name, setName] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false); // Dialog kontrolü için state
-  const [selectedTeamId, setSelectedTeamId] = useState(null); // Seçilen takım id'si
-  const [popupVisible, setPopupVisible] = useState(false); // Popup görünürlüğü
-  const [currentTeamPlayers, setCurrentTeamPlayers] = useState([]); // Mevcut takım oyuncuları
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState('mine');
+  const [search, setSearch] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [inviting, setInviting] = useState(null);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api
+      .get('/api/Team/GetTeamList')
+      .then((r) => {
+        const data = r.data || [];
+        setTeams(data);
+        // Kullanıcının hiç takımı yoksa doğrudan tüm takımları göster
+        const myId = getCurrentUser()?.playerId;
+        if (!data.some((t) => (t.playerId || []).includes(myId))) setTab('all');
+      })
+      .catch((e) => message.error(apiErrorMessage(e, 'Takımlar yüklenemedi.')))
+      .finally(() => setLoading(false));
+  }, [message]);
 
   useEffect(() => {
-    axios.get("http://localhost:5033/api/Team/GetTeamList")
-      .then(response => {
-        setTeams(response.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, []);
+    load();
+  }, [load]);
 
-  const handleDelete = (teamId) => {
-    fetch(`http://localhost:5033/api/Team/DeleteTeam?teamId=${teamId}`, {
-      method: "POST",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          message.success(data.message || "Başarıyla silindi.");
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          message.error(data.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+  const isMember = (t) => (t.playerId || []).includes(me?.playerId);
+  const canManage = (t) => me?.isAdmin === 1 || isMember(t);
+  const myCount = teams.filter(isMember).length;
+
+  const list = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return teams
+      .filter((t) => (tab === 'mine' ? isMember(t) : true))
+      .filter((t) => !q || (t.teamName || '').toLowerCase().includes(q));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teams, tab, search]);
+
+  const remove = (team) =>
+    modal.confirm({
+      title: 'Takımı sil',
+      content: `"${team.teamName}" takımı silinecek. Bu işlem geri alınamaz.`,
+      okText: 'Sil',
+      okButtonProps: { danger: true },
+      cancelText: 'Vazgeç',
+      onOk: async () => {
+        try {
+          await api.post(`/api/Team/DeleteTeam?teamId=${team.teamId}`);
+          message.success('Takım silindi.');
+          setTeams((ts) => ts.filter((t) => t.teamId !== team.teamId));
+        } catch (e) {
+          message.error(apiErrorMessage(e, 'Takım silinemedi. Takım bir maça kayıtlı olabilir.'));
         }
-      })
-      .catch((error) => {
-        message.error(error.message || "Bir hata oluştu. Lütfen tekrar deneyiniz.");
-      });
-  };
-
-  const handleDialogOpen = (teamId) => {
-    setSelectedTeamId(teamId);
-    setDialogOpen(true);
-  };
-
-  const handleDialogClose = (confirm) => {
-    setDialogOpen(false);
-    if (confirm && selectedTeamId !== null) {
-      handleDelete(selectedTeamId);
-    }
-  };
-
-  const handlePlayerEdit = (team) => {
-    setCurrentTeamPlayers(team.playerName); // Mevcut takım oyuncularını ayarla
-    setSelectedTeamId(team.teamId); // Seçilen takım ID'sini ayarla
-    setName(team.teamName); // Seçilen takım ismini ayarla
-    setPopupVisible(true); // Popup'ı aç
-  };
-
-  const handleSavePlayers = () => {
-    // Popup kapatıldıktan sonra takımlar listesini yeniden yükle
-    axios.get("http://localhost:5033/api/Team/GetTeamList")
-      .then(response => {
-        setTeams(response.data); // Takımlar listesini güncelle
-      })
-};
+      },
+    });
 
   return (
-    <div>
-      <Navbar />
-      <ContentContainer>
-        <Button variant="contained" color="primary" component={Link} to="/create-team">
-          Takım Oluştur
-        </Button>
-        <TeamsListContainer>
-          {teams.map((team) => (
-            <Card key={team.teamId} className="teamCard" sx={{ margin: '20px', width: '300px', backgroundColor: '#3cc1b8' }}>
-              <CardHeader
-                avatar={
-                  <Avatar>
-                    <UsergroupAddOutlined />
-                  </Avatar>
-                }
-                action={
-                  <IconButton onClick={() => handleDialogOpen(team.teamId)} aria-label="delete">
-                    <DeleteForeverIcon style={{ color: "red" }} />
-                  </IconButton>
-                }
-                title={
-                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                    {team.teamName}
-                  </Typography>
-                }
-              />
-              <CardContent>
-                <Typography variant="body2" color="textSecondary" sx={{ marginBottom: '8px' }}>
-                  Oyuncu Sayısı: {team.playerName.length}
-                </Typography>
-                {team.playerName.map((player, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-                    {team.profilePictureUrl && team.profilePictureUrl[index] ? (
-                      <Avatar
-                        src={team.profilePictureUrl[index].startsWith('http') ? team.profilePictureUrl[index] : `http://localhost:5033${team.profilePictureUrl[index]}`}
-                        sx={{ width: 32, height: 32, marginRight: 1 }}
-                      />
-                    ) : (
-                      <Avatar sx={{ width: 32, height: 32, marginRight: 1 }}>
-                        {player[0] || '?'}
-                      </Avatar>
-                    )}
-                    <Typography variant="body2" color="textSecondary">
-                      {player}
-                    </Typography>
-                  </div>
-                ))}
-                <Button
-                  variant="contained"
-                  style={{
-                    background: 'linear-gradient(45deg,rgb(227, 74, 187) 30%,rgb(72, 152, 238) 90%)',
-                    color: 'white',
-                    marginTop: '15px',
-                  }}
-                  onClick={() => handlePlayerEdit(team)}
-                >
-                  Oyuncu ekle / sil
-                </Button>
-              </CardContent>
+    <>
+      <PageHeader
+        title="Takımlar"
+        subtitle="Takımlarını yönet, kadroyu düzenle veya yeni bir takım kur."
+        icon={<TeamOutlined />}
+        extra={[
+          <Button key="ai" icon={<RobotOutlined />} onClick={() => navigate('/teamAICreate')}>
+            AI ile oluştur
+          </Button>,
+          <Button key="new" type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create-team')}>
+            Takım oluştur
+          </Button>,
+        ]}
+      />
+
+      <Card bordered={false} className="mb-toolbar-card" style={{ marginBottom: 16 }}>
+        <div className="mb-toolbar">
+          <Segmented
+            value={tab}
+            onChange={setTab}
+            options={[
+              { label: `Takımlarım (${myCount})`, value: 'mine' },
+              { label: `Tüm takımlar (${teams.length})`, value: 'all' },
+            ]}
+          />
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            placeholder="Takım ara"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: 240 }}
+          />
+        </div>
+      </Card>
+
+      {loading ? (
+        <div className="mb-grid">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} bordered={false}>
+              <Skeleton active />
             </Card>
           ))}
-        </TeamsListContainer>
-      </ContentContainer>
+        </div>
+      ) : list.length === 0 ? (
+        <Card bordered={false}>
+          <EmptyState description={tab === 'mine' ? 'Henüz bir takımda değilsiniz' : 'Takım bulunamadı'}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create-team')}>
+              Takım oluştur
+            </Button>
+          </EmptyState>
+        </Card>
+      ) : (
+        <div className="mb-grid">
+          {list.map((team) => {
+            const members = membersOf(team);
+            return (
+              <Card key={team.teamId} bordered={false} className="mb-team-tile">
+                <div className="mb-team-tile__head">
+                  <div className="mb-team-tile__logo">{(team.teamName || '?').charAt(0).toUpperCase()}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Title level={5} style={{ margin: 0 }} ellipsis>
+                      {team.teamName}
+                    </Title>
+                    <Text type="secondary">{members.length} oyuncu</Text>
+                  </div>
+                  {canManage(team) && (
+                    <Dropdown
+                      trigger={['click']}
+                      menu={{
+                        items: [
+                          ...(isMember(team)
+                            ? [{ key: 'invite', icon: <SendOutlined />, label: 'Davet et', onClick: () => setInviting(team) }]
+                            : []),
+                          { key: 'edit', icon: <EditOutlined />, label: 'Kadroyu düzenle', onClick: () => setEditing(team) },
+                          { type: 'divider' },
+                          { key: 'delete', icon: <DeleteOutlined />, label: 'Takımı sil', danger: true, onClick: () => remove(team) },
+                        ],
+                      }}
+                    >
+                      <Button type="text" icon={<MoreOutlined />} aria-label="Takım işlemleri" />
+                    </Dropdown>
+                  )}
+                </div>
 
-      {/* Oyuncu Seçim Popup */}
-      <PlayerSelectionPopup
-        visible={popupVisible}
-        onClose={() => setPopupVisible(false)}
-        teamPlayers={currentTeamPlayers}
-        teamId={selectedTeamId}
-        teamName={name || ""} // Seçilen takımın ismini al
-        onSave={handleSavePlayers}
+                <Avatar.Group max={{ count: 6 }} size={34}>
+                  {members.map((m) => (
+                    <Tooltip key={m.playerId} title={`@${m.userName}`}>
+                      <PlayerAvatar player={m} size={34} />
+                    </Tooltip>
+                  ))}
+                </Avatar.Group>
+
+                <div className="mb-team-tile__members">
+                  {members.slice(0, 4).map((m) => (
+                    <Text key={m.playerId} type="secondary" className="mb-team-tile__member">
+                      @{m.userName}
+                      {m.playerId === me?.playerId && ' (sen)'}
+                    </Text>
+                  ))}
+                  {members.length > 4 && <Text type="secondary">+{members.length - 4} oyuncu daha</Text>}
+                  {members.length === 0 && <Text type="secondary">Kadro boş</Text>}
+                </div>
+
+                {canManage(team) && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button block icon={<EditOutlined />} onClick={() => setEditing(team)}>
+                      Kadroyu düzenle
+                    </Button>
+                    {isMember(team) && (
+                      <Button block icon={<SendOutlined />} onClick={() => setInviting(team)}>
+                        Davet et
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <InviteModal
+        open={!!inviting}
+        onClose={() => setInviting(null)}
+        kind="team"
+        targetId={inviting?.teamId}
+        title={inviting?.teamName}
       />
-    </div>
+      <PlayerSelectionPopup visible={!!editing} team={editing} onClose={() => setEditing(null)} onSave={load} />
+    </>
   );
 };
 
