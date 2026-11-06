@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Alert, Button, Card, Col, Progress, Row, Skeleton, Tag, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   AppstoreOutlined,
   CalendarOutlined,
@@ -32,20 +33,21 @@ import {
 
 const { Text } = Typography;
 
+// Etiket ve ipuçları owner:dashboard.missing.<anahtar>.{label,hint} altındadır
 const MISSING = {
-  photo: { label: 'Tesis fotoğrafı', to: '/venue/facility', hint: 'En az bir fotoğraf ekleyin' },
-  pitch: { label: 'Aktif saha', to: '/venue/pitches', hint: 'En az bir sahayı aktif edin' },
-  location: { label: 'Harita konumu', to: '/venue/facility', hint: 'Haritada tesisinizi işaretleyin' },
-  address: { label: 'Adres', to: '/venue/facility', hint: 'Açık adresinizi girin' },
-  hours: { label: 'Açılış saatleri', to: '/venue/pricing', hint: 'Haftalık çalışma saatlerinizi belirleyin' },
+  photo: { to: '/venue/facility' },
+  pitch: { to: '/venue/pitches' },
+  location: { to: '/venue/facility' },
+  address: { to: '/venue/facility' },
+  hours: { to: '/venue/pricing' },
 };
 
-function greeting() {
+function greeting(t) {
   const h = new Date().getHours();
-  if (h < 6) return 'İyi geceler';
-  if (h < 12) return 'Günaydın';
-  if (h < 18) return 'İyi günler';
-  return 'İyi akşamlar';
+  if (h < 6) return t('owner:dashboard.greeting.night');
+  if (h < 12) return t('owner:dashboard.greeting.morning');
+  if (h < 18) return t('owner:dashboard.greeting.day');
+  return t('owner:dashboard.greeting.evening');
 }
 
 function StatCard({ label, value, icon, accent, to, children }) {
@@ -66,6 +68,7 @@ function StatCard({ label, value, icon, accent, to, children }) {
 
 /** Genel bakış: günün özeti, bekleyen talepler, yaklaşan maçlar */
 export default function OwnerDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { venue, membershipUntil, membershipActive } = useOwnerVenue();
   const { data, loading, error, reload } = useOwnerData((id) => ownerApi.dashboard(id));
@@ -109,18 +112,18 @@ export default function OwnerDashboard() {
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Genel Bakış"
+        title={t('owner:dashboard.title')}
         icon={<AppstoreOutlined />}
-        subtitle={`${greeting()}. Tesisinizin bugünkü durumu aşağıda.`}
+        subtitle={t('owner:dashboard.subtitle', { greeting: greeting(t) })}
         extra={
           <Button icon={<CalendarOutlined />} onClick={() => navigate('/venue/calendar')}>
-            Takvimi aç
+            {t('owner:dashboard.openCalendar')}
           </Button>
         }
       />
 
       {membershipUntil && membershipActive && (
-        <div className="mb-owner-membership">Üyeliğiniz {formatDate(membershipUntil)} tarihine kadar geçerlidir.</div>
+        <div className="mb-owner-membership">{t('owner:dashboard.membershipUntil', { date: formatDate(membershipUntil) })}</div>
       )}
 
       {missing.length > 0 && (
@@ -128,15 +131,19 @@ export default function OwnerDashboard() {
           <div className="mb-owner-missing__head">
             <WarningOutlined />
             <div>
-              <strong>Tesis profiliniz eksik</strong>
-              <Text type="secondary">
-                Aşağıdaki bilgileri tamamlayana kadar tesisiniz oyunculara görünmez ve rezervasyon alamazsınız.
-              </Text>
+              <strong>{t('owner:dashboard.missingTitle')}</strong>
+              <Text type="secondary">{t('owner:dashboard.missingText')}</Text>
             </div>
           </div>
           <div className="mb-owner-missing__list">
             {missing.map((k) => {
-              const m = MISSING[k] || { label: k, to: '/venue/facility', hint: 'Bilgiyi tamamlayın' };
+              const m = MISSING[k]
+                ? {
+                    to: MISSING[k].to,
+                    label: t(`owner:dashboard.missing.${k}.label`),
+                    hint: t(`owner:dashboard.missing.${k}.hint`),
+                  }
+                : { label: k, to: '/venue/facility', hint: t('owner:dashboard.missing.fallbackHint') };
               return (
                 <Link key={k} to={m.to} className="mb-owner-missing__item">
                   <span>
@@ -165,20 +172,28 @@ export default function OwnerDashboard() {
         ) : (
           <>
             <Col xs={12} md={8} xl={4}>
-              <StatCard label="Bugünkü maç" value={d.todayCount ?? 0} accent={colors.primary} />
+              <StatCard label={t('owner:dashboard.stats.today')} value={d.todayCount ?? 0} accent={colors.primary} />
             </Col>
             <Col xs={12} md={8} xl={4}>
-              <StatCard label="Bu hafta" value={d.weekCount ?? 0} />
+              <StatCard label={t('owner:dashboard.stats.week')} value={d.weekCount ?? 0} />
             </Col>
             <Col xs={12} md={8} xl={4}>
-              <StatCard label="Bekleyen talep" value={d.pendingCount ?? pending.length} accent={colors.gold} to="/venue/reservations">
+              <StatCard
+                label={t('owner:dashboard.stats.pending')}
+                value={d.pendingCount ?? pending.length}
+                accent={colors.gold}
+                to="/venue/reservations"
+              >
                 <span className="mb-owner-stat__link">
-                  Talepleri gör <RightOutlined />
+                  {t('owner:dashboard.stats.seeRequests')} <RightOutlined />
                 </span>
               </StatCard>
             </Col>
             <Col xs={12} md={8} xl={4}>
-              <StatCard label="Doluluk" value={`%${Math.round(d.occupancyPercent || 0)}`}>
+              <StatCard
+                label={t('owner:dashboard.stats.occupancy')}
+                value={t('owner:dashboard.stats.percent', { value: Math.round(d.occupancyPercent || 0) })}
+              >
                 <Progress
                   percent={Math.round(d.occupancyPercent || 0)}
                   showInfo={false}
@@ -189,12 +204,17 @@ export default function OwnerDashboard() {
               </StatCard>
             </Col>
             <Col xs={12} md={8} xl={4}>
-              <StatCard label="Haftalık ciro" value={formatPrice(d.weekRevenue || 0)} />
+              <StatCard label={t('owner:dashboard.stats.weekRevenue')} value={formatPrice(d.weekRevenue || 0)} />
             </Col>
             <Col xs={12} md={8} xl={4}>
-              <StatCard label="Puan" value={d.rating ? Number(d.rating).toFixed(1) : '-'} accent={colors.gold} to="/venue/reviews">
+              <StatCard
+                label={t('owner:dashboard.stats.rating')}
+                value={d.rating ? Number(d.rating).toFixed(1) : '-'}
+                accent={colors.gold}
+                to="/venue/reviews"
+              >
                 <span className="mb-owner-stat__sub">
-                  <Stars value={d.rating || 0} size={12} /> {d.reviewCount || 0} yorum
+                  <Stars value={d.rating || 0} size={12} /> {t('owner:dashboard.stats.reviews', { count: d.reviewCount || 0 })}
                 </span>
               </StatCard>
             </Col>
@@ -204,17 +224,17 @@ export default function OwnerDashboard() {
         <Col xs={24} xl={14}>
           <Card
             bordered={false}
-            title="Bekleyen talepler"
+            title={t('owner:dashboard.pending.title')}
             extra={
               <Button type="link" onClick={() => navigate('/venue/reservations')}>
-                Tümü <RightOutlined />
+                {t('common:all')} <RightOutlined />
               </Button>
             }
           >
             {loading && !data ? (
               <Skeleton active avatar />
             ) : pending.length === 0 ? (
-              <EmptyState description="Yanıt bekleyen talep yok. Harika!" />
+              <EmptyState description={t('owner:dashboard.pending.empty')} />
             ) : (
               <div className="mb-owner-list">
                 {pending.map((r) => (
@@ -244,7 +264,7 @@ export default function OwnerDashboard() {
                         onClick={() => responder.reject(r)}
                         loading={responder.busy?.matchId === r.matchId && responder.busy.approve === false}
                       >
-                        Reddet
+                        {t('common:actions.reject')}
                       </WriteButton>
                       <WriteButton
                         size="small"
@@ -253,7 +273,7 @@ export default function OwnerDashboard() {
                         onClick={() => responder.approve(r)}
                         loading={responder.busy?.matchId === r.matchId && responder.busy.approve === true}
                       >
-                        Onayla
+                        {t('common:actions.confirm')}
                       </WriteButton>
                     </div>
                   </div>
@@ -270,57 +290,61 @@ export default function OwnerDashboard() {
               className="mb-owner-fin-card"
               title={
                 <span>
-                  <WalletOutlined /> Bu ay · {dayjs().format('MMMM')}
+                  <WalletOutlined /> {t('owner:dashboard.finance.thisMonth', { month: dayjs().format('MMMM') })}
                 </span>
               }
               extra={
                 <Button type="link" onClick={() => navigate('/venue/finance')}>
-                  Gelir & Gider <RightOutlined />
+                  {t('owner:dashboard.finance.link')} <RightOutlined />
                 </Button>
               }
             >
               {extra.loading && !extra.data ? (
                 <Skeleton active paragraph={{ rows: 1 }} title={false} />
               ) : !fin ? (
-                <Text type="secondary">Finans özeti şu anda alınamadı.</Text>
+                <Text type="secondary">{t('owner:dashboard.finance.unavailable')}</Text>
               ) : (
                 <>
                   <div className="mb-owner-fin-rows">
                     <div className="is-income">
-                      <span>Gelir</span>
+                      <span>{t('owner:dashboard.finance.income')}</span>
                       <strong>{formatPrice(fin.income?.total ?? 0)}</strong>
                     </div>
                     <div className="is-expense">
-                      <span>Gider</span>
+                      <span>{t('owner:dashboard.finance.expense')}</span>
                       <strong>{formatPrice(fin.expenses ?? 0)}</strong>
                     </div>
                     <div className={Number(fin.net) < 0 ? 'is-neg' : 'is-income'}>
-                      <span>Net</span>
+                      <span>{t('owner:dashboard.finance.net')}</span>
                       <strong>{formatPrice(fin.net ?? 0)}</strong>
                     </div>
                   </div>
                   <div className="mb-owner-fin-card__foot">
                     <span>
-                      {Number(fin.receivable) > 0 ? `Tahsil edilmemiş: ${formatPrice(fin.receivable)}` : 'Tahsil edilmemiş ödeme yok'}
+                      {Number(fin.receivable) > 0
+                        ? t('owner:dashboard.finance.receivable', { amount: formatPrice(fin.receivable) })
+                        : t('owner:dashboard.finance.noReceivable')}
                     </span>
-                    {Number(fin.expectedIncome) > 0 && <span>Beklenen: {formatPrice(fin.expectedIncome)}</span>}
+                    {Number(fin.expectedIncome) > 0 && (
+                      <span>{t('owner:dashboard.finance.expected', { amount: formatPrice(fin.expectedIncome) })}</span>
+                    )}
                   </div>
                 </>
               )}
             </Card>
             <Card
               bordered={false}
-              title="Yaklaşan maçlar"
+              title={t('owner:dashboard.upcoming.title')}
               extra={
                 <Button type="link" onClick={() => navigate('/venue/calendar')}>
-                  Takvim <RightOutlined />
+                  {t('owner:dashboard.upcoming.calendar')} <RightOutlined />
                 </Button>
               }
             >
               {loading && !data ? (
                 <Skeleton active />
               ) : agenda.length === 0 ? (
-                <EmptyState description="Yaklaşan maç bulunmuyor" />
+                <EmptyState description={t('owner:dashboard.upcoming.empty')} />
               ) : (
                 <div className="mb-owner-agenda">
                   {agenda.map(({ type, key, start: s, r, b }) => {
@@ -330,7 +354,7 @@ export default function OwnerDashboard() {
                         <div key={key} className="mb-owner-agenda__item is-manual" onClick={() => setManualSel(b)} role="button" tabIndex={0}>
                           <div className="mb-owner-agenda__time">
                             <strong>{s.format('HH:mm')}</strong>
-                            <span>Bugün</span>
+                            <span>{t('owner:dashboard.upcoming.today')}</span>
                           </div>
                           <div className="mb-owner-agenda__body">
                             <Text strong ellipsis>
@@ -339,11 +363,11 @@ export default function OwnerDashboard() {
                             </Text>
                             <span>
                               {b.pitchName ? `${b.pitchName} · ` : ''}
-                              {formatPrice(b.price)} · {b.isPaid ? 'ödendi' : 'ödeme alınmadı'}
+                              {formatPrice(b.price)} · {b.isPaid ? t('owner:dashboard.upcoming.paid') : t('owner:dashboard.upcoming.unpaid')}
                             </span>
                           </div>
                           <Tag color="processing" bordered={false}>
-                            Harici
+                            {t('owner:dashboard.upcoming.external')}
                           </Tag>
                         </div>
                       );
@@ -352,14 +376,15 @@ export default function OwnerDashboard() {
                       <div key={key} className="mb-owner-agenda__item" onClick={() => setSelected(r)} role="button" tabIndex={0}>
                         <div className="mb-owner-agenda__time">
                           <strong>{s.format('HH:mm')}</strong>
-                          <span>{today ? 'Bugün' : s.format('DD MMM ddd')}</span>
+                          <span>{today ? t('owner:dashboard.upcoming.today') : s.format('DD MMM ddd')}</span>
                         </div>
                         <div className="mb-owner-agenda__body">
                           <Text strong ellipsis>
                             {r.matchName}
                           </Text>
                           <span>
-                            {r.pitch?.name} · {r.goingCount ?? 0}/{r.capacity ?? 0} oyuncu
+                            {r.pitch?.name} ·{' '}
+                            {t('owner:dashboard.upcoming.players', { going: r.goingCount ?? 0, capacity: r.capacity ?? 0 })}
                           </span>
                         </div>
                         <MatchStatusTag status={r.status} />

@@ -1,10 +1,17 @@
 import { api } from './config';
+import i18n, { intlLocale, localizedList, localizedMap } from '../i18n';
 
 // Anlaşmalı tesisler / işletme / rezervasyon — sözleşme: MatchBuddy/docs/venues-api.md
 
-export const SURFACE = { 1: 'Suni çim', 2: 'Doğal çim', 3: 'Parke', 4: 'Diğer' };
-export const DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-export const DAYS_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+export const SURFACE = localizedMap({
+  1: 'venues:surface.artificialTurf',
+  2: 'venues:surface.naturalGrass',
+  3: 'venues:surface.parquet',
+  4: 'venues:surface.other',
+});
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+export const DAYS = localizedList(DAY_KEYS.map((d) => `venues:days.${d}`));
+export const DAYS_SHORT = localizedList(DAY_KEYS.map((d) => `venues:daysShort.${d}`));
 /** DaysMask: bit 0 = Pazartesi … bit 6 = Pazar */
 export const maskToDays = (mask) => DAYS_SHORT.filter((_, i) => mask & (1 << i));
 export const daysToMask = (indexes) => indexes.reduce((m, i) => m | (1 << i), 0);
@@ -13,22 +20,40 @@ export const contractDayIndex = (d) => (d.day() + 6) % 7;
 
 /** SlotBlocks.Kind */
 export const BLOCK_KIND = { CLOSED: 0, MANUAL_BOOKING: 1 };
-export const EXPENSE_CATEGORIES = ['Personel', 'Kira', 'Elektrik', 'Su', 'Doğalgaz', 'Bakım-onarım', 'Malzeme', 'Vergi', 'Reklam', 'Diğer'];
 
-export const AMENITIES = [
-  { key: 'camera', label: 'Maç kaydı (kamera)' },
-  { key: 'cleatRental', label: 'Krampon kiralama' },
-  { key: 'shower', label: 'Duş' },
-  { key: 'lockerRoom', label: 'Soyunma odası' },
-  { key: 'parking', label: 'Otopark' },
-  { key: 'cafe', label: 'Kafeterya' },
-  { key: 'shuttle', label: 'Servis' },
-  { key: 'bibs', label: 'Yelek' },
-  { key: 'ball', label: 'Top' },
-];
+// Gider kategorileri: değerler sunucuda olduğu gibi saklanır (Türkçe değer = kayıt anahtarı); ekranda expenseCategoryLabel ile çevrilir
+const EXPENSE_CATEGORY_KEYS = {
+  Personel: 'staff',
+  Kira: 'rent',
+  Elektrik: 'electricity',
+  Su: 'water',
+  'Doğalgaz': 'naturalGas',
+  'Bakım-onarım': 'maintenance',
+  Malzeme: 'supplies',
+  Vergi: 'tax',
+  Reklam: 'advertising',
+  'Diğer': 'other',
+};
+export const EXPENSE_CATEGORIES = Object.keys(EXPENSE_CATEGORY_KEYS);
+/** Gider kategorisinin (sunucu değeri) ekran metni */
+export const expenseCategoryLabel = (category) =>
+  EXPENSE_CATEGORY_KEYS[category]
+    ? i18n.t(`finance:expenseCategories.${EXPENSE_CATEGORY_KEYS[category]}`)
+    : category;
+
+const AMENITY_KEYS = ['camera', 'cleatRental', 'shower', 'lockerRoom', 'parking', 'cafe', 'shuttle', 'bibs', 'ball'];
+/** { key, label } — label erişildiği anda çevrilir */
+export const AMENITIES = AMENITY_KEYS.map((key) => ({
+  key,
+  get label() {
+    return i18n.t(`venues:amenities.${key}`);
+  },
+}));
 
 export const formatPrice = (v) =>
-  v == null ? '-' : `${Number(v).toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ₺`;
+  v == null
+    ? '-'
+    : i18n.t('common:currency', { value: Number(v).toLocaleString(intlLocale(), { maximumFractionDigits: 2 }) });
 
 const data = (r) => r.data;
 

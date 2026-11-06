@@ -1,0 +1,226 @@
+{
+  "formations": {
+    "roles": {
+      "KL": "Kaleci",
+      "DF": "Defans",
+      "OS": "Orta saha",
+      "OOS": "Ofansif orta saha",
+      "FV": "Forvet"
+    },
+    "short": {
+      "KL": "KL",
+      "DF": "DF",
+      "OS": "OS",
+      "OOS": "OOS",
+      "FV": "FV"
+    },
+    "label": "Diziliş"
+  },
+  "sides": {
+    "home": "Ev sahibi",
+    "away": "Deplasman",
+    "homeTeam": "Ev sahibi takım",
+    "seekingOpponent": "Rakip aranıyor"
+  },
+  "status": {
+    "inSquad": "Kadrodasın",
+    "waitlisted": "Yedektesin"
+  },
+  "actions": {
+    "join": "Maça katıl",
+    "joinShort": "Katıl",
+    "joinWaitlist": "Yedeğe yazıl",
+    "like": "Beğen",
+    "unlike": "Beğenmekten vazgeç",
+    "joined": "Maça katıldın.",
+    "joinFailed": "Maça katılamadın."
+  },
+  "players_one": "{{count}} oyuncu",
+  "players_other": "{{count}} oyuncu",
+  "guest": {
+    "removeTitle": "Misafir oyuncuyu kaldır",
+    "removeDescription": "{{name}} kadrodan çıkarılacak.",
+    "remove": "Kaldır",
+    "addByName": "İsimle oyuncu ekle",
+    "defaultNote": "Misafir oyuncu",
+    "tag": "Misafir",
+    "aria": "{{name}} (misafir)",
+    "addedBy": "Ekleyen: {{name}}"
+  },
+  "card": {
+    "report": "Maç raporu",
+    "rejectReason": "Red sebebi: {{reason}}",
+    "missing_one": "{{count}} kişi eksik",
+    "missing_other": "{{count}} kişi eksik",
+    "perPlayer": "Kişi başı {{price}}",
+    "venueFallback": "Halı saha",
+    "friendGoing": "<b>{{name}}</b> katılıyor",
+    "friendPlayed": "<b>{{name}}</b> oynadı",
+    "friendsGoing_one": "<b>{{name}}</b> ve {{count}} arkadaşın katılıyor",
+    "friendsGoing_other": "<b>{{name}}</b> ve {{count}} arkadaşın katılıyor",
+    "friendsPlayed_one": "<b>{{name}}</b> ve {{count}} arkadaşın oynadı",
+    "friendsPlayed_other": "<b>{{name}}</b> ve {{count}} arkadaşın oynadı",
+    "versus": "vs",
+    "mvp": "MVP: {{name}}",
+    "host": "Kurucu: {{name}}"
+  },
+  "comments": {
+    "loadFailed": "Yorumlar yüklenemedi.",
+    "sendFailed": "Yorum gönderilemedi.",
+    "deleteFailed": "Yorum silinemedi.",
+    "empty": "Henüz yorum yok. Soyunma odasında ilk sözü sen söyle.",
+    "deleteAria": "Yorumu sil",
+    "placeholder": "Yorum yaz…"
+  },
+  "pitch": {
+    "viewProfile": "Profili gör",
+    "sendMessage": "Mesaj gönder",
+    "moveToOtherTeam": "Diğer takıma al",
+    "you": "Sen",
+    "emptySlot": "Boş",
+    "noFreeSpots": "Kadroda boş yer yok."
+  },
+  "post": {
+    "resultSaved": "Maç sonucu kaydedildi. Oyunculara bildirim gönderildi.",
+    "resultFailed": "Sonuç kaydedilemedi.",
+    "mvpVoted": "MVP oyun kaydedildi.",
+    "voteFailed": "Oy verilemedi.",
+    "rateAtLeastOne": "En az bir oyuncuyu puanla.",
+    "ratingsSaved": "Puanların kaydedildi. Teşekkürler!",
+    "ratingsFailed": "Puanlar kaydedilemedi.",
+    "columns": {
+      "player": "Oyuncu",
+      "goals": "Gol",
+      "assists": "Asist"
+    },
+    "editResult": "Sonucu düzenle",
+    "enterResult": "Maç sonucunu gir",
+    "saveResult": "Sonucu kaydet",
+    "replayTitle": "Tekrar oynamak ister misin?",
+    "replayText": "Bu maçta birlikte top koşturduğun ama henüz takip etmediğin oyuncular. Takip et, bir sonraki maçta yine bir arada olun.",
+    "goals_one": "{{count}} gol",
+    "goals_other": "{{count}} gol",
+    "avgRating": "ort. {{value}}",
+    "mvpTitle": "Maçın oyuncusu",
+    "mvpOnlyPlayers": "MVP oylaması sadece maçta oynayanlara açık.",
+    "mvpNoOne": "Oy verilecek oyuncu yok.",
+    "votes_one": "{{count}} oy",
+    "votes_other": "{{count}} oy",
+    "rateTitle": "Takım arkadaşlarını puanla",
+    "rateOnlyPlayers": "Puanlama sadece maçta oynayanlara açık.",
+    "rateSubmit": "Puanları gönder",
+    "rateHint": "Puanlar anonimdir ve oyuncuların genel puanını belirler."
+  },
+  "review": {
+    "starFirst": "Önce yıldız ver.",
+    "updated": "Yorumun güncellendi.",
+    "thanks": "Değerlendirmen için teşekkürler!",
+    "failed": "Değerlendirme kaydedilemedi.",
+    "title": "Tesisi değerlendir",
+    "hint": "Saha, soyunma odası, hizmet… Diğer oyunculara yol göster.",
+    "placeholder": "Deneyimini birkaç cümleyle anlat (isteğe bağlı)",
+    "update": "Yorumu güncelle",
+    "submit": "Değerlendirmeyi gönder"
+  },
+  "booking": {
+    "title": "Rezervasyon",
+    "minutes_one": "{{count}} dk",
+    "minutes_other": "{{count}} dk",
+    "extras": "Ekstralar",
+    "cleats_one": "{{count}} çift krampon",
+    "cleats_other": "{{count}} çift krampon",
+    "recording": "maç kaydı",
+    "total": "Toplam",
+    "perPlayer": "Kişi başı",
+    "payOnSite": "Ödeme sahada yapılır.",
+    "goToVenue": "Tesise git",
+    "messageOwner": "İşletmeye yaz"
+  },
+  "details": {
+    "loadFailed": "Maç yüklenemedi.",
+    "teamsFailed": "Takımların yüklenemedi.",
+    "selectTeam": "Bir takım seç.",
+    "claimed": "Takımınla rakip oldun! Takım arkadaşlarına davet gönderildi.",
+    "claimFailed": "Rakip olunamadı.",
+    "loading": "Maç yükleniyor…",
+    "notFound": "Maç bulunamadı",
+    "backToFixture": "Fikstüre dön",
+    "leaveTitle": "Maçtan ayrıl",
+    "leaveWaitlistContent": "Yerine yedek listesindeki ilk oyuncu geçecek.",
+    "leaveContent": "Kadrodan çıkacaksın. Emin misin?",
+    "left": "Maçtan ayrıldın.",
+    "confirmed": "Katılımın onaylandı. Sahada görüşürüz!",
+    "liked": "Beğendin.",
+    "unliked": "Beğeni kaldırıldı.",
+    "sideChanged": "Oyuncunun takımı değişti.",
+    "guestMoved": "{{name}} diğer takıma geçti.",
+    "guestRemoved": "{{name}} kadrodan çıkarıldı.",
+    "business": "İşletme",
+    "businessUserName": "işletme",
+    "deleteTitle": "Maçı sil",
+    "deleteContent": "Maç ve kadrosu kalıcı olarak silinecek.",
+    "deleted": "Maç silindi.",
+    "deleteFailed": "Maç silinemedi.",
+    "actions": {
+      "confirmAttendance": "Geliyorum, onayla",
+      "leave": "Ayrıl",
+      "leaveWaitlist": "Yedek listesinden çık",
+      "invite": "Davet et",
+      "claim": "Takımınla rakip ol",
+      "otherSlot": "Başka saat seç",
+      "deleteMatch": "Maçı sil"
+    },
+    "backLink": "Fikstür",
+    "founder": "Kurucu: <b>{{name}}</b>",
+    "scoreboard": {
+      "result": "Maç sonucu",
+      "awaitingResult": "Sonuç bekleniyor",
+      "hoursLeft_one": "{{count}} saat kaldı",
+      "hoursLeft_other": "{{count}} saat kaldı"
+    },
+    "alerts": {
+      "confirmSoon": "Maça 24 saatten az kaldı. Katılımını onaylarsan organizatör kadroyu kesinleştirebilir.",
+      "pendingApproval": "İşletme onayı bekleniyor. Bu sürede kadro kurmaya devam edebilirsin.",
+      "rejected": "Rezervasyon işletme tarafından reddedildi.",
+      "rejectReason": "Sebep: {{reason}}"
+    },
+    "tabs": {
+      "lineup": "Kadro ({{count}})",
+      "post": "Maç sonu",
+      "comments": "Soyunma odası",
+      "info": "Saha bilgisi"
+    },
+    "waitlistTitle": "Yedekler ({{count}})",
+    "waitlistEmpty": "Yedek yok",
+    "guestsTitle": "Misafir oyuncular ({{count}})",
+    "legend": {
+      "confirmed": "Katılımını onayladı",
+      "mvp": "Maçın oyuncusu",
+      "guest": "Misafir oyuncu (uygulamada hesabı yok)",
+      "swap": "Oyuncuya tıklayıp takımını değiştirebilirsin",
+      "addGuest": "Boş yere tıklayıp isimle oyuncu ekleyebilirsin"
+    },
+    "postEmpty": "Maç oynandıktan sonra skor, MVP oylaması ve oyuncu puanlaması burada açılacak.",
+    "info": {
+      "title": "Maç bilgisi",
+      "venue": "Halı saha",
+      "hours": "Çalışma saatleri",
+      "address": "Adres",
+      "capacity": "Kapasite",
+      "date": "Tarih",
+      "matchup": "Eşleşme",
+      "versus": "{{home}} vs {{away}}",
+      "description": "Açıklama"
+    },
+    "claimModal": {
+      "title": "Takımınla rakip ol",
+      "ok": "Rakip ol",
+      "text": "{{team}} rakip arıyor. Takımını seç; sen deplasman tarafına geçersin, takım arkadaşlarına davet gider.",
+      "placeholder": "Takımını seç",
+      "teamOption_one": "{{name}} · {{count}} oyuncu",
+      "teamOption_other": "{{name}} · {{count}} oyuncu",
+      "empty": "Rakip olabileceğin bir takımın yok.",
+      "createTeam": "Takım kur"
+    }
+  }
+}

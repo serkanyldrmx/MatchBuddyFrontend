@@ -16,7 +16,7 @@
   height: 44px;
   min-width: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--mb-primary), #8fd11c);
+  background: linear-gradient(135deg, var(--mb-primary-fill), #8fd11c);
   color: var(--mb-primary-ink);
   font-family: var(--mb-display);
   font-style: italic;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { App, Button } from 'antd';
 import { CheckOutlined, UserAddOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { emit, socialApi, SOCIAL_CHANGED } from '../../api/social';
 import { apiErrorMessage, fullName } from '../../utils/format';
 
@@ -12,6 +13,7 @@ import { apiErrorMessage, fullName } from '../../utils/format';
  */
 export default function FollowButton({ player, size = 'middle', block, onChange }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [iFollow, setIFollow] = useState(!!player?.iFollow);
   const [busy, setBusy] = useState(false);
   const [hover, setHover] = useState(false);
@@ -30,7 +32,7 @@ export default function FollowButton({ player, size = 'middle', block, onChange 
         const res = await socialApi.follow(player.playerId);
         setIFollow(true);
         onChange?.({ iFollow: true, isMutual: !!res?.isMutual });
-        if (res?.isMutual) message.success(`${fullName(player)} ile artık arkadaşsınız.`);
+        if (res?.isMutual) message.success(t('social:follow.nowFriends', { name: fullName(player) }));
       }
       emit(SOCIAL_CHANGED);
     } catch (err) {
@@ -53,13 +55,13 @@ export default function FollowButton({ player, size = 'middle', block, onChange 
         icon={hover ? null : <CheckOutlined />}
         className={hover ? '' : 'mb-following-btn'}
       >
-        {hover ? 'Takibi bırak' : player?.followsMe ? 'Arkadaşsınız' : 'Takiptesin'}
+        {hover ? t('social:follow.unfollow') : player?.followsMe ? t('social:follow.friends') : t('social:follow.following')}
       </Button>
     );
   }
   return (
     <Button type="primary" size={size} block={block} loading={busy} onClick={toggle} icon={<UserAddOutlined />}>
-      {player?.followsMe ? 'Geri takip et' : 'Takip et'}
+      {player?.followsMe ? t('social:follow.followBack') : t('social:follow.follow')}
     </Button>
   );
 }

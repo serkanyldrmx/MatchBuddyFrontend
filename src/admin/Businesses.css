@@ -39,7 +39,7 @@
 
 .mb-biz-dot.is-visible {
   background: var(--mb-pitch);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--mb-pitch-rgb), 0.18);
 }
 
 .mb-biz-venue.is-unlisted .mb-biz-venue__name {
@@ -97,7 +97,7 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
 }
 

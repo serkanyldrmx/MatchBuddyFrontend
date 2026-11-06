@@ -1,0 +1,59 @@
+{
+  "drawer": {
+    "title": "Mesajlar"
+  },
+  "list": {
+    "friendBadge": "Arkadaş",
+    "youPrefix": "Sen: {{text}}",
+    "loadFailed": "Konuşmalar yüklenemedi.",
+    "emptyChats": "Henüz sohbetin yok. Arkadaşlarınla burada yazışabilirsin.",
+    "noContactFound": "Kişi bulunamadı",
+    "noPlayerFound": "Oyuncu bulunamadı",
+    "tabPeople": "Kişiler",
+    "tabGroups": "Gruplar",
+    "searchPeople": "Kişi ya da oyuncu ara",
+    "searchGroups": "Grup ara",
+    "sectionChats": "Sohbetler",
+    "sectionFriends": "Arkadaşlar",
+    "sectionOthers": "Diğer oyuncular"
+  },
+  "group": {
+    "followingLoadFailed": "Takip ettiklerin yüklenemedi.",
+    "created": "Grup oluşturuldu.",
+    "createFailed": "Grup oluşturulamadı.",
+    "new": "Yeni grup",
+    "empty": "Henüz bir grubun yok",
+    "create": "Grup oluştur",
+    "chat": "Grup sohbeti",
+    "modalTitle": "Yeni grup oluştur",
+    "createOk": "Oluştur",
+    "nameLabel": "Grup adı",
+    "nameRequired": "Grup adı zorunludur.",
+    "namePlaceholder": "Örn. Perşembe Maçı",
+    "membersLabel": "Üyeler",
+    "membersRequired": "En az bir üye seç.",
+    "membersPlaceholder": "Takip ettiğin oyunculardan seç",
+    "noFollowing": "Henüz kimseyi takip etmiyorsun",
+    "creatorNote": "Grubu oluşturan kişi otomatik olarak gruba eklenir."
+  },
+  "chat": {
+    "photo": "Fotoğraf",
+    "loadFailed": "Mesajlar yüklenemedi.",
+    "deniedMessage": "Bu oyuncuya mesaj gönderemezsin.",
+    "uploadRateLimited": "Çok sık fotoğraf yüklüyorsun. Biraz bekleyip tekrar dene.",
+    "sendFailed": "Mesaj gönderilemedi.",
+    "empty": "Henüz mesaj yok. İlk mesajı sen gönder.",
+    "member": "Üye",
+    "preparingPhoto": "Fotoğraf hazırlanıyor…",
+    "uploadedWaiting": "Yüklendi · gönderilmeyi bekliyor",
+    "uploadOnSend": "Gönder’e basınca yüklenir",
+    "remove": "Kaldır",
+    "removePhoto": "Fotoğrafı kaldır",
+    "addPhotoHint": "Fotoğraf ekle — yapıştırabilir ya da sürükleyip bırakabilirsin",
+    "addPhoto": "Fotoğraf ekle",
+    "deniedPlaceholder": "Bu oyuncuya mesaj gönderemezsin",
+    "captionPlaceholder": "Açıklama ekle (isteğe bağlı)…",
+    "inputPlaceholder": "Mesaj yaz… (Enter: gönder, Shift+Enter: yeni satır)",
+    "dropHere": "Fotoğrafı buraya bırak"
+  }
+}

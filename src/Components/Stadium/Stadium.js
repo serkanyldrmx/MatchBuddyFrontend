@@ -6,10 +6,12 @@ import L from 'leaflet';
 import 'leaflet-routing-machine';
 import { Alert, App, Button, Card, Col, Descriptions, Grid, Input, List, Row, Skeleton, Space, Switch, Tag, Tooltip, Typography } from 'antd';
 import { ClockCircleOutlined, EnvironmentOutlined, PlusOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons';
+import { Trans, useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { adminVenuesApi } from '../../api/venues';
 import { EmptyState, PageHeader } from '../../ui';
 import { apiErrorMessage } from '../../utils/format';
+import { useThemeMode } from '../../theme/ThemeContext';
 import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
 import SelectedLocationIcon from '../../images/Vector-Location-PNG-Free-Image.png';
 import './StadiumAdmin.css';
@@ -55,11 +57,13 @@ function FlyTo({ position, zoom }) {
 /** Kullanıcı konumundan seçili halı sahaya rota çizer */
 function Routing({ from, to }) {
   const map = useMap();
+  // Leaflet çizgi rengi SVG niteliğidir (CSS değişkeni çalışmaz): aktif temanın somut rengi
+  const routeColor = useThemeMode().palette.primary;
   useEffect(() => {
     if (!from || !to || !L.Routing) return undefined;
     const control = L.Routing.control({
       waypoints: [L.latLng(from[0], from[1]), L.latLng(to[0], to[1])],
-      lineOptions: { styles: [{ color: '#c6f432', weight: 4 }] },
+      lineOptions: { styles: [{ color: routeColor, weight: 4 }] },
       createMarker: () => null,
       show: false,
       addWaypoints: false,
@@ -74,12 +78,13 @@ function Routing({ from, to }) {
         // harita zaten kaldırılmış olabilir
       }
     };
-  }, [map, from, to]);
+  }, [map, from, to, routeColor]);
   return null;
 }
 
 /** Admin: halı saha listesi + harita */
 function Stadium() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const isPhone = Grid.useBreakpoint().md === false;
@@ -104,13 +109,13 @@ function Stadium() {
       .then((r) =>
         setStadiums((Array.isArray(r.data) ? r.data : []).map((s) => ({ ...s, coords: parseLocation(s.location) })))
       )
-      .catch((e) => message.error(apiErrorMessage(e, 'Halı sahalar alınamadı.')))
+      .catch((e) => message.error(apiErrorMessage(e, t('venues:stadium.list.loadError'))))
       .finally(() => setLoading(false));
     adminVenuesApi
       .owners()
       .then((list) => setOwners(Array.isArray(list) ? list : []))
       .catch(() => setOwners([]));
-  }, [message]);
+  }, [message, t]);
 
   // stadiumId → { owner, membershipActive, isVisible }
   const ownerByStadium = useMemo(() => {
@@ -130,9 +135,9 @@ function Stadium() {
     try {
       await adminVenuesApi.setListed(s.stadiumId, value);
       setStadiums((list) => list.map((x) => (x.stadiumId === s.stadiumId ? { ...x, isListed: value } : x)));
-      message.success(value ? 'Tesis yayına alındı.' : 'Tesis yayından kaldırıldı.');
+      message.success(value ? t('venues:stadium.list.listedOn') : t('venues:stadium.list.listedOff'));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Yayın durumu değiştirilemedi.'));
+      message.error(apiErrorMessage(e, t('venues:stadium.list.listedError')));
     } finally {
       setListedBusy(null);
     }
@@ -140,11 +145,11 @@ function Stadium() {
 
   const ownerTag = (s) => {
     const o = ownerByStadium[s.stadiumId];
-    if (!o) return <Tag color="warning">İşletmesi yok</Tag>;
+    if (!o) return <Tag color="warning">{t('venues:stadium.list.noOwner')}</Tag>;
     return (
-      <Tooltip title={o.membershipActive ? 'Aktif işletme' : 'Üyelik aktif değil'}>
+      <Tooltip title={o.membershipActive ? t('venues:stadium.list.activeOwner') : t('venues:stadium.list.membershipInactive')}>
         <Tag icon={<ShopOutlined />} color={o.membershipActive ? 'green' : 'default'}>
-          {o.owner?.name || o.owner?.userName || 'İşletme'}
+          {o.owner?.name || o.owner?.userName || t('venues:stadium.list.ownerFallback')}
         </Tag>
       </Tooltip>
     );
@@ -164,12 +169,12 @@ function Stadium() {
   return (
     <>
       <PageHeader
-        title="Halı Saha Listesi"
-        subtitle="Sistemde kayıtlı halı sahalar ve harita üzerindeki konumları"
+        title={t('venues:stadium.list.title')}
+        subtitle={t('venues:stadium.list.subtitle')}
         icon={<EnvironmentOutlined />}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/adminPanel/stadiums/new')}>
-            Halı saha ekle
+            {t('venues:stadium.list.add')}
           </Button>
         }
       />
@@ -177,25 +182,23 @@ function Stadium() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="Oyuncular yalnızca şu koşulları sağlayan tesisleri görür: yayında, aktif üyeliği olan bir işletmesi var, en az 1 fotoğraf ve 1 aktif saha, konum ve adres dolu."
+        message={t('venues:stadium.list.visibilityInfo')}
         description={
-          <>
-            Yeni anlaşmalı tesis eklemek için <Link to="/adminPanel/businesses?new=1">Yeni işletme</Link> sihirbazını kullanın.
-          </>
+          <Trans i18nKey="venues:stadium.list.newVenueHint" components={{ link: <Link to="/adminPanel/businesses?new=1" /> }} />
         }
       />
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={9}>
           <Card
             bordered={false}
-            title={`Halı sahalar (${stadiums.length})`}
+            title={t('venues:stadium.list.cardTitle', { count: stadiums.length })}
             styles={{ body: { padding: 0 } }}
           >
             <div style={{ padding: 16, paddingBottom: 8 }}>
               <Input
                 allowClear
                 prefix={<SearchOutlined />}
-                placeholder="Ad veya adres ara"
+                placeholder={t('venues:stadium.list.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -208,7 +211,7 @@ function Stadium() {
               ) : (
                 <List
                   dataSource={filtered}
-                  locale={{ emptyText: <EmptyState description="Halı saha bulunamadı" /> }}
+                  locale={{ emptyText: <EmptyState description={t('venues:stadium.list.empty')} /> }}
                   renderItem={(s) => (
                     <List.Item
                       key={s.stadiumId}
@@ -230,10 +233,10 @@ function Stadium() {
                               <Tag icon={<ClockCircleOutlined />}>
                                 {shortTime(s.openingTime)} – {shortTime(s.closingTime)}
                               </Tag>
-                              {!s.coords && <Tag color="warning">Konum yok</Tag>}
+                              {!s.coords && <Tag color="warning">{t('venues:stadium.list.noLocation')}</Tag>}
                               {ownerTag(s)}
-                              {!isListed(s) && <Tag>Yayında değil</Tag>}
-                              {ownerByStadium[s.stadiumId]?.isVisible && <Tag color="lime">Oyunculara görünür</Tag>}
+                              {!isListed(s) && <Tag>{t('venues:stadium.list.notListed')}</Tag>}
+                              {ownerByStadium[s.stadiumId]?.isVisible && <Tag color="lime">{t('venues:stadium.list.visible')}</Tag>}
                             </Space>
                           </Space>
                         }
@@ -260,7 +263,7 @@ function Stadium() {
                 )}
                 {userPosition && (
                   <Marker position={userPosition} icon={customIcon}>
-                    <Popup>Mevcut konumunuz</Popup>
+                    <Popup>{t('venues:stadium.list.yourLocation')}</Popup>
                   </Marker>
                 )}
                 {stadiums
@@ -284,11 +287,11 @@ function Stadium() {
                 {userPosition && selected?.coords && <Routing from={userPosition} to={selected.coords} />}
               </MapContainer>
             </Card>
-            <Card bordered={false} title="Seçili halı saha">
+            <Card bordered={false} title={t('venues:stadium.list.selectedTitle')}>
               {selected ? (
                 <Descriptions column={{ xs: 1, sm: 2 }} size="small">
-                  <Descriptions.Item label="Ad">{selected.stadiumName}</Descriptions.Item>
-                  <Descriptions.Item label="İşletme">
+                  <Descriptions.Item label={t('venues:stadium.list.fields.name')}>{selected.stadiumName}</Descriptions.Item>
+                  <Descriptions.Item label={t('venues:stadium.list.fields.owner')}>
                     {ownerByStadium[selected.stadiumId] ? (
                       <Space direction="vertical" size={0}>
                         {ownerTag(selected)}
@@ -302,12 +305,12 @@ function Stadium() {
                       <Space size={4} wrap>
                         {ownerTag(selected)}
                         <Button size="small" type="link" onClick={() => navigate('/adminPanel/businesses')}>
-                          İşletmeye bağla
+                          {t('venues:stadium.list.linkOwner')}
                         </Button>
                       </Space>
                     )}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Yayında">
+                  <Descriptions.Item label={t('venues:stadium.list.fields.listed')}>
                     <Space size={8}>
                       <Switch
                         size="small"
@@ -316,25 +319,25 @@ function Stadium() {
                         onChange={(v) => toggleListed(selected, v)}
                       />
                       <Text type="secondary" style={{ fontSize: 12 }}>
-                        {ownerByStadium[selected.stadiumId]?.isVisible ? 'Oyunculara görünür' : 'Oyunculara görünmüyor'}
+                        {ownerByStadium[selected.stadiumId]?.isVisible ? t('venues:stadium.list.visible') : t('venues:stadium.list.notVisible')}
                       </Text>
                     </Space>
                   </Descriptions.Item>
-                  <Descriptions.Item label="Çalışma saatleri">
+                  <Descriptions.Item label={t('venues:stadium.list.fields.hours')}>
                     {shortTime(selected.openingTime)} – {shortTime(selected.closingTime)}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Adres" span="filled">
+                  <Descriptions.Item label={t('venues:stadium.list.fields.address')} span="filled">
                     {selected.address || '-'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Konum" span="filled">
-                    {selected.coords ? selected.coords.map((n) => n.toFixed(6)).join(', ') : 'Geçersiz konum'}
+                  <Descriptions.Item label={t('venues:stadium.list.fields.location')} span="filled">
+                    {selected.coords ? selected.coords.map((n) => n.toFixed(6)).join(', ') : t('venues:stadium.list.invalidLocation')}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Açıklama" span="filled">
+                  <Descriptions.Item label={t('venues:stadium.list.fields.description')} span="filled">
                     {selected.description || '-'}
                   </Descriptions.Item>
                 </Descriptions>
               ) : (
-                <Text type="secondary">Ayrıntıları görmek için listeden veya haritadan bir halı saha seçin.</Text>
+                <Text type="secondary">{t('venues:stadium.list.selectHint')}</Text>
               )}
             </Card>
           </Space>

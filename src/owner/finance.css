@@ -57,16 +57,16 @@
 
 .mb-fin-kpi.is-net {
   background:
-    radial-gradient(130% 120% at 100% 0%, rgba(198, 244, 50, 0.12), rgba(198, 244, 50, 0) 60%),
+    radial-gradient(130% 120% at 100% 0%, rgba(var(--mb-primary-rgb), 0.12), rgba(var(--mb-primary-rgb), 0) 60%),
     var(--mb-surface);
-  border-color: rgba(198, 244, 50, 0.25);
+  border-color: rgba(var(--mb-primary-rgb), 0.25);
 }
 
 .mb-fin-kpi.is-loss {
   background:
-    radial-gradient(130% 120% at 100% 0%, rgba(244, 63, 94, 0.14), rgba(244, 63, 94, 0) 60%),
+    radial-gradient(130% 120% at 100% 0%, rgba(var(--mb-danger-rgb), 0.14), rgba(var(--mb-danger-rgb), 0) 60%),
     var(--mb-surface);
-  border-color: rgba(244, 63, 94, 0.3);
+  border-color: rgba(var(--mb-danger-rgb), 0.3);
 }
 
 .mb-fin-kpi.is-link {
@@ -75,7 +75,7 @@
 
 .mb-fin-kpi.is-link:hover,
 .mb-fin-kpi.is-link:focus-visible {
-  border-color: rgba(251, 191, 36, 0.45);
+  border-color: rgba(var(--mb-gold-rgb), 0.45);
   transform: translateY(-2px);
   outline: none;
 }
@@ -215,7 +215,7 @@
 }
 
 .mb-fin-grid {
-  stroke: rgba(148, 163, 184, 0.09);
+  stroke: rgba(var(--mb-slate-rgb), 0.09);
   stroke-width: 1;
 }
 
@@ -242,12 +242,12 @@
 }
 
 .mb-fin-band {
-  fill: rgba(148, 163, 184, 0.06);
+  fill: rgba(var(--mb-slate-rgb), 0.06);
 }
 
 .mb-fin-band.is-selected {
-  fill: rgba(198, 244, 50, 0.07);
-  stroke: rgba(198, 244, 50, 0.28);
+  fill: rgba(var(--mb-primary-rgb), 0.07);
+  stroke: rgba(var(--mb-primary-rgb), 0.28);
   stroke-width: 1;
 }
 
@@ -305,7 +305,7 @@
   transform: translateX(-50%);
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(20, 29, 43, 0.96);
+  background: color-mix(in srgb, var(--mb-surface-2) 96%, transparent);
   border: 1px solid var(--mb-border-strong);
   box-shadow: var(--mb-shadow);
   pointer-events: none;
@@ -510,7 +510,7 @@
 
 .mb-fin-type.is-expense {
   color: var(--mb-danger);
-  background: rgba(244, 63, 94, 0.12);
+  background: rgba(var(--mb-danger-rgb), 0.12);
 }
 
 .mb-fin-src {
@@ -528,7 +528,7 @@
 
 .mb-fin-src.is-manual {
   color: var(--mb-info);
-  background: rgba(56, 189, 248, 0.14);
+  background: rgba(var(--mb-info-rgb), 0.14);
 }
 
 .mb-fin-amount {
@@ -730,4 +730,9 @@
   .mb-fin-net {
     font-size: 16px;
   }
+}
+
+/* Açık tema: kategori renkleri (FinanceCharts.js, sabit orta tonlar) beyaz zeminde okunaklı olsun diye koyulaşır */
+[data-theme='light'] .mb-fin-cat__icon {
+  filter: brightness(0.72) saturate(1.25);
 }

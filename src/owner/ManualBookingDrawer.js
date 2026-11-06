@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { App, Divider, Drawer, Popconfirm, Switch, Typography } from 'antd';
 import { ClockCircleOutlined, DeleteOutlined, EditOutlined, PhoneOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { formatPrice, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { apiErrorMessage, formatDateTime } from '../utils/format';
@@ -16,6 +17,7 @@ const { Text } = Typography;
  */
 export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit, onChanged }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const { membershipActive } = useOwnerVenue();
   const [isPaid, setIsPaid] = useState(Boolean(b?.isPaid));
   const [deleting, setDeleting] = useState(false);
@@ -42,12 +44,12 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
     setDeleting(true);
     try {
       await ownerApi.deleteBlock(b.slotBlockId);
-      message.success('Harici rezervasyon silindi; saat yeniden rezervasyona açıldı.');
+      message.success(t('owner:booking.drawer.deleted'));
       notifyOwnerChanged();
       onChanged?.(null);
       onClose?.();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Rezervasyon silinemedi.'));
+      message.error(apiErrorMessage(e, t('owner:booking.drawer.deleteFailed')));
     } finally {
       setDeleting(false);
     }
@@ -58,25 +60,25 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
       open={open}
       onClose={onClose}
       width={440}
-      title="Harici rezervasyon"
+      title={t('owner:booking.drawer.title')}
       footer={
         <div className="mb-owner-drawer-actions">
           <Popconfirm
-            title="Rezervasyonu sil"
-            description="Bu kayıt silinecek ve saat yeniden rezervasyona açılacak. Emin misiniz?"
-            okText="Sil"
-            cancelText="Vazgeç"
+            title={t('owner:booking.drawer.deleteTitle')}
+            description={t('owner:booking.drawer.deleteConfirm')}
+            okText={t('common:actions.delete')}
+            cancelText={t('common:actions.cancel')}
             okButtonProps={{ danger: true, loading: deleting }}
             onConfirm={remove}
             disabled={!membershipActive}
           >
             <WriteButton danger icon={<DeleteOutlined />} loading={deleting}>
-              Sil
+              {t('common:actions.delete')}
             </WriteButton>
           </Popconfirm>
           {onEdit && (
             <WriteButton type="primary" icon={<EditOutlined />} onClick={() => onEdit({ ...b, isPaid })}>
-              Düzenle
+              {t('common:actions.edit')}
             </WriteButton>
           )}
         </div>
@@ -84,18 +86,19 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
     >
       <div className="mb-mbk-hero">
         <div className="mb-mbk-hero__top">
-          <span className="mb-mbk-tag">Harici</span>
+          <span className="mb-mbk-tag">{t('owner:booking.external')}</span>
           {b.pitchName && <span className="mb-owner-res-hero__pitch">{b.pitchName}</span>}
         </div>
-        <div className="mb-mbk-hero__title">{b.customerName || 'Müşteri'}</div>
+        <div className="mb-mbk-hero__title">{b.customerName || t('owner:booking.customer')}</div>
         {b.reason && <div className="mb-mbk-hero__sub">{b.reason}</div>}
         <div className="mb-owner-res-hero__time">
-          <ClockCircleOutlined /> {start.format('DD MMMM dddd')} · {start.format('HH:mm')}–{end.format('HH:mm')} ({mins} dk)
+          <ClockCircleOutlined /> {start.format('DD MMMM dddd')} · {start.format('HH:mm')}–{end.format('HH:mm')}{' '}
+          {t('owner:booking.duration', { count: mins })}
         </div>
       </div>
 
       <Divider orientation="left" plain>
-        Müşteri
+        {t('owner:booking.customer')}
       </Divider>
       <div className="mb-mbk-contact">
         <Text strong>{b.customerName || '-'}</Text>
@@ -104,33 +107,33 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
             <PhoneOutlined /> {b.customerPhone}
           </a>
         ) : (
-          <Text type="secondary">Telefon girilmemiş</Text>
+          <Text type="secondary">{t('owner:booking.drawer.noPhone')}</Text>
         )}
       </div>
 
       <Divider orientation="left" plain>
-        Ücret ve ödeme
+        {t('owner:booking.drawer.feeAndPayment')}
       </Divider>
       <div className={`mb-mbk-pay${isPaid ? ' is-paid' : ''}`}>
         <div>
-          <span className="mb-mbk-pay__label">Ücret</span>
+          <span className="mb-mbk-pay__label">{t('owner:booking.fee')}</span>
           <span className="mb-mbk-pay__amount">{formatPrice(b.price)}</span>
         </div>
         <div className="mb-mbk-pay__switch">
-          <span>{isPaid ? 'Ödeme alındı' : 'Ödeme alınmadı'}</span>
+          <span>{isPaid ? t('owner:booking.paymentReceived') : t('owner:booking.paymentNotReceived')}</span>
           <InactiveTip>
             <Switch checked={isPaid} onChange={togglePaid} loading={paid.busyId === b.slotBlockId} disabled={!membershipActive} />
           </InactiveTip>
         </div>
       </div>
       {!isPaid && finished && (
-        <div className="mb-owner-note">Bu rezervasyon oynandı ancak ödemesi henüz alınmadı; “Tahsil edilmemiş” tutarında görünür.</div>
+        <div className="mb-owner-note">{t('owner:booking.drawer.unpaidNote')}</div>
       )}
 
       {b.note && (
         <>
           <Divider orientation="left" plain>
-            Not
+            {t('owner:booking.drawer.note')}
           </Divider>
           <Text>{b.note}</Text>
         </>
@@ -138,7 +141,7 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
       {b.createdAt && (
         <div style={{ marginTop: 20 }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Eklenme: {formatDateTime(b.createdAt)}
+            {t('owner:booking.drawer.addedAt', { date: formatDateTime(b.createdAt) })}
           </Text>
         </div>
       )}

@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { App, Button, Input, Modal, Space, Tag, Tooltip, Typography } from 'antd';
+import { Trans, useTranslation } from 'react-i18next';
 import { OWNER_DATA_CHANGED, useOwnerVenue } from '../layout/VenueLayout';
 import { BLOCK_KIND, ownerApi } from '../api/venues';
 import { apiErrorMessage } from '../utils/format';
+import i18n from '../i18n';
 import './owner.css';
 
 const { Text } = Typography;
@@ -12,7 +14,18 @@ const { Text } = Typography;
 
 export const notifyOwnerChanged = () => window.dispatchEvent(new Event(OWNER_DATA_CHANGED));
 
-export const INACTIVE_TIP = 'Üyeliğiniz aktif olmadığı için değişiklik yapamazsınız.';
+/** Üyelik pasifken gösterilen açıklama (render sırasında çağırın) */
+export const inactiveTip = () => i18n.t('owner:shared.inactiveTip');
+
+/**
+ * Geriye dönük uyumluluk için metin sabiti: canlı bağlama (live binding) olarak dil değişince güncellenir.
+ * Yeni kodda inactiveTip() tercih edin.
+ */
+// eslint-disable-next-line import/no-mutable-exports
+export let INACTIVE_TIP = inactiveTip();
+i18n.on('languageChanged', () => {
+  INACTIVE_TIP = inactiveTip();
+});
 
 /** Yanıt bir dizi değilse, verilen anahtarlardaki ilk diziyi döndürür */
 export const asList = (res, ...keys) => {
@@ -93,7 +106,7 @@ export function useOwnerData(loader, deps = []) {
         const data = await loaderRef.current(venueId);
         if (id === seq.current) setState({ data, loading: false, error: null });
       } catch (e) {
-        if (id === seq.current) setState((s) => ({ ...s, loading: false, error: apiErrorMessage(e, 'Veriler yüklenemedi.') }));
+        if (id === seq.current) setState((s) => ({ ...s, loading: false, error: apiErrorMessage(e, i18n.t('owner:shared.loadFailed')) }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,11 +129,11 @@ export const WriteButton = React.forwardRef(function WriteButton({ tooltip, chil
       {children}
     </Button>
   );
-  if (!membershipActive) return <Tooltip title={INACTIVE_TIP}>{btn}</Tooltip>;
+  if (!membershipActive) return <Tooltip title={inactiveTip()}>{btn}</Tooltip>;
   return tooltip ? <Tooltip title={tooltip}>{btn}</Tooltip> : btn;
 });
 
-const QUICK_REASONS = ['Bu saat dolu', 'Tesis bakımda', 'Saha o saatte kapalı', 'Talep bilgileri eksik'];
+const QUICK_REASON_KEYS = ['slotTaken', 'maintenance', 'pitchClosed', 'missingInfo'];
 
 /**
  * Rezervasyon onay/red akışı.
@@ -129,6 +142,7 @@ const QUICK_REASONS = ['Bu saat dolu', 'Tesis bakımda', 'Saha o saatte kapalı'
  */
 export function useReservationResponder(onDone) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(null); // { matchId, approve }
   const [rejecting, setRejecting] = useState(null);
   const [reason, setReason] = useState('');
@@ -137,12 +151,12 @@ export function useReservationResponder(onDone) {
     setBusy({ matchId: r.matchId, approve });
     try {
       await ownerApi.respond(r.matchId, approve, why || undefined);
-      message.success(approve ? 'Rezervasyon onaylandı. Oyunculara bildirim gönderildi.' : 'Talep reddedildi. Oyunculara bildirim gönderildi.');
+      message.success(approve ? t('owner:shared.respond.approved') : t('owner:shared.respond.rejected'));
       notifyOwnerChanged();
       setRejecting(null);
       onDone?.(r, approve);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'İşlem tamamlanamadı.'));
+      message.error(apiErrorMessage(e, t('owner:shared.respond.failed')));
     } finally {
       setBusy(null);
     }
@@ -151,9 +165,9 @@ export function useReservationResponder(onDone) {
   const modal = (
     <Modal
       open={Boolean(rejecting)}
-      title="Talebi reddet"
-      okText="Reddet"
-      cancelText="Vazgeç"
+      title={t('owner:shared.respond.rejectTitle')}
+      okText={t('common:actions.reject')}
+      cancelText={t('common:actions.cancel')}
       okButtonProps={{ danger: true, disabled: !reason.trim(), loading: busy?.approve === false }}
       onOk={() => respond(rejecting, false, reason.trim())}
       onCancel={() => setRejecting(null)}
@@ -161,14 +175,21 @@ export function useReservationResponder(onDone) {
     >
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
         <Text type="secondary">
-          <Text strong>{rejecting?.matchName}</Text> talebini reddetmek üzeresiniz. Lütfen oyunculara iletilecek kısa bir açıklama yazın.
+          <Trans
+            i18nKey="owner:shared.respond.rejectIntro"
+            values={{ name: rejecting?.matchName ?? '' }}
+            components={{ b: <Text strong /> }}
+          />
         </Text>
         <Space size={[6, 6]} wrap>
-          {QUICK_REASONS.map((q) => (
-            <Tag key={q} className="mb-owner-quick-tag" onClick={() => setReason(q)}>
-              {q}
-            </Tag>
-          ))}
+          {QUICK_REASON_KEYS.map((k) => {
+            const q = t(`owner:shared.respond.quickReasons.${k}`);
+            return (
+              <Tag key={k} className="mb-owner-quick-tag" onClick={() => setReason(q)}>
+                {q}
+              </Tag>
+            );
+          })}
         </Space>
         <Input.TextArea
           value={reason}
@@ -176,7 +197,7 @@ export function useReservationResponder(onDone) {
           maxLength={200}
           showCount
           rows={3}
-          placeholder="Örn. Seçtiğiniz saatte sahamız bakımda olacak, başka bir saat önerebiliriz."
+          placeholder={t('owner:shared.respond.reasonPlaceholder')}
           autoFocus
         />
       </Space>
@@ -209,7 +230,12 @@ export function Stars({ value = 0, size = 14 }) {
 
 /** Ekstralar özeti: "Krampon ×2 · Kamera" */
 export const extrasText = (r) =>
-  [r?.cleatCount ? `Krampon ×${r.cleatCount}` : null, r?.cameraRequested ? 'Kamera' : null].filter(Boolean).join(' · ');
+  [
+    r?.cleatCount ? i18n.t('owner:shared.extras.cleats', { count: r.cleatCount }) : null,
+    r?.cameraRequested ? i18n.t('owner:shared.extras.camera') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
 export const isPastStart = (r) => dayjs(r?.start).isBefore(dayjs());
 
@@ -244,17 +270,18 @@ export const normalizeBlock = (b, pitchName) => ({
 /** Harici rezervasyon ödeme durumunu değiştirir: const { toggle, busyId } = useBlockPaidToggle(onDone) */
 export function useBlockPaidToggle(onDone) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [busyId, setBusyId] = useState(null);
   const toggle = async (slotBlockId, isPaid) => {
     setBusyId(slotBlockId);
     try {
       await ownerApi.setBlockPaid(slotBlockId, isPaid);
-      message.success(isPaid ? 'Ödeme alındı olarak işaretlendi.' : 'Ödeme alınmadı olarak işaretlendi.');
+      message.success(isPaid ? t('owner:shared.paid.markedPaid') : t('owner:shared.paid.markedUnpaid'));
       notifyOwnerChanged();
       onDone?.(slotBlockId, isPaid);
       return true;
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Ödeme durumu güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('owner:shared.paid.failed')));
       return false;
     } finally {
       setBusyId(null);
@@ -269,7 +296,7 @@ export const InactiveTip = ({ children }) => {
   return membershipActive ? (
     children
   ) : (
-    <Tooltip title={INACTIVE_TIP}>
+    <Tooltip title={inactiveTip()}>
       <span style={{ display: 'inline-flex' }}>{children}</span>
     </Tooltip>
   );

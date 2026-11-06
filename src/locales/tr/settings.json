@@ -1,0 +1,95 @@
+{
+  "header": {
+    "eyebrow": "Hesap",
+    "title": "Ayarlar",
+    "subtitle": "Değişiklikler otomatik kaydedilir."
+  },
+  "loadError": "Ayarlar yüklenemedi.",
+  "saveError": "Ayar kaydedilemedi.",
+  "saving": "Kaydediliyor…",
+  "appearance": {
+    "title": "Görünüm",
+    "theme": "Tema",
+    "themeHint": "Sistem seçiliyse cihazının açık/koyu ayarını izler."
+  },
+  "privacy": {
+    "title": "Gizlilik",
+    "recommended": "Önerilen",
+    "message": {
+      "question": "Bana kim mesaj atabilir?",
+      "hint": "Daha önce sana yazmış olduğun kişiler her zaman cevap verebilir.",
+      "everyone": {
+        "title": "Herkes",
+        "desc": "Her oyuncu sana mesaj atabilir."
+      },
+      "mutuals": {
+        "title": "Sadece arkadaşlarım",
+        "desc": "Karşılıklı takipleştiğin oyuncular."
+      },
+      "mutualsAndTeammates": {
+        "title": "Arkadaşlarım ve birlikte maç yaptıklarım",
+        "desc": "Arkadaşların ve aynı maçta oynadığın oyuncular."
+      }
+    },
+    "visibility": {
+      "question": "İstatistiklerimi kim görebilir?",
+      "everyone": {
+        "title": "Herkes",
+        "desc": "İstatistiklerini ve takımlarını herkes görebilir."
+      },
+      "followers": {
+        "title": "Beni takip edenler",
+        "desc": "Sadece seni takip eden oyuncular görebilir."
+      },
+      "onlyMe": {
+        "title": "Sadece ben",
+        "desc": "İstatistiklerin herkesten gizlenir."
+      }
+    }
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "follow": {
+      "title": "Yeni takipçi",
+      "desc": "Biri seni takip etmeye başladığında."
+    },
+    "matchInvite": {
+      "title": "Maç davetleri",
+      "desc": "Bir arkadaşın seni maça çağırdığında."
+    },
+    "teamInvite": {
+      "title": "Takım davetleri",
+      "desc": "Bir takıma davet edildiğinde."
+    },
+    "matchReminder": {
+      "title": "Maç hatırlatmaları",
+      "desc": "Katıldığın maç yaklaştığında."
+    },
+    "matchResult": {
+      "title": "Maç sonuçları",
+      "desc": "Oynadığın maçın skoru girildiğinde."
+    },
+    "matchUpdates": {
+      "title": "Maç güncellemeleri",
+      "desc": "Onay, iptal, kadro ve yedek listesi değişiklikleri."
+    }
+  },
+  "blocked": {
+    "title": "Engellenenler",
+    "empty": "Engellediğin kimse yok.",
+    "unblock": "Engeli kaldır",
+    "unblocked": "{{name}} adlı oyuncunun engeli kaldırıldı."
+  },
+  "deleteAccount": {
+    "button": "Hesabımı sil",
+    "description": "Profilin anonimleştirilir, takiplerin ve davetlerin silinir, gelecekteki maçlardan çıkarılırsın. Bu işlem geri alınamaz.",
+    "modalTitle": "Hesabını silmek istediğine emin misin?",
+    "ok": "Hesabımı kalıcı olarak sil",
+    "alertTitle": "Bu işlem geri alınamaz",
+    "alertDescription": "Geçmiş maç kayıtların 'Silinmiş Kullanıcı' olarak kalır, diğer tüm bilgilerin silinir.",
+    "password": "Şifren",
+    "confirmWord": "SİL",
+    "typeToConfirm": "Onaylamak için <b>{{word}}</b> yaz",
+    "error": "Hesap silinemedi."
+  }
+}

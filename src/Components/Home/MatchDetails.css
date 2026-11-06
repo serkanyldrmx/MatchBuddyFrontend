@@ -2,7 +2,7 @@
 .mb-match-hero {
   padding: 22px 32px 26px;
   border-radius: 24px;
-  border: 1px solid rgba(198, 244, 50, 0.16);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.16);
   margin-bottom: 20px;
 }
 
@@ -14,7 +14,7 @@
 }
 
 .mb-ghost-link.ant-btn {
-  color: rgba(232, 238, 246, 0.8);
+  color: rgba(var(--mb-text-rgb), 0.8);
   padding-left: 0;
 }
 
@@ -37,7 +37,7 @@
 
 .mb-match-hero__meta {
   text-align: center;
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
   font-size: 13px;
 }
 
@@ -104,7 +104,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   letter-spacing: 2px;
-  box-shadow: inset 0 0 24px rgba(198, 244, 50, 0.08);
+  box-shadow: inset 0 0 24px rgba(var(--mb-primary-rgb), 0.08);
 }
 
 .mb-scoreboard__score i {
@@ -122,7 +122,7 @@
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
 }
 
 .mb-match-hero__bottom {
@@ -237,7 +237,7 @@
   background:
     radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.08), transparent 62%),
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 8.333%, transparent 8.333% 16.666%),
-    linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(34, 197, 94, 0.1)),
+    linear-gradient(180deg, rgba(var(--mb-pitch-rgb), 0.22), rgba(var(--mb-pitch-rgb), 0.1)),
     var(--mb-pitch-dark);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
 }
@@ -247,7 +247,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(198, 244, 50, 0.08), transparent 32% 68%, rgba(56, 189, 248, 0.08));
+  background: linear-gradient(90deg, rgba(var(--mb-primary-rgb), 0.08), transparent 32% 68%, rgba(var(--mb-info-rgb), 0.08));
   box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55);
 }
 
@@ -344,14 +344,14 @@
 
 .mb-pslot.is-home {
   --team: var(--mb-home);
-  --team-glow: rgba(198, 244, 50, 0.4);
-  --team-soft: rgba(198, 244, 50, 0.16);
+  --team-glow: rgba(var(--mb-primary-rgb), 0.4);
+  --team-soft: rgba(var(--mb-primary-rgb), 0.16);
 }
 
 .mb-pslot.is-away {
   --team: var(--mb-away);
-  --team-glow: rgba(56, 189, 248, 0.4);
-  --team-soft: rgba(56, 189, 248, 0.16);
+  --team-glow: rgba(var(--mb-info-rgb), 0.4);
+  --team-soft: rgba(var(--mb-info-rgb), 0.16);
 }
 
 @keyframes mb-pslot-in {
@@ -504,7 +504,7 @@
 }
 
 .mb-token.is-me .mb-token__label {
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
   border-color: transparent;
 }
@@ -570,7 +570,7 @@
   outline: 2px dashed var(--team);
   outline-offset: 1px;
   background:
-    repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.24) 0 4px, rgba(148, 163, 184, 0.08) 4px 8px),
+    repeating-linear-gradient(135deg, rgba(var(--mb-slate-rgb), 0.24) 0 4px, rgba(var(--mb-slate-rgb), 0.08) 4px 8px),
     var(--mb-surface-3);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
   color: var(--mb-text);
@@ -758,14 +758,14 @@
     background:
       radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.08), transparent 62%),
       repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 6.25%, transparent 6.25% 12.5%),
-      linear-gradient(90deg, rgba(34, 197, 94, 0.22), rgba(34, 197, 94, 0.1)),
+      linear-gradient(90deg, rgba(var(--mb-pitch-rgb), 0.22), rgba(var(--mb-pitch-rgb), 0.1)),
       var(--mb-pitch-dark);
   }
   .mb-pitch__field.is-deep {
     aspect-ratio: 68 / 136;
   }
   .mb-pitch__turf {
-    background: linear-gradient(180deg, rgba(198, 244, 50, 0.08), transparent 32% 68%, rgba(56, 189, 248, 0.08));
+    background: linear-gradient(180deg, rgba(var(--mb-primary-rgb), 0.08), transparent 32% 68%, rgba(var(--mb-info-rgb), 0.08));
   }
   .mb-pitch__marks.is-horizontal {
     display: none;
@@ -907,13 +907,13 @@
 
 .mb-guest-side.is-home.ant-radio-button-wrapper-checked {
   border-color: var(--mb-home);
-  background: rgba(198, 244, 50, 0.1);
+  background: rgba(var(--mb-primary-rgb), 0.1);
   box-shadow: 0 0 0 1px var(--mb-home);
 }
 
 .mb-guest-side.is-away.ant-radio-button-wrapper-checked {
   border-color: var(--mb-away);
-  background: rgba(56, 189, 248, 0.1);
+  background: rgba(var(--mb-info-rgb), 0.1);
   box-shadow: 0 0 0 1px var(--mb-away);
 }
 
@@ -949,7 +949,7 @@
   align-items: center;
   justify-content: center;
   background:
-    repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.24) 0 4px, rgba(148, 163, 184, 0.08) 4px 8px),
+    repeating-linear-gradient(135deg, rgba(var(--mb-slate-rgb), 0.24) 0 4px, rgba(var(--mb-slate-rgb), 0.08) 4px 8px),
     var(--mb-surface-3);
   outline: 1.5px dashed var(--mb-text-2);
   outline-offset: 1px;
@@ -1001,7 +1001,7 @@
 .mb-legend__pos {
   padding: 2px 4px;
   border-radius: 4px;
-  background: var(--mb-gold);
+  background: var(--mb-gold-fill);
   color: var(--mb-primary-ink);
   font-family: var(--mb-display);
   font-size: 10px;
@@ -1138,7 +1138,7 @@
 }
 
 .mb-mvp-card.is-leader {
-  box-shadow: 0 0 0 1px var(--mb-gold), 0 8px 24px rgba(251, 191, 36, 0.18);
+  box-shadow: 0 0 0 1px var(--mb-gold), 0 8px 24px rgba(var(--mb-gold-rgb), 0.18);
 }
 
 .mb-mvp-card__crown {
@@ -1172,7 +1172,7 @@
 
 /* ---------- Tekrar oynamak ister misin? ---------- */
 .mb-replay-card.ant-card {
-  border-color: rgba(198, 244, 50, 0.25) !important;
+  border-color: rgba(var(--mb-primary-rgb), 0.25) !important;
   background: linear-gradient(135deg, var(--mb-primary-soft), transparent 60%), var(--mb-surface);
 }
 
@@ -1317,7 +1317,7 @@
   padding: 12px 14px;
   border-radius: 12px;
   background: var(--mb-primary-soft);
-  border: 1px solid rgba(198, 244, 50, 0.3);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.3);
 }
 
 .mb-booking__per span {
@@ -1358,7 +1358,7 @@
 
 /* ---------- Tesis değerlendirme ---------- */
 .mb-venue-review-card {
-  border-color: rgba(251, 191, 36, 0.35) !important;
+  border-color: rgba(var(--mb-gold-rgb), 0.35) !important;
 }
 
 .mb-venue-review {
@@ -1514,4 +1514,10 @@
   .mb-pitch-menu button {
     min-height: 44px;
   }
+}
+
+/* ---------- Açık tema: saha koyu "stadyum" paneli olarak kalır, gölgesi yumuşar ---------- */
+[data-theme='light'] .mb-pitch__field {
+  border-color: rgba(15, 61, 34, 0.3);
+  box-shadow: 0 18px 40px rgba(15, 61, 34, 0.22);
 }

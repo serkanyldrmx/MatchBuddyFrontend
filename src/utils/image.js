@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 // Tarayıcı tarafında resim hazırlığı (yükleme öncesi küçültme) — sözleşme: MatchBuddy/docs/media-api.md §5
 // Sunucu her resmi yine doğrular, döndürür, WebP'ye çevirir; burada amaç mobil veride hızlı yüklemedir.
 
@@ -6,10 +8,10 @@ export const ACCEPTED_IMAGE_ACCEPT = ACCEPTED_IMAGE_TYPES.join(',');
 export const MAX_IMAGE_MB = 10;
 export const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
-/** Dosya kabul edilebilir değilse Türkçe hata metni, uygunsa null */
+/** Dosya kabul edilebilir değilse (çevrilmiş) hata metni, uygunsa null */
 export const imageError = (file) => {
-  if (!file || !ACCEPTED_IMAGE_TYPES.includes(file.type)) return 'Sadece JPG, PNG veya WebP yükleyebilirsiniz.';
-  if (file.size > MAX_IMAGE_BYTES) return `Fotoğraf en fazla ${MAX_IMAGE_MB} MB olabilir.`;
+  if (!file || !ACCEPTED_IMAGE_TYPES.includes(file.type)) return i18n.t('common:image.invalidType');
+  if (file.size > MAX_IMAGE_BYTES) return i18n.t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB });
   return null;
 };
 

@@ -14,24 +14,19 @@ import {
   TrophyOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { Trans, useTranslation } from 'react-i18next';
 import { aiFetch, AI_BASE_URL } from '../../api/config';
 import { matchesApi, playersApi, PARTICIPANT_STATUS } from '../../api/matches';
 import { INVITES_CHANGED, invitesApi } from '../../api/social';
 import { formatPrice, venuesApi } from '../../api/venues';
+import { intlLocale } from '../../i18n';
 import { CapacityRing, EmptyState, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName, getCurrentUser, isPast, mediaUrl } from '../../utils/format';
 import MatchCard from '../Post/Post';
 import './Home.css';
 
-const FILTERS = [
-  { label: 'Yaklaşan', value: 'upcoming' },
-  { label: 'Kadrosu eksik', value: 'open' },
-  { label: 'Rakip arayanlar', value: 'opponent' },
-  { label: 'Maçlarım', value: 'mine' },
-  { label: 'Arkadaşlarım', value: 'friends' },
-  { label: 'Sonuçlar', value: 'results' },
-  { label: 'Tümü', value: 'all' },
-];
+// Etiketler render sırasında çevrilir (home:filters.*, 'all' → common:all)
+const FILTERS = ['upcoming', 'open', 'opponent', 'mine', 'friends', 'results', 'all'];
 
 const sortDefault = (a, b) => {
   const pa = isPast(a.matchDate);
@@ -42,6 +37,7 @@ const sortDefault = (a, b) => {
 
 /** Sıradaki maça geri sayım */
 function Countdown({ to }) {
+  const { t } = useTranslation();
   const [now, setNow] = useState(dayjs());
   useEffect(() => {
     const t = setInterval(() => setNow(dayjs()), 30000);
@@ -54,13 +50,13 @@ function Countdown({ to }) {
   return (
     <div className="mb-countdown">
       {[
-        [d, 'gün'],
-        [h, 'saat'],
-        [m, 'dk'],
+        [d, 'days'],
+        [h, 'hours'],
+        [m, 'minutes'],
       ].map(([v, l]) => (
         <div key={l}>
           <strong>{String(v).padStart(2, '0')}</strong>
-          <span>{l}</span>
+          <span>{t(`home:countdown.${l}`)}</span>
         </div>
       ))}
     </div>
@@ -70,6 +66,7 @@ function Countdown({ to }) {
 const venueName = (m) => m.venue?.name || m.stadiumName || '';
 
 function Home() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const me = getCurrentUser();
@@ -89,11 +86,11 @@ function Home() {
     try {
       setMatches(await matchesApi.feed());
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Maçlar yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('home:loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [message]);
+  }, [message, t]);
 
   useEffect(() => {
     load();
@@ -117,14 +114,14 @@ function Home() {
     try {
       const res = await aiFetch(AI_BASE_URL, `/sort-matches?playerId=${me.playerId}`);
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Sıralama başarısız oldu.');
+      if (!res.ok || data.error) throw new Error(data.error || t('home:ai.failed'));
       const order = {};
       (data.matches || []).forEach((m, i) => (order[m.matchId] = { rank: i, message: m.personalizedMessage }));
       setAiOrder(order);
       setFilter('upcoming');
-      message.success('Maçlar sana göre sıralandı.');
+      message.success(t('home:ai.sorted'));
     } catch (e) {
-      message.error(e.message === 'Failed to fetch' ? 'Yapay zeka servisine ulaşılamadı.' : e.message);
+      message.error(e.message === 'Failed to fetch' ? t('home:ai.unreachable') : e.message);
     } finally {
       setAiLoading(false);
     }
@@ -160,13 +157,15 @@ function Home() {
   const stadiumOptions = useMemo(
     () =>
       [...new Set(matches.map(venueName).filter(Boolean))]
-        .sort((a, b) => a.localeCompare(b, 'tr'))
+        .sort((a, b) => a.localeCompare(b, intlLocale()))
         .map((n) => ({ value: n, label: n })),
     [matches]
   );
 
   const upcoming = matches.filter((m) => !isPast(m.matchDate) && m.isActive !== 3);
   const openSpots = upcoming.reduce((s, m) => s + Math.max(m.capacity - m.goingCount, 0), 0);
+  const thisWeek = upcoming.filter((m) => dayjs(m.matchDate).isBefore(dayjs().add(7, 'day'))).length;
+  const filterOptions = FILTERS.map((value) => ({ value, label: value === 'all' ? t('common:all') : t(`home:filters.${value}`) }));
 
   return (
     <>
@@ -174,22 +173,21 @@ function Home() {
       <section className="mb-hero mb-pitch-bg">
         <div className="mb-hero__left">
           <span className="mb-hero__eyebrow">
-            <span className="mb-dot" /> Bu hafta {upcoming.filter((m) => dayjs(m.matchDate).isBefore(dayjs().add(7, 'day'))).length} maç oynanıyor
+            <span className="mb-dot" /> {t('home:hero.thisWeek', { count: thisWeek })}
           </span>
           <h1 className="mb-hero__title">
-            Sahaya çık,
-            <br />
-            <em>kadroyu tamamla.</em>
+            <Trans i18nKey="home:hero.title" components={{ br: <br />, em: <em /> }} />
           </h1>
           <p className="mb-hero__text">
-            {openSpots > 0 ? `Şu an ${openSpots} oyunculuk boş yer var. ` : ''}Maçını kur, takımını topla, maçın yıldızı sen ol.
+            {openSpots > 0 ? t('home:hero.openSpots', { count: openSpots }) : ''}
+            {t('home:hero.text')}
           </p>
           <Space wrap>
             <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => navigate('/matches/new')}>
-              Maç oluştur
+              {t('home:hero.createMatch')}
             </Button>
             <Button size="large" icon={<SearchOutlined />} onClick={() => setFilter('open')} className="mb-ghost-btn">
-              Eksik kadroları gör
+              {t('home:hero.seeOpen')}
             </Button>
           </Space>
         </div>
@@ -197,7 +195,7 @@ function Home() {
         <div className="mb-hero__right">
           {nextMatch ? (
             <div className="mb-next" onClick={() => navigate(`/match-details/${nextMatch.matchId}`)}>
-              <span className="mb-next__label">Sıradaki maçın</span>
+              <span className="mb-next__label">{t('home:next.label')}</span>
               <h3>{nextMatch.matchName}</h3>
               <div className="mb-next__meta">
                 <EnvironmentOutlined /> {venueName(nextMatch)} · {dayjs(nextMatch.matchDate).format('DD MMM, HH:mm')}
@@ -206,17 +204,17 @@ function Home() {
               <div className="mb-next__footer">
                 <CapacityRing going={nextMatch.goingCount} capacity={nextMatch.capacity} size={40} />
                 <span className="mb-next__go">
-                  {nextMatch.myStatus === PARTICIPANT_STATUS.WAITLIST ? 'Yedek listesindesin' : 'Maç merkezi'} <ArrowRightOutlined />
+                  {nextMatch.myStatus === PARTICIPANT_STATUS.WAITLIST ? t('home:next.waitlisted') : t('home:next.matchCenter')} <ArrowRightOutlined />
                 </span>
               </div>
             </div>
           ) : (
             <div className="mb-next is-empty">
-              <span className="mb-next__label">Sıradaki maçın</span>
-              <h3>Henüz bir maça yazılmadın</h3>
-              <p>Aşağıdan kadrosu eksik bir maç bul ya da kendi maçını kur.</p>
+              <span className="mb-next__label">{t('home:next.label')}</span>
+              <h3>{t('home:next.emptyTitle')}</h3>
+              <p>{t('home:next.emptyText')}</p>
               <Button type="primary" onClick={() => setFilter('open')}>
-                Maç bul
+                {t('home:next.findMatch')}
               </Button>
             </div>
           )}
@@ -228,10 +226,10 @@ function Home() {
         <section className="mb-deals">
           <div className="mb-section-head">
             <h2 className="mb-section-title">
-              <FireOutlined style={{ color: 'var(--mb-gold)' }} /> Kampanyalı tesisler
+              <FireOutlined style={{ color: 'var(--mb-gold)' }} /> {t('home:deals.title')}
             </h2>
             <Button type="link" onClick={() => navigate('/venues')}>
-              Tüm tesisler <ArrowRightOutlined />
+              {t('home:deals.allVenues')} <ArrowRightOutlined />
             </Button>
           </div>
           <div className="mb-deals__strip">
@@ -240,7 +238,7 @@ function Home() {
                 <span className="mb-deal__cover">
                   {v.coverPhotoUrl ? <img src={mediaUrl(v.coverPhotoUrl, 'md')} alt="" loading="lazy" decoding="async" /> : <span className="mb-deal__ph mb-pitch-bg" />}
                   <span className="mb-deal__badge">
-                    <FireOutlined /> Kampanya
+                    <FireOutlined /> {t('home:deals.badge')}
                   </span>
                 </span>
                 <span className="mb-deal__body">
@@ -248,8 +246,7 @@ function Home() {
                   <small>{[v.district, v.city].filter(Boolean).join(', ')}</small>
                   {v.minPrice != null && (
                     <em>
-                      {formatPrice(v.minPrice)}
-                      <span>'den /saat</span>
+                      <Trans i18nKey="home:deals.fromPrice" values={{ price: formatPrice(v.minPrice) }} components={{ s: <span /> }} />
                     </em>
                   )}
                 </span>
@@ -263,10 +260,10 @@ function Home() {
         <button type="button" className="mb-invite-banner" onClick={() => navigate('/invites')}>
           <MailOutlined className="mb-invite-banner__icon" />
           <span>
-            <strong>{pendingInvites} davetin var</strong> · Arkadaşların seni sahaya çağırıyor
+            <Trans i18nKey="home:invites.banner" count={pendingInvites} components={{ b: <strong /> }} />
           </span>
           <span className="mb-invite-banner__go">
-            Davetlere bak <ArrowRightOutlined />
+            {t('home:invites.go')} <ArrowRightOutlined />
           </span>
         </button>
       )}
@@ -275,26 +272,26 @@ function Home() {
         {/* ---------- Fikstür ---------- */}
         <Col xs={24} xl={16}>
           <div className="mb-section-head">
-            <h2 className="mb-section-title">Fikstür</h2>
+            <h2 className="mb-section-title">{t('home:feed.title')}</h2>
             <Button icon={<RobotOutlined />} loading={aiLoading} onClick={sortWithAI} className="mb-ai-btn">
-              Bana göre sırala
+              {t('home:ai.sortButton')}
             </Button>
           </div>
 
           <div className="mb-filters">
-            <Segmented options={FILTERS} value={filter} onChange={setFilter} />
+            <Segmented options={filterOptions} value={filter} onChange={setFilter} />
             <Space wrap className="mb-filters__search">
               <Input
                 allowClear
                 prefix={<SearchOutlined />}
-                placeholder="Maç veya saha ara"
+                placeholder={t('home:feed.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 style={{ width: 200 }}
               />
               <Select
                 allowClear
-                placeholder="Tüm halı sahalar"
+                placeholder={t('home:feed.venuePlaceholder')}
                 value={stadiumFilter}
                 onChange={setStadiumFilter}
                 style={{ width: 180 }}
@@ -305,14 +302,14 @@ function Home() {
 
           {aiOrder && (
             <div className="mb-ai-banner">
-              <ThunderboltOutlined /> Liste yapay zeka tarafından senin geçmişine göre sıralandı.
+              <ThunderboltOutlined /> {t('home:ai.banner')}
               <Button type="link" size="small" onClick={() => setAiOrder(null)}>
-                Varsayılana dön
+                {t('home:ai.reset')}
               </Button>
             </div>
           )}
 
-          <Spin spinning={aiLoading} tip="Maçlar sana göre sıralanıyor…">
+          <Spin spinning={aiLoading} tip={t('home:ai.sorting')}>
             <div className="mb-feed">
               {loading ? (
                 [1, 2, 3].map((i) => (
@@ -324,16 +321,16 @@ function Home() {
                 <Card>
                   <EmptyState
                     description={
-                      filter === 'friends' ? 'Takip ettiklerinin katıldığı bir maç yok. Daha çok oyuncu takip et!' : 'Bu filtrede maç yok'
+                      filter === 'friends' ? t('home:feed.emptyFriends') : t('home:feed.empty')
                     }
                   >
                     {filter === 'friends' && (
                       <Button onClick={() => navigate('/friends?tab=discover')} style={{ marginRight: 8 }}>
-                        Oyuncu keşfet
+                        {t('home:feed.discoverPlayers')}
                       </Button>
                     )}
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/matches/new')}>
-                      Maç oluştur
+                      {t('home:hero.createMatch')}
                     </Button>
                   </EmptyState>
                 </Card>
@@ -360,17 +357,17 @@ function Home() {
               title={
                 <span>
                   <TrophyOutlined style={{ color: 'var(--mb-gold)', marginRight: 8 }} />
-                  Haftanın yıldızları
+                  {t('home:leaders.title')}
                 </span>
               }
               extra={
                 <Button type="link" onClick={() => navigate('/leaderboard')}>
-                  Tümü
+                  {t('common:all')}
                 </Button>
               }
             >
               {leaders.length === 0 ? (
-                <EmptyState description="Puanlanan maç oynandıkça burası dolacak" />
+                <EmptyState description={t('home:leaders.empty')} />
               ) : (
                 <ol className="mb-leaders">
                   {leaders.map((l, i) => (
@@ -380,7 +377,8 @@ function Home() {
                       <div className="mb-leaders__name">
                         <strong>{fullName(l.player)}</strong>
                         <span>
-                          {l.matchesPlayed} maç · {l.goals} gol {l.mvpCount > 0 && <><CrownFilled style={{ color: 'var(--mb-gold)' }} /> {l.mvpCount}</>}
+                          {t('home:leaders.matches', { count: l.matchesPlayed })} · {t('home:leaders.goals', { count: l.goals })}{' '}
+                          {l.mvpCount > 0 && <><CrownFilled style={{ color: 'var(--mb-gold)' }} /> {l.mvpCount}</>}
                         </span>
                       </div>
                       <span className="mb-leaders__score">{l.userScore}</span>
@@ -393,16 +391,16 @@ function Home() {
             <div className="mb-promo" onClick={() => navigate('/teamAICreate')}>
               <ThunderboltOutlined className="mb-promo__icon" />
               <div>
-                <h4>Dengeli takım kur</h4>
-                <p>Yapay zeka oyuncuları puanlarına göre iki denk takıma bölsün.</p>
+                <h4>{t('home:promo.aiTeamTitle')}</h4>
+                <p>{t('home:promo.aiTeamText')}</p>
               </div>
               <ArrowRightOutlined />
             </div>
             <div className="mb-promo is-blue" onClick={() => navigate('/venues')}>
               <EnvironmentOutlined className="mb-promo__icon" />
               <div>
-                <h4>Anlaşmalı halı sahalar</h4>
-                <p>Boş saatleri gör, fiyatları karşılaştır, sahanı ayırt.</p>
+                <h4>{t('home:promo.venuesTitle')}</h4>
+                <p>{t('home:promo.venuesText')}</p>
               </div>
               <ArrowRightOutlined />
             </div>

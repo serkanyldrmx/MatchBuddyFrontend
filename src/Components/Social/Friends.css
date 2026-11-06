@@ -37,7 +37,7 @@
   padding: 10px 14px;
   border-radius: 12px;
   background: var(--mb-primary-soft);
-  border: 1px solid rgba(198, 244, 50, 0.24);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.24);
   color: var(--mb-text);
   font-size: 13px;
 }
@@ -63,7 +63,7 @@
 /* Mini oyuncu kartı */
 .mb-friend-card.ant-card {
   background:
-    radial-gradient(400px 120px at 100% 0%, rgba(198, 244, 50, 0.06), transparent 70%),
+    radial-gradient(400px 120px at 100% 0%, rgba(var(--mb-primary-rgb), 0.06), transparent 70%),
     var(--mb-surface);
   transition: border-color 0.15s, transform 0.15s;
 }
@@ -74,7 +74,7 @@
 }
 
 .mb-friend-card.is-highlight.ant-card {
-  border-color: rgba(198, 244, 50, 0.4) !important;
+  border-color: rgba(var(--mb-primary-rgb), 0.4) !important;
 }
 
 .mb-friend-card .ant-card-body {

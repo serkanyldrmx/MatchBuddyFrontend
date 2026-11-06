@@ -20,7 +20,7 @@
 .mb-cal-legend .is-invited,
 .mb-cal-chip.is-invited {
   --kind: var(--mb-info);
-  --kind-soft: rgba(56, 189, 248, 0.14);
+  --kind-soft: rgba(var(--mb-info-rgb), 0.14);
 }
 
 .mb-cal-cell__item.is-past,
@@ -53,7 +53,7 @@
 
 .mb-cal-chip.is-going {
   color: var(--mb-primary-ink);
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
 }
 
 /* ---------- Ajanda ---------- */

@@ -17,7 +17,7 @@
   height: 26px;
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
   font-size: 15px;
   font-style: normal;
@@ -257,7 +257,7 @@
 
 .mb-invite-row.is-on {
   background: var(--mb-primary-soft);
-  border-color: rgba(198, 244, 50, 0.3);
+  border-color: rgba(var(--mb-primary-rgb), 0.3);
 }
 
 .mb-invite-row__name {

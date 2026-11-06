@@ -1,15 +1,13 @@
 import dayjs from 'dayjs';
-import 'dayjs/locale/tr';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { API_BASE_URL } from '../api/config';
+import i18n from '../i18n';
 
-dayjs.extend(relativeTime);
-dayjs.locale('tr');
+// dayjs yerel ayarı ve relativeTime eklentisi src/i18n/index.js içinde dile göre ayarlanır.
 
-// Tarih/saat biçimleri tek yerden yönetilir
-export const formatDate = (value) => (value ? dayjs(value).format('DD MMMM YYYY') : '-');
-export const formatTime = (value) => (value ? dayjs(value).format('HH:mm') : '-');
-export const formatDateTime = (value) => (value ? dayjs(value).format('DD MMM YYYY, HH:mm') : '-');
+// Tarih/saat biçimleri tek yerden yönetilir (biçim kalıpları common:formats.* altında, dile göre değişebilir)
+export const formatDate = (value) => (value ? dayjs(value).format(i18n.t('common:formats.date')) : '-');
+export const formatTime = (value) => (value ? dayjs(value).format(i18n.t('common:formats.time')) : '-');
+export const formatDateTime = (value) => (value ? dayjs(value).format(i18n.t('common:formats.dateTime')) : '-');
 export const fromNow = (value) => (value ? dayjs(value).fromNow() : '');
 export const isPast = (value) => (value ? dayjs(value).isBefore(dayjs()) : false);
 
@@ -39,7 +37,7 @@ export const mediaUrl = (url, size = 'md') => {
   return fileUrl(path);
 };
 
-export const fullName = (p) => [p?.playerName, p?.playerSurname].filter(Boolean).join(' ') || p?.userName || 'Bilinmeyen';
+export const fullName = (p) => [p?.playerName, p?.playerSurname].filter(Boolean).join(' ') || p?.userName || i18n.t('common:unknownPerson');
 
 export const initials = (p) => {
   const a = (p?.playerName || p?.userName || '?').charAt(0);
@@ -56,12 +54,40 @@ export const getCurrentUser = () => {
   }
 };
 
-// API hata mesajını kullanıcıya gösterilebilir metne çevirir
-export const apiErrorMessage = (error, fallback = 'Bir hata oluştu. Lütfen tekrar deneyin.') => {
+// Sunucu hata gövdesinden kullanıcıya gösterilebilir ham mesaj (varsa)
+const serverMessageOf = (data) => {
+  if (typeof data === 'string') return data.length < 200 ? data : null;
+  return data?.message || data?.Message || null;
+};
+
+/**
+ * API hata mesajını kullanıcıya gösterilebilir (çevrilmiş) metne çevirir.
+ * Sunucu sözleşmesi: { success: false, code: "MATCH_FULL", message, errors, traceId }
+ *  - code varsa: errors namespace'indeki <code> anahtarı; çeviri yoksa sunucu mesajı, o da yoksa fallback
+ *  - code yoksa: sunucu mesajı; o da yoksa ağ / zaman aşımı / HTTP durumuna göre genel metin ya da fallback
+ * fallback verilmezse errors:generic.unknown kullanılır.
+ */
+export const apiErrorMessage = (error, fallback) => {
+  const fb = fallback ?? i18n.t('errors:generic.unknown');
   const data = error?.response?.data;
-  if (typeof data === 'string' && data.length < 200) return data;
-  if (data?.message) return data.message;
-  if (data?.Message) return data.Message;
-  if (error?.response?.status === 403) return 'Bu işlem için yetkiniz yok.';
-  return fallback;
+  const serverMessage = serverMessageOf(data);
+  const code = data && typeof data === 'object' ? data.code || data.Code : null;
+  if (code && typeof code === 'string') {
+    return i18n.t(`errors:${code}`, { defaultValue: serverMessage || fb });
+  }
+  if (serverMessage) return serverMessage;
+
+  if (!error?.response) {
+    // Yanıt hiç gelmedi: zaman aşımı veya ağ hatası (axios / fetch)
+    if (error?.code === 'ECONNABORTED' || error?.code === 'ETIMEDOUT') return i18n.t('errors:generic.timeout');
+    if (error?.code === 'ERR_NETWORK' || error?.message === 'Network Error' || error?.message === 'Failed to fetch') {
+      return i18n.t('errors:generic.network');
+    }
+    return fb;
+  }
+
+  const status = error.response.status;
+  if (status === 403) return i18n.t('errors:generic.forbidden');
+  if (status === 429) return i18n.t('errors:generic.rateLimited');
+  return fb;
 };

@@ -12,6 +12,7 @@ import {
   UnlockOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { Trans, useTranslation } from 'react-i18next';
 import { emit, REPORT_REASONS, socialApi, SOCIAL_CHANGED } from '../../api/social';
 import { useMessages } from '../../messaging/MessagesContext';
 import { EmptyState, PlayerAvatar, Stat } from '../../ui';
@@ -26,6 +27,7 @@ function FollowListModal({ playerId, kind, name, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const me = getCurrentUser();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!kind) return;
@@ -34,17 +36,21 @@ function FollowListModal({ playerId, kind, name, onClose }) {
     (kind === 'followers' ? socialApi.followers(playerId) : socialApi.following(playerId))
       .then((r) => setList(r || []))
       .catch((e) =>
-        setError(e?.response?.status === 403 ? 'Bu oyuncu listelerini gizli tutuyor.' : apiErrorMessage(e, 'Liste yüklenemedi.'))
+        setError(
+          e?.response?.status === 403
+            ? t('social:profile.followList.hidden')
+            : apiErrorMessage(e, t('social:friends.loadFailed'))
+        )
       )
       .finally(() => setLoading(false));
-  }, [playerId, kind]);
+  }, [playerId, kind, t]);
 
   return (
     <Modal
       open={!!kind}
       onCancel={onClose}
       footer={null}
-      title={kind === 'followers' ? `${name} — Takipçiler` : `${name} — Takip ettikleri`}
+      title={kind === 'followers' ? t('social:profile.followList.followersTitle', { name }) : t('social:profile.followList.followingTitle', { name })}
       destroyOnClose
     >
       {loading ? (
@@ -52,7 +58,7 @@ function FollowListModal({ playerId, kind, name, onClose }) {
       ) : error ? (
         <EmptyState description={error} />
       ) : !list.length ? (
-        <EmptyState description={kind === 'followers' ? 'Henüz takipçisi yok.' : 'Henüz kimseyi takip etmiyor.'} />
+        <EmptyState description={kind === 'followers' ? t('social:profile.followList.noFollowers') : t('social:profile.followList.noFollowing')} />
       ) : (
         <div className="mb-pp-list">
           {list.map((p) => (
@@ -76,6 +82,7 @@ export default function PlayerProfile() {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
   const { openMessages } = useMessages();
+  const { t } = useTranslation();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -97,11 +104,11 @@ export default function PlayerProfile() {
         })
         .catch((e) => {
           if (e?.response?.status === 404) setNotFound(true);
-          else message.error(apiErrorMessage(e, 'Profil yüklenemedi.'));
+          else message.error(apiErrorMessage(e, t('social:profile.loadFailed')));
         })
         .finally(() => setLoading(false));
     },
-    [playerId, message]
+    [playerId, message, t]
   );
 
   useEffect(() => {
@@ -128,18 +135,18 @@ export default function PlayerProfile() {
     return (
       <Result
         status="404"
-        title="Oyuncu bulunamadı"
-        subTitle="Bu oyuncu yok ya da profiline erişemiyorsun."
+        title={t('social:profile.notFound.title')}
+        subTitle={t('social:profile.notFound.subtitle')}
         extra={
           <Button type="primary" onClick={() => navigate('/friends?tab=discover')}>
-            Oyuncu keşfet
+            {t('social:friends.discoverPlayers')}
           </Button>
         }
       />
     );
   }
 
-  if (!profile) return <EmptyState description="Profil yüklenemedi." />;
+  if (!profile) return <EmptyState description={t('social:profile.loadFailed')} />;
   if (profile.isMe) return <Navigate to="/user" replace />;
 
   const player = profile.player || {};
@@ -149,23 +156,23 @@ export default function PlayerProfile() {
 
   const block = () =>
     modal.confirm({
-      title: `${name} engellensin mi?`,
+      title: t('social:profile.block.confirmTitle', { name }),
       icon: <StopOutlined style={{ color: 'var(--mb-danger)' }} />,
       content: (
         <ul className="mb-pp-confirm">
-          <li>Aranızdaki tüm takipler (iki yönlü) kaldırılır.</li>
-          <li>Birbirinizi listelerde, aramada ve akışta görmezsiniz.</li>
-          <li>Sana mesaj, takip isteği ya da davet gönderemez.</li>
-          <li>Engeli istediğin zaman Ayarlar'dan kaldırabilirsin.</li>
+          <li>{t('social:profile.block.effectFollows')}</li>
+          <li>{t('social:profile.block.effectVisibility')}</li>
+          <li>{t('social:profile.block.effectContact')}</li>
+          <li>{t('social:profile.block.effectUndo')}</li>
         </ul>
       ),
-      okText: 'Engelle',
+      okText: t('social:profile.block.block'),
       okButtonProps: { danger: true },
-      cancelText: 'Vazgeç',
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
         try {
           await socialApi.block(player.playerId);
-          message.success(`${name} engellendi.`);
+          message.success(t('social:profile.block.blocked', { name }));
           emit(SOCIAL_CHANGED);
           load(true);
         } catch (e) {
@@ -177,7 +184,7 @@ export default function PlayerProfile() {
   const unblock = async () => {
     try {
       await socialApi.unblock(player.playerId);
-      message.success('Engel kaldırıldı.');
+      message.success(t('social:profile.block.unblocked'));
       emit(SOCIAL_CHANGED);
       load(true);
     } catch (e) {
@@ -189,7 +196,7 @@ export default function PlayerProfile() {
     setReporting(true);
     try {
       await socialApi.report(player.playerId, reason, details.trim() || undefined);
-      message.success('Şikayetin alındı, teşekkürler. Ekibimiz inceleyecek.');
+      message.success(t('social:profile.report.success'));
       setReportOpen(false);
       setReason(undefined);
       setDetails('');
@@ -203,9 +210,9 @@ export default function PlayerProfile() {
   const menu = {
     items: [
       profile.isBlockedByMe
-        ? { key: 'unblock', icon: <UnlockOutlined />, label: 'Engeli kaldır' }
-        : { key: 'block', icon: <StopOutlined />, label: 'Engelle', danger: true },
-      { key: 'report', icon: <FlagOutlined />, label: 'Şikayet et' },
+        ? { key: 'unblock', icon: <UnlockOutlined />, label: t('social:profile.block.unblock') }
+        : { key: 'block', icon: <StopOutlined />, label: t('social:profile.block.block'), danger: true },
+      { key: 'report', icon: <FlagOutlined />, label: t('social:profile.report.action') },
     ],
     onClick: ({ key }) => {
       if (key === 'block') block();
@@ -221,7 +228,7 @@ export default function PlayerProfile() {
       onClick={() => openMessages({ type: 'user', data: { ...followTarget, isMutual: profile.isMutual } })}
       className="mb-ghost-btn"
     >
-      Mesaj gönder
+      {t('social:friends.sendMessage')}
     </Button>
   );
 
@@ -232,31 +239,39 @@ export default function PlayerProfile() {
         <div className="mb-profile-hero__id">
           <PlayerAvatar player={player} size={112} />
           <div>
-            <span className="mb-profile-hero__eyebrow">Oyuncu kartı</span>
+            <span className="mb-profile-hero__eyebrow">{t('social:profile.eyebrow')}</span>
             <h1>{name}</h1>
             <span className="mb-profile-hero__user">@{player.userName}</span>
             <div className="mb-pp-chips">
-              {profile.isMutual && <span className="mb-chip is-live">Arkadaşsınız</span>}
-              {!profile.isMutual && profile.followsMe && <span className="mb-chip is-pending">Seni takip ediyor</span>}
-              {profile.isBlockedByMe && <span className="mb-chip is-rejected">Engellendi</span>}
+              {profile.isMutual && <span className="mb-chip is-live">{t('social:follow.friends')}</span>}
+              {!profile.isMutual && profile.followsMe && <span className="mb-chip is-pending">{t('social:friends.followsYou')}</span>}
+              {profile.isBlockedByMe && <span className="mb-chip is-rejected">{t('social:profile.block.blockedChip')}</span>}
             </div>
             <div className="mb-pp-counts">
               <button type="button" onClick={() => setListKind('followers')}>
-                <strong>{profile.followersCount ?? 0}</strong> takipçi
+                <Trans
+                  i18nKey="social:profile.followersCount"
+                  count={profile.followersCount ?? 0}
+                  components={{ b: <strong /> }}
+                />
               </button>
               <button type="button" onClick={() => setListKind('following')}>
-                <strong>{profile.followingCount ?? 0}</strong> takip
+                <Trans
+                  i18nKey="social:profile.followingCount"
+                  count={profile.followingCount ?? 0}
+                  components={{ b: <strong /> }}
+                />
               </button>
             </div>
             <div className="mb-profile-hero__tags">
-              {player.age ? <span>{player.age} yaş</span> : null}
-              {player.size ? <span>{player.size} cm</span> : null}
-              {player.weight ? <span>{player.weight} kg</span> : null}
+              {player.age ? <span>{t('social:profile.age', { count: player.age })}</span> : null}
+              {player.size ? <span>{t('social:profile.height', { value: player.size })}</span> : null}
+              {player.weight ? <span>{t('social:profile.weight', { value: player.weight })}</span> : null}
             </div>
           </div>
         </div>
         <div className="mb-profile-hero__rating">
-          <span>Genel puan</span>
+          <span>{t('social:profile.overallRating')}</span>
           <strong>{player.userScore ?? 0}</strong>
           <div className="mb-pp-actions">
             {!profile.isBlockedByMe && <FollowButton player={followTarget} onChange={() => load(true)} />}
@@ -264,12 +279,12 @@ export default function PlayerProfile() {
               (profile.canMessage ? (
                 messageBtn
               ) : (
-                <Tooltip title="Bu oyuncu sadece arkadaşlarından mesaj kabul ediyor">
+                <Tooltip title={t('social:profile.friendsOnlyMessages')}>
                   <span>{messageBtn}</span>
                 </Tooltip>
               ))}
             <Dropdown menu={menu} trigger={['click']} placement="bottomRight">
-              <Button icon={<MoreOutlined />} aria-label="Diğer" className="mb-ghost-btn" />
+              <Button icon={<MoreOutlined />} aria-label={t('common:other')} className="mb-ghost-btn" />
             </Dropdown>
           </div>
         </div>
@@ -280,17 +295,17 @@ export default function PlayerProfile() {
           type="warning"
           showIcon
           style={{ marginBottom: 20 }}
-          message="Bu oyuncuyu engelledin"
-          description="Birbirinize mesaj, takip ya da davet gönderemezsiniz."
-          action={<Button size="small" onClick={unblock}>Engeli kaldır</Button>}
+          message={t('social:profile.block.alertTitle')}
+          description={t('social:profile.block.alertDescription')}
+          action={<Button size="small" onClick={unblock}>{t('social:profile.block.unblock')}</Button>}
         />
       )}
 
       {!profile.statsVisible ? (
         <Card bordered={false} className="mb-pp-locked">
           <LockOutlined className="mb-pp-locked__icon" />
-          <h3>Bu oyuncu istatistiklerini gizli tutuyor</h3>
-          <p>Maçlarını ve takımlarını sadece izin verdiği kişiler görebilir.</p>
+          <h3>{t('social:profile.locked.title')}</h3>
+          <p>{t('social:profile.locked.description')}</p>
           {!profile.iFollow && !profile.isBlockedByMe && (
             <FollowButton player={followTarget} onChange={() => load(true)} />
           )}
@@ -298,32 +313,41 @@ export default function PlayerProfile() {
       ) : (
         <>
           <div className="mb-stat-strip">
-            <Card><Stat value={stats?.matchesPlayed ?? 0} label="Maç" /></Card>
-            <Card><Stat value={stats?.goals ?? 0} label="Gol" accent="var(--mb-primary)" /></Card>
-            <Card><Stat value={stats?.assists ?? 0} label="Asist" /></Card>
-            <Card><Stat value={stats?.mvpCount ?? 0} label="MVP" accent="var(--mb-gold)" /></Card>
+            <Card><Stat value={stats?.matchesPlayed ?? 0} label={t('social:profile.stats.matches')} /></Card>
+            <Card><Stat value={stats?.goals ?? 0} label={t('social:profile.stats.goals')} accent="var(--mb-primary)" /></Card>
+            <Card><Stat value={stats?.assists ?? 0} label={t('social:profile.stats.assists')} /></Card>
+            <Card><Stat value={stats?.mvpCount ?? 0} label={t('social:profile.stats.mvp')} accent="var(--mb-gold)" /></Card>
             <Card>
               <Stat
                 value={stats?.avgRating != null ? stats.avgRating.toFixed(1) : '-'}
-                label={`Ort. puan (${stats?.ratingCount ?? 0})`}
+                label={t('social:profile.stats.avgRating', { count: stats?.ratingCount ?? 0 })}
               />
             </Card>
           </div>
 
           <Row gutter={[20, 20]}>
             <Col xs={24} lg={15}>
-              <Card title="Son maçlar">
+              <Card title={t('social:profile.recentMatches')}>
                 {!stats?.recentMatches?.length ? (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Henüz oynanmış maçı yok." />
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('social:profile.noRecentMatches')} />
                 ) : (
                   <div className="mb-recent">
                     {stats.recentMatches.map((m) => {
                       const mine = m.side === 2 ? m.awayScore : m.homeScore;
                       const theirs = m.side === 2 ? m.homeScore : m.awayScore;
+                      // res: CSS sınıfı için sabit kod (G/M/B); görünen harf çeviriden gelir
                       const res = m.homeScore == null ? '-' : mine > theirs ? 'G' : mine < theirs ? 'M' : 'B';
+                      const resLabel =
+                        res === 'G'
+                          ? t('social:profile.resultShort.win')
+                          : res === 'M'
+                            ? t('social:profile.resultShort.loss')
+                            : res === 'B'
+                              ? t('social:profile.resultShort.draw')
+                              : res;
                       return (
                         <div key={m.matchId} className="mb-recent__row" onClick={() => navigate(`/match-details/${m.matchId}`)}>
-                          <span className={`mb-result-badge is-${res}`}>{res}</span>
+                          <span className={`mb-result-badge is-${res}`}>{resLabel}</span>
                           <div className="mb-recent__name">
                             <strong>{m.matchName}</strong>
                             <span>{dayjs(m.matchDate).format('DD MMM YYYY')}</span>
@@ -348,25 +372,25 @@ export default function PlayerProfile() {
                 <TeamOutlined className="mb-pp-together__icon" />
                 {profile.playedTogether > 0 ? (
                   <div>
-                    <strong>Birlikte {profile.playedTogether} maç</strong>
-                    <span>oynadınız</span>
+                    <strong>{t('social:profile.together.count', { count: profile.playedTogether })}</strong>
+                    <span>{t('social:profile.together.played')}</span>
                   </div>
                 ) : (
                   <div>
-                    <strong>Henüz birlikte oynamadınız</strong>
-                    <span>Bir maça birlikte katılın!</span>
+                    <strong>{t('social:profile.together.none')}</strong>
+                    <span>{t('social:profile.together.cta')}</span>
                   </div>
                 )}
               </Card>
-              <Card title="Takımları">
+              <Card title={t('social:profile.teams')}>
                 {profile.teams?.length ? (
-                  profile.teams.map((t) => (
-                    <Tag key={t.teamId} style={{ marginBottom: 8, padding: '4px 10px' }}>
-                      {t.teamName}
+                  profile.teams.map((team) => (
+                    <Tag key={team.teamId} style={{ marginBottom: 8, padding: '4px 10px' }}>
+                      {team.teamName}
                     </Tag>
                   ))
                 ) : (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Henüz bir takımda değil." />
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('social:profile.noTeams')} />
                 )}
               </Card>
             </Col>
@@ -378,14 +402,14 @@ export default function PlayerProfile() {
 
       <Modal
         open={reportOpen}
-        title={`${name} adlı oyuncuyu şikayet et`}
-        okText="Şikayet et"
-        cancelText="Vazgeç"
+        title={t('social:profile.report.title', { name })}
+        okText={t('social:profile.report.action')}
+        cancelText={t('common:actions.cancel')}
         okButtonProps={{ danger: true, disabled: !reason, loading: reporting }}
         onOk={submitReport}
         onCancel={() => setReportOpen(false)}
       >
-        <p className="mb-pp-report__hint">Neden şikayet ediyorsun? Şikayetin gizli tutulur.</p>
+        <p className="mb-pp-report__hint">{t('social:profile.report.hint')}</p>
         <Radio.Group value={reason} onChange={(e) => setReason(e.target.value)} className="mb-pp-report__reasons">
           {REPORT_REASONS.map((r) => (
             <Radio key={r.value} value={r.value}>
@@ -396,7 +420,7 @@ export default function PlayerProfile() {
         <Input.TextArea
           value={details}
           onChange={(e) => setDetails(e.target.value)}
-          placeholder="Eklemek istediğin bir detay var mı? (isteğe bağlı)"
+          placeholder={t('social:profile.report.detailsPlaceholder')}
           autoSize={{ minRows: 3, maxRows: 6 }}
           maxLength={500}
           showCount

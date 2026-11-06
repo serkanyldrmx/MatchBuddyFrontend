@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { App, DatePicker, Form, Input, InputNumber, Modal, Radio, Select } from 'antd';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { tournamentsApi, TOURNAMENT_FORMAT } from '../../api/tournaments';
 import { apiErrorMessage } from '../../utils/format';
 import { FormatIcon } from './tournamentUtils';
@@ -8,13 +9,13 @@ import { FormatIcon } from './tournamentUtils';
 const FORMAT_OPTIONS = [
   {
     value: TOURNAMENT_FORMAT.LEAGUE,
-    title: 'Lig',
-    text: 'Herkes herkesle oynar, puan tablosu belirler.',
+    titleKey: 'tournaments:format.league',
+    textKey: 'tournaments:create.leagueHint',
   },
   {
     value: TOURNAMENT_FORMAT.KNOCKOUT,
-    title: 'Eleme',
-    text: 'Kaybeden elenir, kazanan finale yürür.',
+    titleKey: 'tournaments:format.knockout',
+    textKey: 'tournaments:create.knockoutHint',
   },
 ];
 
@@ -22,6 +23,7 @@ const isPowerOfTwo = (n) => n > 0 && (n & (n - 1)) === 0;
 
 export default function CreateTournamentModal({ open, onClose, onCreated, stadiums = [] }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
   const format = Form.useWatch('format', form);
@@ -40,14 +42,14 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
         stadiumId: values.stadiumId ?? null,
       });
       if (res?.success === false) {
-        message.error(res.message || 'Turnuva oluşturulamadı.');
+        message.error(res.message || t('tournaments:create.error'));
         return;
       }
-      message.success(res?.message || 'Turnuva oluşturuldu, takımları bekliyoruz!');
+      message.success(res?.message || t('tournaments:create.success'));
       form.resetFields();
       onCreated?.(res?.tournamentId);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Turnuva oluşturulamadı.'));
+      message.error(apiErrorMessage(e, t('tournaments:create.error')));
     } finally {
       setSaving(false);
     }
@@ -55,15 +57,15 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
 
   const knockoutHint =
     format === TOURNAMENT_FORMAT.KNOCKOUT && maxTeams && !isPowerOfTwo(maxTeams)
-      ? 'Eleme için 4, 8 veya 16 takım önerilir; eksik yerler bay geçer.'
+      ? t('tournaments:create.powerOfTwoHint')
       : undefined;
 
   return (
     <Modal
       open={open}
-      title="Turnuva oluştur"
-      okText="Oluştur"
-      cancelText="Vazgeç"
+      title={t('tournaments:list.create')}
+      okText={t('tournaments:create.ok')}
+      cancelText={t('common:actions.cancel')}
       confirmLoading={saving}
       onOk={submit}
       onCancel={onClose}
@@ -79,20 +81,20 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
       >
         <Form.Item
           name="name"
-          label="Ad"
+          label={t('tournaments:create.name')}
           rules={[
-            { required: true, whitespace: true, message: 'Turnuvaya bir ad ver.' },
-            { max: 80, message: 'En fazla 80 karakter.' },
+            { required: true, whitespace: true, message: t('tournaments:create.nameRequired') },
+            { max: 80, message: t('tournaments:create.maxChars', { count: 80 }) },
           ]}
         >
-          <Input placeholder="Örn. Kış Ligi" maxLength={80} />
+          <Input placeholder={t('tournaments:create.namePlaceholder')} maxLength={80} />
         </Form.Item>
 
-        <Form.Item name="description" label="Açıklama" rules={[{ max: 500, message: 'En fazla 500 karakter.' }]}>
-          <Input.TextArea rows={3} maxLength={500} showCount placeholder="Kurallar, ödül, maç günleri…" />
+        <Form.Item name="description" label={t('tournaments:create.description')} rules={[{ max: 500, message: t('tournaments:create.maxChars', { count: 500 }) }]}>
+          <Input.TextArea rows={3} maxLength={500} showCount placeholder={t('tournaments:create.descriptionPlaceholder')} />
         </Form.Item>
 
-        <Form.Item name="format" label="Format" rules={[{ required: true }]}>
+        <Form.Item name="format" label={t('tournaments:create.format')} rules={[{ required: true }]}>
           <Radio.Group className="mb-tr-format-radio">
             {FORMAT_OPTIONS.map((o) => (
               <Radio.Button key={o.value} value={o.value} className="mb-tr-format-option">
@@ -100,8 +102,8 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
                   <FormatIcon format={o.value} />
                 </span>
                 <span className="mb-tr-format-option__text">
-                  <strong>{o.title}</strong>
-                  <small>{o.text}</small>
+                  <strong>{t(o.titleKey)}</strong>
+                  <small>{t(o.textKey)}</small>
                 </span>
               </Radio.Button>
             ))}
@@ -111,12 +113,12 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
         <div className="mb-tr-form-row">
           <Form.Item
             name="startDate"
-            label="Başlangıç tarihi ve saati"
+            label={t('tournaments:create.startDate')}
             rules={[
-              { required: true, message: 'Başlangıç tarihini seç.' },
+              { required: true, message: t('tournaments:create.startDateRequired') },
               {
                 validator: (_, v) =>
-                  !v || v.isAfter(dayjs()) ? Promise.resolve() : Promise.reject(new Error('Geçmiş bir tarih seçemezsin.')),
+                  !v || v.isAfter(dayjs()) ? Promise.resolve() : Promise.reject(new Error(t('tournaments:create.pastDate'))),
               },
             ]}
           >
@@ -125,14 +127,14 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
               format="DD.MM.YYYY HH:mm"
               disabledDate={(d) => d && d.isBefore(dayjs().startOf('day'))}
               style={{ width: '100%' }}
-              placeholder="Tarih ve saat"
+              placeholder={t('tournaments:create.dateTimePlaceholder')}
             />
           </Form.Item>
 
           <Form.Item
             name="maxTeams"
-            label="Maks. takım"
-            rules={[{ required: true, message: 'Takım sayısını gir.' }]}
+            label={t('tournaments:create.maxTeams')}
+            rules={[{ required: true, message: t('tournaments:create.maxTeamsRequired') }]}
             help={knockoutHint}
             validateStatus={knockoutHint ? 'warning' : undefined}
           >
@@ -149,18 +151,18 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
                 className={`mb-tr-quick-size ${maxTeams === n ? 'is-active' : ''}`}
                 onClick={() => form.setFieldValue('maxTeams', n)}
               >
-                {n} takım
+                {t('tournaments:create.teamSize', { count: n })}
               </button>
             ))}
           </div>
         )}
 
-        <Form.Item name="stadiumId" label="Halı saha (isteğe bağlı)">
+        <Form.Item name="stadiumId" label={t('tournaments:create.pitch')}>
           <Select
             allowClear
             showSearch
             optionFilterProp="label"
-            placeholder="Halı saha seç"
+            placeholder={t('tournaments:create.pitchPlaceholder')}
             options={stadiums.map((s) => ({ value: s.stadiumId, label: s.stadiumName }))}
           />
         </Form.Item>

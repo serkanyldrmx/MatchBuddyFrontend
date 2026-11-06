@@ -69,7 +69,7 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: rgba(56,189,248,0.14);
+  background: rgba(var(--mb-info-rgb), 0.14);
   color: var(--mb-info);
   display: flex;
   align-items: center;
@@ -157,8 +157,8 @@
 }
 
 .mb-bubble.is-mine {
-  background: var(--mb-primary);
-  border-color: var(--mb-primary);
+  background: var(--mb-primary-fill);
+  border-color: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
   border-radius: 14px 14px 4px 14px;
 }
@@ -376,7 +376,7 @@
   gap: 8px;
   border: 2px dashed var(--mb-primary);
   border-radius: var(--mb-radius);
-  background: rgba(7, 11, 18, 0.86);
+  background: rgba(var(--mb-bg-rgb), 0.9);
   color: var(--mb-primary);
   font-family: var(--mb-display);
   font-size: 20px;

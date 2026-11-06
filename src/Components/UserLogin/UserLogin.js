@@ -2,13 +2,15 @@ import { LockOutlined, UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import AuthShell from "./AuthShell";
 import { api, getToken } from '../../api/config';
 import { homePathFor } from '../../utils/roles';
 
 const UserLogin = () => {
   const navigate = useNavigate();
-  
+  const { t } = useTranslation();
+
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     // Token yoksa oturum geçersiz sayılır
@@ -18,11 +20,11 @@ const UserLogin = () => {
   }, [navigate]);
 
   const success = () => {
-    message.success("Giriş başarılı, yönlendiriliyorsunuz");
+    message.success(t('auth:login.success'));
   };
 
-  const error = (text = "Giriş başarısız") => {
-    message.error(text);
+  const error = (text) => {
+    message.error(text || t('auth:login.failed'));
   };
 
   const onFinish = async (values) => {
@@ -49,7 +51,7 @@ const UserLogin = () => {
       }, 1500);
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        error("Kullanıcı adı veya şifre hatalı");
+        error(t('auth:login.invalidCredentials'));
       } else {
         error();
       }
@@ -59,8 +61,8 @@ const UserLogin = () => {
 
   return (
     <AuthShell
-      title={<>Sahaya <em>dönüş</em></>}
-      subtitle="Kadron seni bekliyor. Hesabına giriş yap, maçını kaçırma."
+      title={<Trans i18nKey="auth:login.title" components={{ em: <em /> }} />}
+      subtitle={t('auth:login.subtitle')}
     >
       <Form
         name="normal_login"
@@ -74,18 +76,18 @@ const UserLogin = () => {
       >
         <Form.Item
           name="username"
-          label="Kullanıcı adı"
+          label={t('auth:login.username')}
           rules={[
             {
               required: true,
-              message: "Lütfen Kullanıcı adınızı giriniz!",
+              message: t('auth:login.usernameRequired'),
             },
           ]}
         >
           <Input
             size="large"
             prefix={<UserOutlined />}
-            placeholder="Kullanıcı Adı"
+            placeholder={t('auth:login.usernamePlaceholder')}
             autoComplete="username"
             autoCapitalize="none"
             autoFocus
@@ -93,36 +95,36 @@ const UserLogin = () => {
         </Form.Item>
         <Form.Item
           name="password"
-          label="Şifre"
+          label={t('auth:login.password')}
           rules={[
             {
               required: true,
-              message: "Lütfen Şifrenizi Giriniz!",
+              message: t('auth:login.passwordRequired'),
             },
           ]}
         >
           <Input.Password
             size="large"
             prefix={<LockOutlined />}
-            placeholder="Şifre"
+            placeholder={t('auth:login.passwordPlaceholder')}
             autoComplete="current-password"
             iconRender={visible => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
           />
         </Form.Item>
         <div className="mb-auth__row">
           <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Beni Hatırla</Checkbox>
+            <Checkbox>{t('auth:login.remember')}</Checkbox>
           </Form.Item>
-          <Link to="#" className="mb-auth__link">Parolanızı mı unuttunuz?</Link>
+          <Link to="#" className="mb-auth__link">{t('auth:login.forgotPassword')}</Link>
         </div>
         <Form.Item className="mb-auth__submit">
           <Button type="primary" htmlType="submit" size="large" block>
-            Giriş Yap
+            {t('auth:login.submit')}
           </Button>
         </Form.Item>
       </Form>
       <p className="mb-auth__switch">
-        Hesabın yok mu? <Link to="/register" className="mb-auth__link">Şimdi üye ol</Link>
+        {t('auth:login.noAccount')} <Link to="/register" className="mb-auth__link">{t('auth:login.signUpNow')}</Link>
       </p>
     </AuthShell>
   );

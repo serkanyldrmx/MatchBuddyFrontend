@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Avatar, Button, Card, Col, Form, Input, InputNumber, Row, Space, Typography, Upload } from 'antd';
 import { EditOutlined, LockOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { USER_CHANGED } from '../../layout/AppLayout';
 import { PageHeader } from '../../ui';
@@ -14,6 +15,7 @@ const { Text } = Typography;
 
 function UserUpdate() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [user, setUser] = useState(getCurrentUser() || {});
@@ -42,8 +44,8 @@ function UserUpdate() {
           age: r.data.age || null,
         });
       })
-      .catch((e) => message.error(apiErrorMessage(e, 'Profil yüklenemedi.')));
-  }, [form, message]);
+      .catch((e) => message.error(apiErrorMessage(e, t('profile:loadError'))));
+  }, [form, message, t]);
 
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
 
@@ -64,7 +66,7 @@ function UserUpdate() {
     }
     const prepared = await prepareImage(f);
     if (prepared.size > MAX_IMAGE_BYTES) {
-      message.error(`Fotoğraf en fazla ${MAX_IMAGE_MB} MB olabilir.`);
+      message.error(t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB }));
       return Upload.LIST_IGNORE;
     }
     setFile(prepared);
@@ -97,10 +99,10 @@ function UserUpdate() {
       const fresh = await api.get(`/api/Players/GetPlayerById?playerId=${user.playerId}`);
       localStorage.setItem('user', JSON.stringify(fresh.data));
       window.dispatchEvent(new Event(USER_CHANGED));
-      message.success('Profiliniz güncellendi.');
+      message.success(t('profile:edit.success'));
       navigate('/user');
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Profil güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('profile:edit.error')));
     } finally {
       setSaving(false);
     }
@@ -110,81 +112,81 @@ function UserUpdate() {
 
   return (
     <>
-      <PageHeader title="Profili düzenle" subtitle="Bilgilerini güncel tut; takım arkadaşların seni daha kolay bulsun." icon={<EditOutlined />} />
+      <PageHeader title={t('profile:edit.title')} subtitle={t('profile:edit.subtitle')} icon={<EditOutlined />} />
       <Form form={form} layout="vertical" onFinish={submit} requiredMark="optional">
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
-            <Card bordered={false} title="Profil fotoğrafı" style={{ marginBottom: 24 }}>
+            <Card bordered={false} title={t('profile:edit.photo.title')} style={{ marginBottom: 24 }}>
               <div className="mb-upload-row">
                 <Avatar size={88} src={avatarSrc} icon={!avatarSrc && <UserOutlined />} />
                 <Space direction="vertical" size={4}>
                   <ImageCrop variant="avatar" beforeCrop={beforeCrop}>
                     <Upload beforeUpload={beforeUpload} showUploadList={false} accept={ACCEPTED_IMAGE_ACCEPT} maxCount={1}>
-                      <Button icon={<UploadOutlined />}>Fotoğraf seç</Button>
+                      <Button icon={<UploadOutlined />}>{t('profile:edit.photo.select')}</Button>
                     </Upload>
                   </ImageCrop>
-                  <Text type="secondary" style={{ fontSize: 12 }}>JPG, PNG veya WebP, en fazla {MAX_IMAGE_MB} MB. Seçtikten sonra kırpabilirsin.</Text>
-                  {file && <Text style={{ fontSize: 12 }}>Seçildi: {file.name}</Text>}
+                  <Text type="secondary" style={{ fontSize: 12 }}>{t('profile:edit.photo.hint', { maxMb: MAX_IMAGE_MB })}</Text>
+                  {file && <Text style={{ fontSize: 12 }}>{t('profile:edit.photo.selected', { name: file.name })}</Text>}
                 </Space>
               </div>
             </Card>
 
-            <Card bordered={false} title="Kişisel bilgiler" style={{ marginBottom: 24 }}>
+            <Card bordered={false} title={t('profile:edit.personal')} style={{ marginBottom: 24 }}>
               <Row gutter={16}>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="playerName" label="Ad" rules={[{ required: true, whitespace: true, message: 'Ad zorunludur.' }]}>
+                  <Form.Item name="playerName" label={t('profile:fields.firstName')} rules={[{ required: true, whitespace: true, message: t('profile:edit.required.firstName') }]}>
                     <Input maxLength={100} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="playerSurname" label="Soyad" rules={[{ required: true, whitespace: true, message: 'Soyad zorunludur.' }]}>
+                  <Form.Item name="playerSurname" label={t('profile:fields.lastName')} rules={[{ required: true, whitespace: true, message: t('profile:edit.required.lastName') }]}>
                     <Input maxLength={100} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="userName" label="Kullanıcı adı" rules={[{ required: true, whitespace: true, message: 'Kullanıcı adı zorunludur.' }]}>
+                  <Form.Item name="userName" label={t('profile:fields.userName')} rules={[{ required: true, whitespace: true, message: t('profile:edit.required.userName') }]}>
                     <Input prefix="@" maxLength={25} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
                   <Form.Item
                     name="email"
-                    label="E-posta"
+                    label={t('profile:fields.email')}
                     rules={[
-                      { required: true, message: 'E-posta zorunludur.' },
-                      { type: 'email', message: 'Geçerli bir e-posta girin.' },
+                      { required: true, message: t('profile:edit.required.email') },
+                      { type: 'email', message: t('validation:email') },
                     ]}
                   >
                     <Input maxLength={100} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="phoneNumber" label="Telefon" rules={[{ required: true, message: 'Telefon zorunludur.' }]}>
+                  <Form.Item name="phoneNumber" label={t('profile:fields.phone')} rules={[{ required: true, message: t('profile:edit.required.phone') }]}>
                     <Input placeholder="+90 5xx xxx xx xx" maxLength={20} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="address" label="Adres" rules={[{ required: true, message: 'Adres zorunludur.' }]}>
+                  <Form.Item name="address" label={t('profile:fields.address')} rules={[{ required: true, message: t('profile:edit.required.address') }]}>
                     <Input maxLength={200} />
                   </Form.Item>
                 </Col>
               </Row>
             </Card>
 
-            <Card bordered={false} title="Fiziksel bilgiler">
+            <Card bordered={false} title={t('profile:edit.physical')}>
               <Row gutter={16}>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="age" label="Yaş" rules={[{ required: true, message: 'Zorunlu' }]}>
+                  <Form.Item name="age" label={t('profile:fields.age')} rules={[{ required: true, message: t('profile:edit.required.short') }]}>
                     <InputNumber min={10} max={80} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="size" label="Boy (cm)" rules={[{ required: true, message: 'Zorunlu' }]}>
+                  <Form.Item name="size" label={t('profile:fields.height')} rules={[{ required: true, message: t('profile:edit.required.short') }]}>
                     <InputNumber min={120} max={230} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="weight" label="Kilo (kg)" rules={[{ required: true, message: 'Zorunlu' }]}>
+                  <Form.Item name="weight" label={t('profile:fields.weight')} rules={[{ required: true, message: t('profile:edit.required.short') }]}>
                     <InputNumber min={30} max={200} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
@@ -193,16 +195,16 @@ function UserUpdate() {
           </Col>
 
           <Col xs={24} lg={8}>
-            <Card bordered={false} title="Şifre değiştir" style={{ marginBottom: 24 }}>
+            <Card bordered={false} title={t('profile:edit.password.title')} style={{ marginBottom: 24 }}>
               <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-                Şifrenizi değiştirmek istemiyorsanız boş bırakın.
+                {t('profile:edit.password.hint')}
               </Text>
-              <Form.Item name="password" label="Yeni şifre" rules={[{ min: 6, message: 'En az 6 karakter olmalıdır.' }]} hasFeedback>
+              <Form.Item name="password" label={t('profile:edit.password.new')} rules={[{ min: 6, message: t('profile:edit.password.minLength', { count: 6 }) }]} hasFeedback>
                 <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
               </Form.Item>
               <Form.Item
                 name="confirm"
-                label="Yeni şifre (tekrar)"
+                label={t('profile:edit.password.confirm')}
                 dependencies={['password']}
                 hasFeedback
                 rules={[
@@ -210,7 +212,7 @@ function UserUpdate() {
                     validator: (_, v) =>
                       !getFieldValue('password') || getFieldValue('password') === v
                         ? Promise.resolve()
-                        : Promise.reject(new Error('Şifreler eşleşmiyor.')),
+                        : Promise.reject(new Error(t('validation:passwordMismatch'))),
                   }),
                 ]}
               >
@@ -219,9 +221,9 @@ function UserUpdate() {
             </Card>
             <Card bordered={false}>
               <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                <Button onClick={() => navigate('/user')}>Vazgeç</Button>
+                <Button onClick={() => navigate('/user')}>{t('common:actions.cancel')}</Button>
                 <Button type="primary" htmlType="submit" loading={saving}>
-                  Değişiklikleri kaydet
+                  {t('profile:edit.submit')}
                 </Button>
               </Space>
             </Card>

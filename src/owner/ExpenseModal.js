@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { App, Button, Checkbox, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Select, Skeleton, Typography } from 'antd';
-import { EXPENSE_CATEGORIES, formatPrice, ownerApi } from '../api/venues';
+import { useTranslation } from 'react-i18next';
+import { EXPENSE_CATEGORIES, expenseCategoryLabel, formatPrice, ownerApi } from '../api/venues';
 import { EmptyState } from '../ui';
 import { apiErrorMessage } from '../utils/format';
 import { CategoryChip } from './FinanceCharts';
@@ -9,13 +10,14 @@ import { WriteButton, asList, notifyOwnerChanged, ymd } from './shared';
 
 const { Text } = Typography;
 
+// category: sunucuya kaydedilen değer (çevrilmez); key: finance:expenseModal.quick.<key>.{label,description}
 const QUICK = [
-  { label: 'Kira', category: 'Kira', description: 'Aylık kira' },
-  { label: 'Elektrik faturası', category: 'Elektrik', description: 'Elektrik faturası' },
-  { label: 'Su faturası', category: 'Su', description: 'Su faturası' },
-  { label: 'Doğalgaz faturası', category: 'Doğalgaz', description: 'Doğalgaz faturası' },
-  { label: 'Personel maaşı', category: 'Personel', description: 'Personel maaşı' },
-  { label: 'Saha bakımı', category: 'Bakım-onarım', description: 'Saha bakımı' },
+  { key: 'rent', category: 'Kira' },
+  { key: 'electricity', category: 'Elektrik' },
+  { key: 'water', category: 'Su' },
+  { key: 'naturalGas', category: 'Doğalgaz' },
+  { key: 'staff', category: 'Personel' },
+  { key: 'maintenance', category: 'Bakım-onarım' },
 ];
 
 const categoryOptions = EXPENSE_CATEGORIES.map((c) => ({ value: c, label: <CategoryChip category={c} compact /> }));
@@ -28,14 +30,16 @@ const defaultDate = (month) => (dayjs().isSame(month, 'month') ? dayjs().startOf
  * expense: null → yeni kayıt; { expenseId, date, category, amount, description } → düzenleme
  */
 export default function ExpenseModal({ open, expense, month, venueId, onClose, onSaved }) {
+  const { t } = useTranslation();
   return (
-    <Modal open={open} title={expense?.expenseId ? 'Gideri düzenle' : 'Gider ekle'} onCancel={onClose} footer={null} destroyOnClose width={520}>
+    <Modal open={open} title={expense?.expenseId ? t('finance:expenseModal.titleEdit') : t('finance:expenseModal.titleAdd')}onCancel={onClose} footer={null} destroyOnClose width={520}>
       {open && <ExpenseForm expense={expense} month={month} venueId={venueId} onClose={onClose} onSaved={onSaved} />}
     </Modal>
   );
 }
 
 function ExpenseForm({ expense, month, venueId, onClose, onSaved }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
@@ -65,11 +69,11 @@ function ExpenseForm({ expense, month, venueId, onClose, onSaved }) {
         amount: Number(v.amount),
         description: v.description?.trim() || undefined,
       });
-      message.success(editing ? 'Gider güncellendi.' : 'Gider eklendi.');
+      message.success(editing ? t('finance:expenseModal.updated') : t('finance:expenseModal.added'));
       notifyOwnerChanged();
       onSaved?.();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Gider kaydedilemedi.'));
+      message.error(apiErrorMessage(e, t('finance:expenseModal.saveFailed')));
     } finally {
       setSaving(false);
     }
@@ -80,18 +84,20 @@ function ExpenseForm({ expense, month, venueId, onClose, onSaved }) {
       {!editing && (
         <>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Hızlı ekle
+            {t('finance:expenseModal.quickAdd')}
           </Text>
           <div className="mb-mbk-chips" style={{ marginTop: 6 }}>
             {QUICK.map((q) => (
               <span
-                key={q.label}
+                key={q.key}
                 role="button"
                 tabIndex={0}
                 className="mb-mbk-chip"
-                onClick={() => form.setFieldsValue({ category: q.category, description: q.description })}
+                onClick={() =>
+                  form.setFieldsValue({ category: q.category, description: t(`finance:expenseModal.quick.${q.key}.description`) })
+                }
               >
-                {q.label}
+                {t(`finance:expenseModal.quick.${q.key}.label`)}
               </span>
             ))}
           </div>
@@ -99,33 +105,41 @@ function ExpenseForm({ expense, month, venueId, onClose, onSaved }) {
       )}
       <Row gutter={12}>
         <Col xs={24} sm={12}>
-          <Form.Item name="date" label="Tarih" rules={[{ required: true, message: 'Tarih seçin.' }]}>
+          <Form.Item
+            name="date"
+            label={t('finance:expenseModal.date')}
+            rules={[{ required: true, message: t('finance:expenseModal.dateRequired') }]}
+          >
             <DatePicker format="DD.MM.YYYY" style={{ width: '100%' }} allowClear={false} />
           </Form.Item>
         </Col>
         <Col xs={24} sm={12}>
-          <Form.Item name="category" label="Kategori" rules={[{ required: true, message: 'Kategori seçin.' }]}>
-            <Select options={categoryOptions} placeholder="Kategori seçin" />
+          <Form.Item
+            name="category"
+            label={t('finance:expenseModal.category')}
+            rules={[{ required: true, message: t('finance:expenseModal.categoryRequired') }]}
+          >
+            <Select options={categoryOptions} placeholder={t('finance:expenseModal.categoryPlaceholder')} />
           </Form.Item>
         </Col>
       </Row>
       <Form.Item
         name="amount"
-        label="Tutar"
+        label={t('finance:expenseModal.amount')}
         rules={[
-          { required: true, message: 'Tutar girin.' },
-          { type: 'number', min: 0.01, message: 'Tutar sıfırdan büyük olmalı.' },
+          { required: true, message: t('finance:expenseModal.amountRequired') },
+          { type: 'number', min: 0.01, message: t('finance:expenseModal.amountPositive') },
         ]}
       >
         <InputNumber min={0} max={100000000} step={100} style={{ width: '100%' }} addonAfter="₺" decimalSeparator="," autoFocus={editing} />
       </Form.Item>
-      <Form.Item name="description" label="Açıklama">
-        <Input maxLength={200} showCount placeholder="Örn. Kasım ayı elektrik faturası" />
+      <Form.Item name="description" label={t('finance:expenseModal.description')}>
+        <Input maxLength={200} showCount placeholder={t('finance:expenseModal.descriptionPlaceholder')} />
       </Form.Item>
       <div className="mb-mbk-footer">
-        <Button onClick={onClose}>Vazgeç</Button>
+        <Button onClick={onClose}>{t('common:actions.cancel')}</Button>
         <WriteButton type="primary" loading={saving} onClick={submit}>
-          {editing ? 'Değişiklikleri kaydet' : 'Gideri ekle'}
+          {editing ? t('finance:expenseModal.saveChanges') : t('finance:expenseModal.submitAdd')}
         </WriteButton>
       </div>
     </Form>
@@ -134,6 +148,7 @@ function ExpenseForm({ expense, month, venueId, onClose, onSaved }) {
 
 /** Geçen ayın giderlerinden seçilenleri bu aya kopyalar (aynı gün, ay sonuna sığdırılarak) */
 export function CopyExpensesModal({ open, month, venueId, onClose, onDone }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const [list, setList] = useState(null);
   const [error, setError] = useState(null);
@@ -154,7 +169,7 @@ export function CopyExpensesModal({ open, month, venueId, onClose, onDone }) {
         setList(items);
         setChecked(items.map((e) => e.expenseId));
       })
-      .catch((e) => alive && setError(apiErrorMessage(e, 'Geçen ayın giderleri alınamadı.')));
+      .catch((e) => alive && setError(apiErrorMessage(e, t('finance:copyModal.loadFailed'))));
     return () => {
       alive = false;
     };
@@ -184,19 +199,19 @@ export function CopyExpensesModal({ open, month, venueId, onClose, onDone }) {
     }
     setSaving(false);
     if (ok) {
-      message.success(`${ok} gider ${month.format('MMMM')} ayına kopyalandı.`);
+      message.success(t('finance:copyModal.copied', { count: ok, month: month.format('MMMM') }));
       notifyOwnerChanged();
       onDone?.();
     }
-    if (ok < items.length) message.error(`${items.length - ok} gider kopyalanamadı.`);
+    if (ok < items.length) message.error(t('finance:copyModal.copyFailed', { count: items.length - ok }));
   };
 
   const total = (list || []).filter((e) => checked.includes(e.expenseId)).reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
   return (
-    <Modal open={open} title="Geçen aydan kopyala" onCancel={onClose} footer={null} destroyOnClose width={560}>
+    <Modal open={open} title={t('finance:copyModal.title')} onCancel={onClose} footer={null} destroyOnClose width={560}>
       <Text type="secondary">
-        {prev.format('MMMM YYYY')} giderlerinden tekrar edenleri seçin; {month.format('MMMM YYYY')} ayına aynı günle eklenir.
+        {t('finance:copyModal.intro', { prev: prev.format('MMMM YYYY'), month: month.format('MMMM YYYY') })}
       </Text>
       <div className="mb-fin-copy">
         {error ? (
@@ -204,14 +219,14 @@ export function CopyExpensesModal({ open, month, venueId, onClose, onDone }) {
         ) : !list ? (
           <Skeleton active paragraph={{ rows: 3 }} title={false} />
         ) : list.length === 0 ? (
-          <EmptyState description="Geçen ay kayıtlı gider yok" />
+          <EmptyState description={t('finance:copyModal.empty')} />
         ) : (
           <Checkbox.Group value={checked} onChange={setChecked} style={{ width: '100%' }}>
             {list.map((e) => (
               <Checkbox key={e.expenseId} value={e.expenseId} className="mb-fin-copy__row">
                 <span className="mb-fin-copy__inner">
                   <CategoryChip category={e.category} compact />
-                  <span className="mb-fin-copy__desc">{e.description || e.category}</span>
+                  <span className="mb-fin-copy__desc">{e.description || expenseCategoryLabel(e.category)}</span>
                   <span className="mb-fin-copy__date">{dayjs(e.date).format('DD MMM')}</span>
                   <strong>{formatPrice(e.amount)}</strong>
                 </span>
@@ -221,11 +236,13 @@ export function CopyExpensesModal({ open, month, venueId, onClose, onDone }) {
         )}
       </div>
       <div className="mb-mbk-footer" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text type="secondary">{checked.length ? `${checked.length} kalem · ${formatPrice(total)}` : ''}</Text>
+        <Text type="secondary">
+          {checked.length ? t('finance:copyModal.summary', { count: checked.length, total: formatPrice(total) }) : ''}
+        </Text>
         <span style={{ display: 'inline-flex', gap: 8 }}>
-          <Button onClick={onClose}>Vazgeç</Button>
+          <Button onClick={onClose}>{t('common:actions.cancel')}</Button>
           <WriteButton type="primary" loading={saving} disabled={!checked.length || !list?.length} onClick={copy}>
-            Seçilenleri kopyala
+            {t('finance:copyModal.copySelected')}
           </WriteButton>
         </span>
       </div>

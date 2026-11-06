@@ -2,30 +2,165 @@
    Match Buddy — global tasarım değişkenleri ("gece maçı")
    antd token'ları: src/theme/theme.js
    ========================================================= */
-:root {
+:root,
+[data-theme='dark'],
+/* Açık temada da koyu kalan "stadyum" panelleri (ada): hero alanları, saha, giriş ekranı */
+.mb-pitch-bg,
+.mb-dark-island,
+.mb-auth,
+.mb-pitch__field,
+.mb-owner-pitch__field,
+.mb-venue-card__cover {
+  /* ---- Koyu ("gece maçı") palet: varsayılan ---- */
   --mb-bg: #070b12;
+  --mb-bg-rgb: 7, 11, 18;
   --mb-surface: #0e1520;
   --mb-surface-2: #141d2b;
   --mb-surface-3: #1b2637;
+  --mb-surface-hover: #1b2637;
+  --mb-sider-bg: #05080e;
+  --mb-glass: rgba(7, 11, 18, 0.72);
+  --mb-glass-strong: rgba(5, 8, 14, 0.92);
   --mb-border: rgba(148, 163, 184, 0.14);
   --mb-border-strong: rgba(148, 163, 184, 0.26);
+  --mb-slate-rgb: 148, 163, 184;
   --mb-text: #e8eef6;
+  --mb-text-rgb: 232, 238, 246;
   --mb-text-2: #8b9bb0;
   --mb-text-3: #5f6f84;
+  /* yüzeyin "öne çıkan" yönü: koyu temada beyaz, açık temada koyu (ince vurgu/hover katmanları) */
+  --mb-fg-rgb: 255, 255, 255;
+
+  /* Vurgu: --mb-primary yazı/çizgi/ikon içindir; dolgu için --mb-primary-fill + --mb-primary-ink */
   --mb-primary: #c6f432;
+  --mb-primary-rgb: 198, 244, 50;
+  --mb-primary-hover: #d4f75c;
+  --mb-primary-fill: #c6f432;
+  --mb-primary-fill-hover: #d4f75c;
+  --mb-primary-fill-rgb: 198, 244, 50;
   --mb-primary-ink: #0b1405;
   --mb-primary-soft: rgba(198, 244, 50, 0.12);
+
   --mb-pitch: #22c55e;
+  --mb-pitch-rgb: 34, 197, 94;
+  --mb-pitch-fill: #22c55e;
+  --mb-pitch-ink: #04130b;
   --mb-pitch-dark: #0f3d22;
   --mb-gold: #fbbf24;
+  --mb-gold-rgb: 251, 191, 36;
+  --mb-gold-fill: #fbbf24;
+  --mb-gold-fill-rgb: 251, 191, 36;
+  --mb-gold-ink: #1a1203;
   --mb-gold-soft: rgba(251, 191, 36, 0.14);
   --mb-danger: #f43f5e;
+  --mb-danger-rgb: 244, 63, 94;
   --mb-info: #38bdf8;
+  --mb-info-rgb: 56, 189, 248;
+  --mb-info-ink: #04121c;
+  --mb-violet: #a78bfa;
+  --mb-violet-rgb: 167, 139, 250;
+  --mb-orange: #fb923c;
   --mb-home: #c6f432;
+  --mb-home-rgb: 198, 244, 50;
   --mb-away: #38bdf8;
+  --mb-away-rgb: 56, 189, 248;
+
+  /* Gölgeler ve örtüler */
+  --mb-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --mb-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --mb-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --mb-scrim: rgba(5, 8, 14, 0.62); /* fotoğraf/örtü üstü — iki temada da koyu */
+  --mb-placeholder: linear-gradient(135deg, #1f2b3d, #2a3a52);
+
+  /* Harita (Leaflet) karo filtresi */
+  --mb-map-filter: brightness(0.75) contrast(1.1) saturate(0.8) hue-rotate(-10deg);
+
+  /* Saha ("stadyum") paneli */
+  --mb-turf-1: #0d2a19;
+  --mb-turf-2: #0b2416;
+  --mb-turf-line: rgba(255, 255, 255, 0.10);
+
   --mb-radius: 16px;
   --mb-display: 'Barlow Condensed', 'Inter', sans-serif;
-  --mb-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+/* ---- Açık ("gündüz maçı") palet ----
+   Kireç yeşili (#c6f432) sadece koyu yazılı dolgu olarak kalır; açık zeminde yazı/çizgi için koyu yeşil (#467211). */
+[data-theme='light'] {
+  --mb-bg: #f3f6f1;
+  --mb-bg-rgb: 243, 246, 241;
+  --mb-surface: #ffffff;
+  --mb-surface-2: #eef2ea;
+  --mb-surface-3: #e2e8dc;
+  --mb-surface-hover: #e8ede3;
+  --mb-sider-bg: #ffffff;
+  --mb-glass: rgba(255, 255, 255, 0.8);
+  --mb-glass-strong: rgba(255, 255, 255, 0.94);
+  --mb-border: rgba(22, 38, 26, 0.11);
+  --mb-border-strong: rgba(22, 38, 26, 0.2);
+  --mb-slate-rgb: 71, 85, 105;
+  --mb-text: #111a14;
+  --mb-text-rgb: 17, 26, 20;
+  --mb-text-2: #4a5a50;
+  --mb-text-3: #66756c;
+  --mb-fg-rgb: 17, 26, 20;
+
+  --mb-primary: #467211;
+  --mb-primary-rgb: 70, 114, 17;
+  --mb-primary-hover: #3a5f0d;
+  --mb-primary-fill: #c6f432;
+  --mb-primary-fill-hover: #b9ea1f;
+  --mb-primary-fill-rgb: 132, 184, 18;
+  --mb-primary-ink: #0b1405;
+  --mb-primary-soft: rgba(70, 114, 17, 0.1);
+
+  --mb-pitch: #15803d;
+  --mb-pitch-rgb: 21, 128, 61;
+  --mb-pitch-fill: #22c55e;
+  --mb-pitch-ink: #04130b;
+  --mb-pitch-dark: #0f3d22;
+  --mb-gold: #b45309;
+  --mb-gold-rgb: 217, 119, 6;
+  --mb-gold-fill: #fbbf24;
+  --mb-gold-fill-rgb: 251, 191, 36;
+  --mb-gold-ink: #1a1203;
+  --mb-gold-soft: rgba(217, 119, 6, 0.12);
+  --mb-danger: #e11d48;
+  --mb-danger-rgb: 225, 29, 72;
+  --mb-info: #0369a1;
+  --mb-info-rgb: 2, 132, 199;
+  --mb-info-ink: #ffffff;
+  --mb-violet: #6d28d9;
+  --mb-violet-rgb: 109, 40, 217;
+  --mb-orange: #c2410c;
+  --mb-home: #467211;
+  --mb-home-rgb: 70, 114, 17;
+  --mb-away: #0369a1;
+  --mb-away-rgb: 2, 132, 199;
+
+  --mb-shadow: 0 10px 30px rgba(22, 38, 26, 0.08);
+  --mb-shadow-lg: 0 24px 60px rgba(22, 38, 26, 0.16);
+  --mb-shadow-sm: 0 4px 14px rgba(22, 38, 26, 0.08);
+  --mb-scrim: rgba(5, 8, 14, 0.55);
+  --mb-placeholder: linear-gradient(135deg, #dfe7d8, #c9d5c0);
+
+  --mb-map-filter: saturate(0.85) contrast(1.02);
+
+  --mb-turf-1: #0d2a19;
+  --mb-turf-2: #0b2416;
+  --mb-turf-line: rgba(255, 255, 255, 0.10);
+  color-scheme: light;
+}
+
+/* Açık temada koyu kalan "stadyum" panelleri: yazı rengi de koyu palete döner */
+[data-theme='light'] .mb-pitch-bg,
+[data-theme='light'] .mb-dark-island,
+[data-theme='light'] .mb-auth,
+[data-theme='light'] .mb-pitch__field,
+[data-theme='light'] .mb-owner-pitch__field,
+[data-theme='light'] .mb-venue-card__cover {
+  color: var(--mb-text);
 }
 
 html,
@@ -40,7 +175,7 @@ body {
 }
 
 ::selection {
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
 }
 
@@ -48,7 +183,7 @@ a {
   color: var(--mb-primary);
 }
 
-/* İnce, koyu kaydırma çubukları */
+/* İnce kaydırma çubukları (temaya göre) */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--mb-surface-3) transparent;
@@ -89,7 +224,7 @@ a {
   width: 100%;
 }
 
-/* Leaflet haritaları: koyu temaya uyum */
+/* Leaflet haritaları: temaya uyum */
 .leaflet-container {
   border-radius: 12px;
   z-index: 0;
@@ -97,13 +232,42 @@ a {
 }
 
 .leaflet-tile-pane {
-  filter: brightness(0.75) contrast(1.1) saturate(0.8) hue-rotate(-10deg);
+  filter: var(--mb-map-filter);
 }
 
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   background: var(--mb-surface-2);
   color: var(--mb-text);
+  box-shadow: var(--mb-shadow);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--mb-text-2);
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--mb-text);
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--mb-surface);
+  color: var(--mb-text);
+  border-bottom-color: var(--mb-border);
+}
+
+.leaflet-bar a:hover {
+  background: var(--mb-surface-2);
+}
+
+.leaflet-control-attribution {
+  background: var(--mb-glass) !important;
+  color: var(--mb-text-2);
+}
+
+.leaflet-control-attribution a {
+  color: var(--mb-text-2);
 }
 
 /* Saha çizgisi deseni (hero alanlarında kullanılır) */
@@ -111,9 +275,9 @@ a {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(1200px 400px at 85% -20%, rgba(198, 244, 50, 0.18), transparent 60%),
-    radial-gradient(800px 400px at -10% 120%, rgba(34, 197, 94, 0.22), transparent 60%),
-    repeating-linear-gradient(90deg, #0d2a19 0 80px, #0b2416 80px 160px);
+    radial-gradient(1200px 400px at 85% -20%, rgba(var(--mb-primary-rgb), 0.18), transparent 60%),
+    radial-gradient(800px 400px at -10% 120%, rgba(var(--mb-pitch-rgb), 0.22), transparent 60%),
+    repeating-linear-gradient(90deg, var(--mb-turf-1) 0 80px, var(--mb-turf-2) 80px 160px);
 }
 
 .mb-pitch-bg::before {
@@ -122,8 +286,8 @@ a {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 50%, transparent 0 88px, rgba(255, 255, 255, 0.10) 89px 91px, transparent 92px),
-    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.10) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+    radial-gradient(circle at 50% 50%, transparent 0 88px, var(--mb-turf-line) 89px 91px, transparent 92px),
+    linear-gradient(90deg, transparent calc(50% - 1px), var(--mb-turf-line) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
   pointer-events: none;
 }
 
@@ -132,7 +296,7 @@ a {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(7, 11, 18, 0.1) 0%, rgba(7, 11, 18, 0.65) 100%);
+  background: linear-gradient(180deg, rgba(var(--mb-bg-rgb), 0.1) 0%, rgba(var(--mb-bg-rgb), 0.65) 100%);
   pointer-events: none;
 }
 
@@ -162,4 +326,99 @@ a {
   background: rgba(7, 11, 18, 0.5);
   border-color: rgba(255, 255, 255, 0.2);
   color: #fff;
+}
+
+.mb-ghost-btn.ant-btn:not(:disabled):hover {
+  background: rgba(7, 11, 18, 0.62);
+  border-color: rgba(198, 244, 50, 0.7);
+  color: #c6f432;
+}
+
+/* Açık temada koyu "stadyum" panellerinin içindeki antd parçaları da koyu palete uysun */
+[data-theme='light'] .mb-pitch-bg .ant-typography,
+[data-theme='light'] .mb-dark-island .ant-typography {
+  color: inherit;
+}
+
+[data-theme='light'] .mb-pitch-bg .ant-typography.ant-typography-secondary,
+[data-theme='light'] .mb-dark-island .ant-typography.ant-typography-secondary {
+  color: var(--mb-text-2);
+}
+
+[data-theme='light'] .mb-pitch-bg .ant-tag,
+[data-theme='light'] .mb-dark-island .ant-tag {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--mb-text);
+}
+
+[data-theme='light'] .mb-pitch-bg .ant-avatar,
+[data-theme='light'] .mb-dark-island .ant-avatar {
+  background: var(--mb-surface-3);
+  color: var(--mb-text);
+}
+
+[data-theme='light'] .mb-pitch-bg .ant-statistic-title,
+[data-theme='light'] .mb-dark-island .ant-statistic-title {
+  color: var(--mb-text-2);
+}
+
+[data-theme='light'] .mb-pitch-bg .ant-statistic-content,
+[data-theme='light'] .mb-dark-island .ant-statistic-content {
+  color: var(--mb-text);
+}
+
+/* Tema seçici (Sistem / Açık / Koyu) */
+.mb-theme-switch.ant-segmented {
+  padding: 3px;
+}
+
+.mb-theme-switch .ant-segmented-item-label {
+  font-weight: 600;
+}
+
+.mb-theme-switch .ant-segmented-item-label > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.mb-theme-switch--compact .ant-segmented-item-label {
+  min-height: 28px;
+  line-height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.mb-theme-menu-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 0 4px;
+  cursor: default;
+}
+
+.mb-theme-menu-item__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--mb-text-3);
+}
+
+.ant-dropdown-menu .ant-dropdown-menu-item.mb-theme-menu-entry,
+.ant-dropdown-menu .ant-dropdown-menu-item.mb-theme-menu-entry:hover {
+  background: transparent;
+  cursor: default;
+}
+
+/* Tema değişirken renkler yumuşak geçsin (hareket azaltma tercihinde kapalı) */
+@media (prefers-reduced-motion: no-preference) {
+  html.mb-theme-anim,
+  html.mb-theme-anim *,
+  html.mb-theme-anim *::before,
+  html.mb-theme-anim *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease, fill 0.25s ease !important;
+  }
 }

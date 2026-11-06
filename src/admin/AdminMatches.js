@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { App, Button, Card, Grid, Input, Popconfirm, Segmented, Select, Space, Table, Tooltip, Typography } from 'antd';
 import { CalendarOutlined, DeleteOutlined, EyeOutlined, HeartOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { formatPrice } from '../api/venues';
 import { RESERVATIONS_CHANGED } from '../layout/AdminLayout';
@@ -23,6 +24,7 @@ const FILTERS = {
 /** Sistemdeki tüm maçlar */
 export default function AdminMatches() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const isPhone = Grid.useBreakpoint().md === false;
   const { matches, setMatches, stadiums, stadiumNames, loading, reload } = useAdminData();
   const [view, setView] = useState('all');
@@ -52,11 +54,11 @@ export default function AdminMatches() {
     setDeleting(matchId);
     try {
       await api.post('/api/Match/DeleteMatch', { matchId });
-      message.success('Maç silindi.');
+      message.success(t('admin:matches.deleted'));
       setMatches((list) => list.filter((m) => m.matchId !== matchId));
       window.dispatchEvent(new Event(RESERVATIONS_CHANGED));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Maç silinemedi.'));
+      message.error(apiErrorMessage(e, t('admin:matches.deleteFailed')));
     } finally {
       setDeleting(null);
     }
@@ -66,12 +68,12 @@ export default function AdminMatches() {
     setBusy(status);
     try {
       await api.post('/api/Match/MatchStatusUpdate', { matchId, status });
-      message.success(status === 2 ? 'Rezervasyon admin olarak onaylandı.' : 'Rezervasyon admin olarak reddedildi.');
+      message.success(status === 2 ? t('admin:shared.approvedAsAdmin') : t('admin:shared.rejectedAsAdmin'));
       setMatches((list) => list.map((m) => (m.matchId === matchId ? { ...m, isActive: status } : m)));
       setSelected(null);
       window.dispatchEvent(new Event(RESERVATIONS_CHANGED));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Durum güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('admin:shared.statusUpdateFailed')));
     } finally {
       setBusy(null);
     }
@@ -79,18 +81,18 @@ export default function AdminMatches() {
 
   const columns = [
     {
-      title: 'Maç',
+      title: t('admin:shared.columns.match'),
       dataIndex: 'matchName',
       sorter: (a, b) => (a.matchName || '').localeCompare(b.matchName || '', 'tr'),
       render: (name) => <Text strong>{name}</Text>,
     },
     {
-      title: 'Tesis · Saha',
+      title: t('admin:shared.columns.venuePitch'),
       key: 'venue',
       render: (_, m) => venueLabel(m, stadiumNames) || <Text type="secondary">-</Text>,
     },
     {
-      title: 'Tarih',
+      title: t('admin:shared.columns.date'),
       dataIndex: 'matchDate',
       defaultSortOrder: 'descend',
       sorter: (a, b) => new Date(a.matchDate) - new Date(b.matchDate),
@@ -101,21 +103,21 @@ export default function AdminMatches() {
       ),
     },
     {
-      title: 'Oyuncu',
+      title: t('admin:shared.columns.players'),
       dataIndex: 'userCount',
       align: 'center',
       width: 90,
       sorter: (a, b) => (a.userCount || 0) - (b.userCount || 0),
     },
     {
-      title: 'Tutar',
+      title: t('admin:shared.columns.amount'),
       dataIndex: 'totalPrice',
       align: 'right',
       sorter: (a, b) => (a.totalPrice || 0) - (b.totalPrice || 0),
       render: (v) => (v != null ? formatPrice(v) : <Text type="secondary">-</Text>),
     },
     {
-      title: 'Beğeni',
+      title: t('admin:shared.columns.likes'),
       dataIndex: 'likes',
       align: 'center',
       responsive: ['md'],
@@ -129,29 +131,29 @@ export default function AdminMatches() {
       ),
     },
     {
-      title: 'Durum',
+      title: t('admin:shared.columns.status'),
       key: 'status',
       render: (_, m) => <MatchStatusTag status={m.isActive} past={m.isActive !== 3 && isPast(m.matchDate)} />,
     },
     {
-      title: 'İşlemler',
+      title: t('admin:shared.columns.actions'),
       key: 'actions',
       align: 'right',
       width: 110,
       render: (_, m) => (
         <Space size={4} onClick={(e) => e.stopPropagation()}>
-          <Tooltip title="Detay">
+          <Tooltip title={t('common:actions.detail')}>
             <Button size="small" icon={<EyeOutlined />} onClick={() => setSelected(m)} />
           </Tooltip>
           <Popconfirm
-            title="Maç silinsin mi?"
-            description="Bu işlem geri alınamaz."
-            okText="Sil"
-            cancelText="Vazgeç"
+            title={t('admin:matches.deleteConfirm')}
+            description={t('admin:matches.deleteConfirmDesc')}
+            okText={t('common:actions.delete')}
+            cancelText={t('common:actions.cancel')}
             okButtonProps={{ danger: true }}
             onConfirm={() => deleteMatch(m.matchId)}
           >
-            <Tooltip title="Sil">
+            <Tooltip title={t('common:actions.delete')}>
               <Button size="small" danger icon={<DeleteOutlined />} loading={deleting === m.matchId} />
             </Tooltip>
           </Popconfirm>
@@ -163,12 +165,12 @@ export default function AdminMatches() {
   return (
     <>
       <PageHeader
-        title="Tüm Maçlar"
-        subtitle="Sistemde oluşturulmuş tüm maçlar ve durumları"
+        title={t('admin:matches.title')}
+        subtitle={t('admin:matches.subtitle')}
         icon={<CalendarOutlined />}
         extra={
           <Button icon={<ReloadOutlined />} onClick={reload} loading={loading}>
-            Yenile
+            {t('common:actions.refresh')}
           </Button>
         }
       />
@@ -183,11 +185,11 @@ export default function AdminMatches() {
             value={view}
             onChange={setView}
             options={[
-              { label: `Tümü (${counts.all})`, value: 'all' },
-              { label: `Onay bekleyen (${counts.pending})`, value: 'pending' },
-              { label: `Onaylı (${counts.approved})`, value: 'approved' },
-              { label: `Reddedilen (${counts.rejected})`, value: 'rejected' },
-              { label: `Tamamlanan (${counts.done})`, value: 'done' },
+              { label: t('admin:matches.filters.all', { count: counts.all }), value: 'all' },
+              { label: t('admin:matches.filters.pending', { count: counts.pending }), value: 'pending' },
+              { label: t('admin:matches.filters.approved', { count: counts.approved }), value: 'approved' },
+              { label: t('admin:matches.filters.rejected', { count: counts.rejected }), value: 'rejected' },
+              { label: t('admin:matches.filters.done', { count: counts.done }), value: 'done' },
             ]}
           />
           <Space wrap className="mb-admin-filters">
@@ -195,7 +197,7 @@ export default function AdminMatches() {
               className="mb-admin-filter"
               allowClear
               prefix={<SearchOutlined />}
-              placeholder="Maç adı ara"
+              placeholder={t('admin:matches.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ width: 220 }}
@@ -205,7 +207,7 @@ export default function AdminMatches() {
               allowClear
               showSearch
               optionFilterProp="label"
-              placeholder="Tesis"
+              placeholder={t('admin:shared.venuePlaceholder')}
               value={stadiumId}
               onChange={setStadiumId}
               style={{ width: 200 }}
@@ -221,7 +223,7 @@ export default function AdminMatches() {
           scroll={{ x: isPhone ? 'max-content' : 1000 }}
           pagination={{ pageSize: 15, hideOnSinglePage: true, showSizeChanger: false }}
           onRow={(m) => ({ onClick: () => setSelected(m), style: { cursor: 'pointer' } })}
-          locale={{ emptyText: <EmptyState description="Bu filtreye uygun maç yok" /> }}
+          locale={{ emptyText: <EmptyState description={t('admin:matches.empty')} /> }}
         />
       </Card>
       <MatchDetailDrawer

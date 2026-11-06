@@ -89,7 +89,7 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--mb-primary-ink);
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
 }
 
 .mb-option-card__desc {
@@ -112,6 +112,7 @@
 }
 
 .mb-settings__switch div,
+.mb-settings__theme > div,
 .mb-settings__danger-row div {
   display: flex;
   flex-direction: column;
@@ -119,9 +120,24 @@
 }
 
 .mb-settings__switch span,
+.mb-settings__theme > div > span,
 .mb-settings__danger-row span {
   font-size: 12px;
   color: var(--mb-text-2);
+}
+
+/* Görünüm (tema) */
+.mb-settings__theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mb-settings__theme > div {
+  flex: 1;
+  min-width: 200px;
 }
 
 /* Engellenenler */
@@ -152,7 +168,7 @@
 
 /* Tehlikeli bölge */
 .mb-settings__danger.ant-card {
-  border-color: rgba(244, 63, 94, 0.35) !important;
+  border-color: rgba(var(--mb-danger-rgb), 0.35) !important;
 }
 
 .mb-settings__danger .ant-card-head-title,
@@ -223,5 +239,18 @@
   }
   .mb-settings__danger-row > .ant-btn {
     width: 100%;
+  }
+  .mb-settings__theme > div {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .mb-settings__theme .mb-theme-switch {
+    width: 100%;
+  }
+  .mb-settings__theme .mb-theme-switch .ant-segmented-group {
+    width: 100%;
+  }
+  .mb-settings__theme .mb-theme-switch .ant-segmented-item {
+    flex: 1;
   }
 }

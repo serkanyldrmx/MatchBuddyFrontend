@@ -1,4 +1,5 @@
 import { api } from './config';
+import i18n from '../i18n';
 
 // Medya yükleme — sözleşme: MatchBuddy/docs/media-api.md §4
 
@@ -18,7 +19,7 @@ export const uploadMedia = async (file, kind = 'message', onProgress) => {
   });
   const data = res.data;
   if (!data || data.success === false || !data.mediaId) {
-    throw Object.assign(new Error(data?.message || 'Fotoğraf yüklenemedi.'), { response: { data: data || {} } });
+    throw Object.assign(new Error(data?.message || i18n.t('common:image.uploadFailed')), { response: { data: data || {} } });
   }
   onProgress?.(100);
   return data;

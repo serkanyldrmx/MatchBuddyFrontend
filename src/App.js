@@ -1,9 +1,10 @@
 import './App.css';
 import './mobile.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { App as AntApp, ConfigProvider, Grid } from 'antd';
-import trTR from 'antd/locale/tr_TR';
-import { appTheme, mobileTheme } from './theme/theme';
+import { App as AntApp } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { antdLocaleFor } from './i18n';
+import { ThemeProvider } from './theme/ThemeContext';
 import { MessagesProvider } from './messaging/MessagesContext';
 import AppLayout from './layout/AppLayout';
 import AdminLayout from './layout/AdminLayout';
@@ -57,11 +58,11 @@ import Stadium from './Components/Stadium/Stadium';
 import StadiumIsAdmin from './Components/Stadium/StadiumIsAdmin';
 
 function App() {
-  // Telefonlarda (md altı) dokunmaya uygun kontrol boyları; masaüstü teması aynen kalır
-  const screens = Grid.useBreakpoint();
-  const theme = screens.md === false ? mobileTheme : appTheme;
+  // Dil değişince antd bileşen metinleri (DatePicker, Table vb.) de güncellenir
+  const { i18n } = useTranslation();
+  // ThemeProvider: açık/koyu tema + telefon (md altı) kontrol boyları → antd ConfigProvider
   return (
-    <ConfigProvider theme={theme} locale={trTR}>
+    <ThemeProvider locale={antdLocaleFor(i18n.language)}>
       <AntApp>
         <BrowserRouter>
           <MessagesProvider>
@@ -142,7 +143,7 @@ function App() {
           </MessagesProvider>
         </BrowserRouter>
       </AntApp>
-    </ConfigProvider>
+    </ThemeProvider>
   );
 }
 

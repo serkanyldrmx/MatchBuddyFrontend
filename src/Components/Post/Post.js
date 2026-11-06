@@ -12,6 +12,7 @@ import {
   SunOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { Trans, useTranslation } from 'react-i18next';
 import { matchesApi, PARTICIPANT_STATUS } from '../../api/matches';
 import { formatPrice, SURFACE } from '../../api/venues';
 import { CapacityRing, MatchStatusTag, PlayerAvatar } from '../../ui';
@@ -24,6 +25,7 @@ import './Post.css';
  * Bitmiş maçta: skor tabelası ve MVP.
  */
 export default function MatchCard({ match, onChanged }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -45,10 +47,10 @@ export default function MatchCard({ match, onChanged }) {
     setBusy(true);
     try {
       const res = await matchesApi.join(match.matchId);
-      message.success(res?.message || 'Maça katıldın.');
+      message.success(res?.message || t('match:actions.joined'));
       onChanged?.();
     } catch (err) {
-      message.error(apiErrorMessage(err, 'Maça katılamadın.'));
+      message.error(apiErrorMessage(err, t('match:actions.joinFailed')));
     } finally {
       setBusy(false);
     }
@@ -74,19 +76,19 @@ export default function MatchCard({ match, onChanged }) {
   if (match.myStatus === PARTICIPANT_STATUS.GOING) {
     action = (
       <Button className="mb-fixture__mine" icon={<CheckOutlined />} onClick={(e) => { e.stopPropagation(); open(); }}>
-        Kadrodasın
+        {t('match:status.inSquad')}
       </Button>
     );
   } else if (match.myStatus === PARTICIPANT_STATUS.WAITLIST) {
-    action = <Button onClick={(e) => { e.stopPropagation(); open(); }}>Yedektesin</Button>;
+    action = <Button onClick={(e) => { e.stopPropagation(); open(); }}>{t('match:status.waitlisted')}</Button>;
   } else if (!closed) {
     action = (
       <Button type="primary" loading={busy} onClick={join}>
-        {missing > 0 ? 'Katıl' : 'Yedeğe yazıl'}
+        {missing > 0 ? t('match:actions.joinShort') : t('match:actions.joinWaitlist')}
       </Button>
     );
   } else {
-    action = <Button onClick={(e) => { e.stopPropagation(); open(); }}>{hasResult ? 'Maç raporu' : 'Detay'}</Button>;
+    action = <Button onClick={(e) => { e.stopPropagation(); open(); }}>{hasResult ? t('match:card.report') : t('common:actions.detail')}</Button>;
   }
 
   return (
@@ -112,7 +114,7 @@ export default function MatchCard({ match, onChanged }) {
       <div className="mb-fixture__body">
         <div className="mb-fixture__top">
           {match.isActive === 3 && match.rejectReason ? (
-            <Tooltip title={`Red sebebi: ${match.rejectReason}`}>
+            <Tooltip title={t('match:card.rejectReason', { reason: match.rejectReason })}>
               <span>
                 <MatchStatusTag status={match.isActive} past={past} />
               </span>
@@ -120,29 +122,31 @@ export default function MatchCard({ match, onChanged }) {
           ) : (
             <MatchStatusTag status={match.isActive} past={past} />
           )}
-          {!past && missing > 0 && missing <= 3 && <span className="mb-chip is-live">{missing} kişi eksik</span>}
-          {lookingOpp && <span className="mb-chip is-pending">Rakip aranıyor</span>}
-          {match.perPlayer != null && !hasResult && <span className="mb-fixture__price">Kişi başı {formatPrice(match.perPlayer)}</span>}
+          {!past && missing > 0 && missing <= 3 && <span className="mb-chip is-live">{t('match:card.missing', { count: missing })}</span>}
+          {lookingOpp && <span className="mb-chip is-pending">{t('match:sides.seekingOpponent')}</span>}
+          {match.perPlayer != null && !hasResult && (
+            <span className="mb-fixture__price">{t('match:card.perPlayer', { price: formatPrice(match.perPlayer) })}</span>
+          )}
         </div>
         <h3 className="mb-fixture__title">{match.matchName}</h3>
         {match.homeTeam && (
           <div className="mb-fixture__teams">
             <strong className="is-home">{match.homeTeam.teamName}</strong>
-            <i>vs</i>
+            <i>{t('match:card.versus')}</i>
             {match.awayTeam ? <strong className="is-away">{match.awayTeam.teamName}</strong> : <strong className="is-tbd">?</strong>}
           </div>
         )}
         <div className="mb-fixture__meta">
           {venue ? (
             <span>
-              <Tooltip title={`${SURFACE[venue.surface] || 'Saha'} · ${venue.isIndoor ? 'Kapalı' : 'Açık'}`}>
+              <Tooltip title={`${SURFACE[venue.surface] || t('common:pitch')} · ${venue.isIndoor ? t('common:indoor') : t('common:outdoor')}`}>
                 {venue.isIndoor ? <HomeOutlined /> : <SunOutlined />}
               </Tooltip>{' '}
               {venue.name}
               {venue.pitchName ? ` · ${venue.pitchName}` : ''}
             </span>
           ) : (
-            <span><EnvironmentOutlined /> {match.stadiumName || 'Halı saha'}</span>
+            <span><EnvironmentOutlined /> {match.stadiumName || t('match:card.venueFallback')}</span>
           )}
           {!hasResult && <span><ClockCircleOutlined /> {date.format('dddd, HH:mm')}</span>}
         </div>
@@ -156,17 +160,28 @@ export default function MatchCard({ match, onChanged }) {
           </Avatar.Group>
           {friendsGoing ? (
             <span className="mb-fixture__friends">
-              <strong>{match.followingPreview[0].playerName || match.followingPreview[0].userName}</strong>
-              {match.followingGoingCount > 1 && <> ve {match.followingGoingCount - 1} arkadaşın</>}{' '}
-              {past ? 'oynadı' : 'katılıyor'}
+              <Trans
+                i18nKey={
+                  match.followingGoingCount > 1
+                    ? past
+                      ? 'match:card.friendsPlayed'
+                      : 'match:card.friendsGoing'
+                    : past
+                      ? 'match:card.friendPlayed'
+                      : 'match:card.friendGoing'
+                }
+                count={match.followingGoingCount - 1}
+                values={{ name: match.followingPreview[0].playerName || match.followingPreview[0].userName }}
+                components={{ b: <strong /> }}
+              />
             </span>
           ) : null}
           {match.mvp ? (
             <span className="mb-fixture__mvp">
-              <CrownFilled /> MVP: {fullName(match.mvp)}
+              <CrownFilled /> {t('match:card.mvp', { name: fullName(match.mvp) })}
             </span>
           ) : match.createdBy && !friendsGoing ? (
-            <span className="mb-fixture__host">Kurucu: {fullName(match.createdBy)}</span>
+            <span className="mb-fixture__host">{t('match:card.host', { name: fullName(match.createdBy) })}</span>
           ) : null}
         </div>
       </div>
@@ -175,7 +190,7 @@ export default function MatchCard({ match, onChanged }) {
       <div className="mb-fixture__side">
         {!hasResult && <CapacityRing going={match.goingCount} capacity={match.capacity} size={44} />}
         <div className="mb-fixture__actions">
-          <Tooltip title={liked ? 'Beğenmekten vazgeç' : 'Beğen'}>
+          <Tooltip title={liked ? t('match:actions.unlike') : t('match:actions.like')}>
             <Button
               className="mb-like"
               type="text"

@@ -28,6 +28,7 @@ import {
   ShopOutlined,
   StarFilled,
 } from '@ant-design/icons';
+import { Trans, useTranslation } from 'react-i18next';
 import { adminVenuesApi, AMENITIES, DAYS, formatPrice, maskToDays, SURFACE } from '../api/venues';
 import { Stat } from '../ui';
 import { apiErrorMessage, formatDate, formatDateTime, mediaUrl } from '../utils/format';
@@ -35,31 +36,25 @@ import './OwnerDetailModal.css';
 
 const { Text, Paragraph, Title } = Typography;
 
-const MISSING_LABELS = {
-  photo: 'Fotoğraf yok',
-  pitch: 'Aktif saha yok',
-  location: 'Konum yok',
-  address: 'Adres yok',
-  listed: 'Yayından kaldırılmış',
-  membership: 'Üyelik aktif değil',
-  hours: 'Çalışma saatleri eksik',
-};
+// Bilinen eksik kodları (çeviri anahtarları: adminVenues:ownerDetail.missing.<kod>)
+const MISSING_KEYS = ['photo', 'pitch', 'location', 'address', 'listed', 'membership', 'hours'];
 
 /** Panoya kopyalanabilir değer */
 function Copyable({ value, children }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   if (!value) return <Text type="secondary">-</Text>;
   return (
     <Space size={6} className="mb-od-copyable">
       <span className="mb-od-copyable__value">{children ?? value}</span>
-      <Tooltip title="Kopyala">
+      <Tooltip title={t('adminVenues:ownerDetail.copy')}>
         <Button
           type="text"
           size="small"
           icon={<CopyOutlined />}
           onClick={() => {
             navigator.clipboard?.writeText(String(value));
-            message.success('Kopyalandı.');
+            message.success(t('adminVenues:ownerDetail.copied'));
           }}
         />
       </Tooltip>
@@ -67,14 +62,15 @@ function Copyable({ value, children }) {
   );
 }
 
-function membershipChip(o) {
-  if (o.membershipSuspended) return <span className="mb-chip is-rejected">Askıda</span>;
-  if (!o.membershipActive) return <span className="mb-chip is-rejected">Süresi doldu</span>;
-  return <span className="mb-chip is-approved">Aktif</span>;
+function membershipChip(o, t) {
+  if (o.membershipSuspended) return <span className="mb-chip is-rejected">{t('adminVenues:ownerDetail.membership.suspended')}</span>;
+  if (!o.membershipActive) return <span className="mb-chip is-rejected">{t('adminVenues:ownerDetail.membership.expired')}</span>;
+  return <span className="mb-chip is-approved">{t('adminVenues:ownerDetail.membership.active')}</span>;
 }
 
 /* ---------------- Giriş bilgileri ---------------- */
 function Credentials({ detail }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const isPhone = Grid.useBreakpoint().md === false;
   const [reset, setReset] = useState(null);
@@ -85,9 +81,9 @@ function Credentials({ detail }) {
     try {
       const res = await adminVenuesApi.resetOwnerPassword(detail.owner.playerId);
       setReset(res);
-      message.success('Yeni geçici şifre oluşturuldu.');
+      message.success(t('adminVenues:ownerDetail.credentials.resetSuccess'));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Şifre sıfırlanamadı.'));
+      message.error(apiErrorMessage(e, t('adminVenues:ownerDetail.credentials.resetFailed')));
     } finally {
       setBusy(false);
     }
@@ -96,19 +92,19 @@ function Credentials({ detail }) {
   return (
     <div className="mb-od-card">
       <div className="mb-od-card__title">
-        <LockOutlined /> Giriş bilgileri
+        <LockOutlined /> {t('adminVenues:ownerDetail.credentials.title')}
       </div>
       <Descriptions column={1} size="small" labelStyle={{ width: isPhone ? 100 : 130 }}>
-        <Descriptions.Item label="Kullanıcı adı">
+        <Descriptions.Item label={t('adminVenues:ownerDetail.credentials.userName')}>
           <Copyable value={detail.owner.userName}>@{detail.owner.userName}</Copyable>
         </Descriptions.Item>
-        <Descriptions.Item label="Şifre">
+        <Descriptions.Item label={t('adminVenues:ownerDetail.credentials.password')}>
           {reset ? (
             <Copyable value={reset.password}>
               <code className="mb-od-password">{reset.password}</code>
             </Copyable>
           ) : (
-            <Text type="secondary">•••••••••• (şifreli saklanır)</Text>
+            <Text type="secondary">{t('adminVenues:ownerDetail.credentials.hashed')}</Text>
           )}
         </Descriptions.Item>
       </Descriptions>
@@ -116,25 +112,24 @@ function Credentials({ detail }) {
         <Alert
           type="warning"
           showIcon
-          message="Bu şifre sadece şimdi gösteriliyor"
-          description="Pencereyi kapattıktan sonra bir daha görüntülenemez. İşletmeye iletin; ilk girişte değiştirmesini önerin. Eski şifre artık çalışmaz."
+          message={t('adminVenues:ownerDetail.credentials.shownOnceTitle')}
+          description={t('adminVenues:ownerDetail.credentials.shownOnceDescription')}
         />
       ) : (
         <>
           <Paragraph type="secondary" className="mb-od-hint">
-            Güvenlik gereği şifreler geri çevrilemez biçimde saklanır; mevcut şifreyi kimse göremez. İşletme şifresini unuttuysa yeni bir geçici
-            şifre oluşturabilirsiniz.
+            {t('adminVenues:ownerDetail.credentials.hint')}
           </Paragraph>
           <Popconfirm
-            title="Şifre sıfırlansın mı?"
-            description="İşletmenin mevcut şifresi geçersiz olur ve yeni geçici şifre oluşturulur."
-            okText="Sıfırla"
+            title={t('adminVenues:ownerDetail.credentials.resetConfirm')}
+            description={t('adminVenues:ownerDetail.credentials.resetConfirmDescription')}
+            okText={t('common:actions.reset')}
             okButtonProps={{ danger: true }}
-            cancelText="Vazgeç"
+            cancelText={t('common:actions.cancel')}
             onConfirm={doReset}
           >
             <Button icon={<KeyOutlined />} loading={busy}>
-              Şifreyi sıfırla
+              {t('adminVenues:ownerDetail.credentials.resetButton')}
             </Button>
           </Popconfirm>
         </>
@@ -145,6 +140,7 @@ function Credentials({ detail }) {
 
 /* ---------------- Tesis ---------------- */
 function VenuePanel({ v }) {
+  const { t } = useTranslation();
   const isPhone = Grid.useBreakpoint().md === false;
   const am = v.amenities || {};
   const activeAmenities = AMENITIES.filter((a) => am[a.key]);
@@ -155,12 +151,16 @@ function VenuePanel({ v }) {
     <div className="mb-od-venue">
       {/* Durum */}
       <Space wrap style={{ marginBottom: 12 }}>
-        {v.isVisible ? <span className="mb-chip is-approved">Oyunculara görünüyor</span> : <span className="mb-chip is-rejected">Oyunculara görünmüyor</span>}
-        {v.isListed ? <Tag>Yayında</Tag> : <Tag color="red">Yayından kaldırıldı</Tag>}
-        {v.hasActiveCampaign && <Tag color="gold">Aktif kampanya</Tag>}
+        {v.isVisible ? (
+          <span className="mb-chip is-approved">{t('adminVenues:ownerDetail.venue.visible')}</span>
+        ) : (
+          <span className="mb-chip is-rejected">{t('adminVenues:ownerDetail.venue.notVisible')}</span>
+        )}
+        {v.isListed ? <Tag>{t('adminVenues:ownerDetail.venue.listed')}</Tag> : <Tag color="red">{t('adminVenues:ownerDetail.venue.unlisted')}</Tag>}
+        {v.hasActiveCampaign && <Tag color="gold">{t('adminVenues:ownerDetail.venue.activeCampaign')}</Tag>}
         {v.rating != null && (
           <Tag icon={<StarFilled style={{ color: 'var(--mb-gold)' }} />}>
-            {Number(v.rating).toFixed(1)} · {v.reviewCount || 0} yorum
+            {Number(v.rating).toFixed(1)} · {t('adminVenues:ownerDetail.venue.reviews', { count: v.reviewCount || 0 })}
           </Tag>
         )}
       </Space>
@@ -169,39 +169,39 @@ function VenuePanel({ v }) {
           type="warning"
           showIcon
           style={{ marginBottom: 12 }}
-          message="Eksikler"
-          description={v.missing.map((m) => MISSING_LABELS[m] || m).join(' · ')}
+          message={t('adminVenues:ownerDetail.venue.missingTitle')}
+          description={v.missing.map((m) => (MISSING_KEYS.includes(m) ? t(`adminVenues:ownerDetail.missing.${m}`) : m)).join(' · ')}
         />
       )}
 
       {/* Fotoğraflar */}
-      <div className="mb-od-section-title">Fotoğraflar ({v.photos?.length || 0})</div>
+      <div className="mb-od-section-title">{t('adminVenues:ownerDetail.venue.photos', { count: v.photos?.length || 0 })}</div>
       {v.photos?.length ? (
         <Image.PreviewGroup>
           <div className="mb-od-photos">
             {v.photos.map((p) => (
               <div key={p.photoId} className={`mb-od-photo ${p.isCover ? 'is-cover' : ''}`}>
                 <Image src={mediaUrl(p.url, 'md')} preview={{ src: mediaUrl(p.url, 'lg') }} alt="" loading="lazy" decoding="async" />
-                {p.isCover && <span className="mb-od-photo__badge">Kapak</span>}
+                {p.isCover && <span className="mb-od-photo__badge">{t('adminVenues:ownerDetail.venue.cover')}</span>}
               </div>
             ))}
           </div>
         </Image.PreviewGroup>
       ) : (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Fotoğraf yok" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('adminVenues:ownerDetail.venue.noPhotos')} />
       )}
 
       {/* Genel bilgiler */}
-      <div className="mb-od-section-title">Tesis bilgileri</div>
+      <div className="mb-od-section-title">{t('adminVenues:ownerDetail.venue.infoTitle')}</div>
       <Descriptions column={{ xs: 1, md: 2 }} size="small" bordered>
-        <Descriptions.Item label="Tesis adı">{v.name}</Descriptions.Item>
-        <Descriptions.Item label="Telefon">
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.name')}>{v.name}</Descriptions.Item>
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.phone')}>
           <Copyable value={v.phone} />
         </Descriptions.Item>
-        <Descriptions.Item label="İl / ilçe">
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.cityDistrict')}>
           {[v.city, v.district].filter(Boolean).join(' / ') || '-'}
         </Descriptions.Item>
-        <Descriptions.Item label="Konum">
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.location')}>
           {hasCoords ? (
             <a href={`https://www.google.com/maps?q=${coords[0]},${coords[1]}`} target="_blank" rel="noopener noreferrer">
               <EnvironmentOutlined /> {coords[0].toFixed(5)}, {coords[1].toFixed(5)}
@@ -210,19 +210,19 @@ function VenuePanel({ v }) {
             '-'
           )}
         </Descriptions.Item>
-        <Descriptions.Item label="Adres" span={2}>
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.address')} span={2}>
           <Copyable value={v.address} />
         </Descriptions.Item>
-        <Descriptions.Item label="Açıklama" span={2}>
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.description')} span={2}>
           {v.description || '-'}
         </Descriptions.Item>
-        <Descriptions.Item label="İptal politikası" span={2}>
+        <Descriptions.Item label={t('adminVenues:ownerDetail.venue.cancellationPolicy')} span={2}>
           {v.cancellationPolicy || '-'}
         </Descriptions.Item>
       </Descriptions>
 
       {/* Olanaklar ve ekstra ücretler */}
-      <div className="mb-od-section-title">Olanaklar</div>
+      <div className="mb-od-section-title">{t('adminVenues:ownerDetail.venue.amenities')}</div>
       {activeAmenities.length ? (
         <Space wrap>
           {activeAmenities.map((a) => (
@@ -234,55 +234,73 @@ function VenuePanel({ v }) {
           ))}
         </Space>
       ) : (
-        <Text type="secondary">Olanak girilmemiş.</Text>
+        <Text type="secondary">{t('adminVenues:ownerDetail.venue.noAmenities')}</Text>
       )}
 
       <Row gutter={[16, 16]} style={{ marginTop: 4 }}>
         <Col xs={24} lg={14}>
-          <div className="mb-od-section-title">Sahalar ({v.pitches?.length || 0})</div>
+          <div className="mb-od-section-title">{t('adminVenues:ownerDetail.venue.pitches', { count: v.pitches?.length || 0 })}</div>
           <Table
             size="small"
             rowKey="pitchId"
             pagination={false}
             scroll={isPhone ? { x: 'max-content' } : undefined}
             dataSource={v.pitches || []}
-            locale={{ emptyText: 'Saha yok' }}
+            locale={{ emptyText: t('adminVenues:ownerDetail.venue.noPitches') }}
             columns={[
-              { title: 'Saha', dataIndex: 'name' },
-              { title: 'Zemin', dataIndex: 'surface', render: (s) => SURFACE[s] || '-' },
-              { title: 'Tip', dataIndex: 'isIndoor', render: (i) => (i ? 'Kapalı' : 'Açık') },
-              { title: 'Format', dataIndex: 'playersPerSide', render: (n) => `${n}+${n}` },
-              { title: 'Saatlik', dataIndex: 'basePrice', render: formatPrice },
+              { title: t('adminVenues:ownerDetail.venue.pitchColumns.pitch'), dataIndex: 'name' },
+              { title: t('adminVenues:ownerDetail.venue.pitchColumns.surface'), dataIndex: 'surface', render: (s) => SURFACE[s] || '-' },
               {
-                title: 'Durum',
+                title: t('adminVenues:ownerDetail.venue.pitchColumns.type'),
+                dataIndex: 'isIndoor',
+                render: (i) => (i ? t('common:indoor') : t('common:outdoor')),
+              },
+              { title: t('adminVenues:ownerDetail.venue.pitchColumns.format'), dataIndex: 'playersPerSide', render: (n) => `${n}+${n}` },
+              { title: t('adminVenues:ownerDetail.venue.pitchColumns.hourly'), dataIndex: 'basePrice', render: formatPrice },
+              {
+                title: t('adminVenues:ownerDetail.venue.pitchColumns.status'),
                 dataIndex: 'isActive',
-                render: (a) => (a === false ? <Tag color="red">Pasif</Tag> : <Tag color="green">Aktif</Tag>),
+                render: (a) =>
+                  a === false ? (
+                    <Tag color="red">{t('adminVenues:ownerDetail.venue.inactive')}</Tag>
+                  ) : (
+                    <Tag color="green">{t('adminVenues:ownerDetail.venue.active')}</Tag>
+                  ),
               },
             ]}
           />
         </Col>
         <Col xs={24} lg={10}>
-          <div className="mb-od-section-title">Çalışma saatleri</div>
+          <div className="mb-od-section-title">{t('adminVenues:ownerDetail.venue.hours')}</div>
           <div className="mb-od-hours">
             {(v.openingHours || []).map((h) => (
               <div key={h.dayOfWeek}>
                 <span>{DAYS[h.dayOfWeek]}</span>
-                <span>{h.isClosed ? <Text type="secondary">Kapalı</Text> : `${(h.openTime || '').slice(0, 5)} – ${(h.closeTime || '').slice(0, 5)}`}</span>
+                <span>
+                  {h.isClosed ? (
+                    <Text type="secondary">{t('adminVenues:ownerDetail.venue.closed')}</Text>
+                  ) : (
+                    `${(h.openTime || '').slice(0, 5)} – ${(h.closeTime || '').slice(0, 5)}`
+                  )}
+                </span>
               </div>
             ))}
-            {!v.openingHours?.length && <Text type="secondary">Girilmemiş</Text>}
+            {!v.openingHours?.length && <Text type="secondary">{t('adminVenues:ownerDetail.venue.notEntered')}</Text>}
           </div>
         </Col>
       </Row>
 
-      <div className="mb-od-section-title">Aktif kampanyalar ({v.campaigns?.length || 0})</div>
+      <div className="mb-od-section-title">{t('adminVenues:ownerDetail.venue.campaigns', { count: v.campaigns?.length || 0 })}</div>
       {v.campaigns?.length ? (
         <div className="mb-od-campaigns">
           {v.campaigns.map((c) => (
             <div key={c.campaignId} className="mb-od-campaign">
               <strong>{c.title}</strong>
               <span>
-                {c.discountPercent ? `%${c.discountPercent} indirim` : `${formatPrice(c.fixedPrice)} sabit`} · {maskToDays(c.daysMask).join(', ')} ·{' '}
+                {c.discountPercent
+                  ? t('adminVenues:ownerDetail.venue.discount', { percent: c.discountPercent })
+                  : t('adminVenues:ownerDetail.venue.fixedPrice', { price: formatPrice(c.fixedPrice) })}{' '}
+                · {maskToDays(c.daysMask).join(', ')} ·{' '}
                 {String(c.fromHour).padStart(2, '0')}:00–{String(c.toHour).padStart(2, '0')}:00
               </span>
               <Text type="secondary">
@@ -292,7 +310,7 @@ function VenuePanel({ v }) {
           ))}
         </div>
       ) : (
-        <Text type="secondary">Aktif kampanya yok.</Text>
+        <Text type="secondary">{t('adminVenues:ownerDetail.venue.noCampaigns')}</Text>
       )}
     </div>
   );
@@ -300,6 +318,7 @@ function VenuePanel({ v }) {
 
 /* ---------------- Pencere ---------------- */
 export default function OwnerDetailModal({ ownerId, open, onClose }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const isPhone = Grid.useBreakpoint().md === false;
   const [detail, setDetail] = useState(null);
@@ -312,11 +331,11 @@ export default function OwnerDetailModal({ ownerId, open, onClose }) {
     try {
       setDetail(await adminVenuesApi.ownerDetail(ownerId));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'İşletme bilgileri alınamadı.'));
+      message.error(apiErrorMessage(e, t('adminVenues:ownerDetail.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [ownerId, message]);
+  }, [ownerId, message, t]);
 
   useEffect(() => {
     if (open) load();
@@ -341,11 +360,19 @@ export default function OwnerDetailModal({ ownerId, open, onClose }) {
                 {d.owner.name}
               </Title>
               <Space wrap size={8}>
-                {membershipChip(d)}
+                {membershipChip(d, t)}
                 <Text type="secondary">
-                  Üyelik bitişi: <strong>{d.membershipUntil ? formatDate(d.membershipUntil) : 'Süresiz'}</strong>
+                  <Trans
+                    i18nKey="adminVenues:ownerDetail.membership.until"
+                    values={{
+                      date: d.membershipUntil ? formatDate(d.membershipUntil) : t('adminVenues:ownerDetail.membership.unlimited'),
+                    }}
+                    components={{ b: <strong /> }}
+                  />
                 </Text>
-                {d.createdAt && <Text type="secondary">· Kayıt: {formatDate(d.createdAt)}</Text>}
+                {d.createdAt && (
+                  <Text type="secondary">{t('adminVenues:ownerDetail.membership.registered', { date: formatDate(d.createdAt) })}</Text>
+                )}
               </Space>
             </div>
           </div>
@@ -354,14 +381,14 @@ export default function OwnerDetailModal({ ownerId, open, onClose }) {
             <Col xs={24} md={12}>
               <div className="mb-od-card">
                 <div className="mb-od-card__title">
-                  <PhoneOutlined /> İletişim
+                  <PhoneOutlined /> {t('adminVenues:ownerDetail.contact.title')}
                 </div>
                 <Descriptions column={1} size="small" labelStyle={{ width: isPhone ? 100 : 130 }}>
-                  <Descriptions.Item label="Yetkili kişi">{d.owner.contactName || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="Telefon">
+                  <Descriptions.Item label={t('adminVenues:ownerDetail.contact.contactName')}>{d.owner.contactName || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('adminVenues:ownerDetail.contact.phone')}>
                     <Copyable value={d.owner.phoneNumber} />
                   </Descriptions.Item>
-                  <Descriptions.Item label="E-posta">
+                  <Descriptions.Item label={t('adminVenues:ownerDetail.contact.email')}>
                     <Copyable value={d.owner.email} />
                   </Descriptions.Item>
                 </Descriptions>
@@ -373,21 +400,25 @@ export default function OwnerDetailModal({ ownerId, open, onClose }) {
           </Row>
 
           <div className="mb-od-stats">
-            <Stat value={d.stats?.totalReservations ?? 0} label="Toplam rezervasyon" />
-            <Stat value={d.stats?.pendingCount ?? 0} label="Onay bekleyen" accent="var(--mb-gold)" />
-            <Stat value={d.stats?.upcomingApprovedCount ?? 0} label="Yaklaşan onaylı" accent="var(--mb-primary)" />
-            <Stat value={d.stats?.rejectedCount ?? 0} label="Reddedilen" />
-            <Stat value={formatPrice(d.stats?.approvedRevenue ?? 0)} label="Gerçekleşen ciro" />
+            <Stat value={d.stats?.totalReservations ?? 0} label={t('adminVenues:ownerDetail.stats.totalReservations')} />
+            <Stat value={d.stats?.pendingCount ?? 0} label={t('adminVenues:ownerDetail.stats.pending')} accent="var(--mb-gold)" />
+            <Stat
+              value={d.stats?.upcomingApprovedCount ?? 0}
+              label={t('adminVenues:ownerDetail.stats.upcomingApproved')}
+              accent="var(--mb-primary)"
+            />
+            <Stat value={d.stats?.rejectedCount ?? 0} label={t('adminVenues:ownerDetail.stats.rejected')} />
+            <Stat value={formatPrice(d.stats?.approvedRevenue ?? 0)} label={t('adminVenues:ownerDetail.stats.revenue')} />
           </div>
           {d.stats?.lastReservationAt && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Son rezervasyon talebi: {formatDateTime(d.stats.lastReservationAt)}
+              {t('adminVenues:ownerDetail.stats.lastReservation', { date: formatDateTime(d.stats.lastReservationAt) })}
             </Text>
           )}
 
           <div className="mb-od-venues">
             {venues.length === 0 ? (
-              <Empty description="Bu işletmeye bağlı tesis yok" />
+              <Empty description={t('adminVenues:ownerDetail.noVenues')} />
             ) : venues.length === 1 ? (
               <VenuePanel v={venues[0]} />
             ) : (

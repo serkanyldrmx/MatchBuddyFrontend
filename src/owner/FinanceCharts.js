@@ -13,7 +13,9 @@ import {
   ThunderboltOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
-import { formatPrice } from '../api/venues';
+import { useTranslation } from 'react-i18next';
+import { expenseCategoryLabel, formatPrice } from '../api/venues';
+import i18n, { intlLocale } from '../i18n';
 
 /* =========================================================
    Gelir & Gider grafikleri — kütüphanesiz, düz SVG / CSS.
@@ -41,21 +43,24 @@ export const categoryMeta = (c) => CATEGORY_META[c] || CATEGORY_META['Diğer'];
 
 /** Kategori çipi: renkli ikon + ad */
 export function CategoryChip({ category, compact }) {
+  useTranslation();
   const m = categoryMeta(category);
   return (
     <span className={`mb-fin-cat${compact ? ' is-compact' : ''}`}>
       <span className="mb-fin-cat__icon" style={{ color: m.color, background: m.color.replace(', 1)', ', 0.14)') }}>
         {m.icon}
       </span>
-      {category || 'Diğer'}
+      {expenseCategoryLabel(category || 'Diğer')}
     </span>
   );
 }
 
-const compactFmt = new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 });
-export const compactPrice = (v) => `${compactFmt.format(Number(v) || 0)} ₺`;
+const compactFmt = { format: (v) => new Intl.NumberFormat(intlLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(v) };
+export const compactPrice = (v) => i18n.t('common:currency', { value: compactFmt.format(Number(v) || 0) });
 export const pctFmt = (v, digits = 1) =>
-  `%${Number(v || 0).toLocaleString('tr-TR', { maximumFractionDigits: digits, minimumFractionDigits: 0 })}`;
+  i18n.t('finance:percent', {
+    value: Number(v || 0).toLocaleString(intlLocale(), { maximumFractionDigits: digits, minimumFractionDigits: 0 }),
+  });
 
 /* ---------- yardımcılar ---------- */
 
@@ -150,6 +155,7 @@ export function Legend({ items }) {
 /* ---------- 12 aylık grafik ---------- */
 
 export function MonthlyChart({ data = [], selected, onSelect, height = 270 }) {
+  const { t } = useTranslation();
   const [ref, width] = useWidth();
   const [hover, setHover] = useState(null);
   const narrow = usePhone();
@@ -179,7 +185,7 @@ export function MonthlyChart({ data = [], selected, onSelect, height = 270 }) {
   return (
     <div className="mb-fin-chart" ref={ref}>
       {width > 0 && (
-        <svg width={width} height={height} role="img" aria-label="Son 12 ayın gelir, gider ve net kâr grafiği">
+        <svg width={width} height={height} role="img" aria-label={t('finance:charts.monthlyAria')}>
           {ticks.map((t) => (
             <g key={t}>
               <line x1={pad.l} x2={width - pad.r} y1={y(t)} y2={y(t)} className={t === 0 ? 'mb-fin-axis' : 'mb-fin-grid'} />
@@ -235,7 +241,7 @@ export function MonthlyChart({ data = [], selected, onSelect, height = 270 }) {
               onMouseLeave={() => setHover(null)}
               onClick={() => onSelect?.(d.year, d.month)}
             >
-              <title>{`${d.month}.${d.year} — seçmek için tıklayın`}</title>
+              <title>{t('finance:charts.clickToSelect', { month: d.month, year: d.year })}</title>
             </rect>
           ))}
         </svg>
@@ -243,9 +249,9 @@ export function MonthlyChart({ data = [], selected, onSelect, height = 270 }) {
       {h && (
         <Tip x={cx(hover)} y={pad.t} width={width} narrow={narrow}>
           <div className="mb-fin-tip__title">{dayjs(`${h.year}-${String(h.month).padStart(2, '0')}-01`).format('MMMM YYYY')}</div>
-          <TipRow color={INCOME_COLOR} label="Gelir" value={formatPrice(h.income || 0)} />
-          <TipRow color={EXPENSE_COLOR} label="Gider" value={formatPrice(h.expenses || 0)} />
-          <TipRow color="var(--mb-text)" line label="Net kâr" value={formatPrice(h.net || 0)} />
+          <TipRow color={INCOME_COLOR} label={t('finance:income')} value={formatPrice(h.income || 0)} />
+          <TipRow color={EXPENSE_COLOR} label={t('finance:expense')} value={formatPrice(h.expenses || 0)} />
+          <TipRow color="var(--mb-text)" line label={t('finance:netProfit')} value={formatPrice(h.net || 0)} />
         </Tip>
       )}
     </div>
@@ -255,6 +261,7 @@ export function MonthlyChart({ data = [], selected, onSelect, height = 270 }) {
 /* ---------- günlük akış (gelir yukarı, gider aşağı) ---------- */
 
 export function DailyChart({ data = [], height = 270 }) {
+  const { t } = useTranslation();
   const [ref, width] = useWidth();
   const [hover, setHover] = useState(null);
   const narrow = usePhone();
@@ -276,7 +283,7 @@ export function DailyChart({ data = [], height = 270 }) {
   return (
     <div className="mb-fin-chart" ref={ref}>
       {width > 0 && (
-        <svg width={width} height={height} role="img" aria-label="Seçili ayın günlük gelir ve gider grafiği">
+        <svg width={width} height={height} role="img" aria-label={t('finance:charts.dailyAria')}>
           {ticks.map((t) => (
             <g key={t}>
               <line x1={pad.l} x2={width - pad.r} y1={y(t)} y2={y(t)} className={t === 0 ? 'mb-fin-axis' : 'mb-fin-grid'} />
@@ -319,9 +326,9 @@ export function DailyChart({ data = [], height = 270 }) {
       {h && (
         <Tip x={x(hover) + barW / 2} y={pad.t} width={width} narrow={narrow}>
           <div className="mb-fin-tip__title">{dayjs(h.date).format('DD MMMM dddd')}</div>
-          <TipRow color={INCOME_COLOR} label="Gelir" value={formatPrice(h.income || 0)} />
-          <TipRow color={EXPENSE_COLOR} label="Gider" value={formatPrice(h.expense || 0)} />
-          <TipRow color="var(--mb-text)" line label="Fark" value={formatPrice((h.income || 0) - (h.expense || 0))} />
+          <TipRow color={INCOME_COLOR} label={t('finance:income')} value={formatPrice(h.income || 0)} />
+          <TipRow color={EXPENSE_COLOR} label={t('finance:expense')} value={formatPrice(h.expense || 0)} />
+          <TipRow color="var(--mb-text)" line label={t('finance:charts.difference')} value={formatPrice((h.income || 0) - (h.expense || 0))} />
         </Tip>
       )}
     </div>
@@ -330,15 +337,17 @@ export function DailyChart({ data = [], height = 270 }) {
 
 /* ---------- gelir kaynağı (yığılmış yatay çubuk) ---------- */
 
-const SOURCE_LABEL = { matches: 'Uygulama maçları', manual: 'Harici rezervasyonlar' };
+const SOURCE_LABEL_KEYS = { matches: 'finance:charts.sourceLabel.matches', manual: 'finance:charts.sourceLabel.manual' };
 const SOURCE_COLOR = { matches: INCOME_COLOR, manual: MANUAL_COLOR };
 
 export function SourceSplit({ items = [] }) {
+  const { t } = useTranslation();
+  const sourceLabel = (s) => (SOURCE_LABEL_KEYS[s] ? t(SOURCE_LABEL_KEYS[s]) : s);
   const rows = items.map((i) => ({ ...i, amount: Number(i.amount) || 0 }));
   const total = rows.reduce((s, r) => s + r.amount, 0);
   return (
     <div className="mb-fin-split">
-      <div className="mb-fin-split__bar" role="img" aria-label="Gelirin kaynağa göre dağılımı">
+      <div className="mb-fin-split__bar" role="img" aria-label={t('finance:charts.sourceAria')}>
         {total > 0 ? (
           rows
             .filter((r) => r.amount > 0)
@@ -346,7 +355,7 @@ export function SourceSplit({ items = [] }) {
               <span
                 key={r.source}
                 style={{ flexGrow: r.amount, background: SOURCE_COLOR[r.source] || 'var(--mb-text-3)' }}
-                title={`${SOURCE_LABEL[r.source] || r.source}: ${formatPrice(r.amount)}`}
+                title={`${sourceLabel(r.source)}: ${formatPrice(r.amount)}`}
               />
             ))
         ) : (
@@ -357,7 +366,7 @@ export function SourceSplit({ items = [] }) {
         {rows.map((r) => (
           <div key={r.source}>
             <span className="mb-fin-swatch" style={{ background: SOURCE_COLOR[r.source] || 'var(--mb-text-3)' }} />
-            <span className="mb-fin-split__label">{SOURCE_LABEL[r.source] || r.source}</span>
+            <span className="mb-fin-split__label">{sourceLabel(r.source)}</span>
             <strong>{formatPrice(r.amount)}</strong>
             <em>{total > 0 ? pctFmt((r.amount / total) * 100, 0) : '—'}</em>
           </div>

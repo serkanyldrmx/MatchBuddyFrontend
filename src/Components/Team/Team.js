@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Avatar, Button, Card, Dropdown, Input, Segmented, Skeleton, Tooltip, Typography } from 'antd';
 import { DeleteOutlined, EditOutlined, MoreOutlined, PlusOutlined, RobotOutlined, SearchOutlined, SendOutlined, TeamOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, getCurrentUser } from '../../utils/format';
@@ -22,6 +23,7 @@ const membersOf = (team) =>
 
 const Team = () => {
   const { message, modal } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const me = getCurrentUser();
   const [teams, setTeams] = useState([]);
@@ -42,9 +44,9 @@ const Team = () => {
         const myId = getCurrentUser()?.playerId;
         if (!data.some((t) => (t.playerId || []).includes(myId))) setTab('all');
       })
-      .catch((e) => message.error(apiErrorMessage(e, 'Takımlar yüklenemedi.')))
+      .catch((e) => message.error(apiErrorMessage(e, t('team:list.loadError'))))
       .finally(() => setLoading(false));
-  }, [message]);
+  }, [message, t]);
 
   useEffect(() => {
     load();
@@ -64,18 +66,18 @@ const Team = () => {
 
   const remove = (team) =>
     modal.confirm({
-      title: 'Takımı sil',
-      content: `"${team.teamName}" takımı silinecek. Bu işlem geri alınamaz.`,
-      okText: 'Sil',
+      title: t('team:list.deleteConfirm.title'),
+      content: t('team:list.deleteConfirm.content', { name: team.teamName }),
+      okText: t('common:actions.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Vazgeç',
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
         try {
           await api.post(`/api/Team/DeleteTeam?teamId=${team.teamId}`);
-          message.success('Takım silindi.');
+          message.success(t('team:list.deleteSuccess'));
           setTeams((ts) => ts.filter((t) => t.teamId !== team.teamId));
         } catch (e) {
-          message.error(apiErrorMessage(e, 'Takım silinemedi. Takım bir maça kayıtlı olabilir.'));
+          message.error(apiErrorMessage(e, t('team:list.deleteError')));
         }
       },
     });
@@ -83,15 +85,15 @@ const Team = () => {
   return (
     <>
       <PageHeader
-        title="Takımlar"
-        subtitle="Takımlarını yönet, kadroyu düzenle veya yeni bir takım kur."
+        title={t('team:list.title')}
+        subtitle={t('team:list.subtitle')}
         icon={<TeamOutlined />}
         extra={[
           <Button key="ai" icon={<RobotOutlined />} onClick={() => navigate('/teamAICreate')}>
-            AI ile oluştur
+            {t('team:list.createWithAI')}
           </Button>,
           <Button key="new" type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create-team')}>
-            Takım oluştur
+            {t('team:list.create')}
           </Button>,
         ]}
       />
@@ -102,14 +104,14 @@ const Team = () => {
             value={tab}
             onChange={setTab}
             options={[
-              { label: `Takımlarım (${myCount})`, value: 'mine' },
-              { label: `Tüm takımlar (${teams.length})`, value: 'all' },
+              { label: t('team:list.tabs.mine', { count: myCount }), value: 'mine' },
+              { label: t('team:list.tabs.all', { count: teams.length }), value: 'all' },
             ]}
           />
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            placeholder="Takım ara"
+            placeholder={t('team:list.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: 240 }}
@@ -127,9 +129,9 @@ const Team = () => {
         </div>
       ) : list.length === 0 ? (
         <Card bordered={false}>
-          <EmptyState description={tab === 'mine' ? 'Henüz bir takımda değilsiniz' : 'Takım bulunamadı'}>
+          <EmptyState description={tab === 'mine' ? t('team:list.emptyMine') : t('team:list.empty')}>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/create-team')}>
-              Takım oluştur
+              {t('team:list.create')}
             </Button>
           </EmptyState>
         </Card>
@@ -145,7 +147,7 @@ const Team = () => {
                     <Title level={5} style={{ margin: 0 }} ellipsis>
                       {team.teamName}
                     </Title>
-                    <Text type="secondary">{members.length} oyuncu</Text>
+                    <Text type="secondary">{t('team:list.players', { count: members.length })}</Text>
                   </div>
                   {canManage(team) && (
                     <Dropdown
@@ -153,15 +155,15 @@ const Team = () => {
                       menu={{
                         items: [
                           ...(isMember(team)
-                            ? [{ key: 'invite', icon: <SendOutlined />, label: 'Davet et', onClick: () => setInviting(team) }]
+                            ? [{ key: 'invite', icon: <SendOutlined />, label: t('team:list.invite'), onClick: () => setInviting(team) }]
                             : []),
-                          { key: 'edit', icon: <EditOutlined />, label: 'Kadroyu düzenle', onClick: () => setEditing(team) },
+                          { key: 'edit', icon: <EditOutlined />, label: t('team:list.editSquad'), onClick: () => setEditing(team) },
                           { type: 'divider' },
-                          { key: 'delete', icon: <DeleteOutlined />, label: 'Takımı sil', danger: true, onClick: () => remove(team) },
+                          { key: 'delete', icon: <DeleteOutlined />, label: t('team:list.deleteConfirm.title'), danger: true, onClick: () => remove(team) },
                         ],
                       }}
                     >
-                      <Button type="text" icon={<MoreOutlined />} aria-label="Takım işlemleri" />
+                      <Button type="text" icon={<MoreOutlined />} aria-label={t('team:list.actions')} />
                     </Dropdown>
                   )}
                 </div>
@@ -178,21 +180,21 @@ const Team = () => {
                   {members.slice(0, 4).map((m) => (
                     <Text key={m.playerId} type="secondary" className="mb-team-tile__member">
                       @{m.userName}
-                      {m.playerId === me?.playerId && ' (sen)'}
+                      {m.playerId === me?.playerId && t('team:list.youSuffix')}
                     </Text>
                   ))}
-                  {members.length > 4 && <Text type="secondary">+{members.length - 4} oyuncu daha</Text>}
-                  {members.length === 0 && <Text type="secondary">Kadro boş</Text>}
+                  {members.length > 4 && <Text type="secondary">{t('team:list.morePlayers', { count: members.length - 4 })}</Text>}
+                  {members.length === 0 && <Text type="secondary">{t('team:list.emptySquad')}</Text>}
                 </div>
 
                 {canManage(team) && (
                   <div className="mb-team-tile__actions" style={{ display: 'flex', gap: 8 }}>
                     <Button block icon={<EditOutlined />} onClick={() => setEditing(team)}>
-                      Kadroyu düzenle
+                      {t('team:list.editSquad')}
                     </Button>
                     {isMember(team) && (
                       <Button block icon={<SendOutlined />} onClick={() => setInviting(team)}>
-                        Davet et
+                        {t('team:list.invite')}
                       </Button>
                     )}
                   </div>

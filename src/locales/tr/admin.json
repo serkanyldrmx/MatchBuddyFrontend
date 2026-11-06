@@ -1,0 +1,153 @@
+{
+  "shared": {
+    "columns": {
+      "match": "Maç",
+      "venuePitch": "Tesis · Saha",
+      "date": "Tarih",
+      "dateTime": "Tarih & saat",
+      "status": "Durum",
+      "actions": "İşlemler",
+      "players": "Oyuncu",
+      "amount": "Tutar",
+      "likes": "Beğeni",
+      "creator": "Kurucu"
+    },
+    "venuePlaceholder": "Tesis",
+    "playerCount_one": "{{count}} oyuncu",
+    "playerCount_other": "{{count}} oyuncu",
+    "approveAsAdmin": "Admin olarak onayla",
+    "rejectAsAdmin": "Admin olarak reddet",
+    "approveAsAdminConfirm": "Admin olarak onaylansın mı?",
+    "rejectAsAdminConfirm": "Admin olarak reddedilsin mi?",
+    "approvedAsAdmin": "Rezervasyon admin olarak onaylandı.",
+    "rejectedAsAdmin": "Rezervasyon admin olarak reddedildi.",
+    "statusUpdateFailed": "Durum güncellenemedi.",
+    "mixed": "Karma",
+    "lookingForOpponent": "Rakip aranıyor",
+    "expired": "Tarihi geçti",
+    "perPlayer": "kişi başı {{price}}",
+    "loadMatchesFailed": "Maç listesi alınamadı."
+  },
+  "dashboard": {
+    "greeting": {
+      "night": "İyi geceler",
+      "morning": "Günaydın",
+      "day": "İyi günler",
+      "evening": "İyi akşamlar"
+    },
+    "title": "Genel Bakış",
+    "subtitle": "{{greeting}}. Sistemin güncel durumu aşağıda.",
+    "subtitleWithName": "{{greeting}}, {{name}}. Sistemin güncel durumu aşağıda.",
+    "breakdown": {
+      "pending": "Onay bekleyen",
+      "approved": "Onaylı (yaklaşan)",
+      "done": "Tamamlanan",
+      "rejected": "Reddedilen"
+    },
+    "stats": {
+      "totalMatches": "Toplam maç",
+      "pendingApproval": "İşletme onayı bekleyen",
+      "partnerVenues": "Anlaşmalı tesis",
+      "activeOwners": "Aktif işletme",
+      "playerCount": "Oyuncu sayısı"
+    },
+    "pendingTitle": "İşletme onayı bekleyen rezervasyonlar",
+    "seeAll": "Tümünü gör",
+    "pendingEmpty": "Onay bekleyen rezervasyon yok",
+    "breakdownTitle": "Maç durum dağılımı",
+    "noMatches": "Henüz maç yok",
+    "upcomingTitle": "Yaklaşan onaylı maçlar",
+    "allMatches": "Tüm maçlar",
+    "upcomingEmpty": "Yaklaşan onaylı maç yok"
+  },
+  "matches": {
+    "deleted": "Maç silindi.",
+    "deleteFailed": "Maç silinemedi.",
+    "deleteConfirm": "Maç silinsin mi?",
+    "deleteConfirmDesc": "Bu işlem geri alınamaz.",
+    "title": "Tüm Maçlar",
+    "subtitle": "Sistemde oluşturulmuş tüm maçlar ve durumları",
+    "filters": {
+      "all": "Tümü ({{count}})",
+      "pending": "Onay bekleyen ({{count}})",
+      "approved": "Onaylı ({{count}})",
+      "rejected": "Reddedilen ({{count}})",
+      "done": "Tamamlanan ({{count}})"
+    },
+    "searchPlaceholder": "Maç adı ara",
+    "empty": "Bu filtreye uygun maç yok"
+  },
+  "matchDetail": {
+    "overrideWarning": "Rezervasyonları normalde tesis işletmesi onaylar. Bu işlem işletmenin kararını geçersiz kılar.",
+    "team": "Takım",
+    "teamsLoadFailed": "Takım bilgileri alınamadı.",
+    "title": "Maç detayı",
+    "labels": {
+      "status": "Durum",
+      "venue": "Tesis",
+      "pitch": "Saha",
+      "dateTime": "Tarih & saat",
+      "duration": "Süre",
+      "playerCount": "Oyuncu sayısı",
+      "amount": "Tutar",
+      "extras": "Ekstralar",
+      "teams": "Takımlar",
+      "creator": "Kurucu",
+      "rejectReason": "Red sebebi",
+      "likes": "Beğeni",
+      "description": "Açıklama"
+    },
+    "durationMinutes_one": "{{count}} dakika",
+    "durationMinutes_other": "{{count}} dakika",
+    "cleats_one": "{{count}} krampon",
+    "cleats_other": "{{count}} krampon",
+    "recording": "Maç kaydı",
+    "vs": "vs",
+    "noTeams": "Bu maça ait takım bilgisi yok",
+    "noPlayers": "Oyuncu yok"
+  },
+  "reports": {
+    "totalCount_one": "Toplam {{count}} şikayet",
+    "totalCount_other": "Toplam {{count}} şikayet",
+    "loadFailed": "Şikayetler yüklenemedi.",
+    "resolved": "Şikayet incelendi olarak işaretlendi.",
+    "updateFailed": "Şikayet güncellenemedi.",
+    "columns": {
+      "reported": "Şikayet edilen",
+      "reporter": "Şikayet eden",
+      "reason": "Sebep",
+      "details": "Detay",
+      "date": "Tarih",
+      "action": "İşlem"
+    },
+    "resolveConfirm": "İncelendi olarak işaretlensin mi?",
+    "mark": "İşaretle",
+    "markResolved": "İncelendi olarak işaretle",
+    "title": "Şikayetler",
+    "subtitle": "Oyuncuların birbirleri hakkında gönderdiği şikayetler",
+    "tabs": {
+      "new": "Yeni",
+      "newWithCount": "Yeni ({{count}})",
+      "resolved": "İncelenenler"
+    },
+    "emptyNew": "Yeni şikayet yok",
+    "emptyResolved": "İncelenmiş şikayet yok"
+  },
+  "reservations": {
+    "teamsLine": "{{home}} vs {{away}}",
+    "durationShort": " · {{count}} dk",
+    "waiting": "Bekleme süresi",
+    "createdAt": "Oluşturulma: {{date}} {{time}}",
+    "title": "Rezervasyonlar",
+    "subtitle": "İşletme onayı bekleyen talepler",
+    "alertMessage": "Rezervasyon talepleri artık tesis işletmeleri tarafından onaylanır.",
+    "alertDescription": "Bu ekran izleme amaçlıdır. Admin onayı/reddi yalnızca istisnai durumlarda işletmenin kararını geçersiz kılmak için kullanılmalıdır.",
+    "tabs": {
+      "upcoming": "Bekleyenler ({{count}})",
+      "expired": "Tarihi geçenler ({{count}})",
+      "all": "Tümü ({{count}})"
+    },
+    "searchPlaceholder": "Maç, tesis veya kurucu ara",
+    "empty": "İşletme onayı bekleyen talep yok"
+  }
+}

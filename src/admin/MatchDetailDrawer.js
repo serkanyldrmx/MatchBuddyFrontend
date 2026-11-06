@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { App, Button, Card, Col, Descriptions, Drawer, Grid, List, Popconfirm, Row, Skeleton, Space, Tag, Typography } from 'antd';
 import { CheckOutlined, CloseOutlined, StarFilled, TeamOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
+import i18n from '../i18n';
 import { SURFACE, formatPrice } from '../api/venues';
 import { EmptyState, MatchStatusTag, PlayerAvatar } from '../ui';
 import { apiErrorMessage, formatDateTime, fromNow, fullName, isPast } from '../utils/format';
@@ -9,9 +11,7 @@ import './AdminResponsive.css';
 
 const { Text, Paragraph } = Typography;
 
-export const OVERRIDE_WARNING = 'Rezervasyonları normalde tesis işletmesi onaylar. Bu işlem işletmenin kararını geçersiz kılar.';
-
-const teamName = (t) => t?.teamName || 'Takım';
+const teamName = (team, t) => team?.teamName || t('admin:matchDetail.team');
 
 /** GetMatchTeamInfo düz satırlarını takımlara gruplar */
 export function groupTeams(rows) {
@@ -30,6 +30,7 @@ export function groupTeams(rows) {
  */
 export default function MatchDetailDrawer({ match, stadiumName, open, onClose, onStatusChange, actionLoading }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const isPhone = Grid.useBreakpoint().md === false;
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
     api
       .get('/api/Match/GetMatchTeamInfo', { params: { matchId: match.matchId } })
       .then((r) => !cancelled && setTeams(groupTeams(r.data)))
-      .catch((e) => !cancelled && message.error(apiErrorMessage(e, 'Takım bilgileri alınamadı.')))
+      .catch((e) => !cancelled && message.error(apiErrorMessage(e, i18n.t('admin:matchDetail.teamsLoadFailed'))))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -57,95 +58,107 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
     return (
       <Space style={{ width: '100%', justifyContent: 'flex-end' }} className={isPhone ? 'mb-admin-drawer-actions' : undefined}>
         <Popconfirm
-          title="Admin olarak reddedilsin mi?"
-          description={OVERRIDE_WARNING}
-          okText="Reddet"
-          cancelText="Vazgeç"
+          title={t('admin:shared.rejectAsAdminConfirm')}
+          description={t('admin:matchDetail.overrideWarning')}
+          okText={t('common:actions.reject')}
+          cancelText={t('common:actions.cancel')}
           okButtonProps={{ danger: true }}
           onConfirm={() => onStatusChange(match.matchId, 3)}
         >
           <Button danger icon={<CloseOutlined />} loading={actionLoading === 3}>
-            {isPhone ? 'Reddet' : 'Admin olarak reddet'}
+            {isPhone ? t('common:actions.reject') : t('admin:shared.rejectAsAdmin')}
           </Button>
         </Popconfirm>
         <Popconfirm
-          title="Admin olarak onaylansın mı?"
-          description={OVERRIDE_WARNING}
-          okText="Onayla"
-          cancelText="Vazgeç"
+          title={t('admin:shared.approveAsAdminConfirm')}
+          description={t('admin:matchDetail.overrideWarning')}
+          okText={t('common:actions.confirm')}
+          cancelText={t('common:actions.cancel')}
           onConfirm={() => onStatusChange(match.matchId, 2)}
         >
           <Button type="primary" icon={<CheckOutlined />} loading={actionLoading === 2}>
-            {isPhone ? 'Onayla' : 'Admin olarak onayla'}
+            {isPhone ? t('common:actions.confirm') : t('admin:shared.approveAsAdmin')}
           </Button>
         </Popconfirm>
       </Space>
     );
-  }, [canDecide, match, onStatusChange, actionLoading, isPhone]);
+  }, [canDecide, match, onStatusChange, actionLoading, isPhone, t]);
 
   return (
-    <Drawer title={match?.matchName || 'Maç detayı'} width={520} open={open} onClose={onClose} footer={footer} destroyOnClose>
+    <Drawer title={match?.matchName || t('admin:matchDetail.title')} width={520} open={open} onClose={onClose} footer={footer} destroyOnClose>
       {match && (
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <Descriptions column={1} size="small" bordered labelStyle={isPhone ? { width: 110 } : undefined}>
-            <Descriptions.Item label="Durum">
+            <Descriptions.Item label={t('admin:matchDetail.labels.status')}>
               <Space size={4} wrap>
                 <MatchStatusTag status={match.isActive} />
-                {past && <Tag>Tarihi geçti</Tag>}
+                {past && <Tag>{t('admin:shared.expired')}</Tag>}
               </Space>
             </Descriptions.Item>
-            <Descriptions.Item label="Tesis">{match.venue?.name || match.stadiumName || stadiumName || '-'}</Descriptions.Item>
+            <Descriptions.Item label={t('admin:matchDetail.labels.venue')}>
+              {match.venue?.name || match.stadiumName || stadiumName || '-'}
+            </Descriptions.Item>
             {match.venue?.pitchName && (
-              <Descriptions.Item label="Saha">
+              <Descriptions.Item label={t('admin:matchDetail.labels.pitch')}>
                 <Space size={4} wrap>
                   {match.venue.pitchName}
-                  {match.venue.surface != null && <Tag>{SURFACE[match.venue.surface] || 'Diğer'}</Tag>}
-                  {match.venue.isIndoor != null && <Tag>{match.venue.isIndoor ? 'Kapalı' : 'Açık'}</Tag>}
+                  {match.venue.surface != null && <Tag>{SURFACE[match.venue.surface] || t('common:other')}</Tag>}
+                  {match.venue.isIndoor != null && (
+                    <Tag>{match.venue.isIndoor ? t('common:indoor') : t('common:outdoor')}</Tag>
+                  )}
                 </Space>
               </Descriptions.Item>
             )}
-            <Descriptions.Item label="Tarih & saat">
+            <Descriptions.Item label={t('admin:matchDetail.labels.dateTime')}>
               {formatDateTime(match.matchDate)}{' '}
               <Text type="secondary">({fromNow(match.matchDate)})</Text>
             </Descriptions.Item>
             {match.durationMinutes != null && (
-              <Descriptions.Item label="Süre">{match.durationMinutes} dakika</Descriptions.Item>
+              <Descriptions.Item label={t('admin:matchDetail.labels.duration')}>
+                {t('admin:matchDetail.durationMinutes', { count: match.durationMinutes })}
+              </Descriptions.Item>
             )}
-            <Descriptions.Item label="Oyuncu sayısı">
+            <Descriptions.Item label={t('admin:matchDetail.labels.playerCount')}>
               {match.goingCount != null ? `${match.goingCount} / ` : ''}
               {match.userCount ?? match.capacity ?? '-'}
             </Descriptions.Item>
             {match.totalPrice != null && (
-              <Descriptions.Item label="Tutar">
+              <Descriptions.Item label={t('admin:matchDetail.labels.amount')}>
                 <Text strong>{formatPrice(match.totalPrice)}</Text>
-                {match.perPlayer != null && <Text type="secondary"> · kişi başı {formatPrice(match.perPlayer)}</Text>}
+                {match.perPlayer != null && (
+                  <Text type="secondary"> · {t('admin:shared.perPlayer', { price: formatPrice(match.perPlayer) })}</Text>
+                )}
               </Descriptions.Item>
             )}
             {(match.cleatCount > 0 || match.cameraRequested) && (
-              <Descriptions.Item label="Ekstralar">
+              <Descriptions.Item label={t('admin:matchDetail.labels.extras')}>
                 <Space size={4} wrap>
-                  {match.cleatCount > 0 && <Tag>{match.cleatCount} krampon</Tag>}
-                  {match.cameraRequested && <Tag>Maç kaydı</Tag>}
+                  {match.cleatCount > 0 && <Tag>{t('admin:matchDetail.cleats', { count: match.cleatCount })}</Tag>}
+                  {match.cameraRequested && <Tag>{t('admin:matchDetail.recording')}</Tag>}
                 </Space>
               </Descriptions.Item>
             )}
             {(match.homeTeam || match.awayTeam || match.lookingForOpponent) && (
-              <Descriptions.Item label="Takımlar">
+              <Descriptions.Item label={t('admin:matchDetail.labels.teams')}>
                 <Space size={4} wrap>
-                  {match.homeTeam ? <Tag color="lime">{teamName(match.homeTeam)}</Tag> : <Tag>Karma</Tag>}
-                  <Text type="secondary">vs</Text>
-                  {match.awayTeam ? (
-                    <Tag color="blue">{teamName(match.awayTeam)}</Tag>
-                  ) : match.lookingForOpponent ? (
-                    <Tag color="gold">Rakip aranıyor</Tag>
+                  {match.homeTeam ? (
+                    <Tag color="lime">{teamName(match.homeTeam, t)}</Tag>
                   ) : (
-                    <Tag>Karma</Tag>
+                    <Tag>{t('admin:shared.mixed')}</Tag>
+                  )}
+                  <Text type="secondary">{t('admin:matchDetail.vs')}</Text>
+                  {match.awayTeam ? (
+                    <Tag color="blue">{teamName(match.awayTeam, t)}</Tag>
+                  ) : match.lookingForOpponent ? (
+                    <Tag color="gold">{t('admin:shared.lookingForOpponent')}</Tag>
+                  ) : (
+                    <Tag>{t('admin:shared.mixed')}</Tag>
                   )}
                 </Space>
               </Descriptions.Item>
             )}
             {match.createdBy && (
-              <Descriptions.Item label="Kurucu">
+              <Descriptions.Item label={t('admin:matchDetail.labels.creator')}>
                 <Space size={8}>
                   <PlayerAvatar player={match.createdBy} size={24} />
                   {fullName(match.createdBy)}
@@ -153,11 +166,13 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
               </Descriptions.Item>
             )}
             {match.isActive === 3 && match.rejectReason && (
-              <Descriptions.Item label="Red sebebi">{match.rejectReason}</Descriptions.Item>
+              <Descriptions.Item label={t('admin:matchDetail.labels.rejectReason')}>{match.rejectReason}</Descriptions.Item>
             )}
-            {match.likes != null && <Descriptions.Item label="Beğeni">{match.likes}</Descriptions.Item>}
+            {match.likes != null && (
+              <Descriptions.Item label={t('admin:matchDetail.labels.likes')}>{match.likes}</Descriptions.Item>
+            )}
             {match.description && (
-              <Descriptions.Item label="Açıklama">
+              <Descriptions.Item label={t('admin:matchDetail.labels.description')}>
                 <Paragraph style={{ margin: 0 }}>{match.description}</Paragraph>
               </Descriptions.Item>
             )}
@@ -166,7 +181,7 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
           {loading ? (
             <Skeleton active />
           ) : teams.length === 0 ? (
-            <EmptyState description="Bu maça ait takım bilgisi yok" />
+            <EmptyState description={t('admin:matchDetail.noTeams')} />
           ) : (
             <Row gutter={[16, 16]}>
               {teams.map((team) => (
@@ -176,15 +191,15 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
                     title={
                       <Space>
                         <TeamOutlined />
-                        {team.teamName || 'Takım'}
+                        {teamName(team, t)}
                       </Space>
                     }
-                    extra={<Text type="secondary">{team.players.length} oyuncu</Text>}
+                    extra={<Text type="secondary">{t('admin:shared.playerCount', { count: team.players.length })}</Text>}
                   >
                     <List
                       size="small"
                       dataSource={team.players}
-                      locale={{ emptyText: 'Oyuncu yok' }}
+                      locale={{ emptyText: t('admin:matchDetail.noPlayers') }}
                       renderItem={(p) => (
                         <List.Item
                           key={p.playerId}

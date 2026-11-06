@@ -32,7 +32,7 @@
   height: 0.09em;
   margin-left: -0.3em;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(198, 244, 50, 0.5), rgba(198, 244, 50, 0.12) 60%, transparent);
+  background: radial-gradient(closest-side, rgba(var(--mb-primary-rgb, 198, 244, 50), 0.5), rgba(var(--mb-primary-rgb, 198, 244, 50), 0.12) 60%, transparent);
   animation: mb-ball-shadow 0.9s infinite;
 }
 
@@ -58,7 +58,26 @@
   width: 100%;
   height: 100%;
   animation: mb-ball-spin 1.8s linear infinite;
-  filter: drop-shadow(0 0 0.06em rgba(198, 244, 50, 0.35));
+  filter: drop-shadow(0 0 0.06em rgba(var(--mb-primary-rgb, 198, 244, 50), 0.35));
+}
+
+/* Topun dış halkası: koyu temada kireç yeşili, açık temada zeminde seçilsin diye daha koyu yeşil */
+.mb-ball__ring {
+  stroke: var(--mb-ball-ring, #c6f432);
+}
+
+[data-theme='light'] .mb-ball__ring {
+  --mb-ball-ring: #5d8f12;
+}
+
+[data-theme='light'] .mb-ball__svg {
+  filter: drop-shadow(0 0.02em 0.05em rgba(22, 38, 26, 0.25));
+}
+
+/* Koyu "stadyum" panellerinde koyu temadaki görünüm */
+[data-theme='light'] .mb-pitch-bg .mb-ball__ring,
+[data-theme='light'] .mb-dark-island .mb-ball__ring {
+  --mb-ball-ring: #c6f432;
 }
 
 @keyframes mb-ball-hop {
@@ -150,7 +169,7 @@
   font-size: 15px;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: var(--mb-text-2, rgba(232, 238, 246, 0.62));
+  color: var(--mb-text-2, rgba(var(--mb-text-rgb), 0.62));
   line-height: 1.2;
 }
 

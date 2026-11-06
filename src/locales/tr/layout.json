@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "matches": "Maçlar",
+    "feed": "Akış",
+    "calendar": "Takvimim",
+    "friends": "Arkadaşlar",
+    "teams": "Takımlar",
+    "tournaments": "Turnuvalar",
+    "leaderboard": "Sıralama",
+    "venues": "Halı Sahalar",
+    "aiTeam": "AI Takım Kur"
+  },
+  "tabbar": {
+    "ariaLabel": "Alt menü",
+    "matches": "Maçlar",
+    "feed": "Akış",
+    "createAria": "Maç oluştur",
+    "create": "Maç kur",
+    "messages": "Mesajlar",
+    "profile": "Profil"
+  },
+  "brand": {
+    "homeAria": "MatchBuddy ana sayfa"
+  },
+  "siderCta": {
+    "title": "Kadro eksik mi?",
+    "text": "Maçını kur, oyuncular katılsın.",
+    "button": "Maç oluştur"
+  },
+  "userMenu": {
+    "profile": "Profilim",
+    "editProfile": "Profili düzenle",
+    "invites": "Davetler",
+    "myTeams": "Takımlarım",
+    "settings": "Ayarlar",
+    "logout": "Çıkış yap"
+  },
+  "header": {
+    "menuAria": "Menü",
+    "greeting": "Hoş geldin, <strong>{{name}}</strong> · Bugün sahada mısın?",
+    "messages": "Mesajlar",
+    "invites": "Davetler"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty": "Bildirim yok",
+    "seeAll": "Tüm bildirimleri gör"
+  },
+  "admin": {
+    "badge": "Admin",
+    "role": "Yönetici",
+    "pendingTooltip": "Onay bekleyen rezervasyonlar",
+    "reservationsAria": "Rezervasyonlar",
+    "menu": {
+      "overview": "Genel Bakış",
+      "reservations": "Rezervasyonlar",
+      "matches": "Tüm Maçlar",
+      "reports": "Şikayetler",
+      "businesses": "İşletmeler",
+      "osm": "Aday Tesis Bul",
+      "venuesGroup": "Halı Sahalar",
+      "venueList": "Halı Saha Listesi",
+      "venueAdd": "Halı Saha Ekle",
+      "corporateGroup": "Kurumsal",
+      "about": "Hakkımızda",
+      "contact": "İletişim"
+    }
+  },
+  "venue": {
+    "badge": "İşletme",
+    "role": "İşletme hesabı",
+    "menu": {
+      "overview": "Genel Bakış",
+      "calendar": "Rezervasyon Takvimi",
+      "requests": "Talepler",
+      "finance": "Gelir & Gider",
+      "facilityGroup": "Tesis",
+      "facility": "Tesis Bilgileri",
+      "pitches": "Sahalar",
+      "pricing": "Saatler ve Fiyatlar",
+      "campaigns": "Kampanyalar",
+      "reviews": "Yorumlar"
+    },
+    "membershipInactive": "Üyeliğiniz aktif değil",
+    "membershipInactiveDesc": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız. Yenilemek için Match Buddy ile iletişime geçin.",
+    "membershipInactiveDescUntil": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız (bitiş: {{date}}). Yenilemek için Match Buddy ile iletişime geçin.",
+    "loading": "İşletme paneli yükleniyor…",
+    "noVenue": "Hesabınıza bağlı bir tesis bulunmuyor. Match Buddy ile iletişime geçin."
+  }
+}

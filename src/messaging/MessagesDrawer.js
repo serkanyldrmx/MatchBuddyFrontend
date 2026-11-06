@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Alert, Button, Drawer, Empty, Form, Image, Input, List, Modal, Progress, Segmented, Select, Spin, Tooltip, Typography, message } from 'antd';
 import { ArrowLeftOutlined, CloseOutlined, PictureOutlined, PlusOutlined, SearchOutlined, SendOutlined, TeamOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { uploadMedia } from '../api/media';
 import { socialApi } from '../api/social';
@@ -29,6 +30,7 @@ const matchesQuery = (p, q) =>
   !q || fullName(p).toLocaleLowerCase('tr').includes(q) || (p.userName || '').toLocaleLowerCase('tr').includes(q);
 
 function PersonItem({ player, last, onSelect }) {
+  const { t } = useTranslation();
   return (
     <List.Item className="mb-chat-item" onClick={() => onSelect({ type: 'user', data: player })}>
       <List.Item.Meta
@@ -37,14 +39,14 @@ function PersonItem({ player, last, onSelect }) {
           <div className="mb-chat-item__title">
             <span className="mb-chat-item__name">
               <span className="mb-chat-item__fullname">{fullName(player)}</span>
-              {player.isMutual && <span className="mb-chat-item__badge">Arkadaş</span>}
+              {player.isMutual && <span className="mb-chat-item__badge">{t('messages:list.friendBadge')}</span>}
             </span>
             {last && <Text type="secondary" className="mb-chat-item__time">{fromNow(last.sendingDate)}</Text>}
           </div>
         }
         description={
           <Text type="secondary" ellipsis>
-            {last ? `${last.mine ? 'Sen: ' : ''}${last.text}` : `@${player.userName}`}
+            {last ? (last.mine ? t('messages:list.youPrefix', { text: last.text }) : last.text) : `@${player.userName}`}
           </Text>
         }
       />
@@ -78,6 +80,7 @@ function ConversationList({ me, onSelect }) {
   const [groupModal, setGroupModal] = useState(false);
   const [following, setFollowing] = useState(null);
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   const loadGroups = useCallback(() => api.get('/api/Groups/GetGroupList').then((r) => setGroups(r.data || [])), []);
 
@@ -85,9 +88,9 @@ function ConversationList({ me, onSelect }) {
     if (!me) return;
     setLoading(true);
     Promise.all([socialApi.messageContacts().then((list) => setContacts(list || [])), loadGroups()])
-      .catch((e) => message.error(apiErrorMessage(e, 'Konuşmalar yüklenemedi.')))
+      .catch((e) => message.error(apiErrorMessage(e, t('messages:list.loadFailed'))))
       .finally(() => setLoading(false));
-  }, [me, loadGroups]);
+  }, [me, loadGroups, t]);
 
   const q = search.trim().toLocaleLowerCase('tr');
 
@@ -107,7 +110,7 @@ function ConversationList({ me, onSelect }) {
     }
     let alive = true;
     setOthersLoading(true);
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       socialApi
         .discover(term, 20)
         .then((list) => alive && setOthers(list || []))
@@ -116,7 +119,7 @@ function ConversationList({ me, onSelect }) {
     }, 300);
     return () => {
       alive = false;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
   }, [search, tab]);
 
@@ -133,9 +136,9 @@ function ConversationList({ me, onSelect }) {
       .then((list) => setFollowing(list || []))
       .catch((e) => {
         setFollowing([]);
-        message.error(apiErrorMessage(e, 'Takip ettiklerin yüklenemedi.'));
+        message.error(apiErrorMessage(e, t('messages:group.followingLoadFailed')));
       });
-  }, [groupModal, following]);
+  }, [groupModal, following, t]);
 
   const filteredGroups = useMemo(
     () => groups.filter((g) => !q || (g.groupName || '').toLocaleLowerCase('tr').includes(q)),
@@ -146,22 +149,22 @@ function ConversationList({ me, onSelect }) {
     const values = await form.validateFields();
     try {
       await api.post('/api/Groups/SaveGroup', { groupName: values.groupName, playerList: values.players });
-      message.success('Grup oluşturuldu.');
+      message.success(t('messages:group.created'));
       setGroupModal(false);
       form.resetFields();
       loadGroups();
       setTab('groups');
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Grup oluşturulamadı.'));
+      message.error(apiErrorMessage(e, t('messages:group.createFailed')));
     }
   };
 
   const peopleEmpty = !chats.length && !friends.length && !otherResults.length;
   const emptyText = !q
-    ? 'Henüz sohbetin yok. Arkadaşlarınla burada yazışabilirsin.'
+    ? t('messages:list.emptyChats')
     : search.trim().length < 2
-      ? 'Kişi bulunamadı'
-      : 'Oyuncu bulunamadı';
+      ? t('messages:list.noContactFound')
+      : t('messages:list.noPlayerFound');
 
   return (
     <div className="mb-chat-list">
@@ -171,20 +174,20 @@ function ConversationList({ me, onSelect }) {
           value={tab}
           onChange={setTab}
           options={[
-            { label: 'Kişiler', value: 'people' },
-            { label: 'Gruplar', value: 'groups' },
+            { label: t('messages:list.tabPeople'), value: 'people' },
+            { label: t('messages:list.tabGroups'), value: 'groups' },
           ]}
         />
         <div className="mb-chat-list__search">
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            placeholder={tab === 'people' ? 'Kişi ya da oyuncu ara' : 'Grup ara'}
+            placeholder={tab === 'people' ? t('messages:list.searchPeople') : t('messages:list.searchGroups')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           {tab === 'groups' && (
-            <Tooltip title="Yeni grup">
+            <Tooltip title={t('messages:group.new')}>
               <Button type="primary" icon={<PlusOutlined />} onClick={() => setGroupModal(true)} />
             </Tooltip>
           )}
@@ -196,9 +199,9 @@ function ConversationList({ me, onSelect }) {
           <div className="mb-center"><Spin /></div>
         ) : tab === 'people' ? (
           <>
-            <Section title="Sohbetler" items={chats} onSelect={onSelect} />
-            <Section title="Arkadaşlar" items={friends} onSelect={onSelect} />
-            <Section title="Diğer oyuncular" items={otherResults} onSelect={onSelect} />
+            <Section title={t('messages:list.sectionChats')} items={chats} onSelect={onSelect} />
+            <Section title={t('messages:list.sectionFriends')} items={friends} onSelect={onSelect} />
+            <Section title={t('messages:list.sectionOthers')} items={otherResults} onSelect={onSelect} />
             {othersLoading && (
               <div className="mb-chat-section__loading"><Spin size="small" /></div>
             )}
@@ -210,9 +213,9 @@ function ConversationList({ me, onSelect }) {
           <List
             locale={{
               emptyText: (
-                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Henüz bir grubun yok">
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('messages:group.empty')}>
                   <Button type="primary" icon={<PlusOutlined />} onClick={() => setGroupModal(true)}>
-                    Grup oluştur
+                    {t('messages:group.create')}
                   </Button>
                 </Empty>
               ),
@@ -223,7 +226,7 @@ function ConversationList({ me, onSelect }) {
                 <List.Item.Meta
                   avatar={<div className="mb-group-avatar"><TeamOutlined /></div>}
                   title={g.groupName}
-                  description={<Text type="secondary">Grup sohbeti</Text>}
+                  description={<Text type="secondary">{t('messages:group.chat')}</Text>}
                 />
               </List.Item>
             )}
@@ -232,29 +235,29 @@ function ConversationList({ me, onSelect }) {
       </div>
 
       <Modal
-        title="Yeni grup oluştur"
+        title={t('messages:group.modalTitle')}
         open={groupModal}
         onOk={createGroup}
         onCancel={() => setGroupModal(false)}
-        okText="Oluştur"
-        cancelText="Vazgeç"
+        okText={t('messages:group.createOk')}
+        cancelText={t('common:actions.cancel')}
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
-          <Form.Item name="groupName" label="Grup adı" rules={[{ required: true, whitespace: true, message: 'Grup adı zorunludur.' }]}>
-            <Input placeholder="Örn. Perşembe Maçı" maxLength={50} />
+          <Form.Item name="groupName" label={t('messages:group.nameLabel')} rules={[{ required: true, whitespace: true, message: t('messages:group.nameRequired') }]}>
+            <Input placeholder={t('messages:group.namePlaceholder')} maxLength={50} />
           </Form.Item>
-          <Form.Item name="players" label="Üyeler" rules={[{ required: true, message: 'En az bir üye seç.' }]}>
+          <Form.Item name="players" label={t('messages:group.membersLabel')} rules={[{ required: true, message: t('messages:group.membersRequired') }]}>
             <Select
               mode="multiple"
-              placeholder="Takip ettiğin oyunculardan seç"
+              placeholder={t('messages:group.membersPlaceholder')}
               optionFilterProp="label"
               loading={!following}
-              notFoundContent={following ? 'Henüz kimseyi takip etmiyorsun' : <Spin size="small" />}
+              notFoundContent={following ? t('messages:group.noFollowing') : <Spin size="small" />}
               options={(following || []).map((p) => ({ value: p.playerId, label: `${fullName(p)} (@${p.userName})` }))}
             />
           </Form.Item>
-          <Text type="secondary">Grubu oluşturan kişi otomatik olarak gruba eklenir.</Text>
+          <Text type="secondary">{t('messages:group.creatorNote')}</Text>
         </Form>
       </Modal>
     </div>
@@ -276,11 +279,12 @@ const hasDraggedFiles = (e) => Array.from(e.dataTransfer?.types || []).includes(
  * onLoad sarmalayıcıya gider; React'te img yüklenme olayı üst öğeye de ulaşır.
  */
 function BubbleImage({ url, onLoad }) {
+  const { t } = useTranslation();
   return (
     <Image
       className="mb-bubble__img"
       src={mediaUrl(url, 'sm')}
-      alt="Fotoğraf"
+      alt={t('messages:chat.photo')}
       loading="lazy"
       decoding="async"
       onLoad={onLoad}
@@ -290,6 +294,7 @@ function BubbleImage({ url, onLoad }) {
 }
 
 function Conversation({ me, target }) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
@@ -319,11 +324,11 @@ function Conversation({ me, target }) {
       const list = (res.data || []).slice().sort((a, b) => new Date(a.sendingDate) - new Date(b.sendingDate));
       setMessages(list);
     } catch (e) {
-      if (e?.response?.status !== 401) message.error(apiErrorMessage(e, 'Mesajlar yüklenemedi.'));
+      if (e?.response?.status !== 401) message.error(apiErrorMessage(e, t('messages:chat.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [isGroup, target, me]);
+  }, [isGroup, target, me, t]);
 
   // İlk yükleme + periyodik yenileme (gerçek zamanlı altyapı gelene kadar)
   useEffect(() => {
@@ -331,8 +336,8 @@ function Conversation({ me, target }) {
     setMessages([]);
     setDenied(null);
     load();
-    const t = setInterval(load, POLL_MS);
-    return () => clearInterval(t);
+    const timer = setInterval(load, POLL_MS);
+    return () => clearInterval(timer);
   }, [load]);
 
   useEffect(() => {
@@ -364,10 +369,10 @@ function Conversation({ me, target }) {
     try {
       const prepared = await prepareImage(file);
       if (prepared.size > MAX_IMAGE_BYTES) {
-        message.error(`Fotoğraf en fazla ${MAX_IMAGE_MB} MB olabilir.`);
+        message.error(t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB }));
         return;
       }
-      setAttachment({ file: prepared, preview: URL.createObjectURL(prepared), name: file.name || 'Fotoğraf' });
+      setAttachment({ file: prepared, preview: URL.createObjectURL(prepared), name: file.name || t('messages:chat.photo') });
     } finally {
       setPreparing(false);
     }
@@ -462,11 +467,11 @@ function Conversation({ me, target }) {
     } catch (e) {
       setAttachment((a) => (a ? { ...a, progress: undefined } : a));
       if (step === 'send' && !isGroup && e?.response?.status === 403) {
-        setDenied(apiErrorMessage(e, 'Bu oyuncuya mesaj gönderemezsin.'));
+        setDenied(apiErrorMessage(e, t('messages:chat.deniedMessage')));
       } else if (e?.response?.status === 429) {
-        message.error(apiErrorMessage(e, 'Çok sık fotoğraf yüklüyorsun. Biraz bekleyip tekrar dene.'));
+        message.error(apiErrorMessage(e, t('messages:chat.uploadRateLimited')));
       } else {
-        message.error(apiErrorMessage(e, step === 'upload' ? 'Fotoğraf yüklenemedi.' : 'Mesaj gönderilemedi.'));
+        message.error(apiErrorMessage(e, step === 'upload' ? t('common:image.uploadFailed') : t('messages:chat.sendFailed')));
       }
     } finally {
       setSending(false);
@@ -499,7 +504,7 @@ function Conversation({ me, target }) {
           <div className="mb-center"><Spin /></div>
         ) : messages.length === 0 ? (
           <div className="mb-center">
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Henüz mesaj yok. İlk mesajı sen gönder." />
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('messages:chat.empty')} />
           </div>
         ) : (
           messages.map((m, i) => {
@@ -512,7 +517,7 @@ function Conversation({ me, target }) {
                 {showDay && <div className="mb-chat__day"><span>{day}</span></div>}
                 <div className={`mb-bubble-row ${mine ? 'is-mine' : ''}`}>
                   <div className={`mb-bubble${mine ? ' is-mine' : ''}${m.imageUrl ? ' has-image' : ''}`}>
-                    {isGroup && !mine && <div className="mb-bubble__author">{m.userName || 'Üye'}</div>}
+                    {isGroup && !mine && <div className="mb-bubble__author">{m.userName || t('messages:chat.member')}</div>}
                     {m.imageUrl && <BubbleImage url={m.imageUrl} onLoad={onImageLoad} />}
                     {m.matchMessage && <div className="mb-bubble__text">{m.matchMessage}</div>}
                     <div className="mb-bubble__time">{dayjs(m.sendingDate).format('HH:mm')}</div>
@@ -536,33 +541,33 @@ function Conversation({ me, target }) {
               <span className="mb-attach-chip__thumb is-loading"><Spin size="small" /></span>
             )}
             <div className="mb-attach-chip__body">
-              <span className="mb-attach-chip__name">{attachment ? attachment.name : 'Fotoğraf hazırlanıyor…'}</span>
+              <span className="mb-attach-chip__name">{attachment ? attachment.name : t('messages:chat.preparingPhoto')}</span>
               {uploading ? (
                 <Progress
                   percent={attachment.progress}
                   size="small"
                   showInfo={false}
-                  strokeColor="#c6f432"
+                  strokeColor="var(--mb-primary)"
                   trailColor="rgba(148,163,184,0.16)"
                   className="mb-attach-chip__progress"
                 />
               ) : (
                 attachment && (
                   <span className="mb-attach-chip__hint">
-                    {attachment.mediaId ? 'Yüklendi · gönderilmeyi bekliyor' : 'Gönder’e basınca yüklenir'}
+                    {attachment.mediaId ? t('messages:chat.uploadedWaiting') : t('messages:chat.uploadOnSend')}
                   </span>
                 )
               )}
             </div>
             {attachment && (
-              <Tooltip title="Kaldır">
+              <Tooltip title={t('messages:chat.remove')}>
                 <Button
                   type="text"
                   size="small"
                   icon={<CloseOutlined />}
                   onClick={removeAttachment}
                   disabled={sending}
-                  aria-label="Fotoğrafı kaldır"
+                  aria-label={t('messages:chat.removePhoto')}
                 />
               </Tooltip>
             )}
@@ -571,14 +576,14 @@ function Conversation({ me, target }) {
       )}
       <div className="mb-chat__composer">
         <input ref={fileInputRef} type="file" accept={ACCEPTED_IMAGE_ACCEPT} hidden onChange={onFileChange} />
-        <Tooltip title="Fotoğraf ekle — yapıştırabilir ya da sürükleyip bırakabilirsin">
+        <Tooltip title={t('messages:chat.addPhotoHint')}>
           <Button
             type="text"
             className="mb-chat__photo-btn"
             icon={<PictureOutlined />}
             onClick={() => fileInputRef.current?.click()}
             disabled={!!denied || sending || preparing}
-            aria-label="Fotoğraf ekle"
+            aria-label={t('messages:chat.addPhoto')}
           />
         </Tooltip>
         <Input.TextArea
@@ -589,20 +594,20 @@ function Conversation({ me, target }) {
           disabled={!!denied}
           placeholder={
             denied
-              ? 'Bu oyuncuya mesaj gönderemezsin'
+              ? t('messages:chat.deniedPlaceholder')
               : attachment
-                ? 'Açıklama ekle (isteğe bağlı)…'
-                : 'Mesaj yaz… (Enter: gönder, Shift+Enter: yeni satır)'
+                ? t('messages:chat.captionPlaceholder')
+                : t('messages:chat.inputPlaceholder')
           }
           autoSize={{ minRows: 1, maxRows: 4 }}
           maxLength={1000}
         />
-        <Button type="primary" icon={<SendOutlined />} onClick={send} loading={sending} disabled={!canSend} aria-label="Gönder" />
+        <Button type="primary" icon={<SendOutlined />} onClick={send} loading={sending} disabled={!canSend} aria-label={t('common:actions.send')} />
       </div>
       {dragging && (
         <div className="mb-chat__drop">
           <PictureOutlined />
-          <span>Fotoğrafı buraya bırak</span>
+          <span>{t('messages:chat.dropHere')}</span>
         </div>
       )}
     </div>
@@ -640,6 +645,7 @@ export default function MessagesDrawer({ open, target, onTargetChange, onClose }
   const isMobile = useIsMobile();
   useVisualViewportVars(open && isMobile);
   const [me, setMe] = useState(getCurrentUser);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) setMe(getCurrentUser());
@@ -647,7 +653,7 @@ export default function MessagesDrawer({ open, target, onTargetChange, onClose }
 
   const title = target ? (
     <div className="mb-chat-header">
-      <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => onTargetChange(null)} aria-label="Geri" />
+      <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => onTargetChange(null)} aria-label={t('common:actions.back')} />
       {target.type === 'user' ? (
         <PlayerAvatar player={target.data} size={36} />
       ) : (
@@ -664,12 +670,12 @@ export default function MessagesDrawer({ open, target, onTargetChange, onClose }
           )}
         </div>
         <Text type="secondary" className="mb-chat-header__sub">
-          {target.type === 'user' ? `@${target.data.userName}` : 'Grup sohbeti'}
+          {target.type === 'user' ? `@${target.data.userName}` : t('messages:group.chat')}
         </Text>
       </div>
     </div>
   ) : (
-    <span>Mesajlar</span>
+    <span>{t('messages:drawer.title')}</span>
   );
 
   return (

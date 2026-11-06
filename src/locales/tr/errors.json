@@ -1,0 +1,13 @@
+{
+  "generic": {
+    "unknown": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "network": "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.",
+    "timeout": "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.",
+    "rateLimited": "Çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.",
+    "unauthorized": "Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.",
+    "forbidden": "Bu işlem için yetkiniz yok.",
+    "notFound": "Aradığınız kayıt bulunamadı.",
+    "validationFailed": "Girilen bilgileri kontrol edin.",
+    "server": "Sunucuda bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+  }
+}

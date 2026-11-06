@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Alert, App, Button, Card, Checkbox, Col, Form, Grid, InputNumber, Modal, Row, Select, Skeleton, Space, Switch, Table, TimePicker, Tooltip, Typography } from 'antd';
 import { ClockCircleOutlined, DeleteOutlined, EditOutlined, PlusOutlined, SaveOutlined, TagsOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { DAYS, DAYS_SHORT, daysToMask, formatPrice, maskToDays, ownerApi } from '../api/venues';
+import { intlLocale } from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
 import { apiErrorMessage } from '../utils/format';
@@ -18,10 +20,11 @@ const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 const maskIndexes = (mask) => ALL_DAYS.filter((i) => mask & (1 << i));
 
 function DayChips({ mask }) {
+  const { t } = useTranslation();
   const days = maskToDays(mask);
-  if (mask === 127) return <span className="mb-owner-daychip is-on">Her gün</span>;
-  if (mask === daysToMask(WEEKDAYS)) return <span className="mb-owner-daychip is-on">Hafta içi</span>;
-  if (mask === daysToMask(WEEKEND)) return <span className="mb-owner-daychip is-on">Hafta sonu</span>;
+  if (mask === 127) return <span className="mb-owner-daychip is-on">{t('facility:pricing.everyDay')}</span>;
+  if (mask === daysToMask(WEEKDAYS)) return <span className="mb-owner-daychip is-on">{t('facility:pricing.weekdays')}</span>;
+  if (mask === daysToMask(WEEKEND)) return <span className="mb-owner-daychip is-on">{t('facility:pricing.weekend')}</span>;
   return (
     <span className="mb-owner-daychips">
       {DAYS_SHORT.map((d) => (
@@ -35,6 +38,7 @@ function DayChips({ mask }) {
 
 /** Haftalık açılış saatleri, fiyat kuralları ve fiyat önizlemesi */
 export default function OwnerPricing() {
+  const { t } = useTranslation();
   const { message, modal } = App.useApp();
   const { venue, venueId, membershipActive } = useOwnerVenue();
   const { data, loading, error, reload } = useOwnerData(async (id) => {
@@ -62,7 +66,7 @@ export default function OwnerPricing() {
 
   const rules = useMemo(() => data?.rules || [], [data]);
   const pitches = useMemo(() => data?.pitches || [], [data]);
-  const pitchName = (id) => pitches.find((p) => p.pitchId === id)?.name || `Saha #${id}`;
+  const pitchName = (id) => pitches.find((p) => p.pitchId === id)?.name || t('facility:pricing.pitchFallback', { id });
 
   useEffect(() => {
     if (pitches.length && !pitches.some((p) => p.pitchId === previewPitch)) setPreviewPitch((pitches.find((p) => p.isActive) || pitches[0]).pitchId);
@@ -87,12 +91,12 @@ export default function OwnerPricing() {
         venueId,
         days.map((d) => ({ dayOfWeek: d.dayOfWeek, isClosed: Boolean(d.isClosed), openTime: d.openTime, closeTime: d.closeTime }))
       );
-      message.success('Çalışma saatleriniz kaydedildi.');
+      message.success(t('facility:pricing.hoursSaved'));
       setHoursDirty(false);
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Saatler kaydedilemedi.'));
+      message.error(apiErrorMessage(e, t('facility:pricing.hoursSaveFailed')));
     } finally {
       setSavingHours(false);
     }
@@ -123,12 +127,12 @@ export default function OwnerPricing() {
         toHour: v.toHour,
         pricePerHour: v.pricePerHour,
       });
-      message.success(editing.priceRuleId ? 'Fiyat kuralı güncellendi.' : 'Fiyat kuralı eklendi.');
+      message.success(editing.priceRuleId ? t('facility:pricing.ruleUpdated') : t('facility:pricing.ruleAdded'));
       setEditing(null);
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Kural kaydedilemedi.'));
+      message.error(apiErrorMessage(e, t('facility:pricing.ruleSaveFailed')));
     } finally {
       setSavingRule(false);
     }
@@ -136,36 +140,45 @@ export default function OwnerPricing() {
 
   const removeRule = (r) =>
     modal.confirm({
-      title: 'Fiyat kuralı silinsin mi?',
-      content: 'Bu saatlerde sahanın taban fiyatı ya da diğer kurallar geçerli olur.',
-      okText: 'Sil',
+      title: t('facility:pricing.deleteConfirmTitle'),
+      content: t('facility:pricing.deleteConfirmContent'),
+      okText: t('common:actions.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Vazgeç',
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
         try {
           await ownerApi.deletePriceRule(r.priceRuleId);
-          message.success('Fiyat kuralı silindi.');
+          message.success(t('facility:pricing.ruleDeleted'));
           notifyOwnerChanged();
           reload(true);
         } catch (e) {
-          message.error(apiErrorMessage(e, 'Kural silinemedi.'));
+          message.error(apiErrorMessage(e, t('facility:pricing.ruleDeleteFailed')));
         }
       },
     });
 
   const ruleColumns = [
-    { title: 'Günler', dataIndex: 'daysMask', render: (m) => <DayChips mask={m} /> },
-    { title: 'Saat', key: 'hours', render: (_, r) => <Text strong>{hourRange(r.fromHour, r.toHour)}</Text> },
-    { title: 'Saha', dataIndex: 'pitchId', render: (id) => (id == null ? <Text type="secondary">Tüm sahalar</Text> : pitchName(id)) },
-    { title: 'Saatlik fiyat', dataIndex: 'pricePerHour', align: 'right', render: (v) => <span className="mb-owner-price">{formatPrice(v)}</span> },
+    { title: t('facility:pricing.columns.days'), dataIndex: 'daysMask', render: (m) => <DayChips mask={m} /> },
+    { title: t('facility:pricing.columns.hours'), key: 'hours', render: (_, r) => <Text strong>{hourRange(r.fromHour, r.toHour)}</Text> },
+    {
+      title: t('common:pitch'),
+      dataIndex: 'pitchId',
+      render: (id) => (id == null ? <Text type="secondary">{t('facility:pricing.allPitches')}</Text> : pitchName(id)),
+    },
+    {
+      title: t('facility:pricing.columns.hourlyPrice'),
+      dataIndex: 'pricePerHour',
+      align: 'right',
+      render: (v) => <span className="mb-owner-price">{formatPrice(v)}</span>,
+    },
     {
       title: '',
       key: 'actions',
       align: 'right',
       render: (_, r) => (
         <Space size={4}>
-          <WriteButton size="small" icon={<EditOutlined />} onClick={() => openRule(r)} aria-label="Düzenle" />
-          <WriteButton size="small" danger icon={<DeleteOutlined />} onClick={() => removeRule(r)} aria-label="Sil" />
+          <WriteButton size="small" icon={<EditOutlined />} onClick={() => openRule(r)} aria-label={t('common:actions.edit')} />
+          <WriteButton size="small" danger icon={<DeleteOutlined />} onClick={() => removeRule(r)} aria-label={t('common:actions.delete')} />
         </Space>
       ),
     },
@@ -202,9 +215,9 @@ export default function OwnerPricing() {
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Saatler ve Fiyatlar"
+        title={t('facility:pricing.title')}
         icon={<TagsOutlined />}
-        subtitle="Çalışma saatlerinizi ve saate göre değişen fiyatlarınızı belirleyin."
+        subtitle={t('facility:pricing.subtitle')}
       />
       {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} />}
 
@@ -212,10 +225,10 @@ export default function OwnerPricing() {
         <Col xs={24} xl={10}>
           <Card
             bordered={false}
-            title="Çalışma saatleri"
+            title={t('facility:pricing.openingHours')}
             extra={
               <WriteButton type="primary" size={headBtnSize} icon={<SaveOutlined />} onClick={saveHours} loading={savingHours} disabled={!hoursDirty}>
-                Kaydet
+                {t('common:actions.save')}
               </WriteButton>
             }
           >
@@ -233,12 +246,12 @@ export default function OwnerPricing() {
                         checked={!d.isClosed}
                         disabled={!membershipActive}
                         onChange={(v) => updateDay(i, { isClosed: !v })}
-                        checkedChildren="Açık"
-                        unCheckedChildren="Kapalı"
+                        checkedChildren={t('facility:pricing.open')}
+                        unCheckedChildren={t('facility:pricing.closed')}
                       />
                       {d.isClosed ? (
                         <Text type="secondary" className="mb-owner-hours__closed">
-                          Bu gün kapalı
+                          {t('facility:pricing.dayClosed')}
                         </Text>
                       ) : (
                         <span className="mb-owner-hours__times">
@@ -263,18 +276,25 @@ export default function OwnerPricing() {
                             value={dayjs(d.closeTime, 'HH:mm')}
                             onChange={(t) => t && updateDay(i, { closeTime: t.format('HH:mm') })}
                           />
-                          {overnight && <span className="mb-owner-hours__hint">ertesi gün</span>}
-                          {d.closeTime === '00:00' && <span className="mb-owner-hours__hint is-muted">gece yarısı</span>}
+                          {overnight && <span className="mb-owner-hours__hint">{t('facility:pricing.nextDay')}</span>}
+                          {d.closeTime === '00:00' && <span className="mb-owner-hours__hint is-muted">{t('facility:pricing.midnight')}</span>}
                         </span>
                       )}
-                      <Tooltip title="Bu saatleri tüm günlere uygula">
-                        <Button size="small" type="text" icon={<ClockCircleOutlined />} disabled={!membershipActive} onClick={() => copyToAll(i)} aria-label="Tüm günlere uygula" />
+                      <Tooltip title={t('facility:pricing.applyToAllTooltip')}>
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<ClockCircleOutlined />}
+                          disabled={!membershipActive}
+                          onClick={() => copyToAll(i)}
+                          aria-label={t('facility:pricing.applyToAll')}
+                        />
                       </Tooltip>
                     </div>
                   );
                 })}
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  Kapanış saati açılıştan önceyse (ör. 10:00–02:00) tesisiniz ertesi gün gece saatlerine kadar açık sayılır.
+                  {t('facility:pricing.overnightHint')}
                 </Text>
               </div>
             )}
@@ -284,15 +304,15 @@ export default function OwnerPricing() {
         <Col xs={24} xl={14}>
           <Card
             bordered={false}
-            title="Fiyat kuralları"
+            title={t('facility:pricing.priceRules')}
             extra={
               <WriteButton size={headBtnSize} type="primary" icon={<PlusOutlined />} onClick={() => openRule(null)} disabled={!pitches.length}>
-                Kural ekle
+                {t('facility:pricing.addRule')}
               </WriteButton>
             }
           >
             <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-              Kural olmayan saatlerde sahanın taban fiyatı uygulanır. Sahaya özel kurallar, tüm sahalar için tanımlanan kurallardan önceliklidir.
+              {t('facility:pricing.rulesHint')}
             </Text>
             <Table
               rowKey="priceRuleId"
@@ -302,7 +322,7 @@ export default function OwnerPricing() {
               loading={loading}
               pagination={false}
               scroll={{ x: 560 }}
-              locale={{ emptyText: <EmptyState description="Henüz fiyat kuralı yok. Örneğin akşam saatleri için farklı bir fiyat tanımlayabilirsiniz." /> }}
+              locale={{ emptyText: <EmptyState description={t('facility:pricing.noRules')} /> }}
             />
           </Card>
         </Col>
@@ -310,7 +330,7 @@ export default function OwnerPricing() {
         <Col span={24}>
           <Card
             bordered={false}
-            title="Fiyat önizleme"
+            title={t('facility:pricing.preview')}
             extra={
               pitches.length > 1 && (
                 <Select size="small" value={previewPitch} onChange={setPreviewPitch} style={{ minWidth: 150 }} options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))} />
@@ -318,7 +338,7 @@ export default function OwnerPricing() {
             }
           >
             {!preview ? (
-              <EmptyState description={pitches.length ? 'Önizleme için en az bir gün açık olmalı.' : 'Önizleme için önce bir saha ekleyin.'} />
+              <EmptyState description={pitches.length ? t('facility:pricing.previewNeedsOpenDay') : t('facility:pricing.previewNeedsPitch')} />
             ) : (
               <>
                 <div className="mb-owner-heat-scroll">
@@ -341,12 +361,19 @@ export default function OwnerPricing() {
                         <span className="mb-owner-heat__day">{DAYS_SHORT[r.day]}</span>
                         {r.cells.map((c) =>
                           c.open ? (
-                            <Tooltip key={c.h} title={`${DAYS[r.day]} ${hourLabel(c.h)} · ${formatPrice(c.price)}${c.ruled ? ' (kural)' : ' (taban fiyat)'}`}>
+                            <Tooltip
+                              key={c.h}
+                              title={t(c.ruled ? 'facility:pricing.cellTooltipRule' : 'facility:pricing.cellTooltipBase', {
+                                day: DAYS[r.day],
+                                hour: hourLabel(c.h),
+                                price: formatPrice(c.price),
+                              })}
+                            >
                               <span
                                 className={`mb-owner-heat__cell${c.ruled ? ' is-ruled' : ''}`}
                                 style={{ background: `color-mix(in srgb, var(--mb-primary) ${heat(c.price)}%, var(--mb-surface-2))` }}
                               >
-                                {Math.round(c.price).toLocaleString('tr-TR')}
+                                {Math.round(c.price).toLocaleString(intlLocale())}
                               </span>
                             </Tooltip>
                           ) : (
@@ -358,7 +385,7 @@ export default function OwnerPricing() {
                   </div>
                 </div>
                 <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 10 }}>
-                  Saatlik fiyatlar ₺ cinsindendir; kampanya indirimleri dahil değildir. Koyu renk daha yüksek fiyatı gösterir. Kaydedilmemiş saat değişiklikleri de önizlemeye yansır.
+                  {t('facility:pricing.previewHint')}
                 </Text>
               </>
             )}
@@ -368,47 +395,49 @@ export default function OwnerPricing() {
 
       <Modal
         open={Boolean(editing)}
-        title={editing?.priceRuleId ? 'Fiyat kuralını düzenle' : 'Yeni fiyat kuralı'}
-        okText="Kaydet"
-        cancelText="Vazgeç"
+        title={editing?.priceRuleId ? t('facility:pricing.editRule') : t('facility:pricing.newRule')}
+        okText={t('common:actions.save')}
+        cancelText={t('common:actions.cancel')}
         confirmLoading={savingRule}
         onOk={saveRule}
         onCancel={() => setEditing(null)}
         forceRender
       >
         <Form form={form} layout="vertical" requiredMark={false}>
-          <Form.Item label="Günler" required>
+          <Form.Item label={t('facility:pricing.columns.days')} required>
             <Space size={6} style={{ marginBottom: 8 }} wrap>
               <Button size="small" onClick={() => form.setFieldsValue({ days: WEEKDAYS })}>
-                Hafta içi
+                {t('facility:pricing.weekdays')}
               </Button>
               <Button size="small" onClick={() => form.setFieldsValue({ days: WEEKEND })}>
-                Hafta sonu
+                {t('facility:pricing.weekend')}
               </Button>
               <Button size="small" onClick={() => form.setFieldsValue({ days: ALL_DAYS })}>
-                Her gün
+                {t('facility:pricing.everyDay')}
               </Button>
             </Space>
-            <Form.Item name="days" noStyle rules={[{ required: true, type: 'array', min: 1, message: 'En az bir gün seçin.' }]}>
+            <Form.Item name="days" noStyle rules={[{ required: true, type: 'array', min: 1, message: t('facility:pricing.daysRequired') }]}>
               <Checkbox.Group options={DAYS_SHORT.map((label, value) => ({ label, value }))} />
             </Form.Item>
           </Form.Item>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="fromHour" label="Başlangıç" rules={[{ required: true, message: 'Seçin.' }]}>
+              <Form.Item name="fromHour" label={t('facility:pricing.from')} rules={[{ required: true, message: t('validation:select') }]}>
                 <Select options={HOUR_OPTIONS_FROM} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="toHour"
-                label="Bitiş"
+                label={t('facility:pricing.to')}
                 dependencies={['fromHour']}
                 rules={[
-                  { required: true, message: 'Seçin.' },
+                  { required: true, message: t('validation:select') },
                   ({ getFieldValue }) => ({
                     validator: (_, v) =>
-                      v == null || v > getFieldValue('fromHour') ? Promise.resolve() : Promise.reject(new Error('Bitiş, başlangıçtan sonra olmalı.')),
+                      v == null || v > getFieldValue('fromHour')
+                        ? Promise.resolve()
+                        : Promise.reject(new Error(t('facility:pricing.toAfterFrom'))),
                   }),
                 ]}
               >
@@ -418,18 +447,22 @@ export default function OwnerPricing() {
           </Row>
           <Row gutter={12}>
             <Col xs={24} sm={12}>
-              <Form.Item name="pitchId" label="Saha">
-                <Select allowClear placeholder="Tüm sahalar" options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))} />
+              <Form.Item name="pitchId" label={t('common:pitch')}>
+                <Select allowClear placeholder={t('facility:pricing.allPitches')} options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="pricePerHour" label="Saatlik fiyat" rules={[{ required: true, message: 'Fiyat girin.' }]}>
+              <Form.Item
+                name="pricePerHour"
+                label={t('facility:pricing.columns.hourlyPrice')}
+                rules={[{ required: true, message: t('facility:pricing.priceRequired') }]}
+              >
                 <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Gece yarısını aşan saatler için kuralı ertesi gün 00:00'dan başlayarak ayrıca tanımlayın.
+            {t('facility:pricing.overnightRuleHint')}
           </Text>
         </Form>
       </Modal>

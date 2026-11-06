@@ -1,0 +1,76 @@
+{
+  "loadError": "Profil yüklenemedi.",
+  "loading": "Profil yükleniyor…",
+  "hero": {
+    "eyebrow": "Oyuncu kartı",
+    "age_one": "{{count}} yaş",
+    "age_other": "{{count}} yaş",
+    "overallScore": "Genel puan"
+  },
+  "stats": {
+    "matches": "Maç",
+    "goals": "Gol",
+    "assists": "Asist",
+    "mvp": "MVP",
+    "avgRating_one": "Ort. puan ({{count}})",
+    "avgRating_other": "Ort. puan ({{count}})"
+  },
+  "recent": {
+    "title": "Son maçlar",
+    "empty": "Henüz oynanmış maçın yok.",
+    "win": "G",
+    "loss": "M",
+    "draw": "B"
+  },
+  "contact": {
+    "title": "İletişim bilgileri",
+    "privateHint": "Bu bilgileri sadece sen görebilirsin."
+  },
+  "teams": {
+    "title": "Takımlarım",
+    "empty": "Henüz bir takımda değilsin."
+  },
+  "fields": {
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "userName": "Kullanıcı adı",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "address": "Adres",
+    "age": "Yaş",
+    "height": "Boy (cm)",
+    "weight": "Kilo (kg)"
+  },
+  "edit": {
+    "title": "Profili düzenle",
+    "subtitle": "Bilgilerini güncel tut; takım arkadaşların seni daha kolay bulsun.",
+    "success": "Profiliniz güncellendi.",
+    "error": "Profil güncellenemedi.",
+    "photo": {
+      "title": "Profil fotoğrafı",
+      "select": "Fotoğraf seç",
+      "hint": "JPG, PNG veya WebP, en fazla {{maxMb}} MB. Seçtikten sonra kırpabilirsin.",
+      "selected": "Seçildi: {{name}}"
+    },
+    "personal": "Kişisel bilgiler",
+    "physical": "Fiziksel bilgiler",
+    "required": {
+      "firstName": "Ad zorunludur.",
+      "lastName": "Soyad zorunludur.",
+      "userName": "Kullanıcı adı zorunludur.",
+      "email": "E-posta zorunludur.",
+      "phone": "Telefon zorunludur.",
+      "address": "Adres zorunludur.",
+      "short": "Zorunlu"
+    },
+    "password": {
+      "title": "Şifre değiştir",
+      "hint": "Şifrenizi değiştirmek istemiyorsanız boş bırakın.",
+      "new": "Yeni şifre",
+      "confirm": "Yeni şifre (tekrar)",
+      "minLength_one": "En az {{count}} karakter olmalıdır.",
+      "minLength_other": "En az {{count}} karakter olmalıdır."
+    },
+    "submit": "Değişiklikleri kaydet"
+  }
+}

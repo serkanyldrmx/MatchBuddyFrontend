@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { App } from 'antd';
 import { api } from '../api/config';
+import i18n from '../i18n';
 import { matchesApi } from '../api/matches';
 import { apiErrorMessage } from '../utils/format';
 
@@ -39,7 +40,7 @@ export default function useAdminData() {
       setMatches(mergeMatches(Array.isArray(m.data) ? m.data : [], Array.isArray(f) ? f : []));
       setStadiums(Array.isArray(s.data) ? s.data : []);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Maç listesi alınamadı.'));
+      message.error(apiErrorMessage(e, i18n.t('admin:shared.loadMatchesFailed')));
     } finally {
       setLoading(false);
     }

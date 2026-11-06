@@ -1,12 +1,14 @@
 import React from 'react';
 import { CalendarOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons';
+import { Trans, useTranslation } from 'react-i18next';
 import Logo from '../../images/mutch_buddy_Logo.png';
 import './Login.css';
 
+// Metinler render anında çevrilir (auth:shell.features.<key>)
 const FEATURES = [
-  { icon: <TeamOutlined />, title: 'Kadronu tamamla', text: 'Eksik oyuncuyu dakikalar içinde bul.' },
-  { icon: <CalendarOutlined />, title: 'Halı saha rezervasyonu', text: 'Sahanı seç, saatini ayırt, maçı kur.' },
-  { icon: <TrophyOutlined />, title: 'MVP ve puanlar', text: 'Her maçtan sonra oyla, sıralamada yüksel.' },
+  { key: 'squad', icon: <TeamOutlined /> },
+  { key: 'booking', icon: <CalendarOutlined /> },
+  { key: 'mvp', icon: <TrophyOutlined /> },
 ];
 
 export function AuthBrand() {
@@ -27,6 +29,7 @@ export function AuthBrand() {
  * masaüstünde solda tanıtım metni, sağda buzlu cam kart.
  */
 export default function AuthShell({ wide = false, title, subtitle, children }) {
+  const { t } = useTranslation();
   return (
     <div className={`mb-auth${wide ? ' mb-auth--wide' : ''}`}>
       <div className="mb-auth__bg" aria-hidden="true">
@@ -40,23 +43,21 @@ export default function AuthShell({ wide = false, title, subtitle, children }) {
       <div className="mb-auth__shell">
         <section className="mb-auth__intro">
           <span className="mb-auth__eyebrow">
-            <span className="mb-auth__dot" /> Bu akşam sahada maç var
+            <span className="mb-auth__dot" /> {t('auth:shell.eyebrow')}
           </span>
           <h2 className="mb-auth__intro-title">
-            Maçını kur.
-            <br />
-            <em>Kadronu tamamla.</em>
+            <Trans i18nKey="auth:shell.introTitle" components={{ br: <br />, em: <em /> }} />
           </h2>
           <p className="mb-auth__intro-text">
-            Takım arkadaşlarını bul, halı sahanı ayırt, maçın yıldızı ol. Hepsi tek yerde.
+            {t('auth:shell.introText')}
           </p>
           <ul className="mb-auth__features">
             {FEATURES.map((f) => (
-              <li key={f.title}>
+              <li key={f.key}>
                 <span className="mb-auth__feature-icon">{f.icon}</span>
                 <span>
-                  <strong>{f.title}</strong>
-                  <small>{f.text}</small>
+                  <strong>{t(`auth:shell.features.${f.key}.title`)}</strong>
+                  <small>{t(`auth:shell.features.${f.key}.text`)}</small>
                 </span>
               </li>
             ))}

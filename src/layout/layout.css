@@ -5,6 +5,7 @@
 
 /* ---------- Yan menü ---------- */
 .mb-sider {
+  background: var(--mb-sider-bg);
   position: sticky !important;
   top: 0;
   height: 100vh;
@@ -37,11 +38,11 @@
   height: 38px;
   min-width: 38px;
   border-radius: 12px;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 4px rgba(198, 244, 50, 0.12), 0 8px 24px rgba(198, 244, 50, 0.25);
+  box-shadow: 0 0 0 4px rgba(var(--mb-primary-fill-rgb), 0.12), 0 8px 24px rgba(var(--mb-primary-fill-rgb), 0.25);
 }
 
 .mb-brand__mark img {
@@ -81,8 +82,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  background: var(--mb-gold);
-  color: #1a1203;
+  background: var(--mb-gold-fill);
+  color: var(--mb-gold-ink);
   padding: 2px 8px;
   border-radius: 999px;
 }
@@ -107,7 +108,7 @@
 .mb-sider-cta p {
   margin: 0 0 14px;
   font-size: 12px;
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
 }
 
 /* Üst bardaki kompakt marka (sadece yan menünün çekmeceye dönüştüğü ekranlarda render edilir) */
@@ -126,7 +127,7 @@
   height: 32px;
   min-width: 32px;
   border-radius: 10px;
-  box-shadow: 0 0 0 3px rgba(198, 244, 50, 0.1), 0 6px 16px rgba(198, 244, 50, 0.2);
+  box-shadow: 0 0 0 3px rgba(var(--mb-primary-fill-rgb), 0.1), 0 6px 16px rgba(var(--mb-primary-fill-rgb), 0.2);
 }
 
 .mb-brand--header .mb-brand__mark img {
@@ -160,6 +161,7 @@
 
 /* ---------- Üst bar ---------- */
 .mb-header {
+  background: var(--mb-glass);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -344,7 +346,7 @@
   align-items: end;
   height: calc(64px + env(safe-area-inset-bottom));
   padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
-  background: rgba(5, 8, 14, 0.92);
+  background: var(--mb-glass-strong);
   border-top: 1px solid var(--mb-border);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -394,7 +396,7 @@
 }
 
 .mb-tabbar__item.is-active .anticon {
-  filter: drop-shadow(0 0 8px rgba(198, 244, 50, 0.45));
+  filter: drop-shadow(0 0 8px rgba(var(--mb-primary-rgb), 0.45));
 }
 
 .mb-tabbar__create {
@@ -412,10 +414,10 @@
   margin-top: -22px;
   margin-bottom: 2px;
   border-radius: 18px;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
   font-size: 24px;
-  box-shadow: 0 0 0 5px var(--mb-bg), 0 10px 26px rgba(198, 244, 50, 0.35);
+  box-shadow: 0 0 0 5px var(--mb-bg), 0 10px 26px rgba(var(--mb-primary-fill-rgb), 0.35);
   transform: rotate(0deg);
   transition: transform 0.18s ease;
 }

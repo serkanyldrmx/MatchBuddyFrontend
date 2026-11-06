@@ -27,7 +27,7 @@
 
 .mb-amenities__icon:hover {
   color: var(--mb-primary);
-  border-color: rgba(198, 244, 50, 0.35);
+  border-color: rgba(var(--mb-primary-rgb), 0.35);
 }
 
 .mb-venue-rating {
@@ -70,13 +70,13 @@
   gap: 6px;
   padding: 4px 12px 4px 10px;
   border-radius: 0 999px 999px 0;
-  background: var(--mb-gold);
+  background: var(--mb-gold-fill);
   color: var(--mb-primary-ink);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35);
+  box-shadow: 0 6px 18px rgba(var(--mb-gold-rgb), 0.35);
 }
 
 /* =================== Filtreler =================== */
@@ -118,7 +118,7 @@
 
 .mb-venue-filters__toggle.is-on {
   color: var(--mb-gold);
-  border-color: rgba(251, 191, 36, 0.5);
+  border-color: rgba(var(--mb-gold-rgb), 0.5);
   background: var(--mb-gold-soft);
 }
 
@@ -159,7 +159,7 @@
 
 .mb-venue-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(198, 244, 50, 0.35);
+  border-color: rgba(var(--mb-primary-rgb), 0.35);
   box-shadow: var(--mb-shadow);
 }
 
@@ -221,7 +221,7 @@
   z-index: 2;
   padding: 3px 10px;
   border-radius: 999px;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
   font-size: 11px;
   font-weight: 800;
@@ -482,10 +482,10 @@
 }
 
 .mb-datestrip__day.is-active {
-  background: var(--mb-primary);
-  border-color: var(--mb-primary);
+  background: var(--mb-primary-fill);
+  border-color: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
-  box-shadow: 0 6px 20px rgba(198, 244, 50, 0.25);
+  box-shadow: 0 6px 20px rgba(var(--mb-primary-rgb), 0.25);
 }
 
 .mb-datestrip__day.is-active .mb-datestrip__dow,
@@ -593,7 +593,7 @@
 }
 
 .mb-slot.is-free {
-  border-color: rgba(198, 244, 50, 0.55);
+  border-color: rgba(var(--mb-primary-rgb), 0.55);
   color: var(--mb-text);
   cursor: pointer;
   transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
@@ -610,7 +610,7 @@
 }
 
 .mb-slot.is-free.is-deal {
-  border-color: rgba(251, 191, 36, 0.7);
+  border-color: rgba(var(--mb-gold-rgb), 0.7);
 }
 
 .mb-slot.is-free.is-deal small {
@@ -619,10 +619,10 @@
 
 .mb-slot.is-selected,
 .mb-slot.is-selected.is-deal {
-  background: var(--mb-primary);
-  border-color: var(--mb-primary);
+  background: var(--mb-primary-fill);
+  border-color: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
-  box-shadow: 0 6px 20px rgba(198, 244, 50, 0.3);
+  box-shadow: 0 6px 20px rgba(var(--mb-primary-rgb), 0.3);
 }
 
 .mb-slot.is-selected small,
@@ -637,7 +637,7 @@
   right: -6px;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--mb-gold);
+  background: var(--mb-gold-fill);
   color: var(--mb-primary-ink);
   font-size: 9px;
   font-style: normal;
@@ -648,8 +648,8 @@
 
 .mb-slot.is-booked,
 .mb-slot.is-pending {
-  background: rgba(244, 63, 94, 0.06);
-  border-color: rgba(244, 63, 94, 0.18);
+  background: rgba(var(--mb-danger-rgb), 0.06);
+  border-color: rgba(var(--mb-danger-rgb), 0.18);
   color: var(--mb-text-3);
   cursor: not-allowed;
 }
@@ -687,7 +687,7 @@
 
 .mb-slotpicker__legend i.is-free { border-color: var(--mb-primary); }
 .mb-slotpicker__legend i.is-deal { border-color: var(--mb-gold); }
-.mb-slotpicker__legend i.is-booked { background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.3); }
+.mb-slotpicker__legend i.is-booked { background: rgba(var(--mb-danger-rgb), 0.2); border-color: rgba(var(--mb-danger-rgb), 0.3); }
 .mb-slotpicker__legend i.is-blocked { background: repeating-linear-gradient(135deg, var(--mb-surface) 0 3px, var(--mb-surface-3) 3px 6px); }
 
 .mb-hint {

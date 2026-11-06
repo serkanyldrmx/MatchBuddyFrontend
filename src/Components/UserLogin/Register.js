@@ -2,8 +2,10 @@ import { Button, Form, Input, Select, Row, Col, message, Checkbox, Upload } from
 import { LockOutlined, UserOutlined, MailOutlined, HomeOutlined, NumberOutlined, UploadOutlined, ColumnHeightOutlined, DashboardOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import AuthShell from "./AuthShell";
 import { api } from '../../api/config';
+import { apiErrorMessage } from '../../utils/format';
 import ImageCrop from "../../ui/ImageCrop";
 import { ACCEPTED_IMAGE_ACCEPT, imageError, prepareImage } from "../../utils/image";
 
@@ -14,13 +16,14 @@ const RegisterForm = () => {
   const navigate = useNavigate();
   const [fileList, setFileList] = useState([]);
   const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
+  const { t } = useTranslation();
 
   const success = () => {
-    message.success("Kayıt başarılı, yönlendiriliyor");
+    message.success(t('auth:register.success'));
   };
 
   const error = (errorMessage) => {
-    message.error(errorMessage || "Kayıt başarısız");
+    message.error(errorMessage || t('auth:register.failed'));
   };
 
   const onFinish = async (values) => {
@@ -64,9 +67,12 @@ const RegisterForm = () => {
       }, 1500);
     } catch (err) {
       // Extract error message
-      let errorMessage = "Kayıt başarısız";
+      let errorMessage = t('auth:register.failed');
       if (err.response?.data) {
-        if (err.response.data.message) {
+        if (err.response.data.code || err.response.data.Code) {
+          // Sunucu hata kodu varsa errors namespace'inden çevrilir
+          errorMessage = apiErrorMessage(err, t('auth:register.failed'));
+        } else if (err.response.data.message) {
           errorMessage = err.response.data.message;
         } else if (err.response.data.errors) {
           // Handle validation errors
@@ -121,8 +127,8 @@ const RegisterForm = () => {
   return (
     <AuthShell
       wide
-      title={<>Kadroya <em>katıl</em></>}
-      subtitle="Profilini oluştur, takımını kur ve ilk maçına çık."
+      title={<Trans i18nKey="auth:register.title" components={{ em: <em /> }} />}
+      subtitle={t('auth:register.subtitle')}
     >
       <Form
         layout="vertical"
@@ -133,93 +139,93 @@ const RegisterForm = () => {
         initialValues={{ prefix: "90" }}
         scrollToFirstError
       >
-        <h3 className="mb-auth__section"><span>01</span> Hesap</h3>
+        <h3 className="mb-auth__section"><span>01</span> {t('auth:register.sections.account')}</h3>
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
               name="username"
-              label="Kullanıcı adı"
-              rules={[{ required: true, message: "Lütfen kullanıcı adınızı girin!" }]}
+              label={t('auth:register.username')}
+              rules={[{ required: true, message: t('auth:register.usernameRequired') }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Kullanıcı Adı" autoComplete="username" autoCapitalize="none" />
+              <Input prefix={<UserOutlined />} placeholder={t('auth:register.usernamePlaceholder')} autoComplete="username" autoCapitalize="none" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="email"
-              label="E-posta"
+              label={t('auth:register.email')}
               rules={[
-                { type: "email", message: "Giriş geçerli değil E-mail!" },
-                { required: true, message: "Lütfen E-posta adresinizi giriniz!" },
+                { type: "email", message: t('auth:register.emailInvalid') },
+                { required: true, message: t('auth:register.emailRequired') },
               ]}
             >
-              <Input prefix={<MailOutlined />} placeholder="E-mail" inputMode="email" autoComplete="email" autoCapitalize="none" />
+              <Input prefix={<MailOutlined />} placeholder={t('auth:register.emailPlaceholder')} inputMode="email" autoComplete="email" autoCapitalize="none" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="password"
-              label="Şifre"
-              rules={[{ required: true, message: "Lütfen şifrenizi giriniz!" }]}
+              label={t('auth:register.password')}
+              rules={[{ required: true, message: t('auth:register.passwordRequired') }]}
               hasFeedback
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Şifre" autoComplete="new-password" />
+              <Input.Password prefix={<LockOutlined />} placeholder={t('auth:register.passwordPlaceholder')} autoComplete="new-password" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="confirm"
-              label="Şifre tekrar"
+              label={t('auth:register.confirmPassword')}
               dependencies={["password"]}
               hasFeedback
               rules={[
-                { required: true, message: "Lütfen şifrenizi doğrulayınız!" },
+                { required: true, message: t('auth:register.confirmPasswordRequired') },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue("password") === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error("Girdiğiniz iki şifre eşleşmiyor!"));
+                    return Promise.reject(new Error(t('auth:register.passwordMismatch')));
                   },
                 }),
               ]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Şifreyi Onayla" autoComplete="new-password" />
+              <Input.Password prefix={<LockOutlined />} placeholder={t('auth:register.confirmPasswordPlaceholder')} autoComplete="new-password" />
             </Form.Item>
           </Col>
         </Row>
 
-        <h3 className="mb-auth__section"><span>02</span> Kişisel</h3>
+        <h3 className="mb-auth__section"><span>02</span> {t('auth:register.sections.personal')}</h3>
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
               name="name"
-              label="İsim"
-              tooltip="Başkalarının sana ne demesini istiyorsun?"
-              rules={[{ required: true, message: "Lütfen Tam Adınızı girin!", whitespace: true }]}
+              label={t('auth:register.name')}
+              tooltip={t('auth:register.nameTooltip')}
+              rules={[{ required: true, message: t('auth:register.nameRequired'), whitespace: true }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="İsim" autoComplete="given-name" />
+              <Input prefix={<UserOutlined />} placeholder={t('auth:register.namePlaceholder')} autoComplete="given-name" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="lastName"
-              label="Soyisim"
-              rules={[{ required: true, message: "Lütfen Soyadınızı girin!" }]}
+              label={t('auth:register.lastName')}
+              rules={[{ required: true, message: t('auth:register.lastNameRequired') }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Soyisim" autoComplete="family-name" />
+              <Input prefix={<UserOutlined />} placeholder={t('auth:register.lastNamePlaceholder')} autoComplete="family-name" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="phone"
-              label="Telefon"
-              rules={[{ required: true, message: "Lütfen telefon numaranızı giriniz!" }]}
+              label={t('auth:register.phone')}
+              rules={[{ required: true, message: t('auth:register.phoneRequired') }]}
             >
               <Input
                 addonBefore={prefixSelector}
                 style={{ width: "100%" }}
-                placeholder="Telefon Numarası"
+                placeholder={t('auth:register.phonePlaceholder')}
                 inputMode="tel"
                 autoComplete="tel-national"
               />
@@ -228,67 +234,67 @@ const RegisterForm = () => {
           <Col xs={24} md={12}>
             <Form.Item
               name="address"
-              label="Adres"
-              rules={[{ required: true, message: "Lütfen adresinizi girin!" }]}
+              label={t('auth:register.address')}
+              rules={[{ required: true, message: t('auth:register.addressRequired') }]}
             >
-              <Input prefix={<HomeOutlined />} placeholder="Adres" autoComplete="address-level2" />
+              <Input prefix={<HomeOutlined />} placeholder={t('auth:register.addressPlaceholder')} autoComplete="address-level2" />
             </Form.Item>
           </Col>
         </Row>
 
-        <h3 className="mb-auth__section"><span>03</span> Fiziksel / Oyun</h3>
+        <h3 className="mb-auth__section"><span>03</span> {t('auth:register.sections.physical')}</h3>
         <Row gutter={16}>
           <Col xs={24} sm={8}>
             <Form.Item
               name="size"
-              label="Boy"
-              rules={[{ required: true, message: "Lütfen boyunuzu girin!" }]}
+              label={t('auth:register.height')}
+              rules={[{ required: true, message: t('auth:register.heightRequired') }]}
             >
-              <Input prefix={<ColumnHeightOutlined />} placeholder="Boy (cm)" inputMode="decimal" />
+              <Input prefix={<ColumnHeightOutlined />} placeholder={t('auth:register.heightPlaceholder')} inputMode="decimal" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={8}>
             <Form.Item
               name="weight"
-              label="Kilo"
-              rules={[{ required: true, message: "Lütfen kilonuzu girin!" }]}
+              label={t('auth:register.weight')}
+              rules={[{ required: true, message: t('auth:register.weightRequired') }]}
             >
-              <Input prefix={<DashboardOutlined />} placeholder="Kilo (kg)" inputMode="decimal" />
+              <Input prefix={<DashboardOutlined />} placeholder={t('auth:register.weightPlaceholder')} inputMode="decimal" />
             </Form.Item>
           </Col>
           <Col xs={24} sm={8}>
             <Form.Item
               name="age"
-              label="Yaş"
-              rules={[{ required: true, message: "Lütfen yaşınızı girin!" }]}
+              label={t('auth:register.age')}
+              rules={[{ required: true, message: t('auth:register.ageRequired') }]}
             >
-              <Input prefix={<NumberOutlined />} placeholder="Yaş" inputMode="numeric" />
+              <Input prefix={<NumberOutlined />} placeholder={t('auth:register.agePlaceholder')} inputMode="numeric" />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item name="profilePicture" label="Profil fotoğrafı" rules={[{ required: false }]}>
+            <Form.Item name="profilePicture" label={t('auth:register.profilePicture')} rules={[{ required: false }]}>
               <ImageCrop variant="avatar" beforeCrop={beforeCrop}>
                 <Upload {...uploadProps} accept={ACCEPTED_IMAGE_ACCEPT} maxCount={1}>
-                  <Button icon={<UploadOutlined />} className="mb-auth__upload">Fotoğraf Yükle</Button>
+                  <Button icon={<UploadOutlined />} className="mb-auth__upload">{t('auth:register.uploadPhoto')}</Button>
                 </Upload>
               </ImageCrop>
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <Form.Item name="matchNotificationPermission" valuePropName="checked" label="Bildirimler">
-              <Checkbox className="mb-auth__check">Maç Bildirim İzni</Checkbox>
+            <Form.Item name="matchNotificationPermission" valuePropName="checked" label={t('auth:register.notifications')}>
+              <Checkbox className="mb-auth__check">{t('auth:register.matchNotificationPermission')}</Checkbox>
             </Form.Item>
           </Col>
         </Row>
 
         <Form.Item className="mb-auth__submit">
           <Button type="primary" htmlType="submit" size="large" block>
-            Kayıt Ol
+            {t('auth:register.submit')}
           </Button>
         </Form.Item>
       </Form>
       <p className="mb-auth__switch">
-        Zaten hesabın var mı? <Link to="/" className="mb-auth__link">Giriş yap</Link>
+        {t('auth:register.haveAccount')} <Link to="/" className="mb-auth__link">{t('auth:register.signIn')}</Link>
       </p>
     </AuthShell>
   );

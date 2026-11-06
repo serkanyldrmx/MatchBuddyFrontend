@@ -6,6 +6,8 @@
 // Ev sahibi soldan sağa hücum eder (x = depth); deplasman aynalanır (x = 100 - depth).
 // Mobilde saha dikeydir: ev sahibi üst yarıda aşağı doğru hücum eder (top = depth, left = across).
 
+import i18n from '../../i18n';
+
 /** Taraf başına oyuncu sayısına göre hatlar (kendi kalesinden dışarı doğru) */
 export const FORMATION_PRESETS = {
   1: [1],
@@ -24,13 +26,17 @@ export const FORMATION_PRESETS = {
 /** Hat başına en fazla oyuncu (11'den kalabalık kadrolarda) */
 export const MAX_PER_LINE = 4;
 
-export const ROLE_LABELS = {
-  KL: 'Kaleci',
-  DF: 'Defans',
-  OS: 'Orta saha',
-  OOS: 'Ofansif orta saha',
-  FV: 'Forvet',
-};
+/** Mevki kodu → ad (erişildiği anda çevrilir). Kodlar (KL, DF…) iç anahtardır; ekranda `roleShort` ile gösterilir. */
+export const ROLE_LABELS = ['KL', 'DF', 'OS', 'OOS', 'FV'].reduce((acc, code) => {
+  Object.defineProperty(acc, code, {
+    enumerable: true,
+    get: () => i18n.t(`match:formations.roles.${code}`),
+  });
+  return acc;
+}, {});
+
+/** Mevki kısaltması (ekranda gösterilen) */
+export const roleShort = (code) => i18n.t(`match:formations.short.${code}`);
 
 /** Yerleşim ayarları */
 export const PITCH_GEOMETRY = {

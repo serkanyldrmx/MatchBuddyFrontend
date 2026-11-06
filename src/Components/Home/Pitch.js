@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Dropdown, Popconfirm, Popover, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircleFilled,
   CrownFilled,
@@ -15,8 +16,9 @@ import {
 } from '@ant-design/icons';
 import { PARTICIPANT_STATUS, SIDE } from '../../api/matches';
 import { PlayerAvatar } from '../../ui';
+import { intlLocale } from '../../i18n';
 import { fullName } from '../../utils/format';
-import { buildFormation, ROLE_LABELS } from './formations';
+import { buildFormation, ROLE_LABELS, roleShort } from './formations';
 
 const COMPACT_QUERY = '(max-width: 720px)';
 
@@ -51,7 +53,7 @@ export const guestInitials = (name) =>
     .slice(0, 2)
     .map((w) => w.charAt(0))
     .join('')
-    .toLocaleUpperCase('tr-TR') || '?';
+    .toLocaleUpperCase(intlLocale()) || '?';
 
 const sideKey = (side) => (side === SIDE.AWAY ? 'away' : 'home');
 
@@ -115,11 +117,12 @@ function PitchMarkings() {
 
 /* ---------------- Oyuncu ---------------- */
 function PlayerToken({ p, role, me, canManage, mvpId, avatarSize, onSwap, onMessage }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isMe = p.player.playerId === me?.playerId;
-  const items = [{ key: 'profile', icon: <UserOutlined />, label: 'Profili gör', onClick: () => navigate(`/player/${p.player.playerId}`) }];
-  if (!isMe) items.push({ key: 'msg', icon: <MessageOutlined />, label: 'Mesaj gönder', onClick: () => onMessage(p.player) });
-  if (canManage) items.push({ key: 'swap', icon: <SwapOutlined />, label: 'Diğer takıma al', onClick: () => onSwap(p) });
+  const items = [{ key: 'profile', icon: <UserOutlined />, label: t('match:pitch.viewProfile'), onClick: () => navigate(`/player/${p.player.playerId}`) }];
+  if (!isMe) items.push({ key: 'msg', icon: <MessageOutlined />, label: t('match:pitch.sendMessage'), onClick: () => onMessage(p.player) });
+  if (canManage) items.push({ key: 'swap', icon: <SwapOutlined />, label: t('match:pitch.moveToOtherTeam'), onClick: () => onSwap(p) });
 
   return (
     <Dropdown menu={{ items }} trigger={['click']}>
@@ -127,13 +130,13 @@ function PlayerToken({ p, role, me, canManage, mvpId, avatarSize, onSwap, onMess
         <div className={`mb-token ${isMe ? 'is-me' : ''}`}>
           <div className="mb-token__avatar">
             <PlayerAvatar player={p.player} size={avatarSize} />
-            <span className="mb-token__pos">{role}</span>
+            <span className="mb-token__pos">{roleShort(role)}</span>
             {p.confirmed && <CheckCircleFilled className="mb-token__check" />}
             {mvpId === p.player.playerId && <CrownFilled className="mb-token__crown" />}
             {p.goals > 0 && <span className="mb-token__goals">{p.goals}</span>}
           </div>
           <span className="mb-token__label">
-            <span className="mb-token__name">{isMe ? 'Sen' : p.player.playerName || p.player.userName}</span>
+            <span className="mb-token__name">{isMe ? t('match:pitch.you') : p.player.playerName || p.player.userName}</span>
             <span className="mb-token__score">{p.player.userScore ?? 0}</span>
           </span>
         </div>
@@ -144,16 +147,17 @@ function PlayerToken({ p, role, me, canManage, mvpId, avatarSize, onSwap, onMess
 
 /* ---------------- Misafir ---------------- */
 function GuestToken({ g, role, manage, onEdit, onMove, onRemove }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
 
   const token = (
-    <button type="button" className="mb-token-btn" disabled={!manage} aria-label={`${g.name} (misafir)`}>
+    <button type="button" className="mb-token-btn" disabled={!manage} aria-label={t('match:guest.aria', { name: g.name })}>
       <div className="mb-token is-guest">
         <div className="mb-token__avatar">
           <span className="mb-token__guest">{guestInitials(g.name)}</span>
-          <span className="mb-token__tag">Misafir</span>
-          <span className="mb-token__pos">{role}</span>
+          <span className="mb-token__tag">{t('match:guest.tag')}</span>
+          <span className="mb-token__pos">{roleShort(role)}</span>
         </div>
         <span className="mb-token__label">
           <span className="mb-token__name">{g.name}</span>
@@ -165,8 +169,8 @@ function GuestToken({ g, role, manage, onEdit, onMove, onRemove }) {
   const tip = (
     <div className="mb-guest-tip">
       <strong>{g.name}</strong>
-      <span>{g.note || 'Misafir oyuncu'}</span>
-      {g.addedBy && <small>Ekleyen: {fullName(g.addedBy)}</small>}
+      <span>{g.note || t('match:guest.defaultNote')}</span>
+      {g.addedBy && <small>{t('match:guest.addedBy', { name: fullName(g.addedBy) })}</small>}
     </div>
   );
 
@@ -188,7 +192,7 @@ function GuestToken({ g, role, manage, onEdit, onMove, onRemove }) {
           onEdit(g);
         }}
       >
-        <EditOutlined /> Düzenle
+        <EditOutlined /> {t('common:actions.edit')}
       </button>
       <button
         type="button"
@@ -197,21 +201,21 @@ function GuestToken({ g, role, manage, onEdit, onMove, onRemove }) {
           onMove(g);
         }}
       >
-        <SwapOutlined /> Diğer takıma al
+        <SwapOutlined /> {t('match:pitch.moveToOtherTeam')}
       </button>
       <Popconfirm
-        title="Misafir oyuncuyu kaldır"
-        description={`${g.name} kadrodan çıkarılacak.`}
-        okText="Kaldır"
+        title={t('match:guest.removeTitle')}
+        description={t('match:guest.removeDescription', { name: g.name })}
+        okText={t('match:guest.remove')}
         okButtonProps={{ danger: true }}
-        cancelText="Vazgeç"
+        cancelText={t('common:actions.cancel')}
         onConfirm={() => {
           close();
           return onRemove(g);
         }}
       >
         <button type="button" className="is-danger">
-          <DeleteOutlined /> Kaldır
+          <DeleteOutlined /> {t('match:guest.remove')}
         </button>
       </Popconfirm>
     </div>
@@ -237,7 +241,8 @@ function GuestToken({ g, role, manage, onEdit, onMove, onRemove }) {
 
 /* ---------------- Boş yer ---------------- */
 function EmptySlot({ role, side, manage, canJoin, onJoin, onAddGuest }) {
-  const label = manage ? 'Ekle' : canJoin ? 'Katıl' : 'Boş';
+  const { t } = useTranslation();
+  const label = manage ? t('common:actions.add') : canJoin ? t('match:actions.joinShort') : t('match:pitch.emptySlot');
   const button = (
     <button
       type="button"
@@ -248,7 +253,7 @@ function EmptySlot({ role, side, manage, canJoin, onJoin, onAddGuest }) {
     >
       <div className="mb-token is-empty">
         <div className="mb-token__avatar">
-          <span className="mb-token__role">{role}</span>
+          <span className="mb-token__role">{roleShort(role)}</span>
           <PlusOutlined className="mb-token__plus" />
         </div>
         <span className="mb-token__label">
@@ -261,8 +266,8 @@ function EmptySlot({ role, side, manage, canJoin, onJoin, onAddGuest }) {
   if (!manage) return button;
 
   const items = [];
-  if (canJoin) items.push({ key: 'join', icon: <LoginOutlined />, label: 'Maça katıl', onClick: onJoin });
-  items.push({ key: 'guest', icon: <UserAddOutlined />, label: 'İsimle oyuncu ekle', onClick: () => onAddGuest(side) });
+  if (canJoin) items.push({ key: 'join', icon: <LoginOutlined />, label: t('match:actions.join'), onClick: onJoin });
+  items.push({ key: 'guest', icon: <UserAddOutlined />, label: t('match:guest.addByName'), onClick: () => onAddGuest(side) });
   return (
     <Dropdown menu={{ items }} trigger={['click']}>
       {button}
@@ -287,6 +292,7 @@ function Pitch({
   onMoveGuest,
   onRemoveGuest,
 }) {
+  const { t } = useTranslation();
   const compact = useCompactPitch();
   const manage = !!detail.canManage && !closed;
   const mvpId = detail.mvp?.player?.playerId;
@@ -367,9 +373,9 @@ function Pitch({
       <div className="mb-pitch__head">
         {teamLabel(home, homeLabel)}
         {manage && (
-          <Tooltip title={freeTotal <= 0 ? 'Kadroda boş yer yok.' : undefined}>
+          <Tooltip title={freeTotal <= 0 ? t('match:pitch.noFreeSpots') : undefined}>
             <Button size="small" icon={<UserAddOutlined />} className="mb-pitch__add" disabled={freeTotal <= 0} onClick={() => onAddGuest()}>
-              İsimle oyuncu ekle
+              {t('match:guest.addByName')}
             </Button>
           </Tooltip>
         )}
@@ -381,7 +387,7 @@ function Pitch({
         <PitchMarkings />
         {sides.map((s) => (
           <span key={s.key} className={`mb-pitch__formation is-${s.key}`}>
-            <small>Diziliş</small> {s.formation.label}
+            <small>{t('match:formations.label')}</small> {s.formation.label}
           </span>
         ))}
         {tokens}

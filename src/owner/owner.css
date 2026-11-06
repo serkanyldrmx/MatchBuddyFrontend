@@ -9,15 +9,15 @@
   padding: 10px 14px;
   border-radius: 10px;
   background: var(--mb-gold-soft);
-  border: 1px solid rgba(251, 191, 36, 0.25);
+  border: 1px solid rgba(var(--mb-gold-rgb), 0.25);
   color: var(--mb-text);
   font-size: 13px;
   line-height: 1.5;
 }
 
 .mb-owner-note.is-danger {
-  background: rgba(244, 63, 94, 0.1);
-  border-color: rgba(244, 63, 94, 0.3);
+  background: rgba(var(--mb-danger-rgb), 0.1);
+  border-color: rgba(var(--mb-danger-rgb), 0.3);
 }
 
 .mb-owner-toolbar {
@@ -127,7 +127,7 @@
 
 .mb-owner-missing.ant-card {
   margin-bottom: 16px;
-  border-color: rgba(251, 191, 36, 0.35) !important;
+  border-color: rgba(var(--mb-gold-rgb), 0.35) !important;
   background: linear-gradient(135deg, var(--mb-gold-soft), var(--mb-surface) 60%);
 }
 
@@ -165,7 +165,7 @@
   gap: 10px;
   padding: 10px 14px;
   border-radius: 12px;
-  background: rgba(7, 11, 18, 0.5);
+  background: rgba(var(--mb-bg-rgb), 0.5);
   border: 1px solid var(--mb-border);
   color: var(--mb-text);
 }
@@ -329,7 +329,7 @@
 .mb-owner-res-hero {
   padding: 18px 18px 20px;
   border-radius: 18px;
-  border: 1px solid rgba(198, 244, 50, 0.16);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.16);
 }
 
 .mb-owner-res-hero__top {
@@ -461,7 +461,7 @@
 .mb-owner-res-extras span.is-on {
   color: var(--mb-primary);
   background: var(--mb-primary-soft);
-  border-color: rgba(198, 244, 50, 0.3);
+  border-color: rgba(var(--mb-primary-rgb), 0.3);
 }
 
 .mb-owner-receipt {
@@ -574,11 +574,11 @@
 }
 
 .mb-owner-cal-legend .is-approved::before {
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
 }
 
 .mb-owner-cal-legend .is-pending::before {
-  background: repeating-linear-gradient(135deg, var(--mb-gold) 0 3px, rgba(251, 191, 36, 0.45) 3px 6px);
+  background: repeating-linear-gradient(135deg, var(--mb-gold-fill) 0 3px, rgba(var(--mb-gold-fill-rgb), 0.45) 3px 6px);
 }
 
 .mb-owner-cal-legend .is-block::before {
@@ -676,7 +676,7 @@
 }
 
 .mb-owner-cal__cell {
-  border-top: 1px dashed rgba(148, 163, 184, 0.07);
+  border-top: 1px dashed rgba(var(--mb-slate-rgb), 0.07);
 }
 
 .mb-owner-cal__cell.is-hour {
@@ -691,7 +691,7 @@
 
 .mb-owner-cal__cell.is-open:hover {
   background: var(--mb-primary-soft);
-  box-shadow: inset 0 0 0 1px rgba(198, 244, 50, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(var(--mb-primary-rgb), 0.35);
 }
 
 .mb-owner-cal__cell.is-past {
@@ -728,12 +728,12 @@
 }
 
 .mb-owner-cal__item.is-approved {
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
 }
 
 .mb-owner-cal__item.is-pending {
-  background: repeating-linear-gradient(135deg, var(--mb-gold) 0 8px, rgba(251, 191, 36, 0.78) 8px 16px);
+  background: repeating-linear-gradient(135deg, var(--mb-gold-fill) 0 8px, rgba(var(--mb-gold-fill-rgb), 0.78) 8px 16px);
   color: var(--mb-primary-ink);
 }
 
@@ -840,7 +840,7 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  background: var(--mb-gold);
+  background: var(--mb-gold-fill);
   color: var(--mb-primary-ink);
 }
 
@@ -1070,6 +1070,12 @@
   cursor: default;
 }
 
+/* Açık tema: ısı haritası kireç yeşili dolgu ile karışır (satır içi stil var(--mb-primary) kullanır), yazı koyu kalır */
+[data-theme='light'] .mb-owner-heat__cell {
+  --mb-primary: var(--mb-primary-fill);
+  text-shadow: none;
+}
+
 .mb-owner-heat__cell.is-ruled {
   box-shadow: inset 0 -2px 0 var(--mb-gold);
 }
@@ -1087,10 +1093,10 @@
   padding: 18px 20px 14px;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  border: 1px solid rgba(var(--mb-gold-rgb), 0.35);
   background:
-    radial-gradient(420px 180px at 100% 0%, rgba(251, 191, 36, 0.22), transparent 65%),
-    radial-gradient(300px 160px at 0% 100%, rgba(198, 244, 50, 0.08), transparent 70%),
+    radial-gradient(420px 180px at 100% 0%, rgba(var(--mb-gold-rgb), 0.22), transparent 65%),
+    radial-gradient(300px 160px at 0% 100%, rgba(var(--mb-primary-rgb), 0.08), transparent 70%),
     var(--mb-surface);
   transition: transform 0.2s, border-color 0.2s;
 }
@@ -1131,12 +1137,12 @@
 }
 
 .mb-owner-promo__state.is-live {
-  background: var(--mb-gold);
+  background: var(--mb-gold-fill);
   color: var(--mb-primary-ink);
 }
 
 .mb-owner-promo__state.is-soon {
-  background: rgba(56, 189, 248, 0.14);
+  background: rgba(var(--mb-info-rgb), 0.14);
   color: var(--mb-info);
 }
 
@@ -1362,7 +1368,7 @@
 
 /* ---------- Harici rezervasyon (blok kind 1) ---------- */
 .mb-owner-cal-legend .is-manual::before {
-  background: rgba(56, 189, 248, 0.22);
+  background: rgba(var(--mb-info-rgb), 0.22);
   border-color: var(--mb-info);
   box-shadow: inset 3px 0 0 var(--mb-info);
 }
@@ -1376,9 +1382,9 @@
 }
 
 .mb-owner-cal__item.is-manual {
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.26), rgba(56, 189, 248, 0.14));
+  background: linear-gradient(180deg, rgba(var(--mb-info-rgb), 0.26), rgba(var(--mb-info-rgb), 0.14));
   color: var(--mb-text);
-  border: 1px solid rgba(56, 189, 248, 0.5);
+  border: 1px solid rgba(var(--mb-info-rgb), 0.5);
   box-shadow: inset 3px 0 0 var(--mb-info);
 }
 
@@ -1399,12 +1405,12 @@
   border-radius: 50%;
   font-size: 10px;
   font-weight: 800;
-  background: rgba(34, 197, 94, 0.25);
+  background: rgba(var(--mb-pitch-rgb), 0.25);
   color: var(--mb-pitch);
 }
 
 .mb-owner-cal__item.is-unpaid .mb-cal-pay {
-  background: rgba(251, 191, 36, 0.18);
+  background: rgba(var(--mb-gold-rgb), 0.18);
   color: var(--mb-gold);
 }
 
@@ -1429,7 +1435,7 @@
   font-weight: 800;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  background: rgba(56, 189, 248, 0.22);
+  background: rgba(var(--mb-info-rgb), 0.22);
   color: var(--mb-info);
   line-height: 15px;
 }
@@ -1462,7 +1468,7 @@
 
 .mb-mbk-chip:hover {
   color: var(--mb-primary);
-  border-color: rgba(198, 244, 50, 0.45);
+  border-color: rgba(var(--mb-primary-rgb), 0.45);
 }
 
 .mb-mbk-quote {
@@ -1493,9 +1499,9 @@
 .mb-mbk-hero {
   padding: 18px 18px 20px;
   border-radius: 18px;
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  border: 1px solid rgba(var(--mb-info-rgb), 0.28);
   background:
-    radial-gradient(120% 140% at 100% 0%, rgba(56, 189, 248, 0.18), rgba(56, 189, 248, 0) 60%),
+    radial-gradient(120% 140% at 100% 0%, rgba(var(--mb-info-rgb), 0.18), rgba(var(--mb-info-rgb), 0) 60%),
     var(--mb-surface-2);
 }
 
@@ -1537,13 +1543,13 @@
   gap: 8px;
   padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  border: 1px solid rgba(var(--mb-info-rgb), 0.4);
   color: var(--mb-info);
   font-weight: 600;
 }
 
 .mb-mbk-call:hover {
-  background: rgba(56, 189, 248, 0.12);
+  background: rgba(var(--mb-info-rgb), 0.12);
   color: var(--mb-info);
 }
 
@@ -1555,12 +1561,12 @@
   padding: 14px 16px;
   border-radius: 14px;
   background: var(--mb-gold-soft);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  border: 1px solid rgba(var(--mb-gold-rgb), 0.3);
 }
 
 .mb-mbk-pay.is-paid {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(var(--mb-pitch-rgb), 0.1);
+  border-color: rgba(var(--mb-pitch-rgb), 0.3);
 }
 
 .mb-mbk-pay > div:first-child {

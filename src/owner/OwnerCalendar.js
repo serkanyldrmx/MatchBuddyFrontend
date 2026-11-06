@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Alert, App, Button, Card, DatePicker, Grid, Segmented, Select, Skeleton, Space, Tooltip } from 'antd';
 import { CalendarOutlined, LeftOutlined, LockOutlined, PlusOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { BLOCK_KIND, DAYS_SHORT, contractDayIndex, formatPrice, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
@@ -11,9 +12,9 @@ import ManualBookingDrawer from './ManualBookingDrawer';
 import ManualBookingModal from './ManualBookingModal';
 import ReservationDrawer from './ReservationDrawer';
 import {
-  INACTIVE_TIP,
   WriteButton,
   asList,
+  inactiveTip,
   isMatchItem,
   minutesToHm,
   normalizeBlock,
@@ -31,6 +32,7 @@ const ROW_H_PHONE = 32; // telefonda daha rahat dokunma alanı
 /** Rezervasyon takvimi: tek saha için haftalık görünüm, tüm sahalar için günlük görünüm */
 export default function OwnerCalendar() {
   const { message, modal } = App.useApp();
+  const { t } = useTranslation();
   const { venueId, venue, membershipActive } = useOwnerVenue();
   const [mode, setMode] = useState('week');
   const [anchor, setAnchor] = useState(() => dayjs().startOf('day'));
@@ -63,12 +65,12 @@ export default function OwnerCalendar() {
         setData(res || {});
         setError(null);
       } catch (e) {
-        setError(apiErrorMessage(e, 'Takvim yüklenemedi.'));
+        setError(apiErrorMessage(e, t('owner:calendar.loadFailed')));
       } finally {
         setLoading(false);
       }
     },
-    [venueId, fromStr, dayCount]
+    [venueId, fromStr, dayCount, t]
   );
 
   useEffect(() => {
@@ -76,8 +78,8 @@ export default function OwnerCalendar() {
   }, [load]);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(dayjs()), 60000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(dayjs()), 60000);
+    return () => clearInterval(timer);
   }, []);
 
   const responder = useReservationResponder(() => {
@@ -180,7 +182,7 @@ export default function OwnerCalendar() {
 
   const openSlot = (col, t) => {
     if (!membershipActive) {
-      message.info(INACTIVE_TIP);
+      message.info(inactiveTip());
       return;
     }
     const h = hours[contractDayIndex(col.date)];
@@ -196,7 +198,7 @@ export default function OwnerCalendar() {
 
   const openNew = () => {
     if (!membershipActive) {
-      message.info(INACTIVE_TIP);
+      message.info(inactiveTip());
       return;
     }
     setDraft({ mode: 'booking', pitchId: mode === 'week' ? pitchId : pitches[0]?.pitchId, start: null, maxEnd: null });
@@ -210,22 +212,25 @@ export default function OwnerCalendar() {
 
   const removeBlock = (it) => {
     if (!membershipActive) {
-      message.info(INACTIVE_TIP);
+      message.info(inactiveTip());
       return;
     }
     modal.confirm({
-      title: 'Kapatmayı kaldır',
-      content: `${dayjs(it.start).format('DD MMM HH:mm')}–${dayjs(it.end).format('HH:mm')} aralığı (${it.reason || 'sebep belirtilmemiş'}) yeniden rezervasyona açılsın mı?`,
-      okText: 'Saati aç',
-      cancelText: 'Vazgeç',
+      title: t('owner:calendar.removeBlock.title'),
+      content: t('owner:calendar.removeBlock.content', {
+        range: `${dayjs(it.start).format('DD MMM HH:mm')}–${dayjs(it.end).format('HH:mm')}`,
+        reason: it.reason || t('owner:calendar.removeBlock.noReason'),
+      }),
+      okText: t('owner:calendar.removeBlock.ok'),
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
         try {
           await ownerApi.deleteBlock(it.slotBlockId);
-          message.success('Saat yeniden rezervasyona açıldı.');
+          message.success(t('owner:calendar.removeBlock.success'));
           notifyOwnerChanged();
           load(true);
         } catch (e) {
-          message.error(apiErrorMessage(e, 'Kapatma kaldırılamadı.'));
+          message.error(apiErrorMessage(e, t('owner:calendar.removeBlock.failed')));
         }
       },
     });
@@ -260,16 +265,16 @@ export default function OwnerCalendar() {
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Rezervasyon Takvimi"
+        title={t('owner:calendar.title')}
         icon={<CalendarOutlined />}
-        subtitle="Maçlarınızı görün, talepleri yanıtlayın; boş bir saate tıklayarak telefonla gelen rezervasyonu ekleyin ya da saati kapatın."
+        subtitle={t('owner:calendar.subtitle')}
         extra={
           <Space wrap>
             <Button icon={<ReloadOutlined />} onClick={() => load()} loading={loading}>
-              Yenile
+              {t('common:actions.refresh')}
             </Button>
             <WriteButton type="primary" icon={<PlusOutlined />} onClick={openNew} disabled={!pitches.length}>
-              Rezervasyon ekle
+              {t('owner:calendar.addBooking')}
             </WriteButton>
           </Space>
         }
@@ -279,9 +284,9 @@ export default function OwnerCalendar() {
         <div className="mb-owner-cal-toolbar">
           <Space wrap>
             <Space.Compact>
-              <Button icon={<LeftOutlined />} onClick={() => shift(-1)} aria-label="Önceki" />
-              <Button onClick={() => setAnchor(dayjs().startOf('day'))}>Bugün</Button>
-              <Button icon={<RightOutlined />} onClick={() => shift(1)} aria-label="Sonraki" />
+              <Button icon={<LeftOutlined />} onClick={() => shift(-1)} aria-label={t('owner:calendar.prev')} />
+              <Button onClick={() => setAnchor(dayjs().startOf('day'))}>{t('owner:calendar.today')}</Button>
+              <Button icon={<RightOutlined />} onClick={() => shift(1)} aria-label={t('owner:calendar.next')} />
             </Space.Compact>
             <DatePicker
               value={anchor}
@@ -297,8 +302,8 @@ export default function OwnerCalendar() {
               value={mode}
               onChange={setMode}
               options={[
-                { label: 'Hafta', value: 'week' },
-                { label: 'Gün · tüm sahalar', value: 'day' },
+                { label: t('owner:calendar.modes.week'), value: 'week' },
+                { label: t('owner:calendar.modes.day'), value: 'day' },
               ]}
             />
             {mode === 'week' && pitches.length > 1 && (
@@ -313,13 +318,13 @@ export default function OwnerCalendar() {
         </div>
 
         <div className="mb-owner-cal-legend">
-          <span className="is-approved">Onaylı</span>
-          <span className="is-pending">Onay bekliyor</span>
-          <span className="is-manual">Harici rezervasyon</span>
-          <span className="is-block">Kapalı / blok</span>
-          <span className="is-open">Açık · boş (tıklayıp rezervasyon ekleyin ya da kapatın)</span>
-          <span className="is-unpaid">₺ Ödemesi alınmamış</span>
-          <span className="is-closed">Çalışma saati dışı</span>
+          <span className="is-approved">{t('owner:calendar.legend.approved')}</span>
+          <span className="is-pending">{t('owner:calendar.legend.pending')}</span>
+          <span className="is-manual">{t('owner:calendar.legend.manual')}</span>
+          <span className="is-block">{t('owner:calendar.legend.block')}</span>
+          <span className="is-open">{t('owner:calendar.legend.open')}</span>
+          <span className="is-unpaid">{t('owner:calendar.legend.unpaid')}</span>
+          <span className="is-closed">{t('owner:calendar.legend.closed')}</span>
         </div>
 
         {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
@@ -327,9 +332,9 @@ export default function OwnerCalendar() {
         {loading && !data ? (
           <Skeleton active paragraph={{ rows: 10 }} />
         ) : pitches.length === 0 ? (
-          <EmptyState description="Takvimi kullanmak için önce bir saha ekleyin.">
+          <EmptyState description={t('owner:calendar.noPitches')}>
             <Link to="/venue/pitches">
-              <Button type="primary">Saha ekle</Button>
+              <Button type="primary">{t('owner:calendar.addPitch')}</Button>
             </Link>
           </EmptyState>
         ) : (
@@ -352,12 +357,12 @@ export default function OwnerCalendar() {
                     key={`h-${c.key}`}
                     className={`mb-owner-cal__head${isToday ? ' is-today' : ''}${mode === 'week' ? ' is-clickable' : ''}`}
                     onClick={mode === 'week' ? () => { setAnchor(c.date); setMode('day'); } : undefined}
-                    title={mode === 'week' ? 'Bu günün tüm sahalarını gör' : undefined}
+                    title={mode === 'week' ? t('owner:calendar.seeDay') : undefined}
                   >
                     <strong>{c.title}</strong>
                     <span>
                       {c.sub}
-                      {h?.isClosed ? ' · Kapalı' : ''}
+                      {h?.isClosed ? ` · ${t('owner:calendar.closed')}` : ''}
                     </span>
                   </div>
                 );
@@ -378,16 +383,16 @@ export default function OwnerCalendar() {
                 const nowTop = nowOffset(c);
                 return (
                   <div key={c.key} className="mb-owner-cal__col" style={{ height: slots.length * rowH }}>
-                    {slots.map((t) => {
-                      const st = cellState(c, t);
+                    {slots.map((m) => {
+                      const st = cellState(c, m);
                       const cls = !st.open ? 'is-closed' : st.past ? 'is-past' : 'is-open';
                       return (
                         <div
-                          key={t}
-                          className={`mb-owner-cal__cell ${cls}${t % 60 === 0 ? ' is-hour' : ''}`}
+                          key={m}
+                          className={`mb-owner-cal__cell ${cls}${m % 60 === 0 ? ' is-hour' : ''}`}
                           style={{ height: rowH }}
-                          onClick={st.open && !st.past ? () => openSlot(c, t) : undefined}
-                          title={st.open && !st.past ? `${minutesToHm(t)} · rezervasyon eklemek ya da saati kapatmak için tıklayın` : undefined}
+                          onClick={st.open && !st.past ? () => openSlot(c, m) : undefined}
+                          title={st.open && !st.past ? t('owner:calendar.cellHint', { time: minutesToHm(m) }) : undefined}
                         />
                       );
                     })}
@@ -400,9 +405,9 @@ export default function OwnerCalendar() {
                         return (
                           <Tooltip
                             key={`x-${it.slotBlockId}`}
-                            title={`${time} · ${it.customerName || 'Harici'}${it.reason ? ` · ${it.reason}` : ''} · ${formatPrice(it.price)} · ${
-                              it.isPaid ? 'ödendi' : 'ödeme alınmadı'
-                            }`}
+                            title={`${time} · ${it.customerName || t('owner:calendar.external')}${it.reason ? ` · ${it.reason}` : ''} · ${formatPrice(
+                              it.price
+                            )} · ${it.isPaid ? t('owner:calendar.paid') : t('owner:calendar.unpaid')}`}
                           >
                             <button
                               type="button"
@@ -411,14 +416,17 @@ export default function OwnerCalendar() {
                               onClick={() => setManual(it)}
                             >
                               <span className="mb-owner-cal__item-title">
-                                <span className="mb-cal-pay" aria-label={it.isPaid ? 'Ödendi' : 'Ödenmedi'}>
+                                <span
+                                  className="mb-cal-pay"
+                                  aria-label={it.isPaid ? t('owner:calendar.paidAria') : t('owner:calendar.unpaidAria')}
+                                >
                                   ₺
                                 </span>
-                                {it.customerName || 'Harici'}
+                                {it.customerName || t('owner:calendar.external')}
                               </span>
                               {height > 30 && (
                                 <span className="mb-owner-cal__item-meta">
-                                  <span className="mb-cal-harici">Harici</span> {time}
+                                  <span className="mb-cal-harici">{t('owner:calendar.external')}</span> {time}
                                 </span>
                               )}
                               {height > 56 && (
@@ -433,10 +441,13 @@ export default function OwnerCalendar() {
                       }
                       if (!it.isMatch) {
                         return (
-                          <Tooltip key={`b-${it.slotBlockId}`} title={`${time} · ${it.reason || 'Kapalı'} — kaldırmak için tıklayın`}>
+                          <Tooltip
+                            key={`b-${it.slotBlockId}`}
+                            title={t('owner:calendar.blockHint', { time, reason: it.reason || t('owner:calendar.closed') })}
+                          >
                             <button type="button" className="mb-owner-cal__item is-block" style={{ top, height }} onClick={() => removeBlock(it)}>
                               <span className="mb-owner-cal__item-title">
-                                <LockOutlined /> {it.reason || 'Kapalı'}
+                                <LockOutlined /> {it.reason || t('owner:calendar.closed')}
                               </span>
                               {height > 30 && <span className="mb-owner-cal__item-meta">{time}</span>}
                             </button>
@@ -451,7 +462,7 @@ export default function OwnerCalendar() {
                           style={{ top, height }}
                           onClick={() => openMatch(it, c.pitch)}
                         >
-                          <span className="mb-owner-cal__item-title">{it.title || 'Maç'}</span>
+                          <span className="mb-owner-cal__item-title">{it.title || t('owner:calendar.match')}</span>
                           {height > 30 && (
                             <span className="mb-owner-cal__item-meta">
                               {time} · {it.goingCount ?? 0}/{it.capacity ?? 0}

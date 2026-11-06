@@ -6,7 +6,7 @@
   flex-wrap: wrap;
   padding: 32px 36px;
   border-radius: 24px;
-  border: 1px solid rgba(198, 244, 50, 0.16);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.16);
   margin-bottom: 20px;
 }
 
@@ -40,7 +40,7 @@
 }
 
 .mb-profile-hero__user {
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
 }
 
 .mb-profile-hero__tags {
@@ -133,9 +133,9 @@
   color: var(--mb-text-2);
 }
 
-.mb-result-badge.is-G { background: var(--mb-pitch); color: #04130b; }
+.mb-result-badge.is-G { background: var(--mb-pitch-fill); color: var(--mb-pitch-ink); }
 .mb-result-badge.is-M { background: var(--mb-danger); color: #fff; }
-.mb-result-badge.is-B { background: var(--mb-gold); color: #1a1203; }
+.mb-result-badge.is-B { background: var(--mb-gold-fill); color: var(--mb-gold-ink); }
 
 .mb-recent__name {
   display: flex;

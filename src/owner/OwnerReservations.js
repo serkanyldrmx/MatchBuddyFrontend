@@ -11,7 +11,9 @@ import {
   ScheduleOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { formatPrice, ownerApi } from '../api/venues';
+import i18n from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { useMessages } from '../messaging/MessagesContext';
 import { EmptyState, MatchStatusTag, PageHeader, PlayerAvatar } from '../ui';
@@ -34,16 +36,28 @@ import {
 
 const { Text } = Typography;
 
+// label / empty erişildiği anda (render sırasında) çevrilir
+const viewDef = (key, rest) => ({
+  ...rest,
+  get label() {
+    return i18n.t(`owner:reservations.views.${key}.label`);
+  },
+  get empty() {
+    return i18n.t(`owner:reservations.views.${key}.empty`);
+  },
+});
+
 const VIEWS = {
-  pending: { label: 'Bekleyen', params: { status: 1 }, empty: 'Yanıt bekleyen talep yok' },
-  approved: { label: 'Onaylı', params: () => ({ status: 2, from: ymd(dayjs()) }), empty: 'Yaklaşan onaylı maç yok' },
-  rejected: { label: 'Reddedilen', params: { status: 3 }, empty: 'Reddedilen talep yok' },
-  past: { label: 'Geçmiş', params: () => ({ status: 2, to: ymd(dayjs().add(1, 'day')) }), empty: 'Geçmiş maç bulunmuyor' },
-  manual: { label: 'Harici', empty: 'Bu tarih aralığında harici rezervasyon yok' },
+  pending: viewDef('pending', { params: { status: 1 } }),
+  approved: viewDef('approved', { params: () => ({ status: 2, from: ymd(dayjs()) }) }),
+  rejected: viewDef('rejected', { params: { status: 3 } }),
+  past: viewDef('past', { params: () => ({ status: 2, to: ymd(dayjs().add(1, 'day')) }) }),
+  manual: viewDef('manual', {}),
 };
 
 /** Rezervasyon talepleri ve maç listesi */
 export default function OwnerReservations() {
+  const { t } = useTranslation();
   const { openMessages } = useMessages();
   const { venue, membershipActive } = useOwnerVenue();
   const [view, setView] = useState('pending');
@@ -99,12 +113,12 @@ export default function OwnerReservations() {
   const manualTotals = useMemo(
     () =>
       manualRows.reduce(
-        (t, b) => {
+        (acc, b) => {
           const v = Number(b.price) || 0;
-          t.total += v;
-          if (b.isPaid) t.paid += v;
-          else t.unpaid += v;
-          return t;
+          acc.total += v;
+          if (b.isPaid) acc.paid += v;
+          else acc.unpaid += v;
+          return acc;
         },
         { total: 0, paid: 0, unpaid: 0 }
       ),
@@ -113,7 +127,7 @@ export default function OwnerReservations() {
 
   const manualColumns = [
     {
-      title: 'Tarih',
+      title: t('owner:reservations.table.date'),
       key: 'start',
       width: 160,
       render: (_, b) => {
@@ -128,15 +142,15 @@ export default function OwnerReservations() {
         );
       },
     },
-    { title: 'Saha', key: 'pitch', render: (_, b) => b.pitchName || '-' },
+    { title: t('common:pitch'), key: 'pitch', render: (_, b) => b.pitchName || '-' },
     {
-      title: 'Müşteri',
+      title: t('owner:reservations.table.customer'),
       key: 'customer',
       render: (_, b) => (
         <Space direction="vertical" size={0}>
           <Space size={6}>
             <Text strong>{b.customerName}</Text>
-            <span className="mb-cal-harici">Harici</span>
+            <span className="mb-cal-harici">{t('owner:reservations.external')}</span>
           </Space>
           {b.reason && (
             <Text type="secondary" style={{ fontSize: 12 }}>
@@ -147,7 +161,7 @@ export default function OwnerReservations() {
       ),
     },
     {
-      title: 'Telefon',
+      title: t('owner:reservations.table.phone'),
       key: 'phone',
       render: (_, b) =>
         b.customerPhone ? (
@@ -158,9 +172,9 @@ export default function OwnerReservations() {
           <Text type="secondary">-</Text>
         ),
     },
-    { title: 'Ücret', dataIndex: 'price', align: 'right', render: (v) => <Text strong>{formatPrice(v)}</Text> },
+    { title: t('owner:reservations.table.fee'), dataIndex: 'price', align: 'right', render: (v) => <Text strong>{formatPrice(v)}</Text> },
     {
-      title: 'Ödeme',
+      title: t('owner:reservations.table.payment'),
       key: 'paid',
       render: (_, b) => (
         <span className={`mb-pay-cell ${b.isPaid ? 'is-paid' : 'is-unpaid'}`} onClick={(e) => e.stopPropagation()}>
@@ -173,7 +187,7 @@ export default function OwnerReservations() {
               onChange={(v) => paid.toggle(b.slotBlockId, v)}
             />
           </InactiveTip>
-          {b.isPaid ? 'Alındı' : 'Alınmadı'}
+          {b.isPaid ? t('owner:reservations.paid') : t('owner:reservations.unpaid')}
         </span>
       ),
     },
@@ -184,7 +198,7 @@ export default function OwnerReservations() {
       render: (_, b) => (
         <Space size={4} onClick={(e) => e.stopPropagation()}>
           <WriteButton size="small" icon={<EditOutlined />} onClick={() => setDraft({ mode: 'booking', booking: b })}>
-            Düzenle
+            {t('common:actions.edit')}
           </WriteButton>
         </Space>
       ),
@@ -206,7 +220,7 @@ export default function OwnerReservations() {
 
   const columns = [
     {
-      title: 'Tarih & saat',
+      title: t('owner:reservations.table.dateTime'),
       key: 'start',
       width: 170,
       render: (_, r) => {
@@ -222,28 +236,31 @@ export default function OwnerReservations() {
         );
       },
     },
-    { title: 'Saha', key: 'pitch', render: (_, r) => r.pitch?.name || '-' },
+    { title: t('common:pitch'), key: 'pitch', render: (_, r) => r.pitch?.name || '-' },
     {
-      title: 'Maç',
+      title: t('owner:reservations.table.match'),
       dataIndex: 'matchName',
       render: (v, r) => (
         <Space direction="vertical" size={0}>
           <Text strong>{v}</Text>
           {(r.homeTeam || r.awayTeam) && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {r.homeTeam?.teamName || 'Karma'} vs {r.awayTeam?.teamName || 'Rakip aranıyor'}
+              {t('owner:reservations.teams', {
+                home: r.homeTeam?.teamName || t('owner:reservations.mixedTeam'),
+                away: r.awayTeam?.teamName || t('owner:reservations.seekingOpponent'),
+              })}
             </Text>
           )}
           {r.createdAt && view === 'pending' && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Talep: {fromNow(r.createdAt)}
+              {t('owner:reservations.requestedAt', { time: fromNow(r.createdAt) })}
             </Text>
           )}
         </Space>
       ),
     },
     {
-      title: 'Kurucu',
+      title: t('owner:reservations.table.creator'),
       key: 'creator',
       render: (_, r) => (
         <div className="mb-owner-creator">
@@ -260,7 +277,7 @@ export default function OwnerReservations() {
       ),
     },
     {
-      title: 'Kadro',
+      title: t('owner:reservations.table.squad'),
       key: 'squad',
       align: 'center',
       render: (_, r) => (
@@ -270,32 +287,32 @@ export default function OwnerReservations() {
       ),
     },
     {
-      title: 'Ekstralar',
+      title: t('owner:reservations.table.extras'),
       key: 'extras',
       responsive: ['md'], // telefonda çekmecede görünür
       render: (_, r) =>
         r.cleatCount || r.cameraRequested ? (
           <Space size={4} wrap>
-            {r.cleatCount ? <Tag>Krampon ×{r.cleatCount}</Tag> : null}
-            {r.cameraRequested ? <Tag>Kamera</Tag> : null}
+            {r.cleatCount ? <Tag>{t('owner:shared.extras.cleats', { count: r.cleatCount })}</Tag> : null}
+            {r.cameraRequested ? <Tag>{t('owner:shared.extras.camera')}</Tag> : null}
           </Space>
         ) : (
           <Text type="secondary">-</Text>
         ),
     },
     {
-      title: 'Tutar',
+      title: t('owner:reservations.table.amount'),
       dataIndex: 'totalPrice',
       align: 'right',
       render: (v) => <Text strong>{formatPrice(v)}</Text>,
     },
     {
-      title: 'Durum',
+      title: t('owner:reservations.table.status'),
       key: 'status',
       render: (_, r) => (
         <Space direction="vertical" size={2}>
           <MatchStatusTag status={r.status} past={isPastStart(r) && r.status === 2} />
-          {r.status === 1 && isPastStart(r) && <Tag color="volcano">Saati geçti</Tag>}
+          {r.status === 1 && isPastStart(r) && <Tag color="volcano">{t('owner:reservations.expired')}</Tag>}
           {r.status === 3 && r.rejectReason && (
             <Text type="secondary" ellipsis style={{ maxWidth: 180, fontSize: 12 }}>
               {r.rejectReason}
@@ -312,7 +329,7 @@ export default function OwnerReservations() {
       render: (_, r) => (
         <Space size={4} onClick={(e) => e.stopPropagation()}>
           {r.creator && (
-            <Tooltip title="Mesaj gönder">
+            <Tooltip title={t('owner:reservations.sendMessage')}>
               <Button size="small" icon={<MessageOutlined />} onClick={() => openMessages({ type: 'user', data: r.creator })} />
             </Tooltip>
           )}
@@ -325,7 +342,7 @@ export default function OwnerReservations() {
                 onClick={() => responder.reject(r)}
                 loading={responder.busy?.matchId === r.matchId && responder.busy.approve === false}
               >
-                Reddet
+                {t('common:actions.reject')}
               </WriteButton>
               <WriteButton
                 size="small"
@@ -334,7 +351,7 @@ export default function OwnerReservations() {
                 onClick={() => responder.approve(r)}
                 loading={responder.busy?.matchId === r.matchId && responder.busy.approve === true}
               >
-                Onayla
+                {t('common:actions.confirm')}
               </WriteButton>
             </>
           )}
@@ -347,13 +364,13 @@ export default function OwnerReservations() {
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Talepler"
+        title={t('owner:reservations.title')}
         icon={<ScheduleOutlined />}
-        subtitle="Oyuncuların rezervasyon taleplerini yanıtlayın, maçlarınızı takip edin."
+        subtitle={t('owner:reservations.subtitle')}
         extra={
           <Space wrap>
             <Button icon={<ReloadOutlined />} onClick={() => reload()} loading={loading}>
-              Yenile
+              {t('common:actions.refresh')}
             </Button>
             {isManual && (
               <WriteButton
@@ -362,7 +379,7 @@ export default function OwnerReservations() {
                 disabled={!pitchList.length}
                 onClick={() => setDraft({ mode: 'booking', pitchId: pitchList[0]?.pitchId, start: null })}
               >
-                Rezervasyon ekle
+                {t('owner:reservations.addBooking')}
               </WriteButton>
             )}
           </Space>
@@ -391,13 +408,13 @@ export default function OwnerReservations() {
             <Input
               allowClear
               prefix={<SearchOutlined />}
-              placeholder={isManual ? 'Müşteri, telefon ya da başlık ara' : 'Maç ya da kurucu ara'}
+              placeholder={isManual ? t('owner:reservations.searchManual') : t('owner:reservations.searchMatches')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ width: 220 }}
             />
             {pitchOptions.length > 1 && (
-              <Select allowClear placeholder="Saha" value={pitchFilter} onChange={setPitchFilter} options={pitchOptions} style={{ width: 150 }} />
+              <Select allowClear placeholder={t('common:pitch')} value={pitchFilter} onChange={setPitchFilter} options={pitchOptions} style={{ width: 150 }} />
             )}
           </Space>
         </div>
@@ -416,13 +433,15 @@ export default function OwnerReservations() {
               manualRows.length ? (
                 <Table.Summary.Row>
                   <Table.Summary.Cell index={0} colSpan={4}>
-                    <Text type="secondary">{manualRows.length} harici rezervasyon</Text>
+                    <Text type="secondary">{t('owner:reservations.manualCount', { count: manualRows.length })}</Text>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={4} align="right">
                     <Text strong>{formatPrice(manualTotals.total)}</Text>
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={5} colSpan={2}>
-                    <span className="mb-pay-cell is-unpaid">Alınmadı: {formatPrice(manualTotals.unpaid)}</span>
+                    <span className="mb-pay-cell is-unpaid">
+                      {t('owner:reservations.unpaidTotal', { amount: formatPrice(manualTotals.unpaid) })}
+                    </span>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>
               ) : null

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Badge, Button, Empty, List, Popover, Typography } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { fromNow, getCurrentUser } from '../utils/format';
 import { NOTIFICATION_TYPES } from './notificationTypes';
@@ -14,6 +15,7 @@ export default function NotificationBell() {
   const [items, setItems] = useState([]);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const load = useCallback(async () => {
     const me = getCurrentUser();
@@ -31,10 +33,10 @@ export default function NotificationBell() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 60000);
+    const timer = setInterval(load, 60000);
     window.addEventListener(NOTIFICATIONS_CHANGED, load);
     return () => {
-      clearInterval(t);
+      clearInterval(timer);
       window.removeEventListener(NOTIFICATIONS_CHANGED, load);
     };
   }, [load]);
@@ -46,7 +48,7 @@ export default function NotificationBell() {
       <List
         size="small"
         dataSource={items.slice(0, 5)}
-        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Bildirim yok" /> }}
+        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('layout:notifications.empty')} /> }}
         renderItem={(n) => {
           const type = NOTIFICATION_TYPES[n.notification?.type] || NOTIFICATION_TYPES.default;
           return (
@@ -68,7 +70,7 @@ export default function NotificationBell() {
           navigate('/NotificationList');
         }}
       >
-        Tüm bildirimleri gör
+        {t('layout:notifications.seeAll')}
       </Button>
     </div>
   );
@@ -76,7 +78,7 @@ export default function NotificationBell() {
   return (
     <Popover
       content={content}
-      title="Bildirimler"
+      title={t('layout:notifications.title')}
       trigger="click"
       placement="bottomRight"
       open={open}
@@ -86,7 +88,7 @@ export default function NotificationBell() {
       }}
     >
       <Badge count={unread} size="small" offset={[-4, 4]}>
-        <Button className="mb-icon-btn" icon={<BellOutlined />} aria-label="Bildirimler" />
+        <Button className="mb-icon-btn" icon={<BellOutlined />} aria-label={t('layout:notifications.title')} />
       </Badge>
     </Popover>
   );

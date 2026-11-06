@@ -12,7 +12,9 @@ import {
   SearchOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { formatPrice, ownerApi } from '../api/venues';
+import { Trans, useTranslation } from 'react-i18next';
+import { expenseCategoryLabel, formatPrice, ownerApi } from '../api/venues';
+import i18n, { intlLocale } from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
 import { apiErrorMessage } from '../utils/format';
@@ -34,12 +36,12 @@ import './finance.css';
 
 const { Text } = Typography;
 
-const SOURCE_TEXT = { match: 'Uygulama maçı', manual: 'Harici rezervasyon', expense: 'Gider' };
+const SOURCE_TEXT_KEYS = { match: 'finance:source.match', manual: 'finance:source.manual', expense: 'finance:source.expense' };
 const FILTERS = [
-  { value: 'all', label: 'Tümü' },
-  { value: 'income', label: 'Gelir' },
-  { value: 'expense', label: 'Gider' },
-  { value: 'unpaid', label: 'Tahsil edilmemiş' },
+  { value: 'all', labelKey: 'common:all' },
+  { value: 'income', labelKey: 'finance:income' },
+  { value: 'expense', labelKey: 'finance:expense' },
+  { value: 'unpaid', labelKey: 'finance:unpaid' },
 ];
 
 const num = (v) => Number(v) || 0;
@@ -49,14 +51,15 @@ const isUnpaid = (t) => t.source === 'manual' && !t.isPaid;
 const change = (cur, prev) => (num(prev) === 0 ? null : ((num(cur) - num(prev)) / Math.abs(num(prev))) * 100);
 
 function Delta({ value, goodWhenUp = true }) {
-  if (value == null) return <span className="mb-fin-delta is-flat">Geçen ay verisi yok</span>;
+  const { t } = useTranslation();
+  if (value == null) return <span className="mb-fin-delta is-flat">{t('finance:delta.noPrevious')}</span>;
   const up = value > 0.05;
   const down = value < -0.05;
   const good = (up && goodWhenUp) || (down && !goodWhenUp);
   const cls = !up && !down ? 'is-flat' : good ? 'is-good' : 'is-bad';
   return (
     <span className={`mb-fin-delta ${cls}`}>
-      {up ? '▲' : down ? '▼' : '•'} {pctFmt(Math.abs(value))} <em>geçen aya göre</em>
+      {up ? '▲' : down ? '▼' : '•'} {pctFmt(Math.abs(value))} <em>{t('finance:delta.vsLastMonth')}</em>
     </span>
   );
 }
@@ -85,19 +88,21 @@ function downloadCsv(rows, month, venueName) {
     return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const money = (v) => num(v).toFixed(2).replace('.', ',');
-  const head = ['Tarih', 'Saat', 'Tür', 'Kaynak', 'Açıklama', 'Kategori', 'Saha', 'Tutar (TL)', 'Ödeme durumu'];
+  const head = ['date', 'time', 'type', 'source', 'description', 'category', 'pitch', 'amount', 'paymentStatus'].map((k) =>
+    i18n.t(`finance:csv.${k}`)
+  );
   const lines = rows.map((t) => {
     const d = dayjs(t.date);
     return [
       d.format('DD.MM.YYYY'),
       t.source === 'expense' ? '' : d.format('HH:mm'),
-      t.type === 'income' ? 'Gelir' : 'Gider',
-      SOURCE_TEXT[t.source] || t.source,
+      t.type === 'income' ? i18n.t('finance:income') : i18n.t('finance:expense'),
+      SOURCE_TEXT_KEYS[t.source] ? i18n.t(SOURCE_TEXT_KEYS[t.source]) : t.source,
       t.title,
-      t.category || '',
+      t.category ? expenseCategoryLabel(t.category) : '',
       t.pitchName || '',
       (t.type === 'expense' ? '-' : '') + money(t.amount),
-      t.source === 'manual' ? (t.isPaid ? 'Ödendi' : 'Ödenmedi') : '',
+      t.source === 'manual' ? (t.isPaid ? i18n.t('finance:csv.paid') : i18n.t('finance:csv.unpaid')) : '',
     ]
       .map(esc)
       .join(';');
@@ -106,12 +111,12 @@ function downloadCsv(rows, month, venueName) {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const slug = (venueName || 'tesis')
+  const slug = (venueName || i18n.t('finance:csv.venueFallback'))
     .toLocaleLowerCase('tr')
     .replace(/[^a-z0-9çğıöşü]+/gi, '-')
     .replace(/^-|-$/g, '');
   a.href = url;
-  a.download = `gelir-gider-${slug}-${month.format('YYYY-MM')}.csv`;
+  a.download = i18n.t('finance:csv.fileName', { slug, month: month.format('YYYY-MM') });
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -120,6 +125,7 @@ function downloadCsv(rows, month, venueName) {
 
 /** Gelir & Gider: aylık finans özeti, grafikler, hareketler, gider yönetimi */
 export default function OwnerFinance() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const { venue, membershipActive } = useOwnerVenue();
   const [month, setMonth] = useState(() => dayjs().startOf('month'));
@@ -200,52 +206,58 @@ export default function OwnerFinance() {
     });
   };
 
-  const deleteExpense = async (t) => {
+  const deleteExpense = async (tx) => {
     try {
-      await ownerApi.deleteExpense(t.refId);
-      message.success('Gider silindi.');
+      await ownerApi.deleteExpense(tx.refId);
+      message.success(t('finance:messages.expenseDeleted'));
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Gider silinemedi.'));
+      message.error(apiErrorMessage(e, t('finance:messages.expenseDeleteFailed')));
     }
   };
 
   const columns = [
     {
-      title: 'Tarih',
+      title: t('finance:table.date'),
       dataIndex: 'date',
       width: 130,
-      render: (v, t) => (
+      render: (v, tx) => (
         <div className="mb-owner-when">
           <strong>{dayjs(v).format('DD MMM ddd')}</strong>
-          {t.source !== 'expense' && <span>{dayjs(v).format('HH:mm')}</span>}
+          {tx.source !== 'expense' && <span>{dayjs(v).format('HH:mm')}</span>}
         </div>
       ),
     },
     {
-      title: 'Tür',
+      title: t('finance:table.type'),
       dataIndex: 'type',
       width: 90,
-      render: (v) => <span className={`mb-fin-type is-${v}`}>{v === 'income' ? 'Gelir' : 'Gider'}</span>,
+      render: (v) => <span className={`mb-fin-type is-${v}`}>{v === 'income' ? t('finance:income') : t('finance:expense')}</span>,
     },
     {
-      title: 'Kaynak',
+      title: t('finance:table.source'),
       dataIndex: 'source',
       width: 170,
-      render: (v, t) =>
+      render: (v, tx) =>
         v === 'expense' ? (
-          <CategoryChip category={t.category} compact />
+          <CategoryChip category={tx.category} compact />
         ) : v === 'manual' ? (
-          <span className="mb-fin-src is-manual">Harici</span>
+          <span className="mb-fin-src is-manual">{t('finance:source.manualShort')}</span>
         ) : (
-          <span className="mb-fin-src is-match">Uygulama maçı</span>
+          <span className="mb-fin-src is-match">{t('finance:source.match')}</span>
         ),
     },
-    { title: 'Açıklama', dataIndex: 'title', render: (v) => v || <Text type="secondary">-</Text> },
-    { title: 'Saha', dataIndex: 'pitchName', width: 110, render: (v) => v || <Text type="secondary">—</Text> },
     {
-      title: 'Tutar',
+      title: t('finance:table.description'),
+      dataIndex: 'title',
+      // açıklamasız giderlerde sunucu başlık olarak kategori değerini döner → ekranda çevrilmiş kategori adı
+      render: (v, tx) =>
+        (tx.source === 'expense' && v && v === tx.category ? expenseCategoryLabel(v) : v) || <Text type="secondary">-</Text>,
+    },
+    { title: t('common:pitch'), dataIndex: 'pitchName', width: 110, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: t('finance:table.amount'),
       dataIndex: 'amount',
       align: 'right',
       width: 130,
@@ -257,26 +269,26 @@ export default function OwnerFinance() {
       ),
     },
     {
-      title: 'Ödeme',
+      title: t('finance:table.payment'),
       key: 'paid',
       width: 140,
-      render: (_, t) =>
-        t.source === 'manual' ? (
-          <span className={`mb-pay-cell ${t.isPaid ? 'is-paid' : 'is-unpaid'}`}>
+      render: (_, tx) =>
+        tx.source === 'manual' ? (
+          <span className={`mb-pay-cell ${tx.isPaid ? 'is-paid' : 'is-unpaid'}`}>
             <InactiveTip>
               <Switch
                 size="small"
-                checked={Boolean(t.isPaid)}
-                disabled={!membershipActive || t.refId == null}
-                loading={paid.busyId === t.refId}
-                onChange={(v) => paid.toggle(t.refId, v)}
+                checked={Boolean(tx.isPaid)}
+                disabled={!membershipActive || tx.refId == null}
+                loading={paid.busyId === tx.refId}
+                onChange={(v) => paid.toggle(tx.refId, v)}
               />
             </InactiveTip>
-            {t.isPaid ? 'Alındı' : 'Alınmadı'}
+            {tx.isPaid ? t('finance:table.received') : t('finance:table.notReceived')}
           </span>
-        ) : t.source === 'match' ? (
+        ) : tx.source === 'match' ? (
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Uygulama
+            {t('finance:source.app')}
           </Text>
         ) : (
           <Text type="secondary">—</Text>
@@ -287,20 +299,26 @@ export default function OwnerFinance() {
       key: 'actions',
       width: 90,
       align: 'right',
-      render: (_, t) =>
-        t.source === 'expense' && t.refId != null ? (
+      render: (_, tx) =>
+        tx.source === 'expense' && tx.refId != null ? (
           <Space size={4}>
-            <WriteButton size="small" tooltip="Düzenle" icon={<EditOutlined />} onClick={() => editExpense(t)} aria-label="Düzenle" />
+            <WriteButton
+              size="small"
+              tooltip={t('common:actions.edit')}
+              icon={<EditOutlined />}
+              onClick={() => editExpense(tx)}
+              aria-label={t('common:actions.edit')}
+            />
             <Popconfirm
-              title="Gideri sil"
-              description="Bu gider kaydı kalıcı olarak silinecek. Emin misiniz?"
-              okText="Sil"
-              cancelText="Vazgeç"
+              title={t('finance:table.deleteTitle')}
+              description={t('finance:table.deleteDescription')}
+              okText={t('common:actions.delete')}
+              cancelText={t('common:actions.cancel')}
               okButtonProps={{ danger: true }}
-              onConfirm={() => deleteExpense(t)}
+              onConfirm={() => deleteExpense(tx)}
               disabled={!membershipActive}
             >
-              <WriteButton size="small" danger icon={<DeleteOutlined />} aria-label="Sil" />
+              <WriteButton size="small" danger icon={<DeleteOutlined />} aria-label={t('common:actions.delete')} />
             </Popconfirm>
           </Space>
         ) : null,
@@ -316,7 +334,7 @@ export default function OwnerFinance() {
       key: p.pitchId ?? p.name,
       label: p.name,
       value: num(p.income),
-      meta: `${num(p.hours).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} saat`,
+      meta: t('finance:pitchHours', { hours: num(p.hours).toLocaleString(intlLocale(), { maximumFractionDigits: 1 }) }),
       color: INCOME_COLOR,
     }))
     .sort((a, b) => b.value - a.value);
@@ -341,13 +359,13 @@ export default function OwnerFinance() {
     <div className="mb-fin">
       <PageHeader
         eyebrow={venue?.name}
-        title="Gelir & Gider"
+        title={t('finance:page.title')}
         icon={<WalletOutlined />}
-        subtitle="Aylık gelirinizi, giderlerinizi ve net kârınızı tek ekranda takip edin."
+        subtitle={t('finance:page.subtitle')}
         extra={
           <Space wrap>
             <Space.Compact>
-              <Button icon={<LeftOutlined />} onClick={() => shiftMonth(-1)} aria-label="Önceki ay" />
+              <Button icon={<LeftOutlined />} onClick={() => shiftMonth(-1)} aria-label={t('finance:page.prevMonth')} />
               <DatePicker
                 picker="month"
                 value={month}
@@ -356,11 +374,11 @@ export default function OwnerFinance() {
                 onChange={(d) => d && setMonth(d.startOf('month'))}
                 style={{ width: 160 }}
               />
-              <Button icon={<RightOutlined />} onClick={() => shiftMonth(1)} aria-label="Sonraki ay" />
+              <Button icon={<RightOutlined />} onClick={() => shiftMonth(1)} aria-label={t('finance:page.nextMonth')} />
             </Space.Compact>
-            {!isCurrentMonth && <Button onClick={() => setMonth(dayjs().startOf('month'))}>Bu ay</Button>}
+            {!isCurrentMonth && <Button onClick={() => setMonth(dayjs().startOf('month'))}>{t('finance:page.thisMonth')}</Button>}
             <WriteButton type="primary" icon={<PlusOutlined />} onClick={() => setExpenseDraft({ expense: null })}>
-              Gider ekle
+              {t('finance:page.addExpense')}
             </WriteButton>
           </Space>
         }
@@ -384,49 +402,61 @@ export default function OwnerFinance() {
       ) : (
         <>
           <div className={`mb-fin-kpis${loading ? ' is-loading' : ''}`}>
-            <Kpi label="Gelir" value={formatPrice(income.total ?? 0)} tone="income">
+            <Kpi label={t('finance:income')} value={formatPrice(income.total ?? 0)} tone="income">
               <span>
-                Uygulama {formatPrice(income.matches ?? 0)} · Harici {formatPrice(income.manual ?? 0)}
+                {t('finance:kpi.incomeSplit', { matches: formatPrice(income.matches ?? 0), manual: formatPrice(income.manual ?? 0) })}
               </span>
               <Delta value={change(income.total, prev.income)} />
             </Kpi>
-            <Kpi label="Gider" value={formatPrice(f.expenses ?? 0)} tone="expense">
-              <span>{asList(f.expenseByCategory).length} kategori</span>
+            <Kpi label={t('finance:expense')} value={formatPrice(f.expenses ?? 0)} tone="expense">
+              <span>{t('finance:kpi.categories', { count: asList(f.expenseByCategory).length })}</span>
               <Delta value={change(f.expenses, prev.expenses)} goodWhenUp={false} />
             </Kpi>
-            <Kpi label="Net kâr" value={formatPrice(net)} tone={net >= 0 ? 'net' : 'loss'}>
+            <Kpi label={t('finance:netProfit')} value={formatPrice(net)} tone={net >= 0 ? 'net' : 'loss'}>
               <span>
-                Kâr marjı <strong>{f.marginPercent != null ? pctFmt(f.marginPercent) : '—'}</strong>
+                <Trans
+                  i18nKey="finance:kpi.margin"
+                  values={{ value: f.marginPercent != null ? pctFmt(f.marginPercent) : '—' }}
+                  components={{ b: <strong /> }}
+                />
               </span>
               <Delta value={change(f.net, prev.net)} />
             </Kpi>
             <Kpi
-              label="Tahsil edilmemiş"
+              label={t('finance:unpaid')}
               value={formatPrice(f.receivable ?? 0)}
               tone="receivable"
               onClick={unpaidCount ? showUnpaid : undefined}
-              title={unpaidCount ? 'Ödemesi alınmamış harici rezervasyonları göster' : undefined}
+              title={unpaidCount ? t('finance:kpi.unpaidTitle') : undefined}
             >
-              <span>{unpaidCount ? `${unpaidCount} harici rezervasyon · listele →` : 'Bekleyen ödeme yok'}</span>
+              <span>{unpaidCount ? t('finance:kpi.unpaidList', { count: unpaidCount }) : t('finance:kpi.noPending')}</span>
             </Kpi>
-            <Kpi label="Beklenen gelir" value={formatPrice(f.expectedIncome ?? 0)} tone="expected">
-              <span>Henüz oynanmamış onaylı maçlar ve harici rezervasyonlar</span>
+            <Kpi label={t('finance:kpi.expected')} value={formatPrice(f.expectedIncome ?? 0)} tone="expected">
+              <span>{t('finance:kpi.expectedHint')}</span>
             </Kpi>
           </div>
 
           <div className="mb-fin-mini">
             <span>
-              <strong>{counts.matches ?? 0}</strong> maç
+              <Trans i18nKey="finance:mini.matches" count={counts.matches ?? 0} components={{ b: <strong /> }} />
             </span>
             <span>
-              <strong>{counts.manualBookings ?? 0}</strong> harici rezervasyon
+              <Trans i18nKey="finance:mini.manualBookings" count={counts.manualBookings ?? 0} components={{ b: <strong /> }} />
             </span>
             <span>
-              <strong>{num(counts.hoursSold).toLocaleString('tr-TR', { maximumFractionDigits: 1 })}</strong> saat satıldı
+              <Trans
+                i18nKey="finance:mini.hoursSold"
+                values={{ hours: num(counts.hoursSold).toLocaleString(intlLocale(), { maximumFractionDigits: 1 }) }}
+                components={{ b: <strong /> }}
+              />
             </span>
             {num(counts.hoursSold) > 0 && (
               <span>
-                Saat başı ortalama <strong>{formatPrice(Math.round(num(income.total) / num(counts.hoursSold)))}</strong>
+                <Trans
+                  i18nKey="finance:mini.avgPerHour"
+                  values={{ value: formatPrice(Math.round(num(income.total) / num(counts.hoursSold))) }}
+                  components={{ b: <strong /> }}
+                />
               </span>
             )}
           </div>
@@ -436,13 +466,13 @@ export default function OwnerFinance() {
               <Card
                 bordered={false}
                 className="mb-fin-card"
-                title="Son 12 ay"
+                title={t('finance:cards.last12Months')}
                 extra={
                   <Legend
                     items={[
-                      { label: 'Gelir', color: INCOME_COLOR },
-                      { label: 'Gider', color: EXPENSE_COLOR },
-                      { label: 'Net kâr', color: 'var(--mb-text)', line: true },
+                      { label: t('finance:income'), color: INCOME_COLOR },
+                      { label: t('finance:expense'), color: EXPENSE_COLOR },
+                      { label: t('finance:netProfit'), color: 'var(--mb-text)', line: true },
                     ]}
                   />
                 }
@@ -450,9 +480,9 @@ export default function OwnerFinance() {
                 {monthly.length ? (
                   <MonthlyChart data={monthly} selected={{ year: month.year(), month: month.month() + 1 }} onSelect={selectMonth} />
                 ) : (
-                  <EmptyState description="Henüz aylık veri yok" />
+                  <EmptyState description={t('finance:cards.noMonthlyData')} />
                 )}
-                <div className="mb-fin-hint">Bir aya tıklayarak o ayın ayrıntılarını görebilirsiniz.</div>
+                <div className="mb-fin-hint">{t('finance:cards.monthlyHint')}</div>
               </Card>
             </Col>
 
@@ -462,29 +492,29 @@ export default function OwnerFinance() {
                   <Card
                     bordered={false}
                     className="mb-fin-card"
-                    title={`Günlük akış · ${month.format('MMMM')}`}
+                    title={t('finance:cards.dailyTitle', { month: month.format('MMMM') })}
                     extra={
                       <Legend
                         items={[
-                          { label: 'Gelir', color: INCOME_COLOR },
-                          { label: 'Gider', color: EXPENSE_COLOR },
+                          { label: t('finance:income'), color: INCOME_COLOR },
+                          { label: t('finance:expense'), color: EXPENSE_COLOR },
                         ]}
                       />
                     }
                   >
                     <DailyChart data={daily} />
-                    <div className="mb-fin-hint">Gelir çizginin üstünde, gider altında gösterilir.</div>
+                    <div className="mb-fin-hint">{t('finance:cards.dailyHint')}</div>
                   </Card>
                 </Col>
 
                 <Col xs={24} lg={12}>
-                  <Card bordered={false} className="mb-fin-card" title="Gelir dağılımı">
-                    <div className="mb-fin-section-label">Kaynağa göre</div>
+                  <Card bordered={false} className="mb-fin-card" title={t('finance:cards.incomeDistribution')}>
+                    <div className="mb-fin-section-label">{t('finance:cards.bySource')}</div>
                     <SourceSplit items={sources} />
                     <div className="mb-fin-section-label" style={{ marginTop: 22 }}>
-                      Sahaya göre
+                      {t('finance:cards.byPitch')}
                     </div>
-                    <HBarList rows={pitchRows} emptyText="Bu ay sahalardan gelir oluşmadı." />
+                    <HBarList rows={pitchRows} emptyText={t('finance:cards.noPitchIncome')} />
                   </Card>
                 </Col>
 
@@ -492,25 +522,25 @@ export default function OwnerFinance() {
                   <Card
                     bordered={false}
                     className="mb-fin-card"
-                    title="Gider dağılımı"
+                    title={t('finance:cards.expenseDistribution')}
                     extra={
                       <WriteButton size="small" icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>
-                        Geçen aydan kopyala
+                        {t('finance:cards.copyFromLastMonth')}
                       </WriteButton>
                     }
                   >
                     {catRows.length ? (
                       <>
                         <div className="mb-fin-cat-total">
-                          <span>Toplam gider</span>
+                          <span>{t('finance:cards.totalExpense')}</span>
                           <strong>{formatPrice(expenseTotal)}</strong>
                         </div>
                         <HBarList rows={catRows} />
                       </>
                     ) : (
-                      <EmptyState description="Bu ay için gider girilmemiş">
+                      <EmptyState description={t('finance:cards.noExpenses')}>
                         <WriteButton type="primary" icon={<PlusOutlined />} onClick={() => setExpenseDraft({ expense: null })}>
-                          Gider ekle
+                          {t('finance:page.addExpense')}
                         </WriteButton>
                       </EmptyState>
                     )}
@@ -519,27 +549,30 @@ export default function OwnerFinance() {
 
                 <Col xs={24}>
                   <div ref={tableRef} className="mb-fin-anchor" />
-                  <Card bordered={false} className="mb-fin-card" title="Hareketler">
+                  <Card bordered={false} className="mb-fin-card" title={t('finance:cards.movements')}>
                     <div className="mb-owner-toolbar">
                       <Segmented
                         value={filter}
                         onChange={setFilter}
                         options={FILTERS.map((o) => ({
                           value: o.value,
-                          label: o.value === 'unpaid' && unpaidCount ? `${o.label} (${unpaidCount})` : o.label,
+                          label:
+                            o.value === 'unpaid' && unpaidCount
+                              ? t('finance:filters.unpaidWithCount', { count: unpaidCount })
+                              : t(o.labelKey),
                         }))}
                       />
                       <Space wrap className="mb-owner-toolbar__filters">
                         <Input
                           allowClear
                           prefix={<SearchOutlined />}
-                          placeholder="Açıklama, kategori ya da saha ara"
+                          placeholder={t('finance:cards.searchPlaceholder')}
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
                           style={{ width: 260 }}
                         />
                         <Button icon={<DownloadOutlined />} disabled={!rows.length} onClick={() => downloadCsv(rows, month, venue?.name)}>
-                          CSV indir
+                          {t('finance:cards.downloadCsv')}
                         </Button>
                       </Space>
                     </div>
@@ -551,14 +584,14 @@ export default function OwnerFinance() {
                       loading={loading}
                       scroll={{ x: 980 }}
                       pagination={{ pageSize: 20, hideOnSinglePage: true }}
-                      rowClassName={(t) => (isUnpaid(t) ? 'mb-fin-row-unpaid' : '')}
-                      locale={{ emptyText: <EmptyState description="Bu filtreye uyan hareket yok" /> }}
+                      rowClassName={(tx) => (isUnpaid(tx) ? 'mb-fin-row-unpaid' : '')}
+                      locale={{ emptyText: <EmptyState description={t('finance:cards.noMatchingMovements')} /> }}
                       summary={() =>
                         rows.length ? (
                           <Table.Summary>
                             <Table.Summary.Row className="mb-fin-summary">
                               <Table.Summary.Cell index={0} colSpan={5}>
-                                <Text type="secondary">{rows.length} hareket</Text>
+                                <Text type="secondary">{t('finance:cards.movementCount', { count: rows.length })}</Text>
                               </Table.Summary.Cell>
                               <Table.Summary.Cell index={5} align="right" colSpan={1}>
                                 <div className="mb-fin-sum">
@@ -568,7 +601,7 @@ export default function OwnerFinance() {
                               </Table.Summary.Cell>
                               <Table.Summary.Cell index={6} colSpan={2}>
                                 <span className={`mb-fin-net ${totals.income - totals.expense >= 0 ? 'is-pos' : 'is-neg'}`}>
-                                  Net {formatPrice(totals.income - totals.expense)}
+                                  {t('finance:cards.net', { value: formatPrice(totals.income - totals.expense) })}
                                 </span>
                               </Table.Summary.Cell>
                             </Table.Summary.Row>
@@ -582,19 +615,17 @@ export default function OwnerFinance() {
             ) : (
               <Col xs={24}>
                 <Card bordered={false} className="mb-fin-card">
-                  <EmptyState description={`${month.format('MMMM YYYY')} için henüz gelir ya da gider kaydı yok`}>
+                  <EmptyState description={t('finance:empty.noRecords', { month: month.format('MMMM YYYY') })}>
                     <div className="mb-fin-empty">
                       <p>
-                        Geliriniz otomatik hesaplanır: <strong>onaylanmış ve oynanmış</strong> uygulama maçları ile{' '}
-                        <strong>ödemesi alınmış</strong> harici rezervasyonlar, maçın oynandığı aya yazılır. Giderlerinizi (kira, fatura,
-                        personel…) buradan ekleyerek net kârınızı görebilirsiniz.
+                        <Trans i18nKey="finance:empty.explanation" components={{ b: <strong /> }} />
                       </p>
                       <Space wrap style={{ justifyContent: 'center' }}>
                         <WriteButton type="primary" icon={<PlusOutlined />} onClick={() => setExpenseDraft({ expense: null })}>
-                          Gider ekle
+                          {t('finance:page.addExpense')}
                         </WriteButton>
                         <WriteButton icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>
-                          Geçen aydan kopyala
+                          {t('finance:cards.copyFromLastMonth')}
                         </WriteButton>
                       </Space>
                     </div>

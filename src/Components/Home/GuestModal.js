@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { App, Form, Input, Modal, Radio } from 'antd';
 import { UserAddOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { matchesApi, SIDE } from '../../api/matches';
 import { apiErrorMessage } from '../../utils/format';
 
@@ -10,6 +11,7 @@ import { apiErrorMessage } from '../../utils/format';
  * free: { [SIDE.HOME]: n, [SIDE.AWAY]: n } — tarafta kalan boş yer (düzenlemede kendi yeri hariç)
  */
 function GuestModal({ open, matchId, guest, side, preferredSide, free = {}, homeLabel, awayLabel, onClose, onSaved }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
@@ -40,11 +42,11 @@ function GuestModal({ open, matchId, guest, side, preferredSide, free = {}, home
       const res = editing
         ? await matchesApi.updateGuest(guest.guestId, values.side, name, note)
         : await matchesApi.addGuest(matchId, values.side, name, note);
-      message.success(res?.message || (editing ? 'Misafir oyuncu güncellendi.' : `${name} kadroya eklendi.`));
+      message.success(res?.message || (editing ? t('home:guestModal.updated') : t('home:guestModal.added', { name })));
       onClose();
       onSaved?.();
     } catch (e) {
-      message.error(apiErrorMessage(e, editing ? 'Misafir oyuncu güncellenemedi.' : 'Misafir oyuncu eklenemedi.'));
+      message.error(apiErrorMessage(e, editing ? t('home:guestModal.updateFailed') : t('home:guestModal.addFailed')));
     } finally {
       setSaving(false);
     }
@@ -57,7 +59,7 @@ function GuestModal({ open, matchId, guest, side, preferredSide, free = {}, home
         <span className="mb-guest-side__inner">
           <span className="mb-guest-side__dot" />
           <span className="mb-guest-side__name">{label}</span>
-          <small>{n > 0 ? `${n} boş yer` : 'Dolu'}</small>
+          <small>{n > 0 ? t('home:guestModal.free', { count: n }) : t('home:guestModal.full')}</small>
         </span>
       </Radio.Button>
     );
@@ -69,11 +71,11 @@ function GuestModal({ open, matchId, guest, side, preferredSide, free = {}, home
       title={
         <span>
           <UserAddOutlined style={{ color: 'var(--mb-primary)', marginRight: 8 }} />
-          {editing ? 'Misafir oyuncuyu düzenle' : 'İsimle oyuncu ekle'}
+          {editing ? t('home:guestModal.titleEdit') : t('home:guestModal.titleAdd')}
         </span>
       }
-      okText={editing ? 'Kaydet' : 'Kadroya ekle'}
-      cancelText="Vazgeç"
+      okText={editing ? t('common:actions.save') : t('home:guestModal.okAdd')}
+      cancelText={t('common:actions.cancel')}
       confirmLoading={saving}
       onOk={submit}
       onCancel={onClose}
@@ -81,8 +83,7 @@ function GuestModal({ open, matchId, guest, side, preferredSide, free = {}, home
       className="mb-guest-modal"
     >
       <p className="mb-guest-modal__hint">
-        Uygulamada hesabı olmayan arkadaşını isimle kadroya yaz. Misafirler kadroda yer tutar ama MVP oylamasına ve
-        puanlamaya katılmaz.
+        {t('home:guestModal.hint')}
       </p>
       <Form
         form={form}
@@ -94,24 +95,28 @@ function GuestModal({ open, matchId, guest, side, preferredSide, free = {}, home
       >
         <Form.Item
           name="name"
-          label="İsim"
+          label={t('home:guestModal.nameLabel')}
           rules={[
-            { required: true, whitespace: true, message: 'İsim yaz.' },
+            { required: true, whitespace: true, message: t('home:guestModal.nameRequired') },
             {
               validator: (_, v) => {
                 const len = (v || '').trim().length;
                 if (!len || (len >= 2 && len <= 60)) return Promise.resolve();
-                return Promise.reject(new Error('İsim 2–60 karakter olmalı.'));
+                return Promise.reject(new Error(t('home:guestModal.nameLength')));
               },
             },
           ]}
         >
-          <Input placeholder="Ör. Ahmet Yılmaz" maxLength={60} autoFocus autoComplete="off" />
+          <Input placeholder={t('home:guestModal.namePlaceholder')} maxLength={60} autoFocus autoComplete="off" />
         </Form.Item>
-        <Form.Item name="note" label="Not / açıklama" rules={[{ max: 200, message: 'En fazla 200 karakter.' }]}>
-          <Input.TextArea rows={2} maxLength={200} showCount placeholder="Ör. kaleci, Ahmet'in arkadaşı" />
+        <Form.Item
+          name="note"
+          label={t('home:guestModal.noteLabel')}
+          rules={[{ max: 200, message: t('home:guestModal.noteMax', { count: 200 }) }]}
+        >
+          <Input.TextArea rows={2} maxLength={200} showCount placeholder={t('home:guestModal.notePlaceholder')} />
         </Form.Item>
-        <Form.Item name="side" label="Takım" rules={[{ required: true, message: 'Bir takım seç.' }]}>
+        <Form.Item name="side" label={t('home:guestModal.sideLabel')} rules={[{ required: true, message: t('home:guestModal.sideRequired') }]}>
           <Radio.Group className="mb-guest-sides">
             {sideOption(SIDE.HOME, homeLabel)}
             {sideOption(SIDE.AWAY, awayLabel)}

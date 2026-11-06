@@ -1,4 +1,5 @@
 import React, { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import './BallLoader.css';
 
 // Klasik beşgen desenli top (viewBox 0 0 100 100; dış parçalar daireyle kırpılır)
@@ -34,7 +35,7 @@ function BallSvg() {
         <path d={CENTER + OUTER} fill="#0b1220" />
         <circle cx="50" cy="50" r="47" fill={`url(#${shade})`} />
       </g>
-      <circle cx="50" cy="50" r="47" fill="none" stroke="#c6f432" strokeWidth="3.5" />
+      <circle className="mb-ball__ring" cx="50" cy="50" r="47" fill="none" stroke="#c6f432" strokeWidth="3.5" />
     </svg>
   );
 }
@@ -47,12 +48,13 @@ const SIZE_CLASS = { small: 'mb-ball--sm', default: 'mb-ball--md', large: 'mb-ba
  * antd Spin'in varsayılan göstergesi olarak da kullanılır (className / percent Spin'den gelir).
  */
 export default function BallLoader({ size = 'default', caption, className, style, percent, ...rest }) {
+  const { t } = useTranslation();
   const ball = (
     <span
       className={['mb-ball', SIZE_CLASS[size] || SIZE_CLASS.default, caption ? '' : className].filter(Boolean).join(' ')}
       style={caption ? undefined : style}
       role={caption ? undefined : 'status'}
-      aria-label={caption ? undefined : 'Yükleniyor'}
+      aria-label={caption ? undefined : t('common:status.loadingShort')}
       {...(caption ? {} : rest)}
     >
       <span className="mb-ball__shadow" />
@@ -73,10 +75,11 @@ export default function BallLoader({ size = 'default', caption, className, style
 }
 
 /** Tüm sayfa / büyük bölüm yüklenirken: ortalanmış büyük top + açıklama; yükseklik sabit, yerleşim zıplamaz */
-export function PageLoader({ caption = 'Yükleniyor…', minHeight = '50vh', style, className }) {
+export function PageLoader({ caption, minHeight = '50vh', style, className }) {
+  const { t } = useTranslation();
   return (
     <div className={['mb-page-loader', className].filter(Boolean).join(' ')} style={{ minHeight, ...style }}>
-      <BallLoader size="large" caption={caption} />
+      <BallLoader size="large" caption={caption ?? t('common:status.loading')} />
     </div>
   );
 }

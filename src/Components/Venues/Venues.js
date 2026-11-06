@@ -25,6 +25,7 @@ import {
   VideoCameraOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { Trans, useTranslation } from 'react-i18next';
 import { AMENITIES, formatPrice, venuesApi } from '../../api/venues';
 import { EmptyState, PageHeader } from '../../ui';
 import { apiErrorMessage, mediaUrl } from '../../utils/format';
@@ -61,17 +62,17 @@ export const AMENITY_ICONS = {
   ball: <DribbbleOutlined />,
 };
 
-// Filtre çipleri için kısa etiketler
+// Filtre çipleri için kısa etiketler (çeviri anahtarları)
 const AMENITY_SHORT = {
-  camera: 'Kamera',
-  cleatRental: 'Krampon',
-  shower: 'Duş',
-  lockerRoom: 'Soyunma odası',
-  parking: 'Otopark',
-  cafe: 'Kafe',
-  shuttle: 'Servis',
-  bibs: 'Yelek',
-  ball: 'Top',
+  camera: 'venues:amenityShort.camera',
+  cleatRental: 'venues:amenityShort.cleatRental',
+  shower: 'venues:amenityShort.shower',
+  lockerRoom: 'venues:amenityShort.lockerRoom',
+  parking: 'venues:amenityShort.parking',
+  cafe: 'venues:amenityShort.cafe',
+  shuttle: 'venues:amenityShort.shuttle',
+  bibs: 'venues:amenityShort.bibs',
+  ball: 'venues:amenityShort.ball',
 };
 
 /** Tesisin sahip olduğu olanakların ikon satırı */
@@ -91,7 +92,8 @@ export function AmenityIcons({ amenities, size = 'md' }) {
 
 /** Puan: yıldız + değer + yorum sayısı */
 export function VenueRating({ rating, count, compact }) {
-  if (!count) return <span className="mb-venue-rating is-new">Yeni tesis</span>;
+  const { t } = useTranslation();
+  if (!count) return <span className="mb-venue-rating is-new">{t('venues:shared.newVenue')}</span>;
   return (
     <span className="mb-venue-rating">
       {compact ? <StarFilled /> : <Rate disabled allowHalf value={Math.round((rating || 0) * 2) / 2} />}
@@ -136,18 +138,19 @@ export function Routing({ from, to }) {
 
 /* =================== Tesis kartı =================== */
 function VenueCard({ v, onOpen, showFree }) {
+  const { t } = useTranslation();
   return (
     <article className="mb-venue-card" onClick={onOpen}>
       <div className="mb-venue-card__cover">
         {v.coverPhotoUrl ? <img src={mediaUrl(v.coverPhotoUrl, 'md')} alt={v.name} loading="lazy" decoding="async" /> : <div className="mb-venue-card__placeholder mb-pitch-bg" />}
         {v.hasActiveCampaign && (
           <span className="mb-ribbon">
-            <FireOutlined /> Kampanya
+            <FireOutlined /> {t('venues:shared.campaign')}
           </span>
         )}
         {showFree && v.freeSlotsToday != null && (
           <span className={`mb-venue-card__free ${v.freeSlotsToday ? '' : 'is-none'}`}>
-            {v.freeSlotsToday ? `${v.freeSlotsToday} boş saat` : 'Boş saat yok'}
+            {v.freeSlotsToday ? t('venues:shared.freeSlots', { count: v.freeSlotsToday }) : t('venues:shared.noFreeSlots')}
           </span>
         )}
         <div className="mb-venue-card__title">
@@ -160,18 +163,15 @@ function VenueCard({ v, onOpen, showFree }) {
       <div className="mb-venue-card__body">
         <div className="mb-venue-card__row">
           <VenueRating rating={v.rating} count={v.reviewCount} compact />
-          <span className="mb-venue-card__pitches">{v.pitchCount} saha</span>
+          <span className="mb-venue-card__pitches">{t('venues:list.card.pitchCount', { count: v.pitchCount })}</span>
         </div>
         <AmenityIcons amenities={v.amenities} size="sm" />
         <div className="mb-venue-card__foot">
           <div className="mb-venue-card__price">
             {v.minPrice != null ? (
-              <>
-                <strong>{formatPrice(v.minPrice)}</strong>
-                <span>'den başlayan /saat</span>
-              </>
+              <Trans i18nKey="venues:list.card.priceFrom" values={{ price: formatPrice(v.minPrice) }} components={{ b: <strong />, s: <span /> }} />
             ) : (
-              <span>Fiyat için tıkla</span>
+              <span>{t('venues:list.card.clickForPrice')}</span>
             )}
           </div>
           <Button
@@ -181,7 +181,7 @@ function VenueCard({ v, onOpen, showFree }) {
               onOpen();
             }}
           >
-            Saat seç
+            {t('venues:shared.pickTime')}
           </Button>
         </div>
       </div>
@@ -191,6 +191,7 @@ function VenueCard({ v, onOpen, showFree }) {
 
 /* =================== Sayfa =================== */
 export default function Venues() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const navigate = useNavigate();
 
@@ -216,12 +217,12 @@ export default function Venues() {
     venuesApi
       .list(dateKey ? { date: dateKey } : undefined)
       .then((res) => alive && setVenues((res || []).map((v) => ({ ...v, coords: parseLocation(v.location) }))))
-      .catch((e) => alive && message.error(apiErrorMessage(e, 'Tesisler yüklenemedi.')))
+      .catch((e) => alive && message.error(apiErrorMessage(e, t('venues:shared.venuesLoadError'))))
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
-  }, [dateKey, message]);
+  }, [dateKey, message, t]);
 
   useEffect(() => {
     if (view !== 'map' || userPosition) return;
@@ -256,16 +257,16 @@ export default function Venues() {
   return (
     <>
       <PageHeader
-        eyebrow="Anlaşmalı tesisler"
-        title="Halı Sahalar"
-        subtitle="Boş saatleri gör, sahanı seç, maçını dakikalar içinde kur."
+        eyebrow={t('venues:list.eyebrow')}
+        title={t('venues:list.title')}
+        subtitle={t('venues:list.subtitle')}
         extra={
           <Segmented
             value={view}
             onChange={setView}
             options={[
-              { value: 'list', label: 'Liste', icon: <AppstoreOutlined /> },
-              { value: 'map', label: 'Harita', icon: <EnvironmentOutlined /> },
+              { value: 'list', label: t('venues:list.viewList'), icon: <AppstoreOutlined /> },
+              { value: 'map', label: t('venues:list.viewMap'), icon: <EnvironmentOutlined /> },
             ]}
           />
         }
@@ -277,28 +278,28 @@ export default function Venues() {
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            placeholder="Tesis, semt ara"
+            placeholder={t('venues:list.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="mb-venue-filters__search"
           />
-          <Select allowClear placeholder="Tüm şehirler" value={city} onChange={setCity} options={cities.map((c) => ({ value: c, label: c }))} style={{ minWidth: 160 }} className="mb-venue-filters__city" />
+          <Select allowClear placeholder={t('venues:list.allCities')} value={city} onChange={setCity} options={cities.map((c) => ({ value: c, label: c }))} style={{ minWidth: 160 }} className="mb-venue-filters__city" />
           <DatePicker
             value={date}
             onChange={(d) => setDate(d ? d.startOf('day') : null)}
             format="DD MMM YYYY"
-            placeholder="Boş saat ara"
+            placeholder={t('venues:list.datePlaceholder')}
             disabledDate={(d) => d.isBefore(dayjs(), 'day')}
           />
           <label className={`mb-venue-filters__toggle ${campaignOnly ? 'is-on' : ''}`}>
             <Switch size="small" checked={campaignOnly} onChange={setCampaignOnly} />
-            <TagOutlined /> Kampanyalı
+            <TagOutlined /> {t('venues:list.campaignOnly')}
           </label>
         </div>
         <div className="mb-venue-filters__chips">
           {AMENITIES.map((a) => (
             <Tag.CheckableTag key={a.key} checked={amenityFilter.includes(a.key)} onChange={(on) => toggleAmenity(a.key, on)} className="mb-amenity-chip">
-              {AMENITY_ICONS[a.key]} {AMENITY_SHORT[a.key] || a.label}
+              {AMENITY_ICONS[a.key]} {AMENITY_SHORT[a.key] ? t(AMENITY_SHORT[a.key]) : a.label}
             </Tag.CheckableTag>
           ))}
         </div>
@@ -318,7 +319,7 @@ export default function Venues() {
           </Row>
         ) : list.length === 0 ? (
           <Card>
-            <EmptyState description={venues.length ? 'Bu filtrelere uyan tesis yok' : 'Henüz anlaşmalı tesis yok'} />
+            <EmptyState description={venues.length ? t('venues:list.emptyFiltered') : t('venues:list.emptyNone')} />
           </Card>
         ) : (
           <Row gutter={[20, 20]}>
@@ -333,11 +334,11 @@ export default function Venues() {
         <Row gutter={[20, 20]}>
           {/* Telefonda önce harita, sonra liste */}
           <Col xs={{ span: 24, order: 2 }} lg={{ span: 8, order: 1 }}>
-            <Card className="mb-venue-side" styles={{ body: { padding: 12 } }} title={<span><UnorderedListOutlined /> {list.length} tesis</span>}>
+            <Card className="mb-venue-side" styles={{ body: { padding: 12 } }} title={<span><UnorderedListOutlined /> {t('venues:list.venueCount', { count: list.length })}</span>}>
               {loading ? (
                 <Skeleton active paragraph={{ rows: 6 }} />
               ) : list.length === 0 ? (
-                <EmptyState description="Tesis bulunamadı" />
+                <EmptyState description={t('venues:list.notFound')} />
               ) : (
                 <div className="mb-venue-side__list">
                   {list.map((v) => (
@@ -370,7 +371,7 @@ export default function Venues() {
                 {selected?.coords && <FlyTo center={selected.coords} zoom={15} />}
                 {userPosition && (
                   <Marker position={userPosition} icon={markerIcon}>
-                    <Popup>Konumun</Popup>
+                    <Popup>{t('venues:list.yourLocation')}</Popup>
                   </Marker>
                 )}
                 {list
@@ -385,7 +386,7 @@ export default function Venues() {
                       <Popup>
                         <strong>{v.name}</strong>
                         <br />
-                        {v.minPrice != null && `${formatPrice(v.minPrice)}'den başlayan /saat`}
+                        {v.minPrice != null && t('venues:list.popupPriceFrom', { price: formatPrice(v.minPrice) })}
                       </Popup>
                     </Marker>
                   ))}
@@ -402,13 +403,13 @@ export default function Venues() {
                   <AmenityIcons amenities={selected.amenities} size="sm" />
                 </div>
                 <div className="mb-venue-mapcard__actions">
-                  <Tooltip title={!userPosition ? 'Konum izni gerekiyor' : undefined}>
+                  <Tooltip title={!userPosition ? t('venues:list.locationPermissionNeeded') : undefined}>
                     <Button icon={<AimOutlined />} disabled={!userPosition || !selected.coords} onClick={() => setRoute(true)}>
-                      Rota çiz
+                      {t('venues:list.drawRoute')}
                     </Button>
                   </Tooltip>
                   <Button type="primary" onClick={() => open(selected)}>
-                    Saat seç
+                    {t('venues:shared.pickTime')}
                   </Button>
                 </div>
               </div>
