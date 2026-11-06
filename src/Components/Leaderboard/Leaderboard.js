@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { App, Card, Segmented, Skeleton, Table } from 'antd';
+import { App, Card, Grid, Segmented, Skeleton, Table } from 'antd';
 import { CrownFilled, StarFilled, TrophyOutlined } from '@ant-design/icons';
 import { playersApi } from '../../api/matches';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
@@ -12,6 +12,40 @@ const SORTS = {
   mvp: { label: 'MVP', key: (r) => r.mvpCount },
   matches: { label: 'Maç', key: (r) => r.matchesPlayed },
 };
+
+/** Telefonda tablo yerine kompakt liste: sıra, avatar, isim, seçili sıralamanın değeri */
+function RankList({ rows, sort, meId }) {
+  return (
+    <ol className="mb-rank-list">
+      {rows.map((r, i) => (
+        <li key={r.player.playerId} className={r.player.playerId === meId ? 'is-me' : ''}>
+          <span className={`mb-rank-list__rank r${i + 1}`}>{i + 1}</span>
+          <PlayerAvatar player={r.player} size={40} />
+          <div className="mb-rank-list__name">
+            <strong>{fullName(r.player)}</strong>
+            <span>
+              {r.matchesPlayed} maç · {r.goals} gol · {r.assists ?? 0} asist
+              {r.mvpCount > 0 && (
+                <>
+                  {' '}· <CrownFilled style={{ color: 'var(--mb-gold)' }} /> {r.mvpCount}
+                </>
+              )}
+              {r.avgRating != null && (
+                <>
+                  {' '}· <StarFilled style={{ color: 'var(--mb-gold)' }} /> {r.avgRating.toFixed(1)}
+                </>
+              )}
+            </span>
+          </div>
+          <span className="mb-rank-list__stat">
+            <strong>{SORTS[sort].key(r) ?? 0}</strong>
+            <small>{SORTS[sort].label}</small>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 function Podium({ rows }) {
   const order = [rows[1], rows[0], rows[2]].filter(Boolean);
@@ -42,6 +76,7 @@ export default function Leaderboard() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('score');
+  const isPhone = Grid.useBreakpoint().md === false;
 
   useEffect(() => {
     playersApi
@@ -74,6 +109,11 @@ export default function Leaderboard() {
       ) : (
         <>
           {sorted.length >= 3 && <Podium rows={sorted} />}
+          {isPhone ? (
+            <Card className="mb-rank-card">
+              <RankList rows={sorted} sort={sort} meId={me?.playerId} />
+            </Card>
+          ) : (
           <Card>
             <Table
               rowKey={(r) => r.player.playerId}
@@ -126,6 +166,7 @@ export default function Leaderboard() {
               ]}
             />
           </Card>
+          )}
         </>
       )}
     </>

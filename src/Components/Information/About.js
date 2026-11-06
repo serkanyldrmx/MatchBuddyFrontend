@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Button, Card, Col, Descriptions, Row, Space, Statistic, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Descriptions, Grid, Row, Space, Statistic, Typography } from 'antd';
 import {
   EnvironmentOutlined,
   GithubOutlined,
@@ -32,7 +32,9 @@ const SOCIAL = [
   { href: 'https://www.youtube.com/', icon: <YoutubeOutlined />, label: 'YouTube' },
 ];
 
-const About = () => (
+const About = () => {
+  const isPhone = Grid.useBreakpoint().md === false;
+  return (
   <>
     <PageHeader title="Hakkında" subtitle="MatchBuddy ve ekibi hakkında" icon={<InfoCircleOutlined />} />
     <Row gutter={[16, 16]}>
@@ -91,7 +93,11 @@ const About = () => (
           <Row gutter={16}>
             {STATS.map((s) => (
               <Col span={8} key={s.title}>
-                <Statistic title={s.title} value={s.value} />
+                <Statistic
+                  title={s.title}
+                  value={s.value}
+                  valueStyle={isPhone ? { fontSize: 20 } : undefined}
+                />
               </Col>
             ))}
           </Row>
@@ -128,6 +134,7 @@ const About = () => (
       &copy; 2024 MatchBuddy. Tüm hakları saklıdır.
     </Paragraph>
   </>
-);
+  );
+};
 
 export default About;

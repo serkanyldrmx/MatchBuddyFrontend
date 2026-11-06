@@ -7,16 +7,15 @@ import {
   Card,
   Col,
   Descriptions,
-  Dropdown,
   Empty,
   Input,
   InputNumber,
   Modal,
+  Popconfirm,
   Rate,
   Result,
   Row,
   Select,
-  Skeleton,
   Table,
   Tabs,
   Tooltip,
@@ -26,6 +25,8 @@ import {
   CheckCircleFilled,
   CheckOutlined,
   CrownFilled,
+  DeleteOutlined,
+  EditOutlined,
   EnvironmentOutlined,
   FlagOutlined,
   HeartFilled,
@@ -39,7 +40,6 @@ import {
   SunOutlined,
   SwapOutlined,
   UserAddOutlined,
-  UserOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -47,100 +47,17 @@ import { api } from '../../api/config';
 import { matchesApi, PARTICIPANT_STATUS, SIDE } from '../../api/matches';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { useMessages } from '../../messaging/MessagesContext';
-import { CapacityRing, MatchStatusTag, PlayerAvatar } from '../../ui';
-import { apiErrorMessage, fileUrl, fullName, getCurrentUser } from '../../utils/format';
+import { CapacityRing, MatchStatusTag, PageLoader, PlayerAvatar } from '../../ui';
+import { apiErrorMessage, fullName, getCurrentUser, mediaUrl } from '../../utils/format';
 import MatchComments from '../Post/MatchComments';
 import InviteModal from '../Invites/InviteModal';
 import FollowButton, { PlayerLink } from '../Social/FollowButton';
+import GuestModal from './GuestModal';
+import Pitch, { guestInitials, sideRoster } from './Pitch';
 import './MatchDetails.css';
 
 const homeName = (d) => d.homeTeam?.teamName || 'Ev sahibi';
 const awayName = (d) => d.awayTeam?.teamName || (d.lookingForOpponent ? 'Rakip aranıyor' : 'Deplasman');
-
-/* ---------------- Saha üzerindeki oyuncu ---------------- */
-function PlayerToken({ p, me, canManage, onSwap, onMessage, mvpId }) {
-  const navigate = useNavigate();
-  const isMe = p.player.playerId === me?.playerId;
-  const items = [{ key: 'profile', icon: <UserOutlined />, label: 'Profili gör', onClick: () => navigate(`/player/${p.player.playerId}`) }];
-  if (!isMe) items.push({ key: 'msg', icon: <MessageOutlined />, label: 'Mesaj gönder', onClick: () => onMessage(p.player) });
-  if (canManage) items.push({ key: 'swap', icon: <SwapOutlined />, label: 'Diğer takıma al', onClick: () => onSwap(p) });
-
-  const token = (
-    <div className={`mb-token ${isMe ? 'is-me' : ''}`}>
-      <div className="mb-token__avatar">
-        <PlayerAvatar player={p.player} size={52} />
-        {p.confirmed && <CheckCircleFilled className="mb-token__check" />}
-        {mvpId === p.player.playerId && <CrownFilled className="mb-token__crown" />}
-        {p.goals > 0 && <span className="mb-token__goals">{p.goals}</span>}
-      </div>
-      <span className="mb-token__name">{isMe ? 'Sen' : p.player.playerName || p.player.userName}</span>
-      <span className="mb-token__score">{p.player.userScore ?? 0}</span>
-    </div>
-  );
-
-  return items.length ? (
-    <Dropdown menu={{ items }} trigger={['click']}>
-      <button type="button" className="mb-token-btn">{token}</button>
-    </Dropdown>
-  ) : (
-    token
-  );
-}
-
-function EmptySlot({ onJoin, canJoin }) {
-  return (
-    <button type="button" className="mb-token-btn" disabled={!canJoin} onClick={onJoin}>
-      <div className="mb-token is-empty">
-        <div className="mb-token__avatar">
-          <span className="mb-token__plus">+</span>
-        </div>
-        <span className="mb-token__name">{canJoin ? 'Katıl' : 'Boş'}</span>
-      </div>
-    </button>
-  );
-}
-
-/* ---------------- Saha ---------------- */
-function Pitch({ detail, me, onSwap, onMessage, onJoin, canJoin }) {
-  const going = detail.participants.filter((p) => p.status === PARTICIPANT_STATUS.GOING);
-  const perSide = Math.max(Math.ceil(detail.capacity / 2), 1);
-  const home = going.filter((p) => p.side !== SIDE.AWAY);
-  const away = going.filter((p) => p.side === SIDE.AWAY);
-  const mvpId = detail.mvp?.player?.playerId;
-
-  const half = (list, side) => (
-    <div className={`mb-pitch__half is-${side}`}>
-      {list.map((p) => (
-        <PlayerToken
-          key={p.player.playerId}
-          p={p}
-          me={me}
-          canManage={detail.canManage}
-          onSwap={onSwap}
-          onMessage={onMessage}
-          mvpId={mvpId}
-        />
-      ))}
-      {Array.from({ length: Math.max(perSide - list.length, 0) }).map((_, i) => (
-        <EmptySlot key={`e${i}`} canJoin={canJoin} onJoin={onJoin} />
-      ))}
-    </div>
-  );
-
-  return (
-    <div className="mb-pitch">
-      <div className="mb-pitch__labels">
-        <span className="is-home">{homeName(detail)} · {home.length}/{perSide}</span>
-        <span className="is-away">{awayName(detail)} · {away.length}/{perSide}</span>
-      </div>
-      <div className="mb-pitch__field">
-        <div className="mb-pitch__lines" />
-        {half(home, 'home')}
-        {half(away, 'away')}
-      </div>
-    </div>
-  );
-}
 
 /* ---------------- Maç sonu ---------------- */
 function PostMatch({ detail, me, reload }) {
@@ -399,7 +316,7 @@ function VenueReviewCard({ detail, reload }) {
       }
     >
       <div className="mb-venue-review">
-        {detail.venue?.coverPhotoUrl && <img src={fileUrl(detail.venue.coverPhotoUrl)} alt="" />}
+        {detail.venue?.coverPhotoUrl && <img src={mediaUrl(detail.venue.coverPhotoUrl, 'sm')} alt="" decoding="async" />}
         <div className="mb-venue-review__form">
           <strong>{detail.venue?.name}</strong>
           <span className="mb-hint">Saha, soyunma odası, hizmet… Diğer oyunculara yol göster.</span>
@@ -455,7 +372,7 @@ function ReservationCard({ d, onMessageOwner }) {
   return (
     <Card className="mb-booking" title="Rezervasyon">
       <button type="button" className="mb-booking__head" onClick={() => navigate(`/venues/${v.stadiumId}`)}>
-        {v.coverPhotoUrl ? <img src={fileUrl(v.coverPhotoUrl)} alt="" /> : <span className="mb-booking__ph mb-pitch-bg" />}
+        {v.coverPhotoUrl ? <img src={mediaUrl(v.coverPhotoUrl, 'sm')} alt="" loading="lazy" decoding="async" /> : <span className="mb-booking__ph mb-pitch-bg" />}
         <span className="mb-booking__head-text">
           <strong>{v.name}</strong>
           <span>
@@ -538,6 +455,8 @@ function MatchDetails() {
   const [myTeams, setMyTeams] = useState([]);
   const [claimTeamId, setClaimTeamId] = useState();
   const [claiming, setClaiming] = useState(false);
+  // Misafir oyuncu modalı: { open, guest?, side? }
+  const [guestModal, setGuestModal] = useState({ open: false });
 
   const load = useCallback(async () => {
     try {
@@ -603,11 +522,7 @@ function MatchDetails() {
   };
 
   if (loading) {
-    return (
-      <Card>
-        <Skeleton active paragraph={{ rows: 10 }} />
-      </Card>
-    );
+    return <PageLoader caption="Maç yükleniyor…" />;
   }
   if (notFound || !detail) {
     return <Result status="404" title="Maç bulunamadı" extra={<Button type="primary" onClick={() => navigate('/home')}>Fikstüre dön</Button>} />;
@@ -617,7 +532,14 @@ function MatchDetails() {
   const date = dayjs(d.matchDate);
   const going = d.participants.filter((p) => p.status === PARTICIPANT_STATUS.GOING);
   const waitlist = d.participants.filter((p) => p.status === PARTICIPANT_STATUS.WAITLIST);
+  const guests = d.guests || [];
+  // Kadro sayıları misafirleri de kapsar (Going + misafir)
+  const rosterCount = going.length + guests.length;
+  const perSide = Math.max(Math.ceil(d.capacity / 2), 1);
+  const homeRoster = sideRoster(d, SIDE.HOME);
+  const awayRoster = sideRoster(d, SIDE.AWAY);
   const closed = d.isPast || d.isActive === 3;
+  const canManageGuests = !!d.canManage && !closed;
   const canJoin = !closed && !d.myStatus;
   const hoursLeft = date.diff(dayjs(), 'hour');
 
@@ -638,6 +560,14 @@ function MatchDetails() {
   const swap = (p) =>
     run(() => matchesApi.setSide(d.matchId, p.player.playerId, p.side === SIDE.AWAY ? SIDE.HOME : SIDE.AWAY), 'Oyuncunun takımı değişti.');
   const msg = (player) => openMessages({ type: 'user', data: player });
+  const openGuestModal = (side, guest) => setGuestModal({ open: true, side, guest });
+  const editGuest = (g) => openGuestModal(undefined, g);
+  const moveGuest = (g) =>
+    run(
+      () => matchesApi.updateGuest(g.guestId, g.side === SIDE.AWAY ? SIDE.HOME : SIDE.AWAY, g.name, g.note || undefined),
+      `${g.name} diğer takıma geçti.`
+    );
+  const removeGuest = (g) => run(() => matchesApi.removeGuest(g.guestId), `${g.name} kadrodan çıkarıldı.`);
   const messageOwner = (ownerName) =>
     openMessages({ type: 'user', data: { playerId: d.ownerPlayerId, playerName: ownerName || d.venue?.name || 'İşletme', userName: 'işletme' } });
   const seekingOpponent = d.lookingForOpponent && !d.awayTeam && !closed;
@@ -683,7 +613,7 @@ function MatchDetails() {
   } else if (canJoin) {
     primaryAction = (
       <Button type="primary" size="large" icon={<UserAddOutlined />} loading={busy} onClick={join}>
-        {going.length < d.capacity ? 'Maça katıl' : 'Yedeğe yazıl'}
+        {rosterCount < d.capacity ? 'Maça katıl' : 'Yedeğe yazıl'}
       </Button>
     );
   }
@@ -714,7 +644,7 @@ function MatchDetails() {
 
         <div className="mb-scoreboard">
           <div className="mb-scoreboard__team is-home">
-            <span>{d.homeTeam ? 'Ev sahibi' : `${going.filter((p) => p.side !== SIDE.AWAY).length} oyuncu`}</span>
+            <span>{d.homeTeam ? 'Ev sahibi' : `${homeRoster.count} oyuncu`}</span>
             <strong>{d.homeTeam ? d.homeTeam.teamName : 'Ev sahibi'}</strong>
           </div>
           <div className="mb-scoreboard__center">
@@ -747,7 +677,7 @@ function MatchDetails() {
               </>
             ) : (
               <>
-                <span>{going.filter((p) => p.side === SIDE.AWAY).length} oyuncu</span>
+                <span>{awayRoster.count} oyuncu</span>
                 <strong>Deplasman</strong>
               </>
             )}
@@ -755,7 +685,7 @@ function MatchDetails() {
         </div>
 
         <div className="mb-match-hero__bottom">
-          <CapacityRing going={going.length} capacity={d.capacity} size={48} />
+          <CapacityRing going={rosterCount} capacity={d.capacity} size={48} />
           <div className="mb-match-hero__actions">
             <Tooltip title={d.likedByMe ? 'Beğenmekten vazgeç' : 'Beğen'}>
               <Button size="large" className="mb-ghost-btn" icon={d.likedByMe ? <HeartFilled style={{ color: 'var(--mb-danger)' }} /> : <HeartOutlined />} onClick={toggleLike}>
@@ -807,11 +737,26 @@ function MatchDetails() {
         items={[
           {
             key: 'lineup',
-            label: `Kadro (${going.length})`,
+            label: `Kadro (${rosterCount})`,
             children: (
               <Row gutter={[20, 20]}>
                 <Col xs={24} xl={17}>
-                  <Pitch detail={d} me={me} onSwap={swap} onMessage={msg} onJoin={join} canJoin={canJoin} />
+                  <Pitch
+                    detail={d}
+                    me={me}
+                    perSide={perSide}
+                    homeLabel={homeName(d)}
+                    awayLabel={awayName(d)}
+                    closed={closed}
+                    canJoin={canJoin}
+                    onJoin={join}
+                    onSwap={swap}
+                    onMessage={msg}
+                    onAddGuest={(side) => openGuestModal(side)}
+                    onEditGuest={editGuest}
+                    onMoveGuest={moveGuest}
+                    onRemoveGuest={removeGuest}
+                  />
                 </Col>
                 <Col xs={24} xl={7}>
                   <Card title={`Yedekler (${waitlist.length})`} size="small">
@@ -828,10 +773,48 @@ function MatchDetails() {
                       </ol>
                     )}
                   </Card>
+                  {guests.length > 0 && (
+                    <Card title={`Misafir oyuncular (${guests.length})`} size="small" className="mb-guest-card">
+                      <ul className="mb-guest-list">
+                        {[...homeRoster.guests, ...awayRoster.guests].map((g) => (
+                          <li key={g.guestId}>
+                            <span className={`mb-guest-list__avatar is-${g.side === SIDE.AWAY ? 'away' : 'home'}`}>{guestInitials(g.name)}</span>
+                            <span className="mb-guest-list__text">
+                              <strong>{g.name}</strong>
+                              <small>
+                                {g.side === SIDE.AWAY ? awayName(d) : homeName(d)}
+                                {g.note ? ` · ${g.note}` : ''}
+                              </small>
+                            </span>
+                            {canManageGuests && (
+                              <span className="mb-guest-list__actions">
+                                <Tooltip title="Düzenle">
+                                  <Button type="text" size="small" icon={<EditOutlined />} onClick={() => editGuest(g)} aria-label="Düzenle" />
+                                </Tooltip>
+                                <Popconfirm
+                                  title="Misafir oyuncuyu kaldır"
+                                  description={`${g.name} kadrodan çıkarılacak.`}
+                                  okText="Kaldır"
+                                  okButtonProps={{ danger: true }}
+                                  cancelText="Vazgeç"
+                                  onConfirm={() => removeGuest(g)}
+                                >
+                                  <Button type="text" size="small" danger icon={<DeleteOutlined />} aria-label="Kaldır" />
+                                </Popconfirm>
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  )}
                   <div className="mb-legend">
                     <span><CheckCircleFilled style={{ color: 'var(--mb-pitch)' }} /> Katılımını onayladı</span>
                     <span><CrownFilled style={{ color: 'var(--mb-gold)' }} /> Maçın oyuncusu</span>
+                    <span><span className="mb-legend__guest" /> Misafir oyuncu (uygulamada hesabı yok)</span>
+                    <span><span className="mb-legend__pos">KL</span> Kaleci · DF Defans · OS Orta saha · FV Forvet</span>
                     {d.canManage && <span><SwapOutlined /> Oyuncuya tıklayıp takımını değiştirebilirsin</span>}
+                    {canManageGuests && <span><UserAddOutlined /> Boş yere tıklayıp isimle oyuncu ekleyebilirsin</span>}
                   </div>
                 </Col>
               </Row>
@@ -927,6 +910,22 @@ function MatchDetails() {
           </Empty>
         )}
       </Modal>
+
+      <GuestModal
+        open={guestModal.open}
+        matchId={d.matchId}
+        guest={guestModal.guest}
+        side={guestModal.side}
+        preferredSide={d.mySide || SIDE.HOME}
+        free={{
+          [SIDE.HOME]: Math.max(perSide - homeRoster.count, 0),
+          [SIDE.AWAY]: Math.max(perSide - awayRoster.count, 0),
+        }}
+        homeLabel={homeName(d)}
+        awayLabel={awayName(d)}
+        onClose={() => setGuestModal((m) => ({ ...m, open: false }))}
+        onSaved={load}
+      />
 
       <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} kind="match" targetId={d.matchId} title={d.matchName} />
     </>

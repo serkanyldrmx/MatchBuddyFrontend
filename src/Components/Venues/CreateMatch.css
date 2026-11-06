@@ -444,3 +444,51 @@
   font-weight: 800;
   text-transform: uppercase;
 }
+
+/* =========================================================
+   Telefon
+   ========================================================= */
+@media (max-width: 767px) {
+  .mb-cm-steps.ant-steps {
+    margin-bottom: 16px;
+    padding: 12px 4px;
+  }
+  .mb-cm-steps .ant-steps-item-title {
+    font-size: 13px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+  .mb-cm-steps.ant-steps-label-vertical .ant-steps-item-content {
+    width: auto;
+    max-width: 104px;
+    margin-inline: auto;
+  }
+  .mb-cm-nav {
+    flex-wrap: wrap;
+  }
+  .mb-cm-nav > .ant-btn-primary {
+    flex: 1 1 auto;
+  }
+  .mb-cm-venue img {
+    width: 76px;
+  }
+  .mb-cm-extra {
+    padding: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .mb-cm-extra__text {
+    min-width: 0;
+    flex: 1 1 160px;
+  }
+  .mb-cm-review strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .mb-cm-sticky {
+    position: static;
+  }
+  .mb-receipt {
+    padding: 16px;
+  }
+}

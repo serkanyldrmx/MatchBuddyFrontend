@@ -1,7 +1,9 @@
 import React from 'react';
 import { Avatar, Empty, Progress, Typography } from 'antd';
-import { fileUrl, initials } from '../utils/format';
+import { initials, mediaUrl } from '../utils/format';
 import './common.css';
+
+export { default as BallLoader, PageLoader } from './BallLoader';
 
 const { Title, Text } = Typography;
 
@@ -25,9 +27,9 @@ export function PageHeader({ title, subtitle, extra, icon, eyebrow }) {
   );
 }
 
-/** Oyuncu avatarı: resim varsa resim, yoksa baş harfler */
+/** Oyuncu avatarı: resim varsa resim, yoksa baş harfler (küçük avatarlarda sm, ≥ 96 px'te md boyu) */
 export function PlayerAvatar({ player, size = 40, ...rest }) {
-  const src = fileUrl(player?.profilePictureUrl);
+  const src = mediaUrl(player?.profilePictureUrl, typeof size === 'number' && size >= 96 ? 'md' : 'sm');
   return (
     <Avatar size={size} src={src} className="mb-avatar" {...rest}>
       {!src && initials(player)}

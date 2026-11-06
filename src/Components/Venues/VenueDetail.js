@@ -20,7 +20,7 @@ import dayjs from 'dayjs';
 import { AMENITIES, contractDayIndex, DAYS, formatPrice, maskToDays, SURFACE, venuesApi } from '../../api/venues';
 import { useMessages } from '../../messaging/MessagesContext';
 import { EmptyState, PlayerAvatar } from '../../ui';
-import { apiErrorMessage, fileUrl, formatDate, fromNow } from '../../utils/format';
+import { apiErrorMessage, formatDate, fromNow, mediaUrl } from '../../utils/format';
 import { PlayerLink } from '../Social/FollowButton';
 import SlotPicker, { DateStrip } from './SlotPicker';
 import { AMENITY_ICONS, directionsUrl, markerIcon, parseLocation, TILE_ATTR, TILE_URL, VenueRating } from './Venues';
@@ -149,7 +149,7 @@ export default function VenueDetail() {
             {photos.length ? (
               <>
                 <div className="mb-vd-gallery__cover">
-                  <Image src={fileUrl(photos[0].url)} alt={v.name} />
+                  <Image src={mediaUrl(photos[0].url, 'lg')} preview={{ src: mediaUrl(photos[0].url, 'lg') }} alt={v.name} decoding="async" />
                   {v.hasActiveCampaign && (
                     <span className="mb-ribbon">
                       <FireOutlined /> Kampanya
@@ -160,14 +160,14 @@ export default function VenueDetail() {
                   <div className="mb-vd-gallery__thumbs">
                     {photos.slice(1, 5).map((p, i) => (
                       <div key={p.photoId || p.url} className="mb-vd-gallery__thumb">
-                        <Image src={fileUrl(p.url)} alt="" />
+                        <Image src={mediaUrl(p.url, 'sm')} preview={{ src: mediaUrl(p.url, 'lg') }} alt="" loading="lazy" decoding="async" />
                         {i === 3 && photos.length > 5 && <span className="mb-vd-gallery__more">+{photos.length - 5}</span>}
                       </div>
                     ))}
                     {/* Kalan fotoğraflar önizleme galerisinde görünsün */}
                     <div style={{ display: 'none' }}>
                       {photos.slice(5).map((p) => (
-                        <Image key={p.photoId || p.url} src={fileUrl(p.url)} />
+                        <Image key={p.photoId || p.url} src={mediaUrl(p.url, 'sm')} preview={{ src: mediaUrl(p.url, 'lg') }} loading="lazy" decoding="async" />
                       ))}
                     </div>
                   </div>

@@ -55,6 +55,62 @@ const activeKey = (path) => {
   return MENU.find((m) => p === m.key.toLowerCase() || p.startsWith(`${m.key.toLowerCase()}/`))?.key;
 };
 
+/** Uygulama kabukları açıkken body'ye sınıf ekler: telefon için global kurallar (mobile.css) giriş ekranlarına dokunmaz */
+export function useAppBodyClass() {
+  useEffect(() => {
+    document.body.classList.add('mb-app');
+    return () => document.body.classList.remove('mb-app');
+  }, []);
+}
+
+/** Telefonda alt sekme çubuğu: Maçlar · Akış · (+) Maç oluştur · Mesajlar · Profil */
+const TAB_PATHS = {
+  home: ['/home', '/match-details'],
+  feed: ['/feed'],
+  profile: ['/user', '/userupdate'],
+};
+const tabActive = (path, key) => TAB_PATHS[key].some((p) => path === p || path.startsWith(`${p}/`));
+
+function BottomTabBar({ hidden }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { openMessages, isOpen } = useMessages();
+  const path = location.pathname.toLowerCase();
+  const tab = (key, to, icon, label) => (
+    <button
+      type="button"
+      className={`mb-tabbar__item ${tabActive(path, key) ? 'is-active' : ''}`}
+      aria-current={tabActive(path, key) ? 'page' : undefined}
+      onClick={() => navigate(to)}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+  return (
+    <nav className={`mb-tabbar ${hidden ? 'is-hidden' : ''}`} aria-label="Alt menü">
+      {tab('home', '/home', <HomeOutlined />, 'Maçlar')}
+      {tab('feed', '/feed', <ThunderboltOutlined />, 'Akış')}
+      <button
+        type="button"
+        className={`mb-tabbar__create ${path.startsWith('/matches/new') ? 'is-active' : ''}`}
+        onClick={() => navigate('/matches/new')}
+        aria-label="Maç oluştur"
+      >
+        <span className="mb-tabbar__plus">
+          <PlusOutlined />
+        </span>
+        <span>Maç kur</span>
+      </button>
+      <button type="button" className={`mb-tabbar__item ${isOpen ? 'is-active' : ''}`} onClick={() => openMessages()}>
+        <MessageOutlined />
+        <span>Mesajlar</span>
+      </button>
+      {tab('profile', '/user', <UserOutlined />, 'Profil')}
+    </nav>
+  );
+}
+
 export function useCurrentUser() {
   const [user, setUser] = useState(getCurrentUser);
   useEffect(() => {
@@ -69,16 +125,27 @@ export function useCurrentUser() {
   return user;
 }
 
-export function Brand({ to = '/home', badge }) {
+/**
+ * Logo + MATCHBUDDY yazısı. variant="header": telefon/tablet üst barında kompakt sürüm;
+ * markOnly: sadece logo kutusu (yer dar olduğunda, ör. işletme panelinde tesis adının yanında)
+ */
+export function Brand({ to = '/home', badge, variant, markOnly }) {
+  const header = variant === 'header';
   return (
-    <Link to={to} className="mb-brand">
+    <Link
+      to={to}
+      className={`mb-brand${header ? ' mb-brand--header' : ''}${markOnly ? ' mb-brand--mark-only' : ''}`}
+      aria-label={header ? 'MatchBuddy ana sayfa' : undefined}
+    >
       <span className="mb-brand__mark">
         <img src={Logo} alt="" />
       </span>
-      <span className="mb-brand__name">
-        Match<em>Buddy</em>
-      </span>
-      {badge && <span className="mb-brand__badge">{badge}</span>}
+      {!markOnly && (
+        <span className="mb-brand__name">
+          Match<em>Buddy</em>
+        </span>
+      )}
+      {badge && !header && <span className="mb-brand__badge">{badge}</span>}
     </Link>
   );
 }
@@ -102,9 +169,12 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.lg;
+  // Alt sekme çubuğu sadece telefonlarda (< 768 px)
+  const isPhone = screens.md === false;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
-  const { openMessages } = useMessages();
+  const { openMessages, isOpen: messagesOpen } = useMessages();
+  useAppBodyClass();
 
   // Eski /chat bağlantısı: mesaj panelini aç
   useEffect(() => {
@@ -148,7 +218,7 @@ export default function AppLayout() {
   };
 
   return (
-    <Layout className="mb-shell">
+    <Layout className={`mb-shell ${isPhone ? 'has-tabbar' : ''}`}>
       {!isMobile && (
         <Sider width={240} className="mb-sider">
           <Brand />
@@ -163,6 +233,7 @@ export default function AppLayout() {
           onClose={() => setMobileNavOpen(false)}
           width={260}
           closable={false}
+          rootClassName="mb-nav-drawer"
           styles={{ body: { padding: 0, background: '#05080e' } }}
         >
           <Brand />
@@ -174,7 +245,10 @@ export default function AppLayout() {
         <Header className="mb-header">
           <div className="mb-header__left">
             {isMobile ? (
-              <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />
+              <>
+                <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />
+                <Brand variant="header" />
+              </>
             ) : (
               <span className="mb-header__greeting">
                 Hoş geldin, <strong>{user?.playerName}</strong> · Bugün sahada mısın?
@@ -182,14 +256,16 @@ export default function AppLayout() {
             )}
           </div>
           <div className="mb-header__right">
-            <Tooltip title="Mesajlar">
-              <Button
-                className="mb-icon-btn"
-                icon={<MessageOutlined />}
-                onClick={() => openMessages()}
-                aria-label="Mesajlar"
-              />
-            </Tooltip>
+            {!isPhone && (
+              <Tooltip title="Mesajlar">
+                <Button
+                  className="mb-icon-btn"
+                  icon={<MessageOutlined />}
+                  onClick={() => openMessages()}
+                  aria-label="Mesajlar"
+                />
+              </Tooltip>
+            )}
             <InvitesButton />
             <NotificationBell />
             <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
@@ -211,6 +287,7 @@ export default function AppLayout() {
           </div>
         </Content>
       </Layout>
+      {isPhone && <BottomTabBar hidden={messagesOpen || mobileNavOpen} />}
     </Layout>
   );
 }

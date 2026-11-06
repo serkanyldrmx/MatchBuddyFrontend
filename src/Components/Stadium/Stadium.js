@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
-import { Alert, App, Button, Card, Col, Descriptions, Input, List, Row, Skeleton, Space, Switch, Tag, Tooltip, Typography } from 'antd';
+import { Alert, App, Button, Card, Col, Descriptions, Grid, Input, List, Row, Skeleton, Space, Switch, Tag, Tooltip, Typography } from 'antd';
 import { ClockCircleOutlined, EnvironmentOutlined, PlusOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons';
 import { api } from '../../api/config';
 import { adminVenuesApi } from '../../api/venues';
@@ -82,6 +82,8 @@ function Routing({ from, to }) {
 function Stadium() {
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isPhone = Grid.useBreakpoint().md === false;
+  const mapCardRef = useRef(null);
   const [userPosition, setUserPosition] = useState(null);
   const [stadiums, setStadiums] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +213,11 @@ function Stadium() {
                     <List.Item
                       key={s.stadiumId}
                       className={`mb-stadium-item${s.stadiumId === selectedId ? ' is-active' : ''}`}
-                      onClick={() => setSelectedId(s.stadiumId)}
+                      onClick={() => {
+                        setSelectedId(s.stadiumId);
+                        // Telefonda harita listenin altında kalır; seçimi görmek için haritaya kaydır
+                        if (isPhone) mapCardRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                      }}
                     >
                       <List.Item.Meta
                         title={s.stadiumName}
@@ -241,7 +247,7 @@ function Stadium() {
         </Col>
         <Col xs={24} lg={15}>
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
-            <Card bordered={false} styles={{ body: { padding: 8 } }}>
+            <Card bordered={false} styles={{ body: { padding: 8 } }} ref={mapCardRef}>
               <MapContainer center={initialCenter} zoom={userPosition ? 13 : 6} className="mb-map">
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

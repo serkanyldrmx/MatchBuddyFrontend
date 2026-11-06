@@ -157,3 +157,19 @@
     width: 100%;
   }
 }
+
+@media (max-width: 767px) {
+  .mb-friends-toolbar .ant-card-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mb-friends-toolbar__filter.ant-input-affix-wrapper {
+    width: 100%;
+  }
+  .mb-friend-card__actions {
+    flex-wrap: wrap;
+  }
+  .mb-friend-card__actions > .ant-btn {
+    flex: 1 1 auto;
+  }
+}

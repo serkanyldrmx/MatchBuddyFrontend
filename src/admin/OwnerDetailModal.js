@@ -6,6 +6,7 @@ import {
   Col,
   Descriptions,
   Empty,
+  Grid,
   Image,
   Modal,
   Popconfirm,
@@ -29,7 +30,7 @@ import {
 } from '@ant-design/icons';
 import { adminVenuesApi, AMENITIES, DAYS, formatPrice, maskToDays, SURFACE } from '../api/venues';
 import { Stat } from '../ui';
-import { apiErrorMessage, fileUrl, formatDate, formatDateTime } from '../utils/format';
+import { apiErrorMessage, formatDate, formatDateTime, mediaUrl } from '../utils/format';
 import './OwnerDetailModal.css';
 
 const { Text, Paragraph, Title } = Typography;
@@ -49,8 +50,8 @@ function Copyable({ value, children }) {
   const { message } = App.useApp();
   if (!value) return <Text type="secondary">-</Text>;
   return (
-    <Space size={6}>
-      <span>{children ?? value}</span>
+    <Space size={6} className="mb-od-copyable">
+      <span className="mb-od-copyable__value">{children ?? value}</span>
       <Tooltip title="Kopyala">
         <Button
           type="text"
@@ -75,6 +76,7 @@ function membershipChip(o) {
 /* ---------------- Giriş bilgileri ---------------- */
 function Credentials({ detail }) {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [reset, setReset] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -96,7 +98,7 @@ function Credentials({ detail }) {
       <div className="mb-od-card__title">
         <LockOutlined /> Giriş bilgileri
       </div>
-      <Descriptions column={1} size="small" labelStyle={{ width: 130 }}>
+      <Descriptions column={1} size="small" labelStyle={{ width: isPhone ? 100 : 130 }}>
         <Descriptions.Item label="Kullanıcı adı">
           <Copyable value={detail.owner.userName}>@{detail.owner.userName}</Copyable>
         </Descriptions.Item>
@@ -143,6 +145,7 @@ function Credentials({ detail }) {
 
 /* ---------------- Tesis ---------------- */
 function VenuePanel({ v }) {
+  const isPhone = Grid.useBreakpoint().md === false;
   const am = v.amenities || {};
   const activeAmenities = AMENITIES.filter((a) => am[a.key]);
   const coords = (v.location || '').split(',').map((x) => parseFloat(x));
@@ -178,7 +181,7 @@ function VenuePanel({ v }) {
           <div className="mb-od-photos">
             {v.photos.map((p) => (
               <div key={p.photoId} className={`mb-od-photo ${p.isCover ? 'is-cover' : ''}`}>
-                <Image src={fileUrl(p.url)} alt="" />
+                <Image src={mediaUrl(p.url, 'md')} preview={{ src: mediaUrl(p.url, 'lg') }} alt="" loading="lazy" decoding="async" />
                 {p.isCover && <span className="mb-od-photo__badge">Kapak</span>}
               </div>
             ))}
@@ -241,6 +244,7 @@ function VenuePanel({ v }) {
             size="small"
             rowKey="pitchId"
             pagination={false}
+            scroll={isPhone ? { x: 'max-content' } : undefined}
             dataSource={v.pitches || []}
             locale={{ emptyText: 'Saha yok' }}
             columns={[
@@ -297,6 +301,7 @@ function VenuePanel({ v }) {
 /* ---------------- Pencere ---------------- */
 export default function OwnerDetailModal({ ownerId, open, onClose }) {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -329,7 +334,7 @@ export default function OwnerDetailModal({ ownerId, open, onClose }) {
           {/* Başlık */}
           <div className="mb-od-head">
             <div className="mb-od-head__icon">
-              {venues[0]?.photos?.[0] ? <img src={fileUrl(venues[0].photos[0].url)} alt="" /> : <ShopOutlined />}
+              {venues[0]?.photos?.[0] ? <img src={mediaUrl(venues[0].photos[0].url, 'sm')} alt="" decoding="async" /> : <ShopOutlined />}
             </div>
             <div className="mb-od-head__text">
               <Title level={3} className="mb-od-head__title">
@@ -351,7 +356,7 @@ export default function OwnerDetailModal({ ownerId, open, onClose }) {
                 <div className="mb-od-card__title">
                   <PhoneOutlined /> İletişim
                 </div>
-                <Descriptions column={1} size="small" labelStyle={{ width: 130 }}>
+                <Descriptions column={1} size="small" labelStyle={{ width: isPhone ? 100 : 130 }}>
                   <Descriptions.Item label="Yetkili kişi">{d.owner.contactName || '-'}</Descriptions.Item>
                   <Descriptions.Item label="Telefon">
                     <Copyable value={d.owner.phoneNumber} />

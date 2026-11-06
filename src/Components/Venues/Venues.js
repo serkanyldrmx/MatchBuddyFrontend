@@ -27,7 +27,7 @@ import {
 import dayjs from 'dayjs';
 import { AMENITIES, formatPrice, venuesApi } from '../../api/venues';
 import { EmptyState, PageHeader } from '../../ui';
-import { apiErrorMessage, fileUrl } from '../../utils/format';
+import { apiErrorMessage, mediaUrl } from '../../utils/format';
 import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
 import SelectedLocationIcon from '../../images/Vector-Location-PNG-Free-Image.png';
 import './Venues.css';
@@ -139,7 +139,7 @@ function VenueCard({ v, onOpen, showFree }) {
   return (
     <article className="mb-venue-card" onClick={onOpen}>
       <div className="mb-venue-card__cover">
-        {v.coverPhotoUrl ? <img src={fileUrl(v.coverPhotoUrl)} alt={v.name} loading="lazy" /> : <div className="mb-venue-card__placeholder mb-pitch-bg" />}
+        {v.coverPhotoUrl ? <img src={mediaUrl(v.coverPhotoUrl, 'md')} alt={v.name} loading="lazy" decoding="async" /> : <div className="mb-venue-card__placeholder mb-pitch-bg" />}
         {v.hasActiveCampaign && (
           <span className="mb-ribbon">
             <FireOutlined /> Kampanya
@@ -282,7 +282,7 @@ export default function Venues() {
             onChange={(e) => setSearch(e.target.value)}
             className="mb-venue-filters__search"
           />
-          <Select allowClear placeholder="Tüm şehirler" value={city} onChange={setCity} options={cities.map((c) => ({ value: c, label: c }))} style={{ minWidth: 160 }} />
+          <Select allowClear placeholder="Tüm şehirler" value={city} onChange={setCity} options={cities.map((c) => ({ value: c, label: c }))} style={{ minWidth: 160 }} className="mb-venue-filters__city" />
           <DatePicker
             value={date}
             onChange={(d) => setDate(d ? d.startOf('day') : null)}
@@ -331,7 +331,8 @@ export default function Venues() {
         )
       ) : (
         <Row gutter={[20, 20]}>
-          <Col xs={24} lg={8}>
+          {/* Telefonda önce harita, sonra liste */}
+          <Col xs={{ span: 24, order: 2 }} lg={{ span: 8, order: 1 }}>
             <Card className="mb-venue-side" styles={{ body: { padding: 12 } }} title={<span><UnorderedListOutlined /> {list.length} tesis</span>}>
               {loading ? (
                 <Skeleton active paragraph={{ rows: 6 }} />
@@ -346,7 +347,7 @@ export default function Venues() {
                       className={`mb-venue-side__item ${selected?.stadiumId === v.stadiumId ? 'is-active' : ''}`}
                       onClick={() => select(v)}
                     >
-                      {v.coverPhotoUrl ? <img src={fileUrl(v.coverPhotoUrl)} alt="" /> : <span className="mb-venue-side__ph mb-pitch-bg" />}
+                      {v.coverPhotoUrl ? <img src={mediaUrl(v.coverPhotoUrl, 'sm')} alt="" loading="lazy" decoding="async" /> : <span className="mb-venue-side__ph mb-pitch-bg" />}
                       <span className="mb-venue-side__text">
                         <strong>{v.name}</strong>
                         <small>{[v.district, v.city].filter(Boolean).join(', ')}</small>
@@ -362,7 +363,7 @@ export default function Venues() {
               )}
             </Card>
           </Col>
-          <Col xs={24} lg={16}>
+          <Col xs={{ span: 24, order: 1 }} lg={{ span: 16, order: 2 }}>
             <Card styles={{ body: { padding: 12 } }}>
               <MapContainer center={userPosition || DEFAULT_CENTER} zoom={userPosition ? 12 : 6} className="mb-venue-map">
                 <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
@@ -394,7 +395,7 @@ export default function Venues() {
 
             {selected && (
               <div className="mb-venue-mapcard">
-                {selected.coverPhotoUrl && <img src={fileUrl(selected.coverPhotoUrl)} alt="" />}
+                {selected.coverPhotoUrl && <img src={mediaUrl(selected.coverPhotoUrl, 'sm')} alt="" decoding="async" />}
                 <div className="mb-venue-mapcard__text">
                   <h3>{selected.name}</h3>
                   <span>{selected.address}</span>

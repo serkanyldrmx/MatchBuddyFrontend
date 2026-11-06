@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { Alert, Button, Card, Col, Progress, Row, Skeleton, Typography } from 'antd';
+import { Alert, Button, Card, Col, Progress, Row, Skeleton, Tag, Typography } from 'antd';
 import {
   AppstoreOutlined,
   CalendarOutlined,
   CheckOutlined,
   CloseOutlined,
   RightOutlined,
+  WalletOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
 import { formatPrice, ownerApi } from '../api/venues';
@@ -15,8 +16,19 @@ import { useOwnerVenue } from '../layout/VenueLayout';
 import { colors } from '../theme/theme';
 import { EmptyState, MatchStatusTag, PageHeader, PlayerAvatar } from '../ui';
 import { formatDate, fromNow, fullName } from '../utils/format';
+import ManualBookingDrawer from './ManualBookingDrawer';
 import ReservationDrawer from './ReservationDrawer';
-import { Stars, WriteButton, extrasText, useOwnerData, useReservationResponder } from './shared';
+import {
+  Stars,
+  WriteButton,
+  asList,
+  extrasText,
+  isManualBooking,
+  normalizeBlock,
+  useOwnerData,
+  useReservationResponder,
+  ymd,
+} from './shared';
 
 const { Text } = Typography;
 
@@ -58,6 +70,19 @@ export default function OwnerDashboard() {
   const { venue, membershipUntil, membershipActive } = useOwnerVenue();
   const { data, loading, error, reload } = useOwnerData((id) => ownerApi.dashboard(id));
   const [selected, setSelected] = useState(null);
+  const [manualSel, setManualSel] = useState(null);
+  // Bugünkü harici rezervasyonlar ve bu ayın finans özeti (hata olursa sayfa yine çalışır)
+  const extra = useOwnerData(async (id) => {
+    const today = dayjs().startOf('day');
+    const [blocks, finance] = await Promise.allSettled([
+      ownerApi.blocks(id, ymd(today), ymd(today.add(1, 'day'))),
+      ownerApi.finance(id, today.year(), today.month() + 1),
+    ]);
+    return {
+      blocks: blocks.status === 'fulfilled' ? asList(blocks.value) : [],
+      finance: finance.status === 'fulfilled' ? finance.value : null,
+    };
+  });
   const responder = useReservationResponder(() => {
     setSelected(null);
     reload(true);
@@ -66,7 +91,19 @@ export default function OwnerDashboard() {
   const missing = (venue?.missing || []).filter(Boolean);
   const d = data || {};
   const pending = d.pending || [];
-  const upcoming = d.upcoming || [];
+  const fin = extra.data?.finance;
+
+  /** Yaklaşan maçlar + bugünün henüz bitmemiş harici rezervasyonları, saate göre */
+  const agenda = useMemo(() => {
+    const now = dayjs();
+    const manual = (extra.data?.blocks || [])
+      .filter((b) => b.slotBlockId != null && isManualBooking(b))
+      .map((b) => normalizeBlock(b))
+      .filter((b) => dayjs(b.start).isSame(now, 'day') && dayjs(b.end).isAfter(now))
+      .map((b) => ({ type: 'manual', key: `b-${b.slotBlockId}`, start: dayjs(b.start), b }));
+    const matches = (d.upcoming || []).map((r) => ({ type: 'match', key: `m-${r.matchId}`, start: dayjs(r.start), r }));
+    return [...matches, ...manual].sort((a, b) => a.start - b.start);
+  }, [d.upcoming, extra.data]);
 
   return (
     <>
@@ -227,48 +264,124 @@ export default function OwnerDashboard() {
         </Col>
 
         <Col xs={24} xl={10}>
-          <Card
-            bordered={false}
-            title="Yaklaşan maçlar"
-            extra={
-              <Button type="link" onClick={() => navigate('/venue/calendar')}>
-                Takvim <RightOutlined />
-              </Button>
-            }
-          >
-            {loading && !data ? (
-              <Skeleton active />
-            ) : upcoming.length === 0 ? (
-              <EmptyState description="Yaklaşan maç bulunmuyor" />
-            ) : (
-              <div className="mb-owner-agenda">
-                {upcoming.map((r) => {
-                  const s = dayjs(r.start);
-                  const today = s.isSame(dayjs(), 'day');
-                  return (
-                    <div key={r.matchId} className="mb-owner-agenda__item" onClick={() => setSelected(r)} role="button" tabIndex={0}>
-                      <div className="mb-owner-agenda__time">
-                        <strong>{s.format('HH:mm')}</strong>
-                        <span>{today ? 'Bugün' : s.format('DD MMM ddd')}</span>
-                      </div>
-                      <div className="mb-owner-agenda__body">
-                        <Text strong ellipsis>
-                          {r.matchName}
-                        </Text>
-                        <span>
-                          {r.pitch?.name} · {r.goingCount ?? 0}/{r.capacity ?? 0} oyuncu
-                        </span>
-                      </div>
-                      <MatchStatusTag status={r.status} />
+          <div className="mb-owner-stack">
+            <Card
+              bordered={false}
+              className="mb-owner-fin-card"
+              title={
+                <span>
+                  <WalletOutlined /> Bu ay · {dayjs().format('MMMM')}
+                </span>
+              }
+              extra={
+                <Button type="link" onClick={() => navigate('/venue/finance')}>
+                  Gelir & Gider <RightOutlined />
+                </Button>
+              }
+            >
+              {extra.loading && !extra.data ? (
+                <Skeleton active paragraph={{ rows: 1 }} title={false} />
+              ) : !fin ? (
+                <Text type="secondary">Finans özeti şu anda alınamadı.</Text>
+              ) : (
+                <>
+                  <div className="mb-owner-fin-rows">
+                    <div className="is-income">
+                      <span>Gelir</span>
+                      <strong>{formatPrice(fin.income?.total ?? 0)}</strong>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
+                    <div className="is-expense">
+                      <span>Gider</span>
+                      <strong>{formatPrice(fin.expenses ?? 0)}</strong>
+                    </div>
+                    <div className={Number(fin.net) < 0 ? 'is-neg' : 'is-income'}>
+                      <span>Net</span>
+                      <strong>{formatPrice(fin.net ?? 0)}</strong>
+                    </div>
+                  </div>
+                  <div className="mb-owner-fin-card__foot">
+                    <span>
+                      {Number(fin.receivable) > 0 ? `Tahsil edilmemiş: ${formatPrice(fin.receivable)}` : 'Tahsil edilmemiş ödeme yok'}
+                    </span>
+                    {Number(fin.expectedIncome) > 0 && <span>Beklenen: {formatPrice(fin.expectedIncome)}</span>}
+                  </div>
+                </>
+              )}
+            </Card>
+            <Card
+              bordered={false}
+              title="Yaklaşan maçlar"
+              extra={
+                <Button type="link" onClick={() => navigate('/venue/calendar')}>
+                  Takvim <RightOutlined />
+                </Button>
+              }
+            >
+              {loading && !data ? (
+                <Skeleton active />
+              ) : agenda.length === 0 ? (
+                <EmptyState description="Yaklaşan maç bulunmuyor" />
+              ) : (
+                <div className="mb-owner-agenda">
+                  {agenda.map(({ type, key, start: s, r, b }) => {
+                    const today = s.isSame(dayjs(), 'day');
+                    if (type === 'manual') {
+                      return (
+                        <div key={key} className="mb-owner-agenda__item is-manual" onClick={() => setManualSel(b)} role="button" tabIndex={0}>
+                          <div className="mb-owner-agenda__time">
+                            <strong>{s.format('HH:mm')}</strong>
+                            <span>Bugün</span>
+                          </div>
+                          <div className="mb-owner-agenda__body">
+                            <Text strong ellipsis>
+                              {b.customerName}
+                              {b.reason ? ` · ${b.reason}` : ''}
+                            </Text>
+                            <span>
+                              {b.pitchName ? `${b.pitchName} · ` : ''}
+                              {formatPrice(b.price)} · {b.isPaid ? 'ödendi' : 'ödeme alınmadı'}
+                            </span>
+                          </div>
+                          <Tag color="processing" bordered={false}>
+                            Harici
+                          </Tag>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={key} className="mb-owner-agenda__item" onClick={() => setSelected(r)} role="button" tabIndex={0}>
+                        <div className="mb-owner-agenda__time">
+                          <strong>{s.format('HH:mm')}</strong>
+                          <span>{today ? 'Bugün' : s.format('DD MMM ddd')}</span>
+                        </div>
+                        <div className="mb-owner-agenda__body">
+                          <Text strong ellipsis>
+                            {r.matchName}
+                          </Text>
+                          <span>
+                            {r.pitch?.name} · {r.goingCount ?? 0}/{r.capacity ?? 0} oyuncu
+                          </span>
+                        </div>
+                        <MatchStatusTag status={r.status} />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+          </div>
         </Col>
       </Row>
 
+      <ManualBookingDrawer
+        open={Boolean(manualSel)}
+        booking={manualSel}
+        onClose={() => setManualSel(null)}
+        onChanged={(b) => {
+          setManualSel(b);
+          extra.reload(true);
+        }}
+      />
       <ReservationDrawer open={Boolean(selected)} reservation={selected} onClose={() => setSelected(null)} responder={responder} />
       {responder.modal}
     </>

@@ -44,14 +44,14 @@ export function PlayerPickerTable({ players, selected, onChange, loading, height
             render: (_, p) => (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <PlayerAvatar player={p} size={32} />
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3, minWidth: 0 }}>
                   <Text>{fullName(p)}</Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>@{p.userName}</Text>
                 </div>
               </div>
             ),
           },
-          { title: 'Yaş', dataIndex: 'age', width: 70, sorter: (a, b) => a.age - b.age },
+          { title: 'Yaş', dataIndex: 'age', width: 70, sorter: (a, b) => a.age - b.age, responsive: ['sm'] },
           {
             title: 'Puan',
             dataIndex: 'userScore',

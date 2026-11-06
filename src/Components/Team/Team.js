@@ -186,7 +186,7 @@ const Team = () => {
                 </div>
 
                 {canManage(team) && (
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="mb-team-tile__actions" style={{ display: 'flex', gap: 8 }}>
                     <Button block icon={<EditOutlined />} onClick={() => setEditing(team)}>
                       Kadroyu düzenle
                     </Button>

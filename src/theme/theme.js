@@ -89,5 +89,39 @@ export const appTheme = {
     Tag: {
       defaultBg: colors.surface2,
     },
+    // Spin göstergesi futbol topu (src/ui/BallLoader): kutu boyutları top boyutlarıyla eşleşir
+    Spin: {
+      dotSizeSM: 26,
+      dotSize: 54,
+      dotSizeLG: 96,
+    },
+  },
+};
+
+// Telefon (< 768 px): parmakla dokunmaya uygun, en az 44 px yüksekliğinde kontroller.
+// Masaüstü görünümü değişmesin diye sadece App.js'te md kırılımının altında kullanılır.
+export const mobileTheme = {
+  ...appTheme,
+  token: {
+    ...appTheme.token,
+    controlHeight: 44,
+    controlHeightLG: 50,
+    controlHeightSM: 30,
+  },
+  components: {
+    ...appTheme.components,
+    Layout: {
+      ...appTheme.components.Layout,
+      headerHeight: 60,
+      headerPadding: '0 12px',
+    },
+    // iOS Safari 16px'ten küçük yazılı alana odaklanınca sayfayı yakınlaştırır
+    Input: { inputFontSize: 16 },
+    InputNumber: { inputFontSize: 16 },
+    DatePicker: { fontSize: 16 },
+    Mentions: { fontSize: 16 },
+    Select: { fontSize: 16 },
+    Cascader: { fontSize: 16 },
+    TreeSelect: { fontSize: 16 },
   },
 };

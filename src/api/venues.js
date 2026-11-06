@@ -11,6 +11,10 @@ export const daysToMask = (indexes) => indexes.reduce((m, i) => m | (1 << i), 0)
 /** dayjs().day(): 0 = Pazar → sözleşme indeksine (0 = Pazartesi) çevir */
 export const contractDayIndex = (d) => (d.day() + 6) % 7;
 
+/** SlotBlocks.Kind */
+export const BLOCK_KIND = { CLOSED: 0, MANUAL_BOOKING: 1 };
+export const EXPENSE_CATEGORIES = ['Personel', 'Kira', 'Elektrik', 'Su', 'Doğalgaz', 'Bakım-onarım', 'Malzeme', 'Vergi', 'Reklam', 'Diğer'];
+
 export const AMENITIES = [
   { key: 'camera', label: 'Maç kaydı (kamera)' },
   { key: 'cleatRental', label: 'Krampon kiralama' },
@@ -70,6 +74,12 @@ export const ownerApi = {
   blocks: (stadiumId, from, to) => api.get('/api/Owner/Blocks', { params: { stadiumId, from, to } }).then(data),
   saveBlock: (payload) => api.post('/api/Owner/Blocks/Save', payload).then(data),
   deleteBlock: (slotBlockId) => api.post('/api/Owner/Blocks/Delete', { slotBlockId }).then(data),
+  setBlockPaid: (slotBlockId, isPaid) => api.post('/api/Owner/Blocks/SetPaid', { slotBlockId, isPaid }).then(data),
+  quote: (pitchId, start, durationMinutes) => api.post('/api/Owner/Quote', { pitchId, start, durationMinutes }).then(data),
+  expenses: (stadiumId, from, to) => api.get('/api/Owner/Expenses', { params: { stadiumId, from, to } }).then(data),
+  saveExpense: (payload) => api.post('/api/Owner/Expenses/Save', payload).then(data),
+  deleteExpense: (expenseId) => api.post('/api/Owner/Expenses/Delete', { expenseId }).then(data),
+  finance: (stadiumId, year, month) => api.get('/api/Owner/Finance', { params: { stadiumId, year, month } }).then(data),
   reviews: (stadiumId) => api.get('/api/Owner/Reviews', { params: { stadiumId } }).then(data),
   reply: (reviewId, reply) => api.post('/api/Owner/Reviews/Reply', { reviewId, reply }).then(data),
 };

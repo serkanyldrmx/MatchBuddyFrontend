@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { Alert, App, Button, Card, Checkbox, Col, Form, InputNumber, Modal, Row, Select, Skeleton, Space, Switch, Table, TimePicker, Tooltip, Typography } from 'antd';
+import { Alert, App, Button, Card, Checkbox, Col, Form, Grid, InputNumber, Modal, Row, Select, Skeleton, Space, Switch, Table, TimePicker, Tooltip, Typography } from 'antd';
 import { ClockCircleOutlined, DeleteOutlined, EditOutlined, PlusOutlined, SaveOutlined, TagsOutlined } from '@ant-design/icons';
 import { DAYS, DAYS_SHORT, daysToMask, formatPrice, maskToDays, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
@@ -49,6 +49,9 @@ export default function OwnerPricing() {
   const [savingRule, setSavingRule] = useState(false);
   const [previewPitch, setPreviewPitch] = useState(null);
   const [form] = Form.useForm();
+  // Telefonda kart başlığındaki ana aksiyonlar tam boy (44px) dokunma alanı alır
+  const isPhone = Grid.useBreakpoint().md === false;
+  const headBtnSize = isPhone ? 'middle' : 'small';
 
   useEffect(() => {
     if (data) {
@@ -211,7 +214,7 @@ export default function OwnerPricing() {
             bordered={false}
             title="Çalışma saatleri"
             extra={
-              <WriteButton type="primary" size="small" icon={<SaveOutlined />} onClick={saveHours} loading={savingHours} disabled={!hoursDirty}>
+              <WriteButton type="primary" size={headBtnSize} icon={<SaveOutlined />} onClick={saveHours} loading={savingHours} disabled={!hoursDirty}>
                 Kaydet
               </WriteButton>
             }
@@ -283,7 +286,7 @@ export default function OwnerPricing() {
             bordered={false}
             title="Fiyat kuralları"
             extra={
-              <WriteButton size="small" type="primary" icon={<PlusOutlined />} onClick={() => openRule(null)} disabled={!pitches.length}>
+              <WriteButton size={headBtnSize} type="primary" icon={<PlusOutlined />} onClick={() => openRule(null)} disabled={!pitches.length}>
                 Kural ekle
               </WriteButton>
             }
@@ -319,7 +322,14 @@ export default function OwnerPricing() {
             ) : (
               <>
                 <div className="mb-owner-heat-scroll">
-                  <div className="mb-owner-heat" style={{ gridTemplateColumns: `72px repeat(${preview.hours.length}, minmax(52px, 1fr))` }}>
+                  <div
+                    className="mb-owner-heat"
+                    style={{
+                      gridTemplateColumns: isPhone
+                        ? `40px repeat(${preview.hours.length}, minmax(44px, 1fr))`
+                        : `72px repeat(${preview.hours.length}, minmax(52px, 1fr))`,
+                    }}
+                  >
                     <span />
                     {preview.hours.map((h) => (
                       <span key={h} className="mb-owner-heat__hour">
@@ -407,12 +417,12 @@ export default function OwnerPricing() {
             </Col>
           </Row>
           <Row gutter={12}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="pitchId" label="Saha">
                 <Select allowClear placeholder="Tüm sahalar" options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="pricePerHour" label="Saatlik fiyat" rules={[{ required: true, message: 'Fiyat girin.' }]}>
                 <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
               </Form.Item>

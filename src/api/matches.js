@@ -18,6 +18,10 @@ export const matchesApi = {
   ratePlayers: (matchId, ratings) => api.post('/api/Match/RatePlayers', { matchId, ratings }).then((r) => r.data),
   toggleLike: (matchId) => api.post('/api/Match/ToggleLike', { matchId }).then((r) => r.data),
   remove: (matchId) => api.post('/api/Match/DeleteMatch', { matchId }).then((r) => r.data),
+  // Misafir oyuncular (uygulamayı kullanmayan kişiler) — sadece maçı yöneten
+  addGuest: (matchId, side, name, note) => api.post('/api/Match/AddGuest', { matchId, side, name, note }).then((r) => r.data),
+  updateGuest: (guestId, side, name, note) => api.post('/api/Match/UpdateGuest', { guestId, side, name, note }).then((r) => r.data),
+  removeGuest: (guestId) => api.post('/api/Match/RemoveGuest', { guestId }).then((r) => r.data),
 };
 
 export const playersApi = {

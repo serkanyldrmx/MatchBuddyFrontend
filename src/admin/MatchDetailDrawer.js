@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { App, Button, Card, Col, Descriptions, Drawer, List, Popconfirm, Row, Skeleton, Space, Tag, Typography } from 'antd';
+import { App, Button, Card, Col, Descriptions, Drawer, Grid, List, Popconfirm, Row, Skeleton, Space, Tag, Typography } from 'antd';
 import { CheckOutlined, CloseOutlined, StarFilled, TeamOutlined } from '@ant-design/icons';
 import { api } from '../api/config';
 import { SURFACE, formatPrice } from '../api/venues';
 import { EmptyState, MatchStatusTag, PlayerAvatar } from '../ui';
 import { apiErrorMessage, formatDateTime, fromNow, fullName, isPast } from '../utils/format';
+import './AdminResponsive.css';
 
 const { Text, Paragraph } = Typography;
 
@@ -29,6 +30,7 @@ export function groupTeams(rows) {
  */
 export default function MatchDetailDrawer({ match, stadiumName, open, onClose, onStatusChange, actionLoading }) {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +55,7 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
   const footer = useMemo(() => {
     if (!canDecide) return null;
     return (
-      <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+      <Space style={{ width: '100%', justifyContent: 'flex-end' }} className={isPhone ? 'mb-admin-drawer-actions' : undefined}>
         <Popconfirm
           title="Admin olarak reddedilsin mi?"
           description={OVERRIDE_WARNING}
@@ -63,7 +65,7 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
           onConfirm={() => onStatusChange(match.matchId, 3)}
         >
           <Button danger icon={<CloseOutlined />} loading={actionLoading === 3}>
-            Admin olarak reddet
+            {isPhone ? 'Reddet' : 'Admin olarak reddet'}
           </Button>
         </Popconfirm>
         <Popconfirm
@@ -74,18 +76,18 @@ export default function MatchDetailDrawer({ match, stadiumName, open, onClose, o
           onConfirm={() => onStatusChange(match.matchId, 2)}
         >
           <Button type="primary" icon={<CheckOutlined />} loading={actionLoading === 2}>
-            Admin olarak onayla
+            {isPhone ? 'Onayla' : 'Admin olarak onayla'}
           </Button>
         </Popconfirm>
       </Space>
     );
-  }, [canDecide, match, onStatusChange, actionLoading]);
+  }, [canDecide, match, onStatusChange, actionLoading, isPhone]);
 
   return (
     <Drawer title={match?.matchName || 'Maç detayı'} width={520} open={open} onClose={onClose} footer={footer} destroyOnClose>
       {match && (
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
-          <Descriptions column={1} size="small" bordered>
+          <Descriptions column={1} size="small" bordered labelStyle={isPhone ? { width: 110 } : undefined}>
             <Descriptions.Item label="Durum">
               <Space size={4} wrap>
                 <MatchStatusTag status={match.isActive} />

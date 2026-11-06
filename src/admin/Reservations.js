@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, App, Button, Card, Input, Popconfirm, Segmented, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { Alert, App, Button, Card, Grid, Input, Popconfirm, Segmented, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import { CheckOutlined, CloseOutlined, EyeOutlined, ReloadOutlined, ScheduleOutlined, SearchOutlined } from '@ant-design/icons';
 import { api } from '../api/config';
 import { formatPrice } from '../api/venues';
@@ -8,6 +8,7 @@ import { EmptyState, MatchStatusTag, PageHeader, PlayerAvatar } from '../ui';
 import { apiErrorMessage, formatDate, formatTime, fromNow, fullName, isPast } from '../utils/format';
 import MatchDetailDrawer, { OVERRIDE_WARNING } from './MatchDetailDrawer';
 import useAdminData, { matchStadiumId, venueLabel } from './useAdminData';
+import './AdminResponsive.css';
 
 const { Text } = Typography;
 
@@ -16,6 +17,7 @@ const createdOf = (m) => m.createdAt || m.createDate || m.createdDate || null;
 /** İşletme onayı bekleyen rezervasyonların izlenmesi (admin yalnızca gerekirse geçersiz kılar) */
 export default function Reservations() {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const { matches, setMatches, stadiums, stadiumNames, loading, reload } = useAdminData();
   const [view, setView] = useState('upcoming');
   const [search, setSearch] = useState('');
@@ -100,6 +102,7 @@ export default function Reservations() {
     {
       title: 'Kurucu',
       key: 'creator',
+      responsive: ['md'],
       render: (_, m) =>
         m.createdBy ? (
           <Space size={8}>
@@ -129,6 +132,7 @@ export default function Reservations() {
     {
       title: 'Bekleme süresi',
       key: 'waiting',
+      responsive: ['md'],
       sorter: (a, b) => new Date(createdOf(a) || a.matchDate) - new Date(createdOf(b) || b.matchDate),
       render: (_, m) => {
         const created = createdOf(m);
@@ -217,7 +221,12 @@ export default function Reservations() {
         description="Bu ekran izleme amaçlıdır. Admin onayı/reddi yalnızca istisnai durumlarda işletmenin kararını geçersiz kılmak için kullanılmalıdır."
       />
       <Card bordered={false}>
-        <Space wrap size={12} style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+        <Space
+          wrap
+          size={12}
+          className="mb-admin-toolbar"
+          style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}
+        >
           <Segmented
             value={view}
             onChange={setView}
@@ -227,8 +236,9 @@ export default function Reservations() {
               { label: `Tümü (${pending.length})`, value: 'all' },
             ]}
           />
-          <Space wrap>
+          <Space wrap className="mb-admin-filters">
             <Input
+              className="mb-admin-filter"
               allowClear
               prefix={<SearchOutlined />}
               placeholder="Maç, tesis veya kurucu ara"
@@ -237,6 +247,7 @@ export default function Reservations() {
               style={{ width: 240 }}
             />
             <Select
+              className="mb-admin-filter"
               allowClear
               showSearch
               optionFilterProp="label"
@@ -253,7 +264,7 @@ export default function Reservations() {
           columns={columns}
           dataSource={data}
           loading={loading}
-          scroll={{ x: 1100 }}
+          scroll={{ x: isPhone ? 'max-content' : 1100 }}
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
           onRow={(m) => ({ onClick: () => setSelected(m), style: { cursor: 'pointer' } })}
           locale={{ emptyText: <EmptyState description="İşletme onayı bekleyen talep yok" /> }}

@@ -18,7 +18,7 @@ import {
 import { api, logout } from '../api/config';
 import { PlayerAvatar } from '../ui';
 import { fullName, isPast } from '../utils/format';
-import { Brand, useCurrentUser } from './AppLayout';
+import { Brand, useAppBodyClass, useCurrentUser } from './AppLayout';
 import './layout.css';
 
 const { Sider, Header, Content } = Layout;
@@ -52,6 +52,7 @@ export default function AdminLayout() {
   const isMobile = !screens.lg;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
+  useAppBodyClass();
   const pending = usePendingCount();
 
   useEffect(() => setMobileNavOpen(false), [location.pathname]);
@@ -138,6 +139,7 @@ export default function AdminLayout() {
           onClose={() => setMobileNavOpen(false)}
           width={260}
           closable={false}
+          rootClassName="mb-nav-drawer"
           styles={{ body: { padding: 0, background: '#05080e' } }}
         >
           {brand}
@@ -147,7 +149,12 @@ export default function AdminLayout() {
       <Layout>
         <Header className="mb-header">
           <div className="mb-header__left">
-            {isMobile && <Button type="text" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />}
+            {isMobile && (
+              <>
+                <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />
+                <Brand to={BASE} variant="header" />
+              </>
+            )}
           </div>
           <div className="mb-header__right">
             <Tooltip title="Onay bekleyen rezervasyonlar">

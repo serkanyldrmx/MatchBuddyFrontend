@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Avatar, Button, Card, Col, Form, Input, InputNumber, Row, Space, Typography, Upload } from 'antd';
 import { EditOutlined, LockOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import { api } from '../../api/config';
 import { USER_CHANGED } from '../../layout/AppLayout';
 import { PageHeader } from '../../ui';
-import { apiErrorMessage, fileUrl, getCurrentUser } from '../../utils/format';
+import ImageCrop from '../../ui/ImageCrop';
+import { apiErrorMessage, getCurrentUser, mediaUrl } from '../../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, MAX_IMAGE_BYTES, MAX_IMAGE_MB, imageError, prepareImage } from '../../utils/image';
 import './User.css';
 
 const { Text } = Typography;
@@ -18,6 +20,7 @@ function UserUpdate() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
+  const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
 
   useEffect(() => {
     // Formu sunucudaki güncel profil ile doldur
@@ -44,17 +47,28 @@ function UserUpdate() {
 
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
 
-  const beforeUpload = (f) => {
-    if (!['image/jpeg', 'image/png'].includes(f.type)) {
-      message.error('Sadece JPG veya PNG yükleyebilirsiniz.');
+  // Kırpmadan önce tür/boyut kontrolü; uygun değilse kırpma penceresi açılmaz
+  const beforeCrop = (f) => {
+    const err = imageError(f);
+    if (!err) return true;
+    message.error(err);
+    rejectedRef.current = f;
+    return false;
+  };
+
+  // Kırpılmış dosya: tarayıcıda küçült, önizle, kaydette gönder
+  const beforeUpload = async (f) => {
+    if (f === rejectedRef.current) {
+      rejectedRef.current = null;
       return Upload.LIST_IGNORE;
     }
-    if (f.size > 5 * 1024 * 1024) {
-      message.error("Dosya boyutu 5 MB'ı geçemez.");
+    const prepared = await prepareImage(f);
+    if (prepared.size > MAX_IMAGE_BYTES) {
+      message.error(`Fotoğraf en fazla ${MAX_IMAGE_MB} MB olabilir.`);
       return Upload.LIST_IGNORE;
     }
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
+    setFile(prepared);
+    setPreview(URL.createObjectURL(prepared));
     return false;
   };
 
@@ -92,7 +106,7 @@ function UserUpdate() {
     }
   };
 
-  const avatarSrc = preview || fileUrl(user.profilePictureUrl);
+  const avatarSrc = preview || mediaUrl(user.profilePictureUrl, 'sm');
 
   return (
     <>
@@ -104,10 +118,12 @@ function UserUpdate() {
               <div className="mb-upload-row">
                 <Avatar size={88} src={avatarSrc} icon={!avatarSrc && <UserOutlined />} />
                 <Space direction="vertical" size={4}>
-                  <Upload beforeUpload={beforeUpload} showUploadList={false} accept="image/jpeg,image/png" maxCount={1}>
-                    <Button icon={<UploadOutlined />}>Fotoğraf seç</Button>
-                  </Upload>
-                  <Text type="secondary" style={{ fontSize: 12 }}>JPG veya PNG, en fazla 5 MB.</Text>
+                  <ImageCrop variant="avatar" beforeCrop={beforeCrop}>
+                    <Upload beforeUpload={beforeUpload} showUploadList={false} accept={ACCEPTED_IMAGE_ACCEPT} maxCount={1}>
+                      <Button icon={<UploadOutlined />}>Fotoğraf seç</Button>
+                    </Upload>
+                  </ImageCrop>
+                  <Text type="secondary" style={{ fontSize: 12 }}>JPG, PNG veya WebP, en fazla {MAX_IMAGE_MB} MB. Seçtikten sonra kırpabilirsin.</Text>
                   {file && <Text style={{ fontSize: 12 }}>Seçildi: {file.name}</Text>}
                 </Space>
               </div>

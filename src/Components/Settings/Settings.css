@@ -184,3 +184,44 @@
   font-size: 13px;
   color: var(--mb-text-2);
 }
+
+/* ---------- Telefon ---------- */
+@media (max-width: 767px) {
+  .mb-settings > .ant-card {
+    margin-bottom: 16px;
+  }
+  .mb-option-cards.ant-radio-group {
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  }
+  .mb-option-card.ant-radio-wrapper {
+    padding: 12px;
+  }
+  .mb-option-card > span:last-child {
+    min-width: 0;
+  }
+  .mb-settings__switch > div {
+    min-width: 0;
+  }
+  .mb-settings__switch .ant-switch {
+    flex-shrink: 0;
+  }
+  .mb-settings__blocked-row {
+    flex-wrap: wrap;
+  }
+  .mb-settings__blocked-name strong,
+  .mb-settings__blocked-name span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mb-settings__blocked-row .ant-btn {
+    height: 36px;
+  }
+  .mb-settings__danger-row div {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .mb-settings__danger-row > .ant-btn {
+    width: 100%;
+  }
+}

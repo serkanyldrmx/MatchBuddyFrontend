@@ -178,3 +178,65 @@
 .mb-biz-row {
   cursor: pointer;
 }
+
+/* ---------------- Telefon ---------------- */
+@media (max-width: 767px) {
+  .mb-od-head {
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-right: 32px;
+  }
+  .mb-od-head__icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+  .mb-od-head__text {
+    min-width: 0;
+  }
+  .mb-od-head__title.ant-typography {
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+
+  .mb-od-card {
+    padding: 12px;
+  }
+
+  /* Uzun e-posta/adres değerleri kartı taşırmasın */
+  .mb-od-modal .ant-descriptions-item-content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .mb-od-copyable.ant-space {
+    max-width: 100%;
+  }
+  .mb-od-copyable > .ant-space-item:first-child {
+    min-width: 0;
+  }
+  .mb-od-copyable__value {
+    overflow-wrap: anywhere;
+  }
+
+  .mb-od-stats {
+    gap: 10px;
+    padding: 12px;
+  }
+  .mb-od-stats .mb-stat__value {
+    font-size: 20px;
+  }
+  /* Tek kalan son istatistik tam satır kaplasın */
+  .mb-od-stats > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .mb-od-photos {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .mb-od-campaigns {
+    grid-template-columns: 1fr;
+  }
+}

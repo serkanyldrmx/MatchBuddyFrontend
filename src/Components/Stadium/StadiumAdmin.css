@@ -36,3 +36,30 @@
     max-height: 360px;
   }
 }
+
+/* ---------------- Telefon ---------------- */
+@media (max-width: 767px) {
+  .mb-map {
+    height: 320px;
+  }
+  .mb-stadium-list {
+    max-height: 340px;
+  }
+  .mb-stadium-list .ant-list-item.mb-stadium-item {
+    padding: 12px;
+  }
+  .mb-stadium-list .ant-list-item-meta-title {
+    overflow-wrap: anywhere;
+  }
+  /* Kaydet / Vazgeç: tam genişlik, kaydet üstte */
+  .mb-stadium-form-actions.ant-space {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+  }
+  .mb-stadium-form-actions > .ant-space-item .ant-btn {
+    width: 100%;
+  }
+}

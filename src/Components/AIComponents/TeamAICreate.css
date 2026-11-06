@@ -19,3 +19,33 @@
   font-weight: 600;
   padding-left: 0;
 }
+
+/* ---------- Telefon ---------- */
+@media (max-width: 575px) {
+  /* Ayar satırı: alanlar ve butonlar tam genişlik, alt alta */
+  .mb-ai-settings {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mb-ai-settings > .ant-space {
+    display: flex;
+    width: 100%;
+  }
+  .mb-ai-settings > .ant-space > .ant-space-item {
+    flex: 1 1 140px;
+  }
+  .mb-ai-settings > .ant-space > .ant-space-item > .ant-btn,
+  .mb-ai-settings .ant-input-number {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Takım kartı başlığı: isim alanı daralabilsin */
+  .mb-ai-team .ant-card-head-title {
+    flex: 1 1 160px;
+  }
+  .mb-ai-team .ant-list-item-meta-description {
+    font-size: 12px;
+  }
+}

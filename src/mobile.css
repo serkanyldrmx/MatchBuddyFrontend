@@ -1,0 +1,339 @@
+/* =========================================================
+   Match Buddy — telefon / tablet genel kuralları
+   - Masaüstü görünümü değişmesin diye her şey medya sorgusu içinde.
+   - body.mb-app: sadece uygulama kabukları (oyuncu / işletme / admin) açıkken
+     vardır; giriş ve kayıt ekranları bu kurallardan etkilenmez.
+   ========================================================= */
+
+/* Yatay kaydırılan şeritlerin kenar solması (scroll-driven; desteklemeyen tarayıcıda solma yok) */
+@property --mb-fade-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --mb-fade-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes mb-strip-fade {
+  from {
+    --mb-fade-l: 0px;
+    --mb-fade-r: 28px;
+  }
+  8% {
+    --mb-fade-l: 28px;
+    --mb-fade-r: 28px;
+  }
+  92% {
+    --mb-fade-l: 28px;
+    --mb-fade-r: 28px;
+  }
+  99.5% {
+    --mb-fade-l: 28px;
+    --mb-fade-r: 0px;
+  }
+  /* Kaydırılamayan (sığan) şeritte Chrome ilerlemeyi %100 sayar: solma olmasın */
+  to {
+    --mb-fade-l: 0px;
+    --mb-fade-r: 0px;
+  }
+}
+
+/* Yatay kaydırma şeridi: herhangi bir kapsayıcıya .mb-hscroll verilebilir */
+.mb-hscroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.mb-hscroll::-webkit-scrollbar {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .mb-hscroll {
+    animation: mb-strip-fade linear both;
+    animation-timeline: scroll(self inline);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--mb-fade-l), #000 calc(100% - var(--mb-fade-r)), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 var(--mb-fade-l), #000 calc(100% - var(--mb-fade-r)), transparent 100%);
+  }
+}
+
+@media (max-width: 991px) {
+  /* ---------- Segmented: geniş seçiciler sayfayı taşırmasın, kendi içinde kaysın ---------- */
+  body.mb-app .ant-segmented:not(.ant-segmented-block) {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    vertical-align: middle;
+  }
+  body.mb-app .ant-segmented:not(.ant-segmented-block)::-webkit-scrollbar {
+    display: none;
+  }
+  body.mb-app .ant-segmented:not(.ant-segmented-block) .ant-segmented-group {
+    width: max-content;
+  }
+  body.mb-app .ant-segmented-item-label {
+    white-space: nowrap;
+  }
+
+  /* ---------- Tablolar: tablo kendi kartının içinde kaysın ---------- */
+  body.mb-app .ant-table-wrapper {
+    max-width: 100%;
+  }
+  body.mb-app .ant-table-content {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Uzun kelimeler / bağlantılar taşırmasın */
+  body.mb-app .mb-content__inner {
+    overflow-wrap: anywhere;
+  }
+  body.mb-app .mb-content__inner :is(img, video, svg, canvas) {
+    max-width: 100%;
+  }
+  body.mb-app .mb-content__inner .leaflet-container img,
+  body.mb-app .mb-content__inner .leaflet-container svg {
+    max-width: none;
+  }
+
+  /* Sekmeler: başlık şeridi kaydırılabilir kalsın */
+  body.mb-app .ant-tabs-nav {
+    max-width: 100%;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 991px) {
+    body.mb-app .ant-segmented:not(.ant-segmented-block) {
+      animation: mb-strip-fade linear both;
+      animation-timeline: scroll(self inline);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--mb-fade-l), #000 calc(100% - var(--mb-fade-r)), transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0, #000 var(--mb-fade-l), #000 calc(100% - var(--mb-fade-r)), transparent 100%);
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  /* ---------- Formlar: iOS odaklanınca yakınlaştırmasın (>= 16px) ----------
+     antd girişleri theme.js'teki mobileTheme bileşen token'larıyla 16px olur; burası antd dışı girişler için */
+  :where(body.mb-app) :is(input, textarea, select):not([class*='ant-']):not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']) {
+    font-size: 16px;
+  }
+
+  /* Form satırları tek sütun ve rahat */
+  body.mb-app .ant-form-inline {
+    row-gap: 8px;
+  }
+  body.mb-app .ant-form-inline .ant-form-item {
+    margin-inline-end: 0;
+    width: 100%;
+  }
+  body.mb-app .ant-picker-range {
+    max-width: 100%;
+  }
+
+  /* ---------- Sayfa başlığı ---------- */
+  body.mb-app .mb-page-header {
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+  body.mb-app .mb-page-header__text {
+    min-width: 0;
+    max-width: 100%;
+  }
+  body.mb-app .mb-page-header__title.ant-typography {
+    font-size: 30px;
+  }
+  body.mb-app .mb-page-header__icon {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+  body.mb-app .mb-page-header__extra {
+    max-width: 100%;
+  }
+
+  /* ---------- Kartlar ---------- */
+  body.mb-app .mb-content__inner .ant-card:not(.ant-card-small) > .ant-card-body {
+    padding: 16px;
+  }
+  body.mb-app .mb-content__inner .ant-card:not(.ant-card-small) > .ant-card-head {
+    padding: 0 16px;
+  }
+  body.mb-app .ant-card-head-wrapper {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  body.mb-app .ant-card-head-title {
+    min-width: 0;
+  }
+  body.mb-app .ant-card-extra {
+    max-width: 100%;
+    margin-inline-start: auto;
+  }
+  body.mb-app .ant-card-head:has(.ant-card-extra .ant-segmented, .ant-card-extra .ant-radio-group, .ant-card-extra .ant-picker) .ant-card-head-wrapper {
+    padding: 10px 0;
+  }
+  body.mb-app .ant-card-head:has(.ant-card-extra .ant-segmented, .ant-card-extra .ant-radio-group, .ant-card-extra .ant-picker) .ant-card-extra {
+    flex-basis: 100%;
+    margin-inline-start: 0;
+  }
+
+  /* Tabloların sayfalama kısmı sarılabilsin */
+  body.mb-app .ant-pagination {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  body.mb-app .ant-table-pagination.ant-pagination {
+    justify-content: center;
+  }
+
+  /* Liste öğelerindeki aksiyonlar alt satıra insin */
+  body.mb-app .ant-list-item {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  body.mb-app .ant-list-item-meta {
+    min-width: 0;
+  }
+  body.mb-app .ant-list-item-meta-content {
+    min-width: 0;
+  }
+
+  /* Descriptions: dar ekranda etiket/değer alt alta */
+  body.mb-app .ant-descriptions-bordered .ant-descriptions-item-label {
+    white-space: normal;
+  }
+
+  /* Haritalar: makul yükseklik */
+  body.mb-app .mb-content__inner .leaflet-container {
+    max-height: 60vh;
+  }
+
+  /* Uyarı kutularındaki aksiyon alt satıra insin */
+  body.mb-app .ant-alert:has(.ant-alert-action) {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  body.mb-app .ant-alert-action {
+    margin-inline-start: 0 !important;
+  }
+
+  /* Bildirim/bilgi popover'ları ekrana sığsın */
+  body.mb-app .ant-popover {
+    max-width: calc(100vw - 16px);
+  }
+  body.mb-app .ant-dropdown {
+    max-width: calc(100vw - 16px);
+  }
+
+  /* ---------- Çekmeceler: içerik çekmeceleri tam genişlik ---------- */
+  body.mb-app .ant-drawer-right > .ant-drawer-content-wrapper,
+  body.mb-app .ant-drawer-left:not(.mb-nav-drawer) > .ant-drawer-content-wrapper {
+    width: 100% !important;
+    max-width: 100vw;
+  }
+  body.mb-app .ant-drawer-top > .ant-drawer-content-wrapper,
+  body.mb-app .ant-drawer-bottom > .ant-drawer-content-wrapper {
+    max-height: 100dvh;
+  }
+  body.mb-app .ant-drawer-header {
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  }
+  body.mb-app .ant-drawer-body {
+    padding: 16px;
+    overscroll-behavior: contain;
+  }
+  body.mb-app .ant-drawer-footer {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  }
+  body.mb-app .ant-drawer-close {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body.mb-app .ant-drawer-extra {
+    max-width: 60%;
+  }
+}
+
+/* ---------- Modallar: telefonda neredeyse tam ekran, gövde kendi içinde kaysın ---------- */
+@media (max-width: 575px) {
+  body.mb-app .ant-modal:not(.ant-modal-confirm) {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px);
+    top: calc(8px + env(safe-area-inset-top));
+    margin: 0 auto;
+    padding-bottom: 8px;
+  }
+  body.mb-app .ant-modal-centered .ant-modal:not(.ant-modal-confirm) {
+    top: 0;
+  }
+  body.mb-app .ant-modal:not(.ant-modal-confirm) .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 16px;
+  }
+  body.mb-app .ant-modal:not(.ant-modal-confirm) .ant-modal-header {
+    flex-shrink: 0;
+    padding-right: 36px;
+  }
+  body.mb-app .ant-modal:not(.ant-modal-confirm) .ant-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.mb-app .ant-modal:not(.ant-modal-confirm) .ant-modal-footer {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  body.mb-app .ant-modal:not(.ant-modal-confirm) .ant-modal-footer > .ant-btn + .ant-btn {
+    margin-inline-start: 0;
+  }
+  body.mb-app .ant-modal-close {
+    width: 40px;
+    height: 40px;
+    top: 10px;
+    inset-inline-end: 10px;
+  }
+  body.mb-app .ant-modal-confirm {
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* ---------- Tarih aralığı seçici: telefonda iki ay alt alta, kendi içinde kayar ---------- */
+@media (max-width: 575px) {
+  body.mb-app .ant-picker-dropdown-range .ant-picker-panels {
+    flex-direction: column;
+  }
+  body.mb-app .ant-picker-dropdown-range .ant-picker-panel-container {
+    max-height: 70dvh;
+    overflow-y: auto;
+  }
+  body.mb-app .ant-picker-dropdown-range .ant-picker-presets {
+    display: none;
+  }
+  body.mb-app .ant-picker-dropdown {
+    max-width: calc(100vw - 16px);
+  }
+}

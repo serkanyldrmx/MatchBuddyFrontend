@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { App, Button, Card, Input, Popconfirm, Segmented, Select, Space, Table, Tooltip, Typography } from 'antd';
+import { App, Button, Card, Grid, Input, Popconfirm, Segmented, Select, Space, Table, Tooltip, Typography } from 'antd';
 import { CalendarOutlined, DeleteOutlined, EyeOutlined, HeartOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { api } from '../api/config';
 import { formatPrice } from '../api/venues';
@@ -8,6 +8,7 @@ import { EmptyState, MatchStatusTag, PageHeader } from '../ui';
 import { apiErrorMessage, formatDate, formatTime, isPast } from '../utils/format';
 import MatchDetailDrawer from './MatchDetailDrawer';
 import useAdminData, { matchStadiumId, venueLabel } from './useAdminData';
+import './AdminResponsive.css';
 
 const { Text } = Typography;
 
@@ -22,6 +23,7 @@ const FILTERS = {
 /** Sistemdeki tüm maçlar */
 export default function AdminMatches() {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const { matches, setMatches, stadiums, stadiumNames, loading, reload } = useAdminData();
   const [view, setView] = useState('all');
   const [search, setSearch] = useState('');
@@ -116,6 +118,7 @@ export default function AdminMatches() {
       title: 'Beğeni',
       dataIndex: 'likes',
       align: 'center',
+      responsive: ['md'],
       width: 90,
       sorter: (a, b) => (a.likes || 0) - (b.likes || 0),
       render: (v) => (
@@ -170,7 +173,12 @@ export default function AdminMatches() {
         }
       />
       <Card bordered={false}>
-        <Space wrap size={12} style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+        <Space
+          wrap
+          size={12}
+          className="mb-admin-toolbar"
+          style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}
+        >
           <Segmented
             value={view}
             onChange={setView}
@@ -182,8 +190,9 @@ export default function AdminMatches() {
               { label: `Tamamlanan (${counts.done})`, value: 'done' },
             ]}
           />
-          <Space wrap>
+          <Space wrap className="mb-admin-filters">
             <Input
+              className="mb-admin-filter"
               allowClear
               prefix={<SearchOutlined />}
               placeholder="Maç adı ara"
@@ -192,6 +201,7 @@ export default function AdminMatches() {
               style={{ width: 220 }}
             />
             <Select
+              className="mb-admin-filter"
               allowClear
               showSearch
               optionFilterProp="label"
@@ -208,7 +218,7 @@ export default function AdminMatches() {
           columns={columns}
           dataSource={data}
           loading={loading}
-          scroll={{ x: 1000 }}
+          scroll={{ x: isPhone ? 'max-content' : 1000 }}
           pagination={{ pageSize: 15, hideOnSinglePage: true, showSizeChanger: false }}
           onRow={(m) => ({ onClick: () => setSelected(m), style: { cursor: 'pointer' } })}
           locale={{ emptyText: <EmptyState description="Bu filtreye uygun maç yok" /> }}

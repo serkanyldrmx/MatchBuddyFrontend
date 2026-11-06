@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { App, Button, Card, Col, Descriptions, Empty, Row, Skeleton, Tag } from 'antd';
+import { App, Button, Card, Col, Descriptions, Empty, Grid, Row, Tag } from 'antd';
 import { CrownFilled, EditOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { api } from '../../api/config';
 import { playersApi } from '../../api/matches';
-import { PlayerAvatar, Stat } from '../../ui';
+import { PageLoader, PlayerAvatar, Stat } from '../../ui';
 import { apiErrorMessage, fullName, getCurrentUser } from '../../utils/format';
 import './User.css';
 
 function User() {
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [player, setPlayer] = useState(null);
   const [stats, setStats] = useState(null);
   const [teams, setTeams] = useState([]);
@@ -35,11 +36,7 @@ function User() {
   }, [message]);
 
   if (loading || !player) {
-    return (
-      <Card>
-        <Skeleton avatar active paragraph={{ rows: 6 }} />
-      </Card>
-    );
+    return <PageLoader caption="Profil yükleniyor…" />;
   }
 
   return (
@@ -47,7 +44,7 @@ function User() {
       {/* ---------- Oyuncu kartı ---------- */}
       <section className="mb-profile-hero mb-pitch-bg">
         <div className="mb-profile-hero__id">
-          <PlayerAvatar player={player} size={112} />
+          <PlayerAvatar player={player} size={isPhone ? 76 : 112} />
           <div>
             <span className="mb-profile-hero__eyebrow">Oyuncu kartı</span>
             <h1>{fullName(player)}</h1>

@@ -14,6 +14,7 @@ import {
   DatePicker,
   Descriptions,
   Form,
+  Grid,
   Input,
   Modal,
   Popconfirm,
@@ -54,14 +55,16 @@ import { adminVenuesApi } from '../api/venues';
 import { colors } from '../theme/theme';
 import { EmptyState, PageHeader } from '../ui';
 import { apiErrorMessage, formatDate } from '../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, ACCEPTED_IMAGE_TYPES, MAX_IMAGE_MB, prepareImage } from '../utils/image';
 import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
+import './AdminResponsive.css';
 import './Businesses.css';
 import OwnerDetailModal from './OwnerDetailModal';
 
 const { Text } = Typography;
 const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
 const MAX_PHOTOS = 10;
-const MAX_PHOTO_MB = 5;
+const MAX_PHOTO_MB = MAX_IMAGE_MB;
 
 const pinIcon = new L.Icon({
   iconUrl: LocationIcon,
@@ -203,6 +206,7 @@ function stepForError(msg) {
 
 function NewBusinessWizard({ open, onClose, onCreated }) {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [form] = Form.useForm();
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState([]); // { uid, file, url }
@@ -278,9 +282,9 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
 
   /* Fotoğraflar */
   const beforeUpload = (file) => {
-    const okType = ['image/jpeg', 'image/png'].includes(file.type);
+    const okType = ACCEPTED_IMAGE_TYPES.includes(file.type);
     if (!okType) {
-      message.error(`${file.name}: sadece JPG veya PNG yükleyebilirsiniz.`);
+      message.error(`${file.name}: sadece JPG, PNG veya WebP yükleyebilirsiniz.`);
       return false;
     }
     if (file.size / 1024 / 1024 > MAX_PHOTO_MB) {
@@ -369,10 +373,9 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await adminVenuesApi.createOwner(
-        model,
-        photos.map((p) => p.file)
-      );
+      // Kırpma yok; sadece tarayıcıda küçült (başarısız olursa orijinal gönderilir)
+      const files = await Promise.all(photos.map((p) => prepareImage(p.file)));
+      const res = await adminVenuesApi.createOwner(model, files);
       if (res && res.success === false) throw Object.assign(new Error(res.message), { response: { data: res } });
       setCreated({ name: model.owner.name, userName: model.owner.userName, password: model.owner.password, email: model.owner.email });
       message.success('İşletme oluşturuldu.');
@@ -466,6 +469,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
           <Steps
             current={step}
             size="small"
+            responsive={false}
             items={[{ title: 'İşletme hesabı' }, { title: 'Tesis' }, { title: 'Fotoğraflar' }, { title: 'Özet & oluştur' }]}
           />
           {error && (
@@ -635,9 +639,11 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                           loading={searching}
                           onSearch={geocode}
                         />
-                        <Button icon={<AimOutlined />} onClick={geocodeAddress} loading={searching}>
-                          Adresten bul
-                        </Button>
+                        <Tooltip title={isPhone ? 'Adresten bul' : undefined}>
+                          <Button icon={<AimOutlined />} onClick={geocodeAddress} loading={searching} aria-label="Adresten bul">
+                            {isPhone ? null : 'Adresten bul'}
+                          </Button>
+                        </Tooltip>
                       </Space.Compact>
                       <MapContainer center={position || DEFAULT_CENTER} zoom={position ? 16 : 6} className="mb-biz-map">
                         <TileLayer
@@ -669,7 +675,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
           {step === 2 && (
             <>
               <Upload.Dragger
-                accept=".jpg,.jpeg,.png"
+                accept={ACCEPTED_IMAGE_ACCEPT}
                 multiple
                 fileList={[]}
                 showUploadList={false}
@@ -681,7 +687,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 </p>
                 <p className="ant-upload-text">Fotoğrafları sürükleyip bırakın ya da seçmek için tıklayın</p>
                 <p className="ant-upload-hint">
-                  JPG/PNG, en fazla {MAX_PHOTO_MB} MB · 1–{MAX_PHOTOS} fotoğraf · ilk fotoğraf kapak olur ({photos.length}/{MAX_PHOTOS})
+                  JPG/PNG/WebP, en fazla {MAX_PHOTO_MB} MB · 1–{MAX_PHOTOS} fotoğraf · ilk fotoğraf kapak olur ({photos.length}/{MAX_PHOTOS})
                 </p>
               </Upload.Dragger>
               {photoError && <Alert type="error" showIcon message={photoError} style={{ marginTop: 12 }} />}
@@ -689,7 +695,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 <div className="mb-biz-photos">
                   {photos.map((p, i) => (
                     <div key={p.uid} className={`mb-biz-photo${i === 0 ? ' is-cover' : ''}`}>
-                      <img src={p.url} alt={p.file.name} />
+                      <img src={p.url} alt={p.file.name} decoding="async" />
                       {i === 0 && <span className="mb-biz-photo__badge">Kapak</span>}
                       <div className="mb-biz-photo__actions">
                         {i === 0 ? (
@@ -745,7 +751,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 <Card size="small" title={`Fotoğraflar (${photos.length})`}>
                   <div className="mb-biz-summary-photos">
                     {photos.map((p) => (
-                      <img key={p.uid} src={p.url} alt={p.file.name} />
+                      <img key={p.uid} src={p.url} alt={p.file.name} decoding="async" />
                     ))}
                   </div>
                 </Card>
@@ -770,6 +776,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
 /** Admin: anlaşmalı işletmeler ve üyelikleri */
 export default function Businesses() {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [searchParams, setSearchParams] = useSearchParams();
   const [owners, setOwners] = useState([]);
   const [stadiums, setStadiums] = useState([]);
@@ -942,6 +949,7 @@ export default function Businesses() {
     {
       title: 'Kullanıcı adı',
       key: 'userName',
+      responsive: ['md'],
       render: (_, o) => <Text copyable={o.owner?.userName ? { text: o.owner.userName } : false}>@{o.owner?.userName || '-'}</Text>,
     },
     {
@@ -1058,7 +1066,7 @@ export default function Businesses() {
       <Row gutter={[16, 16]} className="mb-biz-stats" style={{ marginBottom: 16 }}>
         {statCards.map((s) => (
           <Col xs={12} xl={6} key={s.title}>
-            <Card bordered={false} loading={loading}>
+            <Card bordered={false} loading={loading} className="mb-admin-stat-card">
               <Statistic
                 title={s.title}
                 value={s.value}
@@ -1070,8 +1078,14 @@ export default function Businesses() {
       </Row>
 
       <Card bordered={false}>
-        <Space wrap size={12} style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+        <Space
+          wrap
+          size={12}
+          className="mb-admin-toolbar"
+          style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}
+        >
           <Input
+            className="mb-admin-filter"
             allowClear
             prefix={<SearchOutlined />}
             placeholder="İşletme, kullanıcı adı veya tesis ara"
@@ -1103,7 +1117,7 @@ export default function Businesses() {
           })}
           dataSource={data}
           loading={loading}
-          scroll={{ x: 1100 }}
+          scroll={{ x: isPhone ? 'max-content' : 1100 }}
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
           locale={{
             emptyText: (

@@ -17,6 +17,7 @@ import { colors } from '../theme/theme';
 import { EmptyState, MatchStatusTag, MetaItem, PageHeader } from '../ui';
 import { formatDate, formatDateTime, formatTime, fromNow, getCurrentUser, isPast } from '../utils/format';
 import useAdminData, { venueLabel } from './useAdminData';
+import './AdminResponsive.css';
 
 const { Text } = Typography;
 
@@ -127,9 +128,9 @@ export default function AdminDashboard() {
       />
 
       <Row gutter={[16, 16]}>
-        {stats.map((s) => (
-          <Col xs={24} sm={12} lg={8} xl={{ flex: '20%' }} key={s.title}>
-            <Card bordered={false} loading={loading && !s.async}>
+        {stats.map((s, i) => (
+          <Col xs={i === stats.length - 1 ? 24 : 12} sm={12} lg={8} xl={{ flex: '20%' }} key={s.title}>
+            <Card bordered={false} loading={loading && !s.async} className="mb-admin-stat-card">
               <Statistic
                 title={s.title}
                 value={s.value}
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
         <Col xs={24} xl={16}>
           <Card
             bordered={false}
+            className="mb-admin-card-wrap"
             title="İşletme onayı bekleyen rezervasyonlar"
             extra={
               <Button type="link" onClick={() => navigate('/adminPanel/reservations')}>

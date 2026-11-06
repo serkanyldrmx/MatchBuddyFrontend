@@ -12,6 +12,7 @@ import {
   Card,
   Col,
   Form,
+  Grid,
   Input,
   Modal,
   Progress,
@@ -78,6 +79,7 @@ const websiteHref = (w) => (/^https?:\/\//i.test(w) ? w : `https://${w}`);
 /** Admin: OpenStreetMap'ten aday halı saha bulma ve içe aktarma */
 export default function OsmCandidates() {
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [importForm] = Form.useForm();
   const [provinces, setProvinces] = useState([]);
   const [city, setCity] = useState('');
@@ -95,6 +97,7 @@ export default function OsmCandidates() {
   const [importing, setImporting] = useState(null); // aday
   const [saving, setSaving] = useState(false);
   const listRef = useRef(null);
+  const mapCardRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -184,8 +187,11 @@ export default function OsmCandidates() {
 
   const select = (c, fly) => {
     setSelectedId(c.osmId);
-    if (fly) setFlyTarget({ lat: c.lat, lon: c.lon, t: Date.now() });
-    else {
+    if (fly) {
+      setFlyTarget({ lat: c.lat, lon: c.lon, t: Date.now() });
+      // Telefonda harita listenin altında kalır; seçilen sahayı görmek için haritaya kaydır
+      if (isPhone) mapCardRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } else {
       const el = listRef.current?.querySelector(`[data-osm="${c.osmId}"]`);
       el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -251,8 +257,8 @@ export default function OsmCandidates() {
       />
 
       <Card bordered={false} style={{ marginBottom: 16 }}>
-        <Space wrap size={12} style={{ width: '100%', justifyContent: 'space-between' }}>
-          <Space.Compact style={{ minWidth: 280 }}>
+        <Space wrap size={12} className="mb-osm-toolbar" style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Space.Compact className="mb-osm-city" style={{ minWidth: 280 }}>
             <AutoComplete
               value={city}
               onChange={setCity}
@@ -268,7 +274,7 @@ export default function OsmCandidates() {
               Şehirde ara
             </Button>
           </Space.Compact>
-          <Space wrap>
+          <Space wrap className="mb-osm-area">
             <Text type="secondary" style={{ fontSize: 12 }}>
               {zoom < MIN_AREA_ZOOM ? 'Alan araması için haritayı yakınlaştırın' : 'Haritadaki görünür alan aranır'}
             </Text>
@@ -411,7 +417,7 @@ export default function OsmCandidates() {
           </Card>
         </Col>
         <Col xs={24} lg={14}>
-          <Card bordered={false} styles={{ body: { padding: 8 } }}>
+          <Card bordered={false} styles={{ body: { padding: 8 } }} ref={mapCardRef}>
             <MapContainer center={DEFAULT_CENTER} zoom={6} className="mb-osm-map">
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

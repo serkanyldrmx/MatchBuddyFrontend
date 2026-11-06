@@ -246,3 +246,208 @@
 .mb-chat__denied.ant-alert {
   border-top: 1px solid var(--mb-border);
 }
+
+/* ---------- Fotoğraflı mesajlar ---------- */
+.mb-chat {
+  position: relative;
+}
+
+.mb-bubble.has-image {
+  width: min(78%, 268px);
+  padding: 4px 4px 6px;
+}
+
+.mb-bubble.has-image .mb-bubble__author,
+.mb-bubble.has-image .mb-bubble__text,
+.mb-bubble.has-image .mb-bubble__time {
+  padding: 0 8px;
+}
+
+.mb-bubble.has-image .mb-bubble__author {
+  padding-top: 4px;
+}
+
+.mb-bubble.has-image .mb-bubble__text {
+  margin-top: 6px;
+}
+
+.mb-bubble .ant-image {
+  display: block;
+  border-radius: 11px;
+  overflow: hidden;
+  background: var(--mb-surface-3);
+  cursor: zoom-in;
+}
+
+.mb-bubble .ant-image .mb-bubble__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  max-height: 320px;
+  object-fit: cover;
+}
+
+.mb-bubble.has-image .mb-bubble__time {
+  margin-top: 4px;
+}
+
+/* Gönderim öncesi resim önizlemesi */
+.mb-chat__attach {
+  padding: 10px 16px 0;
+  background: var(--mb-surface);
+  border-top: 1px solid var(--mb-border);
+}
+
+.mb-attach-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 6px 6px 6px 6px;
+  border: 1px solid var(--mb-border-strong);
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+}
+
+.mb-attach-chip__thumb {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--mb-surface-3);
+}
+
+.mb-attach-chip__thumb.is-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mb-attach-chip__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mb-attach-chip__name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-attach-chip__hint {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-attach-chip__progress.ant-progress {
+  margin: 0;
+}
+
+/* Bir önizleme varken yazma alanı onunla bütün görünsün */
+.mb-chat__attach + .mb-chat__composer {
+  border-top: 0;
+}
+
+.mb-chat__photo-btn.ant-btn {
+  flex-shrink: 0;
+  color: var(--mb-text-2);
+}
+
+.mb-chat__photo-btn.ant-btn:not(:disabled):hover {
+  color: var(--mb-primary);
+}
+
+/* Sürükle-bırak katmanı */
+.mb-chat__drop {
+  position: absolute;
+  inset: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed var(--mb-primary);
+  border-radius: var(--mb-radius);
+  background: rgba(7, 11, 18, 0.86);
+  color: var(--mb-primary);
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.mb-chat__drop .anticon {
+  font-size: 34px;
+}
+
+/* ---------- Telefon: tam ekran panel, klavyenin üstünde kalan yazma alanı ---------- */
+@media (max-width: 767px) {
+  .mb-messages-root .ant-drawer-content-wrapper {
+    width: 100% !important;
+    top: var(--mb-vv-top, 0px);
+    bottom: auto;
+    height: var(--mb-vv-h, 100dvh);
+    max-height: 100dvh;
+  }
+  .mb-messages-drawer.ant-drawer-content {
+    height: 100%;
+  }
+  .mb-messages-drawer .ant-drawer-header {
+    padding: calc(8px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  }
+  .mb-messages-drawer .ant-drawer-header-title {
+    min-width: 0;
+  }
+  .mb-messages-drawer .ant-drawer-title {
+    min-width: 0;
+  }
+  .mb-messages-drawer .ant-drawer-close {
+    width: 44px;
+    height: 44px;
+    margin-inline-end: 4px;
+  }
+  .mb-messages-drawer .ant-drawer-body {
+    min-height: 0;
+  }
+  .mb-chat-header .ant-btn {
+    flex-shrink: 0;
+  }
+  .mb-chat__messages {
+    padding: 12px;
+    overscroll-behavior: contain;
+  }
+  .mb-bubble {
+    max-width: 85%;
+  }
+  .mb-bubble.has-image {
+    width: min(85%, 268px);
+  }
+  .mb-chat__composer {
+    padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  .mb-chat__composer .ant-btn {
+    flex-shrink: 0;
+  }
+  .mb-chat__attach {
+    padding: 8px 12px 0;
+  }
+  .mb-chat-list__toolbar {
+    padding: 10px 12px;
+  }
+  .mb-chat-item.ant-list-item {
+    padding: 12px;
+  }
+  .mb-chat-list__items {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

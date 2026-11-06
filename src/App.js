@@ -1,8 +1,9 @@
 import './App.css';
+import './mobile.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { App as AntApp, ConfigProvider } from 'antd';
+import { App as AntApp, ConfigProvider, Grid } from 'antd';
 import trTR from 'antd/locale/tr_TR';
-import { appTheme } from './theme/theme';
+import { appTheme, mobileTheme } from './theme/theme';
 import { MessagesProvider } from './messaging/MessagesContext';
 import AppLayout from './layout/AppLayout';
 import AdminLayout from './layout/AdminLayout';
@@ -17,6 +18,7 @@ import OwnerPitches from './owner/OwnerPitches';
 import OwnerPricing from './owner/OwnerPricing';
 import OwnerCampaigns from './owner/OwnerCampaigns';
 import OwnerReviews from './owner/OwnerReviews';
+import OwnerFinance from './owner/OwnerFinance';
 import Venues from './Components/Venues/Venues';
 import VenueDetail from './Components/Venues/VenueDetail';
 import CreateMatch from './Components/Venues/CreateMatch';
@@ -54,19 +56,19 @@ import AdminMatches from './admin/AdminMatches';
 import Stadium from './Components/Stadium/Stadium';
 import StadiumIsAdmin from './Components/Stadium/StadiumIsAdmin';
 
-// Giriş ve kayıt ekranları kendi açık tasarımlarını kullanır; uygulamanın koyu teması buraya uygulanmaz
-const LightTheme = ({ children }) => <ConfigProvider theme={{ inherit: false }}>{children}</ConfigProvider>;
-
 function App() {
+  // Telefonlarda (md altı) dokunmaya uygun kontrol boyları; masaüstü teması aynen kalır
+  const screens = Grid.useBreakpoint();
+  const theme = screens.md === false ? mobileTheme : appTheme;
   return (
-    <ConfigProvider theme={appTheme} locale={trTR}>
+    <ConfigProvider theme={theme} locale={trTR}>
       <AntApp>
         <BrowserRouter>
           <MessagesProvider>
             <Routes>
               {/* Giriş / kayıt */}
-              <Route path="/" element={<LightTheme><UserLogin /></LightTheme>} />
-              <Route path="/register" element={<LightTheme><RegisterForm /></LightTheme>} />
+              <Route path="/" element={<UserLogin />} />
+              <Route path="/register" element={<RegisterForm />} />
 
               {/* Oyuncu ekranları: ortak AppLayout içinde */}
               <Route element={<PrivateRoute role={ROLE.PLAYER} />}>
@@ -131,6 +133,7 @@ function App() {
                   <Route path="pricing" element={<OwnerPricing />} />
                   <Route path="campaigns" element={<OwnerCampaigns />} />
                   <Route path="reviews" element={<OwnerReviews />} />
+                  <Route path="finance" element={<OwnerFinance />} />
                 </Route>
               </Route>
 

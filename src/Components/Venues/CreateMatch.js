@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, App, Button, Card, Col, Input, InputNumber, Radio, Result, Row, Segmented, Select, Skeleton, Spin, Steps, Switch } from 'antd';
+import { Alert, App, Button, Card, Col, Grid, Input, InputNumber, Radio, Result, Row, Segmented, Select, Skeleton, Spin, Steps, Switch } from 'antd';
 import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
@@ -21,7 +21,7 @@ import { api } from '../../api/config';
 import { matchesApi } from '../../api/matches';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { PageHeader } from '../../ui';
-import { apiErrorMessage, fileUrl, getCurrentUser } from '../../utils/format';
+import { apiErrorMessage, getCurrentUser, mediaUrl } from '../../utils/format';
 import SlotPicker, { DateStrip } from './SlotPicker';
 import { AMENITY_ICONS, VenueRating } from './Venues';
 import './CreateMatch.css';
@@ -52,7 +52,7 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
       <div className="mb-receipt">
         <h3 className="mb-receipt__title">Rezervasyon özeti</h3>
         <div className="mb-receipt__venue">
-          {venue.coverPhotoUrl && <img src={fileUrl(venue.coverPhotoUrl)} alt="" />}
+          {venue.coverPhotoUrl && <img src={mediaUrl(venue.coverPhotoUrl, 'sm')} alt="" loading="lazy" decoding="async" />}
           <div>
             <strong>{venue.name}</strong>
             <span>
@@ -137,6 +137,8 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
 }
 
 export default function CreateMatch() {
+  // Telefonda adımlar yatay ve başlıklar ikonların altında kalsın (antd varsayılanı dikeye geçer)
+  const isPhone = Grid.useBreakpoint().md === false;
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
@@ -369,7 +371,7 @@ export default function CreateMatch() {
   /* ---------- Adımlar ---------- */
   const venueSummary = venue && (
     <div className="mb-cm-venue">
-      {venue.coverPhotoUrl && <img src={fileUrl(venue.coverPhotoUrl)} alt="" />}
+      {venue.coverPhotoUrl && <img src={mediaUrl(venue.coverPhotoUrl, 'sm')} alt="" loading="lazy" decoding="async" />}
       <div className="mb-cm-venue__text">
         <strong>{venue.name}</strong>
         <span>
@@ -545,7 +547,7 @@ export default function CreateMatch() {
                 <strong>Krampon kiralama</strong>
                 <span>{formatPrice(venue.prices?.cleatRentalPrice)} / çift</span>
               </div>
-              <InputNumber min={0} max={players} value={cleatCount} onChange={(v) => setCleatCount(v || 0)} addonAfter="çift" style={{ width: 140 }} />
+              <InputNumber min={0} max={players} value={cleatCount} onChange={(v) => setCleatCount(v || 0)} addonAfter="çift" style={{ width: 140, maxWidth: '100%' }} />
             </div>
           )}
           {hasCamera && (
@@ -601,6 +603,9 @@ export default function CreateMatch() {
       <Steps
         current={step}
         className="mb-cm-steps"
+        responsive={false}
+        labelPlacement={isPhone ? 'vertical' : undefined}
+        size={isPhone ? 'small' : undefined}
         onChange={(s) => (s < step || (s === 1 && step1Ok) || (s === 2 && step1Ok && !step2Error) ? setStep(s) : null)}
         items={[{ title: 'Saha & saat' }, { title: 'Kadro & takım' }, { title: 'Ekstralar & özet' }]}
       />

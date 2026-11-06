@@ -529,3 +529,10 @@
     grid-column: 1 / -1;
   }
 }
+
+@media (max-width: 767px) {
+  .mb-mini-fixture {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+}

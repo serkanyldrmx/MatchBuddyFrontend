@@ -417,3 +417,65 @@
   border-radius: 50%;
   background: var(--kind);
 }
+
+/* ---------- Telefon: ay görünümü kompakt (gün hücresinde sadece renkli noktalar, seçilen günün maçları altta) ---------- */
+@media (max-width: 575px) {
+  .mb-cal-header {
+    gap: 4px;
+    padding-bottom: 10px;
+  }
+  .mb-cal-header h3 {
+    flex: 1;
+    min-width: 0;
+    font-size: 22px;
+  }
+  .mb-cal-header .ant-btn-text {
+    width: 44px;
+    height: 44px;
+  }
+  .mb-cal-card .ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date {
+    margin: 0 1px;
+    padding: 6px 2px 0;
+    text-align: center;
+  }
+  .mb-cal-card .ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date-value {
+    text-align: center;
+    font-size: 16px;
+    line-height: 22px;
+  }
+  .mb-cal-card .ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date-content {
+    height: 18px;
+    overflow: hidden;
+  }
+  .mb-cal-card .ant-picker-content th {
+    font-size: 10px;
+    letter-spacing: 0.4px;
+  }
+  .mb-cal-cell {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+    padding-top: 4px;
+  }
+  .mb-cal-cell__item {
+    padding: 0;
+    background: transparent;
+  }
+  .mb-cal-cell__item b,
+  .mb-cal-cell__item em {
+    display: none;
+  }
+  .mb-cal-cell__item i {
+    width: 7px;
+    height: 7px;
+  }
+  .mb-cal-cell__more {
+    padding-left: 0;
+    font-size: 10px;
+    line-height: 7px;
+  }
+  .mb-cal-summary strong {
+    font-size: 28px;
+  }
+}

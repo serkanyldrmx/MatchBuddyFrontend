@@ -1,9 +1,8 @@
-import { LockOutlined, UserOutlined, EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Row, Col, message, Card } from "antd";
+import { LockOutlined, UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect } from "react";
-import "./Login.css";
-import Logo from '../../images/mutch_buddy_Logo.png'; // Logoyu import edin
+import AuthShell from "./AuthShell";
 import { api, getToken } from '../../api/config';
 import { homePathFor } from '../../utils/roles';
 
@@ -58,88 +57,74 @@ const UserLogin = () => {
     }
   };
 
-  const renderForm = (
-    <div className="login-background">      
-      <img src={Logo} alt="Logo" className="logo" />
-      <Card className="login-card">
-        <div className="login-header">
-          <h1 className="login-title">Log In</h1>
-        </div>
-        <Form
-          name="normal_login"
-          className="login-form"
-          initialValues={{
-            remember: true,
-          }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            name="username"
-            rules={[
-              {
-                required: true,
-                message: "Lütfen Kullanıcı adınızı giriniz!",
-              },
-            ]}
-          >
-            <Input
-              style={{
-                borderRadius: "1.2rem",
-                color: "#0f0e0f",
-                fontSize: "bold",
-              }}
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="Kullanıcı Adı"
-              autoFocus
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: "Lütfen Şifrenizi Giriniz!",
-              },
-            ]}
-          >
-            <Input.Password
-              style={{ borderRadius: "1.2rem", color: "#0f0e0f" }}
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              placeholder="Şifre"
-              iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>Beni Hatırla</Checkbox>
-            </Form.Item>
-            <Link to="#">Parolanızı mı unuttunuz?</Link>
-          </Form.Item>
-          <Form.Item>
-            <Form.Item className="register-button">
-              <Button type="primary" htmlType="submit">
-                Giriş Yap
-              </Button>
-            </Form.Item>
-            <div className="divider"></div> {/* Beyaz çizgi */}
-            Veya <Link to="/register">Şimdi Üye Ol!</Link>
-          </Form.Item>
-        </Form>
-      </Card>
-    </div>
-  );
-
   return (
-    <div className="login">
-      <Row
-        type="flex"
-        justify="center"
-        align="middle"
-        style={{ minHeight: "100vh" }}
+    <AuthShell
+      title={<>Sahaya <em>dönüş</em></>}
+      subtitle="Kadron seni bekliyor. Hesabına giriş yap, maçını kaçırma."
+    >
+      <Form
+        name="normal_login"
+        className="mb-auth__form"
+        layout="vertical"
+        requiredMark={false}
+        initialValues={{
+          remember: true,
+        }}
+        onFinish={onFinish}
       >
-        <Col>{renderForm}</Col>
-      </Row>
-    </div>
+        <Form.Item
+          name="username"
+          label="Kullanıcı adı"
+          rules={[
+            {
+              required: true,
+              message: "Lütfen Kullanıcı adınızı giriniz!",
+            },
+          ]}
+        >
+          <Input
+            size="large"
+            prefix={<UserOutlined />}
+            placeholder="Kullanıcı Adı"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoFocus
+          />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          label="Şifre"
+          rules={[
+            {
+              required: true,
+              message: "Lütfen Şifrenizi Giriniz!",
+            },
+          ]}
+        >
+          <Input.Password
+            size="large"
+            prefix={<LockOutlined />}
+            placeholder="Şifre"
+            autoComplete="current-password"
+            iconRender={visible => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
+          />
+        </Form.Item>
+        <div className="mb-auth__row">
+          <Form.Item name="remember" valuePropName="checked" noStyle>
+            <Checkbox>Beni Hatırla</Checkbox>
+          </Form.Item>
+          <Link to="#" className="mb-auth__link">Parolanızı mı unuttunuz?</Link>
+        </div>
+        <Form.Item className="mb-auth__submit">
+          <Button type="primary" htmlType="submit" size="large" block>
+            Giriş Yap
+          </Button>
+        </Form.Item>
+      </Form>
+      <p className="mb-auth__switch">
+        Hesabın yok mu? <Link to="/register" className="mb-auth__link">Şimdi üye ol</Link>
+      </p>
+    </AuthShell>
   );
 };
 

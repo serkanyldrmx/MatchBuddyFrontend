@@ -19,7 +19,7 @@ import { matchesApi, playersApi, PARTICIPANT_STATUS } from '../../api/matches';
 import { INVITES_CHANGED, invitesApi } from '../../api/social';
 import { formatPrice, venuesApi } from '../../api/venues';
 import { CapacityRing, EmptyState, PlayerAvatar } from '../../ui';
-import { apiErrorMessage, fileUrl, fullName, getCurrentUser, isPast } from '../../utils/format';
+import { apiErrorMessage, fullName, getCurrentUser, isPast, mediaUrl } from '../../utils/format';
 import MatchCard from '../Post/Post';
 import './Home.css';
 
@@ -238,7 +238,7 @@ function Home() {
             {deals.map((v) => (
               <button type="button" key={v.stadiumId} className="mb-deal" onClick={() => navigate(`/venues/${v.stadiumId}`)}>
                 <span className="mb-deal__cover">
-                  {v.coverPhotoUrl ? <img src={fileUrl(v.coverPhotoUrl)} alt="" loading="lazy" /> : <span className="mb-deal__ph mb-pitch-bg" />}
+                  {v.coverPhotoUrl ? <img src={mediaUrl(v.coverPhotoUrl, 'md')} alt="" loading="lazy" decoding="async" /> : <span className="mb-deal__ph mb-pitch-bg" />}
                   <span className="mb-deal__badge">
                     <FireOutlined /> Kampanya
                   </span>
@@ -283,7 +283,7 @@ function Home() {
 
           <div className="mb-filters">
             <Segmented options={FILTERS} value={filter} onChange={setFilter} />
-            <Space wrap>
+            <Space wrap className="mb-filters__search">
               <Input
                 allowClear
                 prefix={<SearchOutlined />}

@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Alert, Badge, Button, Drawer, Dropdown, Grid, Layout, Menu, Select, Spin, Tooltip, Typography } from 'antd';
+import { Alert, Badge, Button, Drawer, Dropdown, Grid, Layout, Menu, Select, Tooltip, Typography } from 'antd';
 import {
   AppstoreOutlined,
   CalendarOutlined,
@@ -13,13 +13,14 @@ import {
   StarOutlined,
   TagsOutlined,
   BorderOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { logout } from '../api/config';
 import { ownerApi } from '../api/venues';
 import { useMessages } from '../messaging/MessagesContext';
-import { PlayerAvatar } from '../ui';
+import { PageLoader, PlayerAvatar } from '../ui';
 import { fullName, formatDate } from '../utils/format';
-import { Brand, useCurrentUser } from './AppLayout';
+import { Brand, useAppBodyClass, useCurrentUser } from './AppLayout';
 import NotificationBell from './NotificationBell';
 import './layout.css';
 
@@ -43,6 +44,7 @@ export default function VenueLayout() {
   const isMobile = !screens.lg;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
+  useAppBodyClass();
   const { openMessages } = useMessages();
 
   const [info, setInfo] = useState(null);
@@ -114,6 +116,7 @@ export default function VenueLayout() {
         </span>
       ),
     },
+    { key: `${BASE}/finance`, icon: <WalletOutlined />, label: 'Gelir & Gider' },
     {
       type: 'group',
       label: 'Tesis',
@@ -159,7 +162,7 @@ export default function VenueLayout() {
           </Sider>
         )}
         {isMobile && (
-          <Drawer placement="left" open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} width={260} closable={false} styles={{ body: { padding: 0, background: '#05080e' } }}>
+          <Drawer placement="left" open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} width={260} closable={false} rootClassName="mb-nav-drawer" styles={{ body: { padding: 0, background: '#05080e' } }}>
             {brand}
             {menu}
           </Drawer>
@@ -167,16 +170,23 @@ export default function VenueLayout() {
         <Layout>
           <Header className="mb-header">
             <div className="mb-header__left">
-              {isMobile && <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />}
+              {isMobile && (
+                <>
+                  <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />
+                  {/* Dar ekranda tesis adı için yer kalsın: sadece logo; tesis yoksa tam marka */}
+                  <Brand to={BASE} variant="header" markOnly={venues.length > 0} />
+                </>
+              )}
               {venues.length > 1 ? (
                 <Select
                   value={venueId}
                   onChange={setVenueId}
-                  style={{ minWidth: 240 }}
+                  className="mb-header__venue-select"
+                  style={{ minWidth: isMobile ? 0 : 240 }}
                   options={venues.map((v) => ({ value: v.stadiumId, label: v.name }))}
                 />
               ) : (
-                venue && <Text strong>{venue.name}</Text>
+                venue && <Text strong ellipsis className="mb-header__venue-name">{venue.name}</Text>
               )}
             </div>
             <div className="mb-header__right">
@@ -211,9 +221,7 @@ export default function VenueLayout() {
                 />
               )}
               {!info ? (
-                <div style={{ textAlign: 'center', padding: 80 }}>
-                  <Spin />
-                </div>
+                <PageLoader caption="İşletme paneli yükleniyor…" />
               ) : venues.length === 0 ? (
                 <Alert type="info" showIcon message="Hesabınıza bağlı bir tesis bulunmuyor. Match Buddy ile iletişime geçin." />
               ) : (

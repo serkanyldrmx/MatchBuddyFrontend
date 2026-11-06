@@ -1018,3 +1018,184 @@
   align-items: center;
   min-height: 24px;
 }
+
+/* =========================================================
+   Telefon / tablet (masaüstü görünümü değişmesin diye hepsi medya sorgusunda)
+   ========================================================= */
+@media (max-width: 767px) {
+  /* Liste */
+  .mb-tr-toolbar {
+    margin-bottom: 16px;
+  }
+  .mb-tr-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 12px;
+  }
+  .mb-tr-card {
+    padding: 16px;
+  }
+  .mb-tr-card:hover {
+    transform: none;
+  }
+  .mb-tr-card__name {
+    font-size: 24px;
+  }
+  .mb-tr-card__winner strong {
+    overflow-wrap: anywhere;
+  }
+  .mb-tr-card__footer > span {
+    min-width: 0;
+  }
+
+  /* Detay: hero */
+  .mb-tr-hero {
+    border-radius: 18px;
+  }
+  .mb-tr-hero__title {
+    margin-top: 12px;
+  }
+  .mb-tr-hero__meta {
+    gap: 6px 14px;
+  }
+  .mb-tr-champion {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  .mb-tr-champion__icon {
+    font-size: 36px;
+  }
+  .mb-tr-champion__name {
+    overflow-wrap: anywhere;
+  }
+  .mb-tr-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 18px;
+    padding-top: 14px;
+  }
+  .mb-tr-join,
+  .mb-tr-hero__actions-right {
+    width: 100%;
+  }
+  .mb-tr-join .ant-select {
+    flex: 1 1 180px;
+    min-width: 0 !important;
+  }
+  .mb-tr-join.is-empty .mb-tr-hint {
+    flex-basis: 100%;
+  }
+
+  /* Fikstür */
+  .mb-fx-rounds {
+    gap: 20px;
+  }
+  .mb-fx-round__head h3 {
+    font-size: 22px;
+  }
+  .mb-fx-row__date {
+    flex-wrap: wrap;
+  }
+  .mb-fx-row__actions .ant-btn {
+    flex: 1 1 auto;
+    height: 40px;
+    padding-inline: 14px;
+  }
+
+  /* Puan tablosu */
+  .mb-st-team strong {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  /* Takımlar */
+  .mb-tm-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    gap: 12px;
+  }
+  .mb-tm-card__footer .ant-btn {
+    height: 36px;
+  }
+
+  /* Eleme ağacı: kaydırma ağacın kendi kutusunda kalsın */
+  .mb-bracket-scroll {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Oluşturma formu */
+  .mb-tr-quick-sizes {
+    flex-wrap: wrap;
+  }
+  .mb-tr-quick-size {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 575px) {
+  .mb-tr-hero {
+    padding: 16px 14px 18px;
+  }
+  .mb-fx-row {
+    padding: 10px 10px 12px;
+  }
+  .mb-fx-row__board {
+    gap: 4px;
+  }
+  .mb-fx-row__team {
+    padding: 6px;
+    gap: 4px;
+  }
+  .mb-fx-row__center {
+    min-width: 56px;
+  }
+  .mb-fx-row__score,
+  .mb-fx-row__time {
+    padding: 4px 6px;
+  }
+  .mb-fx-row__score i {
+    margin: 0 3px;
+  }
+  .mb-fx-row__bye {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  /* Sonuç modalı: iki skor kutusu dar ekrana sığsın */
+  .mb-tr-result-form.mb-result-form {
+    gap: 10px;
+  }
+  .mb-tr-result-form .mb-result-form__side {
+    min-width: 0;
+  }
+  .mb-tr-result-form .mb-result-form__side span {
+    max-width: 110px;
+  }
+  .mb-tr-penalty .ant-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+  }
+  .mb-tr-penalty .ant-radio-button-wrapper {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-radius: 8px;
+    border-inline-start-width: 1px;
+  }
+  .mb-tr-penalty .ant-radio-button-wrapper::before {
+    display: none;
+  }
+
+  /* Eleme ağacı: sütunlar biraz daha dar */
+  .mb-bracket__col {
+    width: 150px;
+  }
+  .mb-bk-team {
+    padding: 7px 10px;
+  }
+}

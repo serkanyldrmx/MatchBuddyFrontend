@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Alert, App, Button, Card, Col, Form, Input, Row, Select, Space, TimePicker, Typography } from 'antd';
+import { Alert, App, Button, Card, Col, Form, Grid, Input, Row, Select, Space, TimePicker, Typography } from 'antd';
 import { AimOutlined, PlusCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { api } from '../../api/config';
 import { PageHeader } from '../../ui';
@@ -52,6 +52,7 @@ const formatCoords = (pos) => (pos ? `${Number(pos[0]).toFixed(6)}, ${Number(pos
 function StadiumIsAdmin() {
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [form] = Form.useForm();
   const [userPosition, setUserPosition] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
@@ -244,13 +245,13 @@ function StadiumIsAdmin() {
               <Form.Item
                 name="location"
                 label="Konum"
-                extra="Haritaya tıklayarak konum seçin"
+                extra={isPhone ? 'Aşağıdaki haritaya dokunarak konum seçin' : 'Haritaya tıklayarak konum seçin'}
                 rules={[{ required: true, message: 'Haritadan konum seçin' }]}
               >
                 <Input readOnly prefix={<AimOutlined />} placeholder="Konum seçilmedi" />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Space>
+                <Space wrap className="mb-stadium-form-actions">
                   <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={saving}>
                     Halı sahayı kaydet
                   </Button>

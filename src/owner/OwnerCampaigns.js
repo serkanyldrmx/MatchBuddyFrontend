@@ -312,12 +312,12 @@ export default function OwnerCampaigns() {
             </Form.Item>
           </Form.Item>
           <Row gutter={12}>
-            <Col span={8}>
+            <Col xs={12} sm={8}>
               <Form.Item name="fromHour" label="Başlangıç" rules={[{ required: true, message: 'Seçin.' }]}>
                 <Select options={HOUR_FROM} />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={12} sm={8}>
               <Form.Item
                 name="toHour"
                 label="Bitiş"
@@ -332,7 +332,7 @@ export default function OwnerCampaigns() {
                 <Select options={HOUR_TO} />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={24} sm={8}>
               <Form.Item name="pitchId" label="Saha">
                 <Select allowClear placeholder="Tüm sahalar" options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))} />
               </Form.Item>

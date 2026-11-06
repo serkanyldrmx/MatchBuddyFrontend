@@ -1359,3 +1359,614 @@
   margin-top: 12px;
   margin-left: 20px;
 }
+
+/* ---------- Harici rezervasyon (blok kind 1) ---------- */
+.mb-owner-cal-legend .is-manual::before {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: var(--mb-info);
+  box-shadow: inset 3px 0 0 var(--mb-info);
+}
+
+.mb-owner-cal-legend .is-unpaid::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--mb-gold);
+}
+
+.mb-owner-cal__item.is-manual {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.26), rgba(56, 189, 248, 0.14));
+  color: var(--mb-text);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  box-shadow: inset 3px 0 0 var(--mb-info);
+}
+
+.mb-owner-cal__item.is-manual .mb-owner-cal__item-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mb-cal-pay {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  background: rgba(34, 197, 94, 0.25);
+  color: var(--mb-pitch);
+}
+
+.mb-owner-cal__item.is-unpaid .mb-cal-pay {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--mb-gold);
+}
+
+.mb-owner-cal__item.is-unpaid .mb-cal-pay::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mb-gold);
+  box-shadow: 0 0 0 2px var(--mb-surface);
+}
+
+.mb-cal-harici,
+.mb-mbk-tag {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  background: rgba(56, 189, 248, 0.22);
+  color: var(--mb-info);
+  line-height: 15px;
+}
+
+.mb-mbk-tag {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  line-height: 18px;
+}
+
+/* modal */
+.mb-mbk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.mb-mbk-chip {
+  cursor: pointer;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--mb-text-2);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.mb-mbk-chip:hover {
+  color: var(--mb-primary);
+  border-color: rgba(198, 244, 50, 0.45);
+}
+
+.mb-mbk-quote {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-mbk-quote strong {
+  color: var(--mb-text);
+}
+
+.mb-mbk-quote .ant-btn {
+  padding: 0 4px;
+  height: auto;
+}
+
+.mb-mbk-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* drawer */
+.mb-mbk-hero {
+  padding: 18px 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(56, 189, 248, 0.18), rgba(56, 189, 248, 0) 60%),
+    var(--mb-surface-2);
+}
+
+.mb-mbk-hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mb-mbk-hero__title {
+  margin: 14px 0 4px;
+  font-family: var(--mb-display);
+  font-size: 30px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--mb-text);
+}
+
+.mb-mbk-hero__sub {
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--mb-info);
+  font-weight: 600;
+}
+
+.mb-mbk-contact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mb-mbk-call {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--mb-info);
+  font-weight: 600;
+}
+
+.mb-mbk-call:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--mb-info);
+}
+
+.mb-mbk-pay {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--mb-gold-soft);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.mb-mbk-pay.is-paid {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.mb-mbk-pay > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-mbk-pay__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+.mb-mbk-pay__amount {
+  font-family: var(--mb-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--mb-text);
+  line-height: 1.1;
+}
+
+.mb-mbk-pay__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mb-gold);
+}
+
+.mb-mbk-pay.is-paid .mb-mbk-pay__switch {
+  color: var(--mb-pitch);
+}
+
+/* talepler · harici sekmesi ve genel bakış */
+.mb-pay-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-pay-cell.is-unpaid {
+  color: var(--mb-gold);
+}
+
+.mb-pay-cell.is-paid {
+  color: var(--mb-pitch);
+}
+
+.mb-owner-agenda__item.is-manual .mb-owner-agenda__time strong {
+  color: var(--mb-info);
+}
+
+.mb-owner-fin-card .mb-owner-fin-rows {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mb-owner-fin-rows > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+  min-width: 0;
+}
+
+.mb-owner-fin-rows span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+.mb-owner-fin-rows strong {
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--mb-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-owner-fin-rows .is-income strong {
+  color: var(--mb-primary);
+}
+
+.mb-owner-fin-rows .is-expense strong {
+  color: var(--mb-danger);
+}
+
+.mb-owner-fin-rows .is-neg strong {
+  color: var(--mb-danger);
+}
+
+.mb-owner-fin-card__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-owner-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Fotoğraflar kartı başlığı: sayaç + toplu yükle + tek fotoğraf (kırpmalı) */
+.mb-owner-photo-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.mb-owner-photo-count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   Telefon / tablet — masaüstü görünümü değişmesin diye hepsi medya sorgusu içinde
+   ========================================================= */
+
+/* Tablet ve altı: takvim ızgarası kart içinde yatay kayarken saat sütunu yapışkan kalsın */
+@media (max-width: 991px) {
+  .mb-owner-cal-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Yapışkan saat sütunu ızgara kutusunun içinde kalır; kutu içerik kadar geniş olmalı ki kaydırınca sabit dursun */
+  .mb-owner-cal {
+    width: max-content;
+  }
+
+  .mb-owner-cal__times {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    box-shadow: 1px 0 0 var(--mb-border);
+  }
+
+  .mb-owner-cal__corner {
+    left: 0;
+    z-index: 6;
+  }
+
+  .mb-owner-heat-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@media (max-width: 767px) {
+  /* ---------- Araç çubukları: filtreler tam genişlik, alt alta ---------- */
+  .mb-owner-toolbar > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .mb-owner-toolbar__filters.ant-space {
+    display: flex;
+    width: 100%;
+  }
+
+  .mb-owner-toolbar__filters > .ant-space-item {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .mb-owner-toolbar__filters > .ant-space-item > * {
+    width: 100% !important;
+  }
+
+  /* ---------- Genel bakış ---------- */
+  .mb-owner-membership {
+    margin: -6px 0 14px;
+  }
+
+  .mb-owner-missing__head strong {
+    font-size: 18px;
+  }
+
+  .mb-owner-fin-card__foot {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .mb-owner-request {
+    gap: 10px 12px;
+    padding: 12px;
+  }
+
+  /* ---------- Takvim ---------- */
+  .mb-owner-cal-toolbar > .ant-space {
+    max-width: 100%;
+  }
+
+  .mb-owner-cal-title {
+    font-size: 18px;
+  }
+
+  .mb-owner-cal-legend {
+    gap: 6px 12px;
+    font-size: 11px;
+  }
+
+  .mb-owner-cal__head {
+    padding: 6px 2px;
+  }
+
+  .mb-owner-cal__head strong {
+    font-size: 15px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mb-owner-cal__times span {
+    right: 5px;
+    font-size: 10px;
+  }
+
+  .mb-owner-cal__item {
+    padding: 3px 5px;
+  }
+
+  /* ---------- Rezervasyon çekmeceleri ---------- */
+  .mb-owner-res-hero,
+  .mb-mbk-hero {
+    padding: 14px 14px 16px;
+  }
+
+  .mb-owner-res-hero__title,
+  .mb-mbk-hero__title {
+    font-size: 26px;
+    overflow-wrap: anywhere;
+  }
+
+  .mb-owner-res-hero__top,
+  .mb-mbk-hero__top {
+    gap: 8px;
+  }
+
+  .mb-owner-res-hero__pitch {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mb-owner-person {
+    flex-wrap: wrap;
+  }
+
+  .mb-owner-person > .ant-btn {
+    flex: 1 1 100%;
+  }
+
+  .mb-owner-drawer-actions > .ant-btn {
+    flex: 1 1 0;
+  }
+
+  .mb-mbk-pay {
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Modallar: hızlı seçim çipleri parmakla seçilebilsin ---------- */
+  .mb-mbk-chip {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .mb-owner-quick-tag.ant-tag {
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+
+  .mb-mbk-footer {
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Tesis ---------- */
+  .mb-owner-photo-tools {
+    justify-content: flex-start;
+  }
+
+  /* ---------- Sahalar ---------- */
+  .mb-owner-pitch__body > div:first-child {
+    min-width: 0;
+  }
+
+  .mb-owner-pitch__name {
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- Saatler ve fiyatlar ---------- */
+  .mb-owner-hours__row {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  /* fiyat önizleme: gün sütunu yatay kaydırmada sabit kalsın */
+  .mb-owner-heat > span:first-child,
+  .mb-owner-heat__day {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--mb-surface);
+    box-shadow: 3px 0 0 var(--mb-surface);
+  }
+
+  .mb-owner-heat__cell {
+    height: 32px;
+  }
+
+  /* ---------- Yorumlar ---------- */
+  .mb-owner-review__reply,
+  .mb-owner-review__form {
+    margin-left: 0;
+  }
+
+  .mb-owner-review__form .ant-btn-sm {
+    height: 44px;
+    padding-inline: 16px;
+  }
+
+  .mb-owner-review__reply-head {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* bekleyen talep kartı: aksiyonlar kendi satırında, büyük dokunma alanı */
+  .mb-owner-request__actions .ant-btn {
+    flex: 1 1 0;
+    height: 44px;
+  }
+}
+
+@media (max-width: 575px) {
+  .mb-owner-stat__value {
+    font-size: 28px;
+  }
+
+  .mb-owner-fin-card .mb-owner-fin-rows {
+    gap: 6px;
+  }
+
+  .mb-owner-fin-rows > div {
+    padding: 8px 10px;
+  }
+
+  .mb-owner-fin-rows span {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .mb-owner-fin-rows strong {
+    font-size: 18px;
+  }
+
+  .mb-owner-agenda__item {
+    grid-template-columns: 60px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .mb-owner-agenda__time strong {
+    font-size: 21px;
+  }
+
+  .mb-owner-photos {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .mb-owner-promo {
+    padding: 16px 16px 12px;
+  }
+
+  .mb-owner-promo__perf {
+    margin: 14px -16px 12px;
+  }
+
+  .mb-owner-promo__big {
+    font-size: 44px;
+  }
+
+  .mb-owner-rating__big {
+    font-size: 60px;
+  }
+
+  .mb-mbk-footer > .ant-btn {
+    flex: 1 1 auto;
+  }
+}

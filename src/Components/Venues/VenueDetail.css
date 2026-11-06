@@ -509,3 +509,49 @@
   margin: 0 0 4px;
   font-size: 15px;
 }
+
+/* =========================================================
+   Telefon
+   ========================================================= */
+@media (max-width: 767px) {
+  .mb-vd-hero {
+    gap: 16px;
+    padding: 12px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+  }
+  .mb-vd-info__name {
+    font-size: 32px;
+    overflow-wrap: anywhere;
+  }
+  .mb-vd-info__stats > div {
+    min-width: 0;
+    padding: 8px 10px;
+  }
+  .mb-vd-info__stats strong {
+    font-size: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mb-vd-info__stats span {
+    font-size: 10px;
+  }
+  .mb-vd-info__actions > * {
+    flex: 1 1 auto;
+  }
+  .mb-vd-tabs .ant-tabs-tab {
+    font-size: 15px;
+  }
+  .mb-pitch-card__size {
+    font-size: 30px;
+  }
+  .mb-vd-score strong {
+    font-size: 44px;
+  }
+  .mb-vd-review__head {
+    flex-wrap: wrap;
+  }
+  .mb-vd-map {
+    height: 240px;
+  }
+}

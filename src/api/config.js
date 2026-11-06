@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // API adresleri ortam değişkenlerinden okunur (bkz. .env.example)
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5033';
+// Boş değer ("") = aynı origin: /api ve /media istekleri barındırma tarafından API'ye yönlendirilir (ör. Vercel rewrites)
+export const API_BASE_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:5033';
 // Maç sıralama AI servisi (ai_match_sorter.py)
 export const AI_BASE_URL = process.env.REACT_APP_AI_URL || 'http://localhost:5001';
 // Takım oluşturma AI servisi (GetAPIPlayers.py)

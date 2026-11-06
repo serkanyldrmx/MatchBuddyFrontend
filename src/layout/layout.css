@@ -110,6 +110,54 @@
   color: rgba(232, 238, 246, 0.75);
 }
 
+/* Üst bardaki kompakt marka (sadece yan menünün çekmeceye dönüştüğü ekranlarda render edilir) */
+.mb-brand.mb-brand--header {
+  height: 44px;
+  padding: 0 4px 0 2px;
+  gap: 8px;
+  min-width: 0;
+  flex-shrink: 1;
+  border-radius: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mb-brand--header .mb-brand__mark {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px rgba(198, 244, 50, 0.1), 0 6px 16px rgba(198, 244, 50, 0.2);
+}
+
+.mb-brand--header .mb-brand__mark img {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+}
+
+.mb-brand--header .mb-brand__name {
+  font-size: 18px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.mb-brand--header:active .mb-brand__mark {
+  transform: scale(0.94);
+}
+
+.mb-brand--header.mb-brand--mark-only {
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+/* Çok dar telefonlarda (< 350 px) yazı yerine sadece logo */
+@media (max-width: 349px) {
+  .mb-brand--header .mb-brand__name {
+    display: none;
+  }
+}
+
 /* ---------- Üst bar ---------- */
 .mb-header {
   position: sticky;
@@ -210,6 +258,178 @@
 /* Sayfalarda ortak kart ızgarası */
 .mb-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 16px;
+}
+
+/* =========================================================
+   Telefon / tablet
+   ========================================================= */
+.mb-shell > .ant-layout {
+  min-width: 0;
+}
+
+/* Yatay taşma emniyeti: sayfa asla yana kaymasın (sticky üst barı bozmayan clip) */
+@media (max-width: 991px) {
+  .mb-shell {
+    overflow-x: clip;
+  }
+  .mb-header__left {
+    flex: 1;
+    min-width: 0;
+  }
+  .mb-header__right {
+    flex-shrink: 0;
+  }
+  .mb-header__venue-select {
+    flex: 1;
+    min-width: 0;
+    max-width: 280px;
+  }
+  .mb-header__venue-name.ant-typography {
+    min-width: 0;
+    margin: 0;
+  }
+  /* Yan menü çekmecesi: çentikli ekranlarda üst/alt boşluk */
+  .mb-nav-drawer .ant-drawer-body {
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-left: env(safe-area-inset-left) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .mb-header.ant-layout-header {
+    height: calc(60px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    line-height: normal;
+  }
+  .mb-header__left,
+  .mb-header__right {
+    gap: 4px;
+  }
+  .mb-icon-btn.ant-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .mb-header .ant-badge .mb-icon-btn.ant-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .mb-user-button {
+    padding: 4px;
+    margin-left: 2px;
+    min-height: 44px;
+  }
+  .mb-content.ant-layout-content {
+    padding: 16px max(12px, env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-right));
+  }
+  /* Alt sekme çubuğu varken içerik çubuğun arkasında kalmasın */
+  .mb-shell.has-tabbar .mb-content.ant-layout-content {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Alt sekme çubuğu (oyuncu, telefon) ---------- */
+.mb-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900; /* antd çekmece/modal (1000) üstte kalsın */
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: end;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+  background: rgba(5, 8, 14, 0.92);
+  border-top: 1px solid var(--mb-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.22s ease;
+}
+
+.mb-tabbar.is-hidden {
+  transform: translateY(110%);
+  pointer-events: none;
+}
+
+.mb-tabbar__item,
+.mb-tabbar__create {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  height: 64px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--mb-text-2);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mb-tabbar__item .anticon {
+  font-size: 21px;
+}
+
+.mb-tabbar__item span,
+.mb-tabbar__create > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mb-tabbar__item.is-active {
+  color: var(--mb-primary);
+}
+
+.mb-tabbar__item.is-active .anticon {
+  filter: drop-shadow(0 0 8px rgba(198, 244, 50, 0.45));
+}
+
+.mb-tabbar__create {
+  justify-content: flex-end;
+  padding-bottom: 8px;
+  color: var(--mb-text);
+}
+
+.mb-tabbar__plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-top: -22px;
+  margin-bottom: 2px;
+  border-radius: 18px;
+  background: var(--mb-primary);
+  color: var(--mb-primary-ink);
+  font-size: 24px;
+  box-shadow: 0 0 0 5px var(--mb-bg), 0 10px 26px rgba(198, 244, 50, 0.35);
+  transform: rotate(0deg);
+  transition: transform 0.18s ease;
+}
+
+.mb-tabbar__create:active .mb-tabbar__plus {
+  transform: scale(0.94);
+}
+
+.mb-tabbar__create.is-active {
+  color: var(--mb-primary);
+}
+
+@media (min-width: 768px) {
+  .mb-tabbar {
+    display: none;
+  }
 }

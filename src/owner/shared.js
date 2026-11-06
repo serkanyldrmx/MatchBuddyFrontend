@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { App, Button, Input, Modal, Space, Tag, Tooltip, Typography } from 'antd';
 import { OWNER_DATA_CHANGED, useOwnerVenue } from '../layout/VenueLayout';
-import { ownerApi } from '../api/venues';
+import { BLOCK_KIND, ownerApi } from '../api/venues';
 import { apiErrorMessage } from '../utils/format';
 import './owner.css';
 
@@ -212,3 +212,65 @@ export const extrasText = (r) =>
   [r?.cleatCount ? `Krampon ×${r.cleatCount}` : null, r?.cameraRequested ? 'Kamera' : null].filter(Boolean).join(' · ');
 
 export const isPastStart = (r) => dayjs(r?.start).isBefore(dayjs());
+
+/* ---------- Bloklar / harici rezervasyon ---------- */
+
+/** Takvim öğesi bir maç mı? (Calendar öğelerinde kind: "match" | "block") */
+export const isMatchItem = (it) => it?.kind === 'match' || (it?.matchId != null && it?.slotBlockId == null);
+
+/**
+ * Blok türü (0 = kapalı, 1 = harici rezervasyon).
+ * Blocks uç noktası sayısal `kind` döner; Calendar öğelerinde `kind` "block" olduğundan
+ * `blockKind` alanı ya da müşteri adı üzerinden çıkarım yapılır.
+ */
+export const blockKindOf = (b) => {
+  if (b?.blockKind != null) return Number(b.blockKind);
+  if (typeof b?.kind === 'number') return b.kind;
+  if (b?.kind != null && /^\d+$/.test(String(b.kind))) return Number(b.kind);
+  return b?.customerName ? BLOCK_KIND.MANUAL_BOOKING : BLOCK_KIND.CLOSED;
+};
+export const isManualBooking = (b) => blockKindOf(b) === BLOCK_KIND.MANUAL_BOOKING;
+
+/** Blocks / Calendar blok öğesini tek biçime getirir: { start, end, pitchName, blockKind, ... } */
+export const normalizeBlock = (b, pitchName) => ({
+  ...b,
+  start: b.start ?? b.startAt,
+  end: b.end ?? b.endAt,
+  pitchName: b.pitchName ?? pitchName ?? b.pitch?.name,
+  blockKind: blockKindOf(b),
+  isPaid: Boolean(b.isPaid),
+});
+
+/** Harici rezervasyon ödeme durumunu değiştirir: const { toggle, busyId } = useBlockPaidToggle(onDone) */
+export function useBlockPaidToggle(onDone) {
+  const { message } = App.useApp();
+  const [busyId, setBusyId] = useState(null);
+  const toggle = async (slotBlockId, isPaid) => {
+    setBusyId(slotBlockId);
+    try {
+      await ownerApi.setBlockPaid(slotBlockId, isPaid);
+      message.success(isPaid ? 'Ödeme alındı olarak işaretlendi.' : 'Ödeme alınmadı olarak işaretlendi.');
+      notifyOwnerChanged();
+      onDone?.(slotBlockId, isPaid);
+      return true;
+    } catch (e) {
+      message.error(apiErrorMessage(e, 'Ödeme durumu güncellenemedi.'));
+      return false;
+    } finally {
+      setBusyId(null);
+    }
+  };
+  return { toggle, busyId };
+}
+
+/** Üyelik aktif değilse devre dışı kalan Switch sarmalayıcısı için yardımcı */
+export const InactiveTip = ({ children }) => {
+  const { membershipActive } = useOwnerVenue();
+  return membershipActive ? (
+    children
+  ) : (
+    <Tooltip title={INACTIVE_TIP}>
+      <span style={{ display: 'inline-flex' }}>{children}</span>
+    </Tooltip>
+  );
+};
