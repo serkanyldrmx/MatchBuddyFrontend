@@ -1,15 +1,24 @@
+import os
 import requests
 import random
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/create-teams": {"origins": "http://localhost:3000"}})
+FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000")
+API_BASE_URL = os.environ.get("MATCHBUDDY_API_URL", "http://localhost:5033").rstrip("/")
+CORS(app, resources={r"/create-teams": {"origins": FRONTEND_ORIGIN}})
+
+
+def auth_headers():
+    """Kullanıcının JWT'sini .NET API'ye iletir."""
+    token = request.headers.get("Authorization", "")
+    return {"Authorization": token} if token else {}
 
 # API'den oyuncu verilerini çekme
 def fetch_players():
     try:
-        response = requests.get("http://localhost:5033/api/Players/GetPlayerList")
+        response = requests.get(f"{API_BASE_URL}/api/Players/GetPlayerList", headers=auth_headers(), timeout=5)
         response.raise_for_status()  # HTTP hatalarını kontrol et
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -77,6 +86,9 @@ def create_balanced_teams(players, team_size):
 @app.route('/create-teams', methods=['GET'])
 def create_teams():
     try:
+        if not request.headers.get("Authorization", "").startswith("Bearer "):
+            return jsonify({"error": "Yetkisiz istek."}), 401
+
         # API parametrelerini alıyoruz
         team_size = request.args.get('teamSize', type=int)
         
@@ -90,7 +102,7 @@ def create_teams():
         return jsonify({"team1": team1, "team2": team2})
     except Exception as e:
         print(f"Takımlar oluşturulurken bir hata oluştu: {e}")
-        return str(e), 500
+        return "Takımlar oluşturulurken bir hata oluştu.", 500
 
 if __name__ == "__main__":
     app.run(port=5000)

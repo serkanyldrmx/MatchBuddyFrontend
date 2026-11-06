@@ -1,105 +1,133 @@
-import React from "react";
+import React from 'react';
+import { Avatar, Button, Card, Col, Descriptions, Row, Space, Statistic, Typography } from 'antd';
 import {
-    Facebook as FacebookIcon,
-    Twitter as TwitterIcon,
-    Instagram as InstagramIcon,
-    LinkedIn as LinkedInIcon,
-    Phone as PhoneIcon,
-    Email as EmailIcon,
-    LocationOn as LocationIcon,
-    GitHub as GitHubIcon,
-    YouTube as YouTubeIcon,
-} from "@mui/icons-material";
-import "./About.css";
-import SerkanYildirim from "./SerkanYildirim.jpg";
-import Logo from '../../images/mutch_buddy_Logo.png'; // Import the logo
+  EnvironmentOutlined,
+  GithubOutlined,
+  InfoCircleOutlined,
+  LinkedinOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  YoutubeOutlined,
+} from '@ant-design/icons';
+import { PageHeader } from '../../ui';
+import SerkanYildirim from './SerkanYildirim.jpg';
+import Logo from '../../images/mutch_buddy_Logo.png';
 
-const About = () => {
-    return (
-        <div className="about-container">
-            <header className="about-header1">
-                <div className="about-header-content">
-                    <img src={Logo} alt="MatchBuddy Logo" className="about-logo" /> {/* Add the logo */}
-                    <div>
-                        <h1>MatchBuddy</h1>
-                        <p>Halı saha arkadaşını bul, eğlenceye katıl!</p>
-                    </div>
-                </div>
-            </header>
+const { Title, Paragraph, Text } = Typography;
 
-            <div className="about-content">
-                <section className="about-section">
-                    <h2>Biz Kimiz?</h2>
-                    <p>MatchBuddy, halı saha maçı yapmak isteyen ancak takım arkadaşlarını bulmakta zorlanan kişiler için oluşturulmuş bir sosyal platformdur. Amacımız, insanların hem spor yapmasını hem de sosyalleşmesini desteklemektir.</p>
-                </section>
+const TEAM = [
+  { name: 'Serkan Yıldırım', role: 'Kurucu & Geliştirici, UI/UX Tasarımcı, Backend Geliştirici', photo: SerkanYildirim },
+  { name: 'Diğer Üye', role: 'Frontend Geliştirici', photo: SerkanYildirim },
+];
 
-                <section className="about-section">
-                    <h2>Misyonumuz</h2>
-                    <p>Takım ruhunu desteklemek, spor yapmayı teşvik etmek ve insanları bir araya getirerek unutulmaz anılar yaratmak. Halı saha maçlarını daha eğlenceli ve erişilebilir hale getiriyoruz.</p>
-                </section>
+const STATS = [
+  { title: 'Kayıtlı Kullanıcı', value: '10,000+' },
+  { title: 'Organize Edilen Maç', value: '5,000+' },
+  { title: 'Takım', value: '1,000+' },
+];
 
-                <section className="about-section">
-                    <h2>Ekibimiz</h2>
-                    <div className="about-team">
-                        <div className="about-team-member">
-                            <img src={SerkanYildirim} alt="Serkan Yıldırım" className="about-team-member-image" />
-                            <div className="about-team-member-info">
-                                <h3>Serkan Yıldırım</h3>
-                                <p>Kurucu & Geliştirici, UI/UX Tasarımcı, Backend Geliştirici</p>
-                            </div>
-                        </div>
-                        <div className="about-team-member">
-                            <img src={SerkanYildirim} alt="Diğer Üye" className="about-team-member-image" />
-                            <div className="about-team-member-info">
-                                <h3>Diğer Üye</h3>
-                                <p>Frontend Geliştirici</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+const SOCIAL = [
+  { href: 'https://www.linkedin.com/in/serkan-y%C4%B1ld%C4%B1r%C4%B1m-558571222/', icon: <LinkedinOutlined />, label: 'LinkedIn' },
+  { href: 'https://github.com/serkanyldrmx', icon: <GithubOutlined />, label: 'GitHub' },
+  { href: 'https://www.youtube.com/', icon: <YoutubeOutlined />, label: 'YouTube' },
+];
 
-                <section className="about-section about-stats">
-                    <h2>İstatistikler</h2>
-                    <div className="stats-container">
-                        <div className="stat-item">
-                            <h3>10,000+</h3>
-                            <p>Kayıtlı Kullanıcı</p>
-                        </div>
-                        <div className="stat-item">
-                            <h3>5,000+</h3>
-                            <p>Organize Edilen Maç</p>
-                        </div>
-                        <div className="stat-item">
-                            <h3>1,000+</h3>
-                            <p>Takım</p>
-                        </div>
-                    </div>
-                </section>
+const About = () => (
+  <>
+    <PageHeader title="Hakkında" subtitle="MatchBuddy ve ekibi hakkında" icon={<InfoCircleOutlined />} />
+    <Row gutter={[16, 16]}>
+      <Col xs={24}>
+        <Card bordered={false}>
+          <Space size={20} align="center" wrap>
+            <Avatar src={Logo} size={72} shape="square" style={{ background: '#fff' }} />
+            <div>
+              <Title level={3} style={{ margin: 0 }}>
+                MatchBuddy
+              </Title>
+              <Text type="secondary">Halı saha arkadaşını bul, eğlenceye katıl!</Text>
             </div>
+          </Space>
+        </Card>
+      </Col>
 
-            <section className="about-contact">
-                <h2>Bize Ulaşın</h2>
-                <div className="contact-info">
-                    <p><PhoneIcon /> +90 545 521 82 49</p>
-                    <p><EmailIcon /> bmserkanyildirim@matchbuddy.com</p>
-                    <p><LocationIcon /> Coşandere Cd. No:3 Bosna Hersek, 42250 Selçuklu/Konya</p>
-                </div>
-                <p>İlişkin güncel haberler için bizi sosyal medya hesaplarımızdan takip edin.</p>
-                <div className="social-links">
-                    <a href="#" className="social-icon"><InstagramIcon /></a>
-                    <a href="#" className="social-icon"><FacebookIcon /></a>
-                    <a href="#" className="social-icon"><TwitterIcon /></a>
-                    <a href="https://www.linkedin.com/in/serkan-y%C4%B1ld%C4%B1r%C4%B1m-558571222/" className="social-icon" target="_blank" rel="noopener noreferrer"><LinkedInIcon /></a>
-                    <a href="https://github.com/serkanyldrmx" className="social-icon" target="_blank" rel="noopener noreferrer"><GitHubIcon /></a>
-                    <a href="https://www.youtube.com/" className="social-icon"><YouTubeIcon /></a>
-                </div>
-            </section>
+      <Col xs={24} md={12}>
+        <Card bordered={false} title="Biz Kimiz?" style={{ height: '100%' }}>
+          <Paragraph style={{ margin: 0 }}>
+            MatchBuddy, halı saha maçı yapmak isteyen ancak takım arkadaşlarını bulmakta zorlanan kişiler için
+            oluşturulmuş bir sosyal platformdur. Amacımız, insanların hem spor yapmasını hem de sosyalleşmesini
+            desteklemektir.
+          </Paragraph>
+        </Card>
+      </Col>
+      <Col xs={24} md={12}>
+        <Card bordered={false} title="Misyonumuz" style={{ height: '100%' }}>
+          <Paragraph style={{ margin: 0 }}>
+            Takım ruhunu desteklemek, spor yapmayı teşvik etmek ve insanları bir araya getirerek unutulmaz anılar
+            yaratmak. Halı saha maçlarını daha eğlenceli ve erişilebilir hale getiriyoruz.
+          </Paragraph>
+        </Card>
+      </Col>
 
-            <footer className="about-footer">
-                <p>&copy; 2024 MatchBuddy. Tüm hakları saklıdır.</p>
-            </footer>
-        </div>
-    );
-};
+      <Col xs={24} lg={14}>
+        <Card bordered={false} title="Ekibimiz" style={{ height: '100%' }}>
+          <Row gutter={[16, 16]}>
+            {TEAM.map((m) => (
+              <Col xs={24} sm={12} key={m.name}>
+                <Space align="start" size={14}>
+                  <Avatar src={m.photo} size={64} />
+                  <div>
+                    <Text strong>{m.name}</Text>
+                    <br />
+                    <Text type="secondary">{m.role}</Text>
+                  </div>
+                </Space>
+              </Col>
+            ))}
+          </Row>
+        </Card>
+      </Col>
+      <Col xs={24} lg={10}>
+        <Card bordered={false} title="İstatistikler" style={{ height: '100%' }}>
+          <Row gutter={16}>
+            {STATS.map((s) => (
+              <Col span={8} key={s.title}>
+                <Statistic title={s.title} value={s.value} />
+              </Col>
+            ))}
+          </Row>
+        </Card>
+      </Col>
+
+      <Col xs={24}>
+        <Card bordered={false} title="Bize Ulaşın">
+          <Descriptions column={{ xs: 1, md: 3 }} size="small">
+            <Descriptions.Item label={<PhoneOutlined />}>
+              <a href="tel:+905455218249">+90 545 521 82 49</a>
+            </Descriptions.Item>
+            <Descriptions.Item label={<MailOutlined />}>
+              <a href="mailto:bmserkanyildirim@matchbuddy.com">bmserkanyildirim@matchbuddy.com</a>
+            </Descriptions.Item>
+            <Descriptions.Item label={<EnvironmentOutlined />}>
+              Coşandere Cd. No:3 Bosna Hersek, 42250 Selçuklu/Konya
+            </Descriptions.Item>
+          </Descriptions>
+          <Paragraph type="secondary" style={{ marginTop: 12 }}>
+            İlişkin güncel haberler için bizi sosyal medya hesaplarımızdan takip edin.
+          </Paragraph>
+          <Space wrap>
+            {SOCIAL.map((s) => (
+              <Button key={s.label} icon={s.icon} href={s.href} target="_blank" rel="noopener noreferrer">
+                {s.label}
+              </Button>
+            ))}
+          </Space>
+        </Card>
+      </Col>
+    </Row>
+    <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 24, marginBottom: 0 }}>
+      &copy; 2024 MatchBuddy. Tüm hakları saklıdır.
+    </Paragraph>
+  </>
+);
 
 export default About;

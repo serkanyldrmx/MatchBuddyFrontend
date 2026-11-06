@@ -1,0 +1,215 @@
+.mb-shell {
+  min-height: 100vh;
+  background: var(--mb-bg);
+}
+
+/* ---------- Yan menü ---------- */
+.mb-sider {
+  position: sticky !important;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--mb-border);
+}
+
+.mb-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 76px;
+  padding: 0 22px;
+  color: var(--mb-text);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mb-brand:hover {
+  color: var(--mb-text);
+}
+
+.mb-brand__mark {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 12px;
+  background: var(--mb-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px rgba(198, 244, 50, 0.12), 0 8px 24px rgba(198, 244, 50, 0.25);
+}
+
+.mb-brand__mark img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+  mix-blend-mode: multiply;
+}
+
+.mb-brand__name {
+  font-family: var(--mb-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.mb-brand__name em {
+  color: var(--mb-primary);
+  font-style: italic;
+}
+
+.mb-brand:has(.mb-brand__badge) {
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.mb-brand:has(.mb-brand__badge) .mb-brand__name {
+  font-size: 20px;
+}
+
+.mb-brand__badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: var(--mb-gold);
+  color: #1a1203;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.mb-sider-cta {
+  margin: auto 16px 20px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--mb-border);
+}
+
+.mb-sider-cta h4 {
+  margin: 0 0 4px;
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.mb-sider-cta p {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: rgba(232, 238, 246, 0.75);
+}
+
+/* ---------- Üst bar ---------- */
+.mb-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--mb-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.mb-header__left,
+.mb-header__right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mb-header__greeting {
+  font-size: 13px;
+  color: var(--mb-text-2);
+}
+
+.mb-header__greeting strong {
+  color: var(--mb-text);
+}
+
+.mb-icon-btn.ant-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px !important;
+  border: 1px solid var(--mb-border);
+  background: var(--mb-surface);
+  color: var(--mb-text);
+}
+
+.mb-icon-btn.ant-btn:hover {
+  border-color: var(--mb-primary) !important;
+  color: var(--mb-primary) !important;
+}
+
+.mb-user-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--mb-border);
+  background: var(--mb-surface);
+  cursor: pointer;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  margin-left: 6px;
+  color: var(--mb-text);
+}
+
+.mb-user-button:hover {
+  border-color: var(--mb-border-strong);
+}
+
+.mb-user-button__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.mb-user-button__text .ant-typography {
+  font-size: 12px;
+}
+
+/* ---------- İçerik ---------- */
+.mb-content {
+  padding: 28px;
+}
+
+.mb-content__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .mb-content {
+    padding: 16px;
+  }
+}
+
+.mb-notif-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+/* Sayfalarda ortak kart ızgarası */
+.mb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}

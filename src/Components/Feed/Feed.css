@@ -1,0 +1,531 @@
+/* ---------- Zaman akışı ---------- */
+.mb-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mb-timeline::before {
+  /* dikey çizgi */
+  content: '';
+  position: absolute;
+  left: 46px;
+  top: 24px;
+  bottom: 24px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--mb-border-strong), transparent);
+  pointer-events: none;
+}
+
+.mb-activity {
+  --accent: var(--mb-text-2);
+  --accent-soft: var(--mb-surface-2);
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 14px;
+  padding: 16px 18px 16px 18px;
+  border-radius: var(--mb-radius);
+  background: var(--mb-surface);
+  border: 1px solid var(--mb-border);
+  transition: border-color 0.18s;
+}
+
+.mb-activity:hover {
+  border-color: var(--mb-border-strong);
+}
+
+.mb-activity.is-created,
+.mb-activity.is-joined {
+  --accent: var(--mb-primary);
+  --accent-soft: var(--mb-primary-soft);
+}
+
+.mb-activity.is-scored {
+  --accent: var(--mb-pitch);
+  --accent-soft: rgba(34, 197, 94, 0.14);
+}
+
+.mb-activity.is-mvp,
+.mb-activity.is-trophy {
+  --accent: var(--mb-gold);
+  --accent-soft: var(--mb-gold-soft);
+}
+
+.mb-activity.is-team,
+.mb-activity.is-follow {
+  --accent: var(--mb-info);
+  --accent-soft: rgba(56, 189, 248, 0.14);
+}
+
+.mb-activity.is-mvp {
+  border-color: rgba(251, 191, 36, 0.35);
+  background:
+    radial-gradient(600px 160px at 100% 0%, rgba(251, 191, 36, 0.16), transparent 70%),
+    var(--mb-surface);
+}
+
+.mb-activity.is-trophy {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.mb-activity__rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-self: start;
+}
+
+.mb-activity__type {
+  position: absolute;
+  right: -2px;
+  bottom: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 2px solid var(--mb-surface);
+  color: var(--accent);
+  font-size: 11px;
+  backdrop-filter: blur(6px);
+}
+
+.mb-activity__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mb-activity__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mb-activity__head p {
+  margin: 0;
+  color: var(--mb-text-2);
+  line-height: 1.45;
+}
+
+.mb-activity__head p .mb-player-link,
+.mb-activity__head p strong {
+  color: var(--mb-text);
+  font-weight: 600;
+}
+
+.mb-activity__head time {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--mb-text-3);
+  white-space: nowrap;
+}
+
+/* Mini fikstür */
+.mb-mini-fixture {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+
+.mb-mini-fixture:hover,
+.mb-mini-fixture:focus-visible {
+  outline: none;
+  border-color: rgba(198, 244, 50, 0.35);
+}
+
+.mb-mini-fixture__when {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-right: 10px;
+  border-right: 1px dashed var(--mb-border-strong);
+  line-height: 1;
+}
+
+.mb-mini-fixture__dow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mb-primary);
+}
+
+.mb-mini-fixture__day {
+  font-family: var(--mb-display);
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.mb-mini-fixture__time {
+  font-family: var(--mb-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mb-text-2);
+}
+
+.mb-mini-fixture__score {
+  font-family: var(--mb-display);
+  font-size: 26px;
+  font-weight: 800;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.mb-mini-fixture__score i {
+  color: var(--mb-primary);
+  font-style: normal;
+  margin: 0 2px;
+}
+
+.mb-mini-fixture__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.mb-mini-fixture__body strong {
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-mini-fixture__body span {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+/* Gol */
+.mb-activity__goals {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.16), transparent);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.mb-activity__ball {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.mb-activity__big {
+  font-family: var(--mb-display);
+  font-size: 56px;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 0.9;
+  color: var(--mb-pitch);
+}
+
+.mb-activity__goals-text {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.mb-activity__goals-text small {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  font-style: normal;
+  text-transform: none;
+  color: var(--mb-text-2);
+}
+
+/* MVP */
+.mb-activity__mvp {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.03));
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.mb-activity__mvp-avatar {
+  position: relative;
+}
+
+.mb-activity__mvp-avatar .mb-avatar.ant-avatar {
+  border-color: var(--mb-gold);
+  box-shadow: 0 0 22px rgba(251, 191, 36, 0.45);
+}
+
+.mb-activity__crown {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-8deg);
+  font-size: 22px;
+  color: var(--mb-gold);
+  z-index: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+.mb-activity__mvp > div:last-child {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.mb-activity__mvp-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--mb-gold);
+}
+
+.mb-activity__mvp strong {
+  font-family: var(--mb-display);
+  font-size: 28px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.mb-activity__mvp small {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+/* Takım */
+.mb-activity__team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+}
+
+.mb-activity__team-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--mb-info);
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.mb-activity__team strong {
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+/* Takip */
+.mb-activity__person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+}
+
+.mb-activity__person > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.mb-activity__person .mb-player-link {
+  font-weight: 600;
+}
+
+.mb-activity__person small {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+/* Turnuva */
+.mb-activity__trophy {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.02));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.mb-activity__trophy > .anticon {
+  font-size: 40px;
+  color: var(--mb-gold);
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.5));
+}
+
+.mb-activity__trophy div {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.mb-activity__trophy span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--mb-gold);
+}
+
+.mb-activity__trophy strong {
+  font-family: var(--mb-display);
+  font-size: 26px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.mb-feed-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.mb-feed-end {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--mb-text-3);
+}
+
+/* ---------- Boş akış ---------- */
+.mb-feed-empty__intro {
+  text-align: center;
+  padding: 12px 0 20px;
+}
+
+.mb-feed-empty__icon {
+  font-size: 40px;
+  color: var(--mb-primary);
+}
+
+.mb-feed-empty__intro h3 {
+  margin: 10px 0 6px;
+  font-family: var(--mb-display);
+  font-size: 32px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.mb-feed-empty__intro p {
+  max-width: 460px;
+  margin: 0 auto;
+  color: var(--mb-text-2);
+}
+
+/* ---------- Öneriler ---------- */
+.mb-feed-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 92px;
+}
+
+@media (max-width: 1199px) {
+  .mb-feed-side {
+    position: static;
+  }
+}
+
+.mb-suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mb-suggest__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mb-suggest.is-prominent .mb-suggest__row {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border);
+}
+
+.mb-suggest__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.mb-suggest__name .mb-player-link {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-suggest__name small {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+@media (max-width: 520px) {
+  .mb-timeline::before {
+    display: none;
+  }
+  .mb-activity {
+    grid-template-columns: 1fr;
+  }
+  .mb-activity__rail {
+    display: none;
+  }
+  .mb-mini-fixture {
+    grid-template-columns: 56px 1fr;
+  }
+  .mb-mini-fixture > .ant-btn,
+  .mb-mini-fixture > .mb-chip {
+    grid-column: 1 / -1;
+  }
+}

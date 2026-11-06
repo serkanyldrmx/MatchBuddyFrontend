@@ -1,221 +1,158 @@
-import React, { useState, useEffect } from 'react';
-import { message, Card, Avatar, Input, Button, Spin } from 'antd';
-import Navbar from "../Navbar/Navbar";
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Alert, App, Button, Card, Col, Input, InputNumber, List, Row, Space, Spin, Statistic, Typography } from 'antd';
+import { ReloadOutlined, RobotOutlined, SaveOutlined, StarFilled, ThunderboltOutlined } from '@ant-design/icons';
+import { aiFetch, api, TEAM_AI_BASE_URL } from '../../api/config';
+import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
+import { apiErrorMessage, fullName } from '../../utils/format';
 import './TeamAICreate.css';
-import axios from 'axios';
-import { BrainCircuit } from "lucide-react";
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+
+const { Text } = Typography;
+const total = (team) => team.reduce((s, p) => s + (p.userScore || 0), 0);
+
+function TeamColumn({ side, name, onName, players }) {
+  return (
+    <Card
+      bordered={false}
+      className={`mb-ai-team is-${side}`}
+      title={
+        <Input
+          value={name}
+          onChange={(e) => onName(e.target.value)}
+          placeholder={side === 'home' ? '1. takımın adı' : '2. takımın adı'}
+          variant="borderless"
+          className="mb-ai-team__name"
+          maxLength={40}
+        />
+      }
+      extra={<Statistic value={total(players)} prefix={<StarFilled style={{ color: 'var(--mb-gold)' }} />} valueStyle={{ fontSize: 18 }} />}
+    >
+      <List
+        dataSource={players}
+        renderItem={(p) => (
+          <List.Item extra={<Text type="secondary">{p.userScore ?? 0} puan</Text>}>
+            <List.Item.Meta
+              avatar={<PlayerAvatar player={p} size={36} />}
+              title={fullName(p)}
+              description={`${p.age || '-'} yaş · ${p.size || '-'} cm · ${p.weight || '-'} kg`}
+            />
+          </List.Item>
+        )}
+      />
+    </Card>
+  );
+}
 
 function TeamAICreate() {
-    const [teamName1, setTeamName1] = useState('');
-    const [teamName2, setTeamName2] = useState('');
-    const [teamMembers, setTeamMembers] = useState({ team1: [], team2: [] });
-    const [loading, setLoading] = useState(false);
-    const [teamSize, setTeamSize] = useState(6);
-    const [team1Score, setTeam1Score] = useState(0);
-    const [team2Score, setTeam2Score] = useState(0);
-    const { Meta } = Card;
+  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const [teamSize, setTeamSize] = useState(6);
+  const [teams, setTeams] = useState({ team1: [], team2: [] });
+  const [names, setNames] = useState({ team1: '', team2: '' });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-    const getTotalScore = (team) => {
-        return team.reduce((total, member) => total + (member.userScore || 0), 0);
-    };
+  const hasTeams = teams.team1.length > 0;
+  const diff = useMemo(() => Math.abs(total(teams.team1) - total(teams.team2)), [teams]);
 
-    useEffect(() => {
-        setTeam1Score(getTotalScore(teamMembers.team1));
-        setTeam2Score(getTotalScore(teamMembers.team2));
-    }, [teamMembers]);
+  const generate = async () => {
+    setLoading(true);
+    try {
+      const res = await aiFetch(TEAM_AI_BASE_URL, `/create-teams?teamSize=${teamSize}`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text && text.length < 200 ? text : 'Takımlar oluşturulamadı.');
+      }
+      const data = await res.json();
+      setTeams({ team1: data.team1 || [], team2: data.team2 || [] });
+      message.success('Dengeli takımlar oluşturuldu.');
+    } catch (e) {
+      message.error(e.message === 'Failed to fetch' ? 'Yapay zeka servisine ulaşılamadı.' : e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleCreateTeam = async () => {
-        if (teamSize < 4 || teamSize > 11) {
-            message.error('Takım boyutu 4 ile 11 arasında olmalıdır!');
-            return;
-        }
+  const save = async () => {
+    if (!names.team1.trim() || !names.team2.trim()) {
+      message.warning('İki takıma da isim verin.');
+      return;
+    }
+    setSaving(true);
+    try {
+      for (const key of ['team1', 'team2']) {
+        await api.post('/api/Team/SaveTeam', {
+          teamName: names[key].trim(),
+          playerId: teams[key].map((p) => p.playerId).filter(Boolean),
+        });
+      }
+      message.success('Takımlar kaydedildi.');
+      navigate('/team');
+    } catch (e) {
+      message.error(apiErrorMessage(e, 'Takımlar kaydedilemedi.'));
+    } finally {
+      setSaving(false);
+    }
+  };
 
-        setLoading(true);
+  return (
+    <>
+      <PageHeader
+        title="AI ile takım oluştur"
+        subtitle="Oyuncuların yaş, boy, kilo ve puanlarına göre birbirine denk iki takım kurulur."
+        icon={<RobotOutlined />}
+      />
 
-        try {
-            const minimumLoadingTime = new Promise(resolve => setTimeout(resolve, 3000));
-
-            const fetchPromise = fetch(`http://localhost:5000/create-teams?teamSize=${teamSize}`)
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`Network response was not ok: ${res.status}`);
-                    }
-                    return res.json();
-                });
-
-            const [result] = await Promise.all([fetchPromise, minimumLoadingTime]);
-
-            setTeamMembers(result);
-            message.success('Takımlar başarıyla oluşturuldu!');
-        } catch (error) {
-            console.error('Takım oluşturma hatası:', error);
-            message.error(`Takımlar oluşturulurken bir hata oluştu: ${error.message}`);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSaveTeams = async () => {
-        if (!teamName1 || !teamName2) {
-            message.error('HerSOLID iki takımın adı da girilmelidir!');
-            return;
-        }
-
-        setLoading(true);
-
-        const saveTeam = async (teamName, teamMembers) => {
-            console.log(`Takım Kaydediliyor: ${teamName}, Üyeler:`, teamMembers);
-            const playerIds = teamMembers.map(member => member.playerId).filter(id => id != null);
-
-            const payload = {
-                TeamName: teamName,
-                PlayerId: playerIds
-            };
-
-            console.log("Gönderilen Payload:", payload);
-
-            try {
-                console.log('API isteği gönderiliyor...');
-                const response = await axios.post("http://localhost:5033/api/Team/SaveTeam", payload, {
-                    headers: { "Content-Type": "application/json" }
-                });
-                console.log('API yanıtı:', response);
-                if (response.status === 200) {
-                    return response.data;
-                } else {
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-            } catch (error) {
-                console.error('Hata:', error);
-                message.error(`Takım kaydedilirken bir hata oluştu: ${error.message}`);
-                return null;
-            }
-        };
-
-        try {
-            const result1 = await saveTeam(teamName1, teamMembers.team1);
-            const result2 = await saveTeam(teamName2, teamMembers.team2);
-
-            if (result1 && result2) {
-                message.success("Takımlar başarıyla kaydedildi!");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="team-ai-create">
-            <Navbar />
-            <div className="ai-header">
-                <BrainCircuit size={32} className="ai-icon1" />
-                <h2>Yapay Zeka ile Turnuva Oluşturma</h2>
+      <Card bordered={false} style={{ marginBottom: 24 }}>
+        <div className="mb-ai-settings">
+          <Space align="end" wrap size={16}>
+            <div>
+              <Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>Takım başına oyuncu</Text>
+              <InputNumber min={4} max={11} value={teamSize} onChange={(v) => setTeamSize(v || 4)} style={{ width: 140 }} />
             </div>
-
-            <div className="team-size-input">
-                <Input
-                    type="number"
-                    min={4}
-                    max={11}
-                    value={teamSize}
-                    onChange={(e) => setTeamSize(Number(e.target.value))}
-                    placeholder="Takım Büyüklüğü (4-11)"
-                />
-            </div>
-
-            <Button onClick={handleCreateTeam} disabled={loading} type="primary">
-                {loading ? <Spin /> : 'Takımları Oluştur'}
+            <Button type="primary" icon={hasTeams ? <ReloadOutlined /> : <ThunderboltOutlined />} onClick={generate} loading={loading}>
+              {hasTeams ? 'Yeniden oluştur' : 'Takımları oluştur'}
             </Button>
-
-            {loading && (
-                <div className="loading-overlay">
-                    <div className="loading-content">
-                        <AutoAwesomeIcon className="loading-icon" />
-                        <div className="spinner"></div>
-                        <span>Yapay Zeka Takımları Oluşturuyor...</span>
-                    </div>
-                </div>
-            )}
-
-            <div className="team-inputs">
-                <Input
-                    placeholder="Takım 1 Adı"
-                    value={teamName1}
-                    onChange={(e) => setTeamName1(e.target.value)}
-                />
-                <Input
-                    placeholder="Takım 2 Adı"
-                    value={teamName2}
-                    onChange={(e) => setTeamName2(e.target.value)}
-                />
-            </div>
-
-            <div className="team-container">
-                <div className="team-card-Ai">
-                    <h3>{teamName1 || 'Takım 1'}</h3>
-                    <div className="total-score">
-                        Toplam Puan: {team1Score}
-                    </div>
-                    {teamMembers.team1.map((member, index) => (
-                        <Card key={index} className="team-member" bordered={false}>
-                            <Avatar
-                                size={72}
-                                src={
-                                    member.profilePictureUrl
-                                        ? member.profilePictureUrl.startsWith("http")
-                                            ? member.profilePictureUrl
-                                            : `http://localhost:5033${member.profilePictureUrl}`
-                                        : undefined
-                                }
-                                style={{ marginBottom: 8 }}
-                            >
-                                {(!member.profilePictureUrl && member.playerName) ? member.playerName[0] : '?'}
-                            </Avatar>
-                            <div>
-                                <h4>{member.playerName} {member.playerSurname}</h4>
-                                <p>Yaş: {member.age || 'Bilinmiyor'}</p>
-                                <p>Skor: {member.userScore || 0}</p>
-                                <p>Boy: {member.size || '-'} cm - Kilo: {member.weight || '-'} kg</p>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-
-                <div className="team-card-Ai">
-                    <h3>{teamName2 || 'Takım 2'}</h3>
-                    <div className="total-score">
-                        Toplam Puan: {team2Score}
-                    </div>
-                    {teamMembers.team2.map((member, index) => (
-                        <Card key={index} className="team-member" bordered={false}>
-                            <Avatar
-                                size={72}
-                                src={
-                                    member.profilePictureUrl
-                                        ? member.profilePictureUrl.startsWith("http")
-                                            ? member.profilePictureUrl
-                                            : `http://localhost:5033${member.profilePictureUrl}`
-                                        : undefined
-                                }
-                                style={{ marginBottom: 8 }}
-                            >
-                                {(!member.profilePictureUrl && member.playerName) ? member.playerName[0] : '?'}
-                            </Avatar>
-                            <div>
-                                <h4>{member.playerName} {member.playerSurname}</h4>
-                                <p>Yaş: {member.age || 'Bilinmiyor'}</p>
-                                <p>Skor: {member.userScore || 0}</p>
-                                <p>Boy: {member.size || '-'} cm - Kilo: {member.weight || '-'} kg</p>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-
-            <Button onClick={handleSaveTeams} className="save-teams-button" type="primary">Takımları Kaydet</Button>
+          </Space>
+          {hasTeams && (
+            <Space wrap size={24}>
+              <Statistic title="Puan farkı" value={diff} valueStyle={{ color: diff <= 10 ? '#22c55e' : '#fbbf24' }} />
+              <Button type="primary" icon={<SaveOutlined />} onClick={save} loading={saving}>
+                Takımları kaydet
+              </Button>
+            </Space>
+          )}
         </div>
-    );
+      </Card>
+
+      <Spin spinning={loading} tip="Takımlar dengeleniyor…">
+        {hasTeams ? (
+          <>
+            {diff > 10 && (
+              <Alert
+                type="warning"
+                showIcon
+                style={{ marginBottom: 16 }}
+                message="Takımlar arasındaki puan farkı yüksek. Daha dengeli bir dağılım için yeniden oluşturmayı deneyin."
+              />
+            )}
+            <Row gutter={[24, 24]}>
+              <Col xs={24} md={12}>
+                <TeamColumn side="home" name={names.team1} onName={(v) => setNames((n) => ({ ...n, team1: v }))} players={teams.team1} />
+              </Col>
+              <Col xs={24} md={12}>
+                <TeamColumn side="away" name={names.team2} onName={(v) => setNames((n) => ({ ...n, team2: v }))} players={teams.team2} />
+              </Col>
+            </Row>
+          </>
+        ) : (
+          <Card bordered={false}>
+            <EmptyState description="Takım boyutunu seçip 'Takımları oluştur' butonuna basın" />
+          </Card>
+        )}
+      </Spin>
+    </>
+  );
 }
 
 export default TeamAICreate;

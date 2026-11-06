@@ -1,0 +1,159 @@
+/* Arkadaşlar sayfası */
+.mb-friends-toolbar.ant-card {
+  margin-bottom: 16px;
+}
+
+.mb-friends-toolbar .ant-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+}
+
+.mb-friends-toolbar .ant-segmented {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mb-friends-toolbar__filter.ant-input-affix-wrapper {
+  width: 240px;
+}
+
+.mb-friends-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--mb-primary);
+  vertical-align: middle;
+  box-shadow: 0 0 8px var(--mb-primary);
+}
+
+.mb-friends-note {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--mb-primary-soft);
+  border: 1px solid rgba(198, 244, 50, 0.24);
+  color: var(--mb-text);
+  font-size: 13px;
+}
+
+.mb-discover-search.ant-input-affix-wrapper {
+  margin-bottom: 20px;
+  height: 52px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+
+.mb-friends-section {
+  margin: 4px 0 14px;
+  font-family: var(--mb-display);
+  font-size: 22px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--mb-text);
+}
+
+/* Mini oyuncu kartı */
+.mb-friend-card.ant-card {
+  background:
+    radial-gradient(400px 120px at 100% 0%, rgba(198, 244, 50, 0.06), transparent 70%),
+    var(--mb-surface);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.mb-friend-card.ant-card:hover {
+  border-color: var(--mb-border-strong) !important;
+  transform: translateY(-2px);
+}
+
+.mb-friend-card.is-highlight.ant-card {
+  border-color: rgba(198, 244, 50, 0.4) !important;
+}
+
+.mb-friend-card .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.mb-friend-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mb-friend-card__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.mb-friend-card__title {
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-friend-card__user {
+  font-size: 12px;
+  color: var(--mb-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-friend-card__score {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-family: var(--mb-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--mb-gold);
+  background: var(--mb-gold-soft);
+  white-space: nowrap;
+}
+
+.mb-friend-card__reason {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--mb-primary);
+}
+
+.mb-friend-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 24px;
+}
+
+.mb-friend-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+@media (max-width: 640px) {
+  .mb-friends-toolbar__filter.ant-input-affix-wrapper {
+    width: 100%;
+  }
+}

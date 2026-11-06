@@ -1,243 +1,301 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import Navbar from '../Navbar/Navbar';
-import './StadiumIsAdmin.css';
-import axios from 'axios';
-import { message } from 'antd';
 import L from 'leaflet';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import { Alert, App, Button, Card, Col, Form, Input, Row, Select, Space, TimePicker, Typography } from 'antd';
+import { AimOutlined, PlusCircleOutlined, SaveOutlined } from '@ant-design/icons';
+import { api } from '../../api/config';
+import { PageHeader } from '../../ui';
+import { apiErrorMessage } from '../../utils/format';
 import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
+import './StadiumAdmin.css';
 
-// Leaflet için özel ikon oluşturma
+const { Text } = Typography;
+const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
+const DEFAULT_VALUES = {
+  openingTime: dayjs('08:00', 'HH:mm'),
+  closingTime: dayjs('23:00', 'HH:mm'),
+};
+
 const customIcon = new L.Icon({
   iconUrl: LocationIcon,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41]
 });
 
+/** Haritayı verilen merkeze taşır */
+function MapView({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) map.flyTo(center, zoom, { duration: 0.8 });
+  }, [map, center, zoom]);
+  return null;
+}
+
+/** Haritaya tıklanınca konumu seçer */
+function ClickPicker({ onPick }) {
+  useMapEvents({
+    click(e) {
+      onPick([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+  return null;
+}
+
+const formatCoords = (pos) => (pos ? `${Number(pos[0]).toFixed(6)}, ${Number(pos[1]).toFixed(6)}` : '');
+
+/** Admin: yeni halı saha ekleme */
 function StadiumIsAdmin() {
+  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [userPosition, setUserPosition] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
-  const [stadiumName, setStadiumName] = useState('');
-  const [openingTime, setOpeningTime] = useState('08:00'); // Varsayılan açılış saati
-  const [closingTime, setClosingTime] = useState('23:00'); // Varsayılan kapanış saati
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
-  const [address, setAddress] = useState('');
-  const [description, setDescription] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchPlaceholder, setSearchPlaceholder] = useState('Konum Ara');
-  const [mapCenter, setMapCenter] = useState([39.9334, 32.8597]); // Varsayılan konum (Ankara)
-  const [zoomLevel, setZoomLevel] = useState(6); // Varsayılan zoom seviyesi
-  const [cities, setCities] = useState([]); // Dinamik il verileri
-  const [districts, setDistricts] = useState([]); // Dinamik ilçe verileri
+  const [view, setView] = useState({ center: null, zoom: 6 });
+  const [cities, setCities] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const cityName = Form.useWatch('city', form); // il/ilçe artık metin (isim) olarak saklanır
 
   useEffect(() => {
+    if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userPos = [position.coords.latitude, position.coords.longitude];
-        setUserPosition(userPos);
-        setMapCenter(userPos); // Kullanıcının konumunu haritanın merkezi olarak ayarla
-        setZoomLevel(13); // Kullanıcının konumuna yakınlaştır
+      (pos) => {
+        const p = [pos.coords.latitude, pos.coords.longitude];
+        setUserPosition(p);
+        setView({ center: p, zoom: 13 });
       },
-      (error) => {
-        console.error('Error getting user position:', error);
-      }
+      () => {}
     );
   }, []);
 
   useEffect(() => {
-    // Tüm illeri ve ilçeleri API'den çek
-    const fetchCities = async () => {
-      try {
-        const response = await axios.get('https://turkiyeapi.dev/api/v1/provinces');
-        setCities(response.data.data);
-      } catch (error) {
-        console.error('Error fetching cities:', error);
-      }
-    };
+    axios
+      .get('https://api.turkiyeapi.dev/v1/provinces')
+      .then((r) => setCities(r.data?.data || []))
+      .catch(() => message.error('İl listesi alınamadı.'))
+      .finally(() => setCitiesLoading(false));
+  }, [message]);
 
-    fetchCities();
-  }, []);
+  const districts = cities.find((c) => c.name === cityName)?.districts || [];
 
-  useEffect(() => {
-    // İl seçildiğinde ilgili ilçeleri ayarla
-    const selectedCity = cities.find(c => c.id === parseInt(city));
-    if (selectedCity) {
-      setDistricts(selectedCity.districts);
-    } else {
-      setDistricts([]);
-    }
-  }, [city, cities]);
+  const pickPosition = (pos) => {
+    setSelectedPosition(pos);
+    form.setFieldValue('location', formatCoords(pos));
+    form.validateFields(['location']).catch(() => {});
+  };
 
-  function LocationMarker() {
-    useMapEvents({
-      click(e) {
-        setSelectedPosition([e.latlng.lat, e.latlng.lng]);
-      },
-    });
-
-    return selectedPosition === null ? null : (
-      <Marker position={selectedPosition} icon={customIcon}>
-        <Popup>Seçilen Konum</Popup>
-      </Marker>
-    );
-  }
-
-  const handleSearch = async () => {
+  const handleSearch = async (query) => {
+    const q = (query || '').trim();
+    if (!q) return;
+    setSearching(true);
     try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}`);
-      if (response.data.length > 0) {
-        const { lat, lon } = response.data[0];
-        setSelectedPosition([lat, lon]);
-        setMapCenter([lat, lon]); // Arama sonucunu haritanın merkezi olarak ayarla
-        setZoomLevel(13); // Arama sonucuna yakınlaştır
+      const r = await axios.get('https://nominatim.openstreetmap.org/search', { params: { format: 'json', q } });
+      if (r.data?.length > 0) {
+        const pos = [parseFloat(r.data[0].lat), parseFloat(r.data[0].lon)];
+        pickPosition(pos);
+        setView({ center: pos, zoom: 15 });
       } else {
-        alert('Konum bulunamadı');
+        message.warning('Konum bulunamadı.');
       }
-    } catch (error) {
-      console.error('Error searching location:', error);
+    } catch (e) {
+      message.error('Konum araması yapılamadı.');
+    } finally {
+      setSearching(false);
     }
   };
 
-  const handleSaveStadium = async () => {
-    if (!stadiumName || !selectedPosition || !city || !district || !address || !openingTime || !closingTime || !description) {
-      alert('Lütfen tüm alanları doldurun.');
+  const handleSubmit = async (values) => {
+    if (!selectedPosition) {
+      message.warning('Lütfen haritadan konum seçin.');
       return;
     }
-
-    const stadiumData = {
-      stadiumName,
+    const payload = {
+      stadiumName: values.stadiumName.trim(),
       location: `${selectedPosition[0]}, ${selectedPosition[1]}`,
-      city: parseInt(city),
-      district: parseInt(district),
-      address,
-      openingTime: `${openingTime}:00`,
-      closingTime: `${closingTime}:00`,
-      description,
+      city: values.city,
+      district: values.district,
+      address: values.address.trim(),
+      openingTime: `${values.openingTime.format('HH:mm')}:00`,
+      closingTime: `${values.closingTime.format('HH:mm')}:00`,
+      description: values.description.trim(),
     };
-
+    setSaving(true);
     try {
-      const response = await axios.post('http://localhost:5033/api/Stadium/SaveStadium', stadiumData);
-      if (response.data.success) {
-        message.success('Stadyum başarıyla kaydedildi.');
-        // Formu temizle
-        setStadiumName('');
-        setSelectedPosition(null);
-        setCity('');
-        setDistrict('');
-        setAddress('');
-        setOpeningTime('08:00'); // Varsayılan açılış saati
-        setClosingTime('23:00'); // Varsayılan kapanış saati
-        setDescription('');
-      } else {
-        message.error('Stadyum kaydedilirken bir hata oluştu.');
+      const r = await api.post('/api/Stadium/SaveStadium', payload);
+      if (r.data && r.data.success === false) {
+        message.error(r.data.message || 'Halı saha kaydedilemedi.');
+        return;
       }
-    } catch (error) {
-      console.error('Error saving stadium:', error);
-      message.error('Stadyum kaydedilirken bir hata oluştu.');
+      message.success('Halı saha başarıyla kaydedildi.');
+      form.resetFields();
+      setSelectedPosition(null);
+      navigate('/adminPanel/stadiums');
+    } catch (e) {
+      message.error(apiErrorMessage(e, 'Halı saha kaydedilemedi.'));
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div>
-      <div className="adminContainer">
-        <div className="controlsContainer">
-          <input
-            type="text"
-            placeholder="Stadyum İsmi"
-            value={stadiumName}
-            onChange={(e) => setStadiumName(e.target.value)}
-            className="inputField"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Seçilen Konum"
-            value={selectedPosition ? `${selectedPosition[0]}, ${selectedPosition[1]}` : ''}
-            readOnly
-            className="inputField"
-            required
-          />
-          <label className="inputLabel">Açılış Saati</label>
-          <input
-            type="time"
-            value={openingTime}
-            onChange={(e) => setOpeningTime(e.target.value)}
-            className="inputField"
-            required
-          />
-          <label className="inputLabel">Kapanış Saati</label>
-          <input
-            type="time"
-            value={closingTime}
-            onChange={(e) => setClosingTime(e.target.value)}
-            className="inputField"
-            required
-          />
-          <select className="comboBox" value={city} onChange={(e) => setCity(e.target.value)} required>
-            <option value="">İl Seçin</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>{city.name}</option>
-            ))}
-          </select>
-          <select className="comboBox" value={district} onChange={(e) => setDistrict(e.target.value)} required>
-            <option value="">İlçe Seçin</option>
-            {districts.map((district) => (
-              <option key={district.id} value={district.id}>{district.name}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="Açık Adres"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="inputField"
-            required
-          />
-          <textarea
-            placeholder="Açıklama"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="textareaField"
-            required
-          />
-          <button onClick={handleSaveStadium} className="saveButton">Stadyumu Kaydet</button>
-        </div>
-        <div className="stadiumMapContainer">
-          <MapContainer
-            center={mapCenter} // Haritanın merkezi
-            zoom={zoomLevel} // Yakınlaştırma seviyesi
-            style={{ height: "700px", width: "100%", position: "relative" }} // Yüksekliği artırdık
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {userPosition && (
-              <Marker position={userPosition} icon={customIcon}>
-                <Popup>Mevcut konumunuz</Popup>
-              </Marker>
-            )}
-            <LocationMarker />
-            <div className="searchContainer">
-              <input
-                type="text"
-                placeholder={searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchPlaceholder('')}
-                onBlur={() => setSearchPlaceholder('Konum Ara')}
-                className="searchInput"
+    <>
+      <PageHeader
+        title="Halı Saha Ekle"
+        subtitle="Yeni bir halı saha kaydı oluşturun ve harita üzerinde konumunu belirleyin"
+        icon={<PlusCircleOutlined />}
+      />
+      <Alert
+        type="warning"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message="Bu ekranla eklenen tesisin işletmesi olmaz ve oyunculara görünmez."
+        description={
+          <>
+            Anlaşmalı bir tesis eklemek için işletme hesabı, fotoğraflar ve konumu tek adımda oluşturan{' '}
+            <Link to="/adminPanel/businesses?new=1">Yeni işletme</Link> sihirbazını kullanmanızı öneririz. Burada eklenen tesis
+            daha sonra İşletmeler ekranından bir işletmeye bağlanabilir.
+          </>
+        }
+      />
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={10}>
+          <Card bordered={false} title="Halı saha bilgileri">
+            <Form
+              form={form}
+              layout="vertical"
+              initialValues={DEFAULT_VALUES}
+              onFinish={handleSubmit}
+              requiredMark="optional"
+              onValuesChange={(changed) => {
+                if ('city' in changed) form.setFieldValue('district', undefined);
+              }}
+            >
+              <Form.Item
+                name="stadiumName"
+                label="Halı saha adı"
+                rules={[{ required: true, whitespace: true, message: 'Halı saha adını girin' }]}
+              >
+                <Input placeholder="Örn. Yıldız Halı Saha" maxLength={100} />
+              </Form.Item>
+              <Row gutter={16}>
+                <Col xs={24} sm={12}>
+                  <Form.Item name="city" label="İl" rules={[{ required: true, message: 'İl seçin' }]}>
+                    <Select
+                      showSearch
+                      loading={citiesLoading}
+                      placeholder="İl seçin"
+                      optionFilterProp="label"
+                      options={cities.map((c) => ({ value: c.name, label: c.name }))}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item name="district" label="İlçe" rules={[{ required: true, message: 'İlçe seçin' }]}>
+                    <Select
+                      showSearch
+                      disabled={!cityName}
+                      placeholder={cityName ? 'İlçe seçin' : 'Önce il seçin'}
+                      optionFilterProp="label"
+                      options={districts.map((d) => ({ value: d.name, label: d.name }))}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item
+                name="address"
+                label="Açık adres"
+                rules={[{ required: true, whitespace: true, message: 'Açık adresi girin' }]}
+              >
+                <Input.TextArea rows={2} placeholder="Mahalle, cadde, no" maxLength={250} />
+              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    name="openingTime"
+                    label="Açılış saati"
+                    rules={[{ required: true, message: 'Açılış saatini seçin' }]}
+                  >
+                    <TimePicker format="HH:mm" minuteStep={30} style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="closingTime"
+                    label="Kapanış saati"
+                    rules={[{ required: true, message: 'Kapanış saatini seçin' }]}
+                  >
+                    <TimePicker format="HH:mm" minuteStep={30} style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item
+                name="description"
+                label="Açıklama"
+                rules={[{ required: true, whitespace: true, message: 'Açıklama girin' }]}
+              >
+                <Input.TextArea rows={3} placeholder="Saha özellikleri, otopark, duş vb." maxLength={500} showCount />
+              </Form.Item>
+              <Form.Item
+                name="location"
+                label="Konum"
+                extra="Haritaya tıklayarak konum seçin"
+                rules={[{ required: true, message: 'Haritadan konum seçin' }]}
+              >
+                <Input readOnly prefix={<AimOutlined />} placeholder="Konum seçilmedi" />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Space>
+                  <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={saving}>
+                    Halı sahayı kaydet
+                  </Button>
+                  <Button onClick={() => navigate('/adminPanel/stadiums')}>Vazgeç</Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+        <Col xs={24} lg={14}>
+          <Card bordered={false} title="Konum seçimi">
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Input.Search
+                placeholder="Adres veya yer ara (örn. Selçuklu, Konya)"
+                enterButton="Ara"
+                allowClear
+                loading={searching}
+                onSearch={handleSearch}
               />
-              <button onClick={handleSearch} className="searchButton">Ara</button>
-            </div>
-          </MapContainer>
-        </div>
-      </div>
-    </div>
+              <MapContainer center={DEFAULT_CENTER} zoom={6} className="mb-map">
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <MapView center={view.center} zoom={view.zoom} />
+                <ClickPicker onPick={pickPosition} />
+                {userPosition && (
+                  <Marker position={userPosition} icon={customIcon} opacity={0.6}>
+                    <Popup>Mevcut konumunuz</Popup>
+                  </Marker>
+                )}
+                {selectedPosition && (
+                  <Marker position={selectedPosition} icon={customIcon}>
+                    <Popup>Seçilen konum</Popup>
+                  </Marker>
+                )}
+              </MapContainer>
+              <Text type="secondary">
+                {selectedPosition ? `Seçilen konum: ${formatCoords(selectedPosition)}` : 'Henüz konum seçilmedi.'}
+              </Text>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+    </>
   );
 }
 

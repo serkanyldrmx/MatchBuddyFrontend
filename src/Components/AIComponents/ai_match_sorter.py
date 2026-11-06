@@ -6,12 +6,21 @@ from datetime import datetime, timedelta
 import numpy as np
 import logging
 import copy
+import os
 
 # Loglama ayarları
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-CORS(app, resources={r"/sort-matches": {"origins": "http://localhost:3000"}})
+FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000")
+API_BASE_URL = os.environ.get("MATCHBUDDY_API_URL", "http://localhost:5033").rstrip("/")
+CORS(app, resources={r"/sort-matches": {"origins": FRONTEND_ORIGIN}})
+
+
+def auth_headers():
+    """Kullanıcının JWT'sini .NET API'ye iletir. API artık tüm uç noktalarda kimlik doğrulama istiyor."""
+    token = request.headers.get("Authorization", "")
+    return {"Authorization": token} if token else {}
 
 # İlk 30 maç için özel mesaj şablonları
 CUSTOM_MESSAGES = [
@@ -53,7 +62,7 @@ CUSTOM_MESSAGES = [
 def fetch_stadiums():
     """Tüm stadyumları API'den çeker."""
     try:
-        response = requests.get("http://localhost:5033/api/Stadium/GetStadiumList", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/api/Stadium/GetStadiumList", headers=auth_headers(), timeout=5)
         response.raise_for_status()
         stadiums = response.json()
         if not isinstance(stadiums, list):
@@ -71,7 +80,7 @@ def fetch_stadiums():
 def fetch_stadium_match_list():
     """Stadyumların maç geçmişlerini API'den çeker."""
     try:
-        response = requests.get("http://localhost:5033/api/Stadium/GetStadiumMatchList", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/api/Stadium/GetStadiumMatchList", headers=auth_headers(), timeout=5)
         response.raise_for_status()
         stadium_matches = response.json()
         if not isinstance(stadium_matches, list):
@@ -90,7 +99,7 @@ def fetch_matches():
     """Tüm maçları, takımları ve stadyumları API'den çeker."""
     try:
         # Maçları çek
-        response = requests.get("http://localhost:5033/api/Match/GetMatchList", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/api/Match/GetMatchList", headers=auth_headers(), timeout=5)
         response.raise_for_status()
         matches = response.json()
         if not isinstance(matches, list):
@@ -154,7 +163,7 @@ def fetch_matches():
 def fetch_player_data(player_id):
     """Oyuncunun geçmiş verilerini API'den çeker."""
     try:
-        response = requests.get(f"http://localhost:5033/api/Players/AISortByPlayer?playerId={player_id}", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/api/Players/AISortByPlayer?playerId={player_id}", headers=auth_headers(), timeout=5)
         response.raise_for_status()
         data = response.json()
         if not isinstance(data, list):
@@ -172,7 +181,7 @@ def fetch_player_data(player_id):
 def fetch_match_teams(match_id):
     """Maçın takımlarını ve oyuncularını API'den çeker."""
     try:
-        response = requests.get(f"http://localhost:5033/api/Match/GetMatchTeamInfo?matchId={match_id}", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/api/Match/GetMatchTeamInfo?matchId={match_id}", headers=auth_headers(), timeout=5)
         response.raise_for_status()
         teams = response.json()
         if not isinstance(teams, list):
@@ -398,6 +407,9 @@ def calculate_match_score(match, player_data, current_time, match_teams):
 @app.route('/sort-matches', methods=['GET'])
 def sort_matches():
     try:
+        if not request.headers.get("Authorization", "").startswith("Bearer "):
+            return jsonify({"error": "Yetkisiz istek."}), 401
+
         player_id = request.args.get('playerId', type=int)
         if not player_id:
             logging.error("playerId parametresi eksik.")
@@ -407,7 +419,8 @@ def sort_matches():
         logging.debug(f"Maç verileri çekiliyor: playerId={player_id}")
         matches = fetch_matches()
         logging.debug(f"Oyuncu verileri çekiliyor: playerId={player_id}")
-        player_data = fetch_player_data(player_id)[0] if fetch_player_data(player_id) else {}
+        player_data_list = fetch_player_data(player_id)
+        player_data = player_data_list[0] if player_data_list else {}
         logging.debug(f"Oyuncu verisi: maç sayısı={len(player_data.get('match', [])) if isinstance(player_data.get('match'), list) else 0}")
 
         # Son 30 maçı ayır
@@ -459,7 +472,7 @@ def sort_matches():
         return jsonify({"matches": final_matches})
     except Exception as e:
         logging.error(f"Maçlar sıralanırken hata oluştu: {e}")
-        return jsonify({"error": f"Sıralama başarısız oldu: {str(e)}"}), 500
+        return jsonify({"error": "Sıralama başarısız oldu."}), 500
 
 if __name__ == "__main__":
     app.run(port=5001)
