@@ -217,7 +217,11 @@
       "total": "Toplam",
       "perPerson": "Kişi başı yaklaşık {{amount}}",
       "requestDate": "Talep tarihi: {{date}}",
-      "expiredNote": "Bu talebin saati geçti; artık yanıtlanamaz."
+      "expiredNote": "Bu talebin saati geçti; artık yanıtlanamaz.",
+      "weekly": "Her hafta",
+      "weeklyInfo": "Haftalık sabit rezervasyon: onayladığınız için sonraki haftalar otomatik onaylı açılır.",
+      "stopRepeat": "Tekrarı durdur",
+      "repeatStopped": "Haftalık tekrar durduruldu."
     }
   },
   "booking": {
@@ -256,7 +260,12 @@
       "feeAndPayment": "Ücret ve ödeme",
       "unpaidNote": "Bu rezervasyon oynandı ancak ödemesi henüz alınmadı; “Tahsil edilmemiş” tutarında görünür.",
       "note": "Not",
-      "addedAt": "Eklenme: {{date}}"
+      "addedAt": "Eklenme: {{date}}",
+      "weekly": "Haftalık",
+      "deleteThisWeek": "Bu haftayı sil",
+      "deleteSeries": "Sonraki haftalarla sil",
+      "deleteSeriesTitle": "Bu ve sonraki haftalar silinsin mi?",
+      "deleteSeriesConfirm": "Bu müşterinin bu haftadan sonraki tüm haftalık kayıtları silinir."
     },
     "modal": {
       "editTitle": "Harici rezervasyonu düzenle",
@@ -298,7 +307,14 @@
       "reasonPlaceholder": "Örn. Bakım, özel etkinlik",
       "closeInfo": "Oyuncular bu aralığı dolu olarak görür. Kapatılan aralık mevcut bir maçla çakışırsa işlem kabul edilmez.",
       "saveChanges": "Değişiklikleri kaydet",
-      "addBooking": "Rezervasyonu ekle"
+      "addBooking": "Rezervasyonu ekle",
+      "customerVisits_one": "{{count}} kez",
+      "customerVisits_other": "{{count}} kez",
+      "repeatLabel": "Tekrar",
+      "repeatHint": "Her hafta aynı gün ve saatte eklenir. Dolu olan haftalar atlanır.",
+      "repeatOnce": "Tek sefer",
+      "repeatWeeks_one": "{{count}} hafta",
+      "repeatWeeks_other": "{{count}} hafta"
     }
   },
   "reviews": {
@@ -362,5 +378,24 @@
         "help": "Maçtan {{unit}} öncesine kadar iptal ücretsizdir. Bilgilendirme amaçlıdır; oyunculara iptal politikasıyla birlikte gösterilir."
       }
     }
+  },
+  "deal": {
+    "button": "Boş saat ilanı",
+    "mode": "Boş saat ilanı",
+    "discount": "İndirim",
+    "pricePreview": "İndirimli saat ücreti:",
+    "audience_one": "{{count}} oyuncuya bildirim gider",
+    "audience_other": "{{count}} oyuncuya bildirim gider",
+    "dailyLimit": "Bugün {{sent}}/{{limit}} ilan",
+    "info": "Bu saat yalnızca bu gün için indirimli olur. Tesisinizde ve yakınınızda son 6 ayda oynamış oyunculara telefon bildirimi gider; dokunan oyuncu maçı uygulamadan kurar.",
+    "send": "İlanı yayınla",
+    "sent": "İlan yayında.",
+    "failed": "İlan yayınlanamadı."
+  },
+  "reliability": {
+    "watch": "Dikkat: son dakika iptal geçmişi var",
+    "ok": "Güvenilir görünüyor",
+    "asPlayer": "Oyuncu olarak son 10 maç: {{late}} son dakika çekilme, {{noShow}} gelmeme",
+    "asOrganizer": "Kurucu olarak son 6 ay: {{count}} gerçekleşen rezervasyon, {{late}} son dakika iptal"
   }
 }

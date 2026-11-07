@@ -7,6 +7,8 @@ export const PARTICIPANT_STATUS = { GOING: 1, WAITLIST: 2, DECLINED: 3 };
 export const SIDE = { HOME: 1, AWAY: 2 };
 
 export const matchesApi = {
+  /** Haftalık tekrarı durdur (kurucu / işletme) */
+  stopRepeat: (matchId) => api.post('/api/Match/StopRepeat', { matchId }).then((r) => r.data),
   feed: () => api.get('/api/Match/GetMatchFeed').then((r) => r.data || []),
   detail: (matchId) => api.get(`/api/Match/GetMatchDetail?matchId=${matchId}`).then((r) => r.data),
   join: (matchId) => api.post('/api/Match/Join', { matchId }).then((r) => r.data),

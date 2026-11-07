@@ -191,6 +191,7 @@ export default function CreateMatch() {
   const [cleatCount, setCleatCount] = useState(0);
   const [cameraRequested, setCameraRequested] = useState(false);
   const [minReliability, setMinReliability] = useState(0); // 0 = sınır yok
+  const [repeatWeekly, setRepeatWeekly] = useState(false); // her hafta aynı gün ve saatte
 
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
@@ -340,6 +341,7 @@ export default function CreateMatch() {
       awayTeamId: matchType === 'team' && opponentMode === 'invite' ? awayTeamId : null,
       lookingForOpponent: matchType === 'team' && opponentMode === 'looking',
       minReliability: minReliability || null,
+      repeatWeekly,
     };
     try {
       const res = await venuesApi.createMatch(body);
@@ -535,6 +537,13 @@ export default function CreateMatch() {
           ]}
         />
         <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.minReliabilityHint')}</p>
+      </div>
+
+      <div className="mb-cm-field mb-cm-repeat">
+        <label>
+          <Switch checked={repeatWeekly} onChange={setRepeatWeekly} size="small" /> {t('venues:createMatch.squad.repeatWeekly')}
+        </label>
+        <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.repeatWeeklyHint')}</p>
       </div>
 
       <div className="mb-cm-field">

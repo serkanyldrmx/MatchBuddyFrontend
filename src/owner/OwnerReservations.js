@@ -16,7 +16,7 @@ import { formatPrice, ownerApi } from '../api/venues';
 import i18n from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { useMessages } from '../messaging/MessagesContext';
-import { EmptyState, MatchStatusTag, PageHeader, PlayerAvatar } from '../ui';
+import { EmptyState, MatchStatusTag, PageHeader, PlayerAvatar, ReliabilityBadge } from '../ui';
 import { fromNow, fullName } from '../utils/format';
 import ManualBookingDrawer from './ManualBookingDrawer';
 import ManualBookingModal from './ManualBookingModal';
@@ -266,7 +266,10 @@ export default function OwnerReservations() {
         <div className="mb-owner-creator">
           <PlayerAvatar player={r.creator} size={32} />
           <div>
-            <Text strong>{fullName(r.creator)}</Text>
+            <Text strong>
+              {fullName(r.creator)}{' '}
+              {r.creatorReliability && <ReliabilityBadge reliability={r.creatorReliability} compact />}
+            </Text>
             {r.creator?.phoneNumber && (
               <a href={`tel:${r.creator.phoneNumber}`} onClick={(e) => e.stopPropagation()} className="mb-owner-phone">
                 {r.creator.phoneNumber}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { App, Divider, Drawer, Popconfirm, Switch, Typography } from 'antd';
+import { App, Divider, Drawer, Popconfirm, Switch, Tag, Typography } from 'antd';
 import { ClockCircleOutlined, DeleteOutlined, EditOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { formatPrice, ownerApi } from '../api/venues';
@@ -40,11 +40,11 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
     }
   };
 
-  const remove = async () => {
+  const remove = async (allFollowing = false) => {
     setDeleting(true);
     try {
-      await ownerApi.deleteBlock(b.slotBlockId);
-      message.success(t('owner:booking.drawer.deleted'));
+      const res = await ownerApi.deleteBlock(b.slotBlockId, allFollowing);
+      message.success(allFollowing ? res?.message || t('owner:booking.drawer.deleted') : t('owner:booking.drawer.deleted'));
       notifyOwnerChanged();
       onChanged?.(null);
       onClose?.();
@@ -60,7 +60,12 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
       open={open}
       onClose={onClose}
       width={440}
-      title={t('owner:booking.drawer.title')}
+      title={
+        <span>
+          {t('owner:booking.drawer.title')}{' '}
+          {b?.seriesId && <Tag color="green">{t('owner:booking.drawer.weekly')}</Tag>}
+        </span>
+      }
       footer={
         <div className="mb-owner-drawer-actions">
           <Popconfirm
@@ -69,13 +74,28 @@ export default function ManualBookingDrawer({ open, booking: b, onClose, onEdit,
             okText={t('common:actions.delete')}
             cancelText={t('common:actions.cancel')}
             okButtonProps={{ danger: true, loading: deleting }}
-            onConfirm={remove}
+            onConfirm={() => remove(false)}
             disabled={!membershipActive}
           >
             <WriteButton danger icon={<DeleteOutlined />} loading={deleting}>
-              {t('common:actions.delete')}
+              {b.seriesId ? t('owner:booking.drawer.deleteThisWeek') : t('common:actions.delete')}
             </WriteButton>
           </Popconfirm>
+          {b.seriesId && (
+            <Popconfirm
+              title={t('owner:booking.drawer.deleteSeriesTitle')}
+              description={t('owner:booking.drawer.deleteSeriesConfirm')}
+              okText={t('common:actions.delete')}
+              cancelText={t('common:actions.cancel')}
+              okButtonProps={{ danger: true, loading: deleting }}
+              onConfirm={() => remove(true)}
+              disabled={!membershipActive}
+            >
+              <WriteButton danger loading={deleting}>
+                {t('owner:booking.drawer.deleteSeries')}
+              </WriteButton>
+            </Popconfirm>
+          )}
           {onEdit && (
             <WriteButton type="primary" icon={<EditOutlined />} onClick={() => onEdit({ ...b, isPaid })}>
               {t('common:actions.edit')}

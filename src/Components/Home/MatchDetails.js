@@ -42,6 +42,7 @@ import {
   UserAddOutlined,
   VideoCameraOutlined,
   RobotOutlined,
+  SyncOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
@@ -671,6 +672,11 @@ function MatchDetails() {
           </Button>
           <div className="mb-match-hero__chips">
             <MatchStatusTag status={d.isActive} past={d.isPast} />
+            {d.repeatWeekly && (
+              <span className="mb-chip">
+                <SyncOutlined /> {t('match:repeat.chip')}
+              </span>
+            )}
             {d.myStatus === PARTICIPANT_STATUS.GOING && <span className="mb-chip is-live">{t('match:status.inSquad')}</span>}
             {d.myStatus === PARTICIPANT_STATUS.WAITLIST && <span className="mb-chip is-pending">{t('match:status.waitlisted')}</span>}
           </div>
@@ -810,6 +816,17 @@ function MatchDetails() {
                   />
                 </Col>
                 <Col xs={24} xl={7}>
+                  {d.canManage && d.repeatWeekly && (
+                    <Button
+                      block
+                      icon={<SyncOutlined />}
+                      loading={busy}
+                      style={{ marginBottom: 12 }}
+                      onClick={() => run(() => matchesApi.stopRepeat(d.matchId), t('match:repeat.stopped'))}
+                    >
+                      {t('match:repeat.stop')}
+                    </Button>
+                  )}
                   {d.canManage && !closed && going.length >= 2 && (
                     <Button block icon={<RobotOutlined />} loading={busy} onClick={balanceSides} style={{ marginBottom: 12 }}>
                       {t('match:details.actions.balanceTeams')}

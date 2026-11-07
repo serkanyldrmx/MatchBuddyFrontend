@@ -275,5 +275,10 @@
     "noShowTitle": "Gelmeyenleri işaretle",
     "noShowHint": "Maça gelmeyen oyuncuları seç ve kaydet. Gelenlere birkaç saat sonra otomatik olarak puan eklenir.",
     "noShowsSaved": "Kaydedildi."
+  },
+  "repeat": {
+    "chip": "Her hafta",
+    "stop": "Haftalık tekrarı durdur",
+    "stopped": "Haftalık tekrar durduruldu."
   }
 }

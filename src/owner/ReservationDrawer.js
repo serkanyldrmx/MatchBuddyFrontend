@@ -1,21 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Divider, Drawer, Space, Typography } from 'antd';
-import { CheckOutlined, ClockCircleOutlined, CloseOutlined, MessageOutlined, PhoneOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import { App, Button, Divider, Drawer, Space, Tag, Typography } from 'antd';
+import { CheckOutlined, ClockCircleOutlined, CloseOutlined, MessageOutlined, PhoneOutlined, SyncOutlined, VideoCameraOutlined, WarningOutlined } from '@ant-design/icons';
 import { Trans, useTranslation } from 'react-i18next';
 import { formatPrice } from '../api/venues';
 import { useMessages } from '../messaging/MessagesContext';
-import { CapacityRing, MatchStatusTag, PlayerAvatar } from '../ui';
-import { formatDateTime, fullName } from '../utils/format';
+import { matchesApi } from '../api/matches';
+import { CapacityRing, MatchStatusTag, PlayerAvatar, ReliabilityBadge } from '../ui';
+import { apiErrorMessage, formatDateTime, fullName } from '../utils/format';
 import { WriteButton, isPastStart } from './shared';
 
 const { Text } = Typography;
+
+/**
+ * Kurucunun güvenilirliği (docs/venue-growth-api.md): işletme onaylamadan önce son dakika iptal / gelmeme geçmişini görür.
+ */
+function OrganizerReliability({ value }) {
+  const { t } = useTranslation();
+  if (!value) return null;
+  const risky = value.lateCancels + value.noShows + value.organizerLateCancels > 0 || value.level === 'risky';
+  return (
+    <div className={`mb-owner-reliability${risky ? ' is-risky' : ''}`}>
+      <div className="mb-owner-reliability__head">
+        <ReliabilityBadge reliability={value} />
+        <span>{risky ? <><WarningOutlined /> {t('owner:reliability.watch')}</> : t('owner:reliability.ok')}</span>
+      </div>
+      <ul>
+        <li>{t('owner:reliability.asPlayer', { late: value.lateCancels, noShow: value.noShows })}</li>
+        <li>{t('owner:reliability.asOrganizer', { count: value.pastReservations, late: value.organizerLateCancels })}</li>
+      </ul>
+    </div>
+  );
+}
 
 /** Rezervasyon detayı (ReservationDto) — takvim, talepler ve genel bakışta ortak */
 export default function ReservationDrawer({ open, reservation: r, onClose, responder, loading }) {
   const { openMessages } = useMessages();
   const { t } = useTranslation();
+  const { message } = App.useApp();
+  const [stopped, setStopped] = useState(null);
   if (!r) return <Drawer open={open} onClose={onClose} width={440} />;
+  const repeating = r.repeatWeekly && stopped !== r.matchId;
+  const stopRepeat = async () => {
+    try {
+      const res = await matchesApi.stopRepeat(r.matchId);
+      message.success(res?.message || t('owner:reservations.drawer.repeatStopped'));
+      setStopped(r.matchId);
+    } catch (e) {
+      message.error(apiErrorMessage(e));
+    }
+  };
 
   const start = dayjs(r.start);
   const end = r.end ? dayjs(r.end) : start.add(r.durationMinutes || 60, 'minute');
@@ -47,6 +81,11 @@ export default function ReservationDrawer({ open, reservation: r, onClose, respo
       <div className="mb-owner-res-hero mb-pitch-bg">
         <div className="mb-owner-res-hero__top">
           <MatchStatusTag status={r.status} past={past} />
+          {repeating && (
+            <Tag color="green" icon={<SyncOutlined />}>
+              {t('owner:reservations.drawer.weekly')}
+            </Tag>
+          )}
           {r.pitch?.name && <span className="mb-owner-res-hero__pitch">{r.pitch.name}</span>}
         </div>
         <div className="mb-owner-res-hero__title">{r.matchName || t('owner:reservations.drawer.match')}</div>
@@ -102,6 +141,15 @@ export default function ReservationDrawer({ open, reservation: r, onClose, respo
         </div>
       ) : (
         <Text type="secondary">{t('owner:reservations.drawer.noCreator')}</Text>
+      )}
+      <OrganizerReliability value={r.creatorReliability} />
+      {repeating && (
+        <div className="mb-owner-note">
+          {t('owner:reservations.drawer.weeklyInfo')}{' '}
+          <WriteButton size="small" onClick={stopRepeat}>
+            {t('owner:reservations.drawer.stopRepeat')}
+          </WriteButton>
+        </div>
       )}
 
       <Divider orientation="left" plain>

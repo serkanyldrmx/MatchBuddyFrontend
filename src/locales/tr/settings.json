@@ -85,6 +85,10 @@
     "matchUpdates": {
       "title": "Maç güncellemeleri",
       "desc": "Onay, iptal, kadro ve yedek listesi değişiklikleri."
+    },
+    "deals": {
+      "title": "Saha fırsatları",
+      "desc": "Oynadığın ve yakındaki sahalar boş saatlerini indirimle duyurduğunda."
     }
   },
   "blocked": {

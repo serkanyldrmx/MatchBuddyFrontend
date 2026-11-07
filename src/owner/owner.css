@@ -1976,3 +1976,28 @@
     flex: 1 1 auto;
   }
 }
+
+/* Büyüme araçları (docs/venue-growth-api.md) */
+.mb-mbk-customer { display: flex; flex-direction: column; line-height: 1.3; }
+.mb-mbk-customer span { font-size: 12px; color: var(--mb-text-2); }
+.mb-deal-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: rgba(var(--mb-primary-fill-rgb), 0.12);
+  border: 1px solid rgba(var(--mb-primary-fill-rgb), 0.35);
+}
+.mb-deal-preview s { color: var(--mb-text-3); }
+.mb-deal-preview strong { font-size: 16px; }
+.mb-owner-reliability {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--mb-border);
+}
+.mb-owner-reliability.is-risky { border-color: rgba(250, 140, 22, 0.6); background: rgba(250, 140, 22, 0.08); }
+.mb-owner-reliability__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
+.mb-owner-reliability ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--mb-text-2); }

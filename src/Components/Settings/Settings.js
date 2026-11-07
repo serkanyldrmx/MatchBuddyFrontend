@@ -34,6 +34,7 @@ const NOTIFY = [
   { key: 'notifyMatchReminder', ...opt('settings:notifications.matchReminder') },
   { key: 'notifyMatchResult', ...opt('settings:notifications.matchResult') },
   { key: 'notifyMatchUpdates', ...opt('settings:notifications.matchUpdates') },
+  { key: 'notifyDeals', ...opt('settings:notifications.deals') },
 ];
 
 /** Seçenek kartları olarak radyo grubu */

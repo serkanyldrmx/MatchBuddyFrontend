@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
-import { App, Button, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Segmented, Select, Switch, TimePicker, Typography } from 'antd';
-import { CalendarOutlined, LockOutlined } from '@ant-design/icons';
+import { App, AutoComplete, Button, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Segmented, Select, Switch, TimePicker, Typography } from 'antd';
+import { CalendarOutlined, LockOutlined, NotificationOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { BLOCK_KIND, contractDayIndex, formatPrice, ownerApi } from '../api/venues';
 import { apiErrorMessage, formErrorMessage } from '../utils/format';
@@ -29,15 +29,22 @@ const CLOSE_DURATIONS = [
 
 const QUICK_TITLE_KEYS = ['corporate', 'school', 'subscription', 'tournament'];
 
+// Haftalık tekrar (yalnızca yeni harici rezervasyon): 1 = tek sefer
+const REPEAT_WEEKS = [1, 4, 8, 12];
+// Boş saat ilanı: süre ve indirim seçenekleri
+const DEAL_DURATIONS = [60, 90, 120];
+const DEAL_DISCOUNTS = [10, 20, 30, 40];
+
 /** Tarih + saat alanlarından başlangıç anını üretir */
 const combine = (date, time) => (date && time ? dayjs(date).startOf('day').add(time.hour(), 'hour').add(time.minute(), 'minute') : null);
 
 /**
  * Harici rezervasyon ekle / saati kapat modalı.
- * draft: { mode: 'booking' | 'close', pitchId, start (dayjs|null), maxEnd (dayjs|null), booking (düzenlenen kayıt) }
+ * draft: { mode: 'booking' | 'close' | 'deal', pitchId, start (dayjs|null), maxEnd (dayjs|null), booking (düzenlenen kayıt) }
  * hours: normalizeHours çıktısı (kapanışa kadar seçeneği için, opsiyonel)
+ * stadiumId: önceki müşteriler ve boş saat ilanı kitlesi için
  */
-export default function ManualBookingModal({ open, draft, pitches = [], hours, onClose, onSaved }) {
+export default function ManualBookingModal({ open, draft, pitches = [], hours, stadiumId, onClose, onSaved }) {
   const { t } = useTranslation();
   const editing = Boolean(draft?.booking);
   return (
@@ -49,12 +56,14 @@ export default function ManualBookingModal({ open, draft, pitches = [], hours, o
       destroyOnClose
       width={560}
     >
-      {open && draft && <BookingForm draft={draft} pitches={pitches} hours={hours} onClose={onClose} onSaved={onSaved} />}
+      {open && draft && (
+        <BookingForm draft={draft} pitches={pitches} hours={hours} stadiumId={stadiumId} onClose={onClose} onSaved={onSaved} />
+      )}
     </Modal>
   );
 }
 
-function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
+function BookingForm({ draft, pitches, hours, stadiumId, onClose, onSaved }) {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const [form] = Form.useForm();
@@ -66,6 +75,24 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
   const [quote, setQuote] = useState({ loading: false, value: null, error: null });
   const priceTouched = useRef(editing);
   const quoteSeq = useRef(0);
+  // Önceki müşteriler (ad yazınca öneri) ve boş saat ilanı kitlesi
+  const [customers, setCustomers] = useState([]);
+  const customerSeq = useRef(0);
+  const [audience, setAudience] = useState(null);
+
+  const searchCustomers = (q) => {
+    if (!stadiumId || editing) return;
+    const id = ++customerSeq.current;
+    ownerApi
+      .customers(stadiumId, q)
+      .then((list) => id === customerSeq.current && setCustomers(Array.isArray(list) ? list : []))
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    if (mode !== 'deal' || !stadiumId) return;
+    ownerApi.slotDealAudience(stadiumId).then(setAudience).catch(() => setAudience(null));
+  }, [mode, stadiumId]);
 
   const initialValues = useMemo(() => {
     const start = booking ? dayjs(booking.start) : draft.start || null;
@@ -86,6 +113,8 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
       duration,
       endTime,
       closeDuration: 60,
+      repeatWeeks: 1,
+      discount: 20,
       customerName: booking?.customerName || '',
       customerPhone: booking?.customerPhone || '',
       reason: booking?.reason || '',
@@ -102,6 +131,7 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
   const duration = Form.useWatch('duration', form);
   const endTime = Form.useWatch('endTime', form);
   const price = Form.useWatch('price', form);
+  const discount = Form.useWatch('discount', form);
 
   const start = combine(date, time);
   const bookingEnd = useMemo(() => {
@@ -130,7 +160,7 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
 
   // Tarifeye göre fiyat: saha / başlangıç / süre değiştikçe yeniden hesaplanır
   useEffect(() => {
-    if (mode !== 'booking' || !pitchId || !start || !durationMinutes || durationMinutes <= 0) {
+    if (mode === 'close' || !pitchId || !start || !durationMinutes || durationMinutes <= 0) {
       setQuote({ loading: false, value: null, error: null });
       return undefined;
     }
@@ -156,6 +186,25 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
     if (!v) return;
     const s = combine(v.date, v.time);
     let payload;
+    if (mode === 'deal') {
+      setSaving(true);
+      try {
+        const res = await ownerApi.slotDeal({
+          pitchId: v.pitchId,
+          start: isoLocal(s),
+          durationMinutes: Number(v.duration) || 60,
+          discountPercent: v.discount,
+        });
+        message.success(res?.message || t('owner:deal.sent'));
+        notifyOwnerChanged();
+        onSaved?.(res);
+      } catch (e) {
+        message.error(apiErrorMessage(e, t('owner:deal.failed')));
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     if (mode === 'booking') {
       if (!bookingEnd || durationMinutes <= 0) {
         message.warning(t('owner:booking.modal.invalidEnd'));
@@ -173,6 +222,7 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
         price: Number(v.price) || 0,
         isPaid: Boolean(v.isPaid),
         note: v.note?.trim() || undefined,
+        repeatWeeks: !editing && v.repeatWeeks > 1 ? v.repeatWeeks : undefined,
       };
     } else {
       const end = v.closeDuration === 'close' ? closeEnd : s.add(v.closeDuration, 'minute');
@@ -186,7 +236,9 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
     try {
       const res = await ownerApi.saveBlock(payload);
       message.success(
-        mode === 'close'
+        payload.repeatWeeks
+          ? res?.message || t('owner:booking.modal.addedSuccess')
+          : mode === 'close'
           ? t('owner:booking.modal.closedSuccess')
           : editing
             ? t('owner:booking.modal.updatedSuccess')
@@ -218,6 +270,7 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
           options={[
             { value: 'booking', label: t('owner:booking.modal.modeBooking'), icon: <CalendarOutlined /> },
             { value: 'close', label: t('owner:booking.modal.modeClose'), icon: <LockOutlined /> },
+            { value: 'deal', label: t('owner:deal.mode'), icon: <ThunderboltOutlined /> },
           ]}
         />
       )}
@@ -289,7 +342,33 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
                 label={t('owner:booking.modal.customerName')}
                 rules={[{ required: true, whitespace: true, message: t('owner:booking.modal.customerNameRequired') }]}
               >
-                <Input maxLength={80} placeholder={t('owner:booking.modal.customerNamePlaceholder')} autoFocus={!editing} />
+                <AutoComplete
+                  options={customers.map((c, i) => ({
+                    // Aynı adlı farklı müşteriler olabilir: değer benzersiz, ad onSelect'te yazılır
+                    value: `${c.name}|${c.phone || ''}|${i}`,
+                    customer: c,
+                    label: (
+                      <div className="mb-mbk-customer">
+                        <strong>{c.name}</strong>
+                        <span>
+                          {[c.phone, t('owner:booking.modal.customerVisits', { count: c.bookings }), c.lastPrice != null && formatPrice(c.lastPrice)]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
+                      </div>
+                    ),
+                  }))}
+                  onSearch={searchCustomers}
+                  onFocus={() => customers.length === 0 && searchCustomers('')}
+                  onSelect={(_, option) => {
+                    const c = option.customer;
+                    const patch = { customerName: c.name, customerPhone: c.phone || '' };
+                    if (!form.getFieldValue('reason') && c.lastTitle) patch.reason = c.lastTitle;
+                    form.setFieldsValue(patch);
+                  }}
+                >
+                  <Input maxLength={80} placeholder={t('owner:booking.modal.customerNamePlaceholder')} autoFocus={!editing} />
+                </AutoComplete>
               </Form.Item>
             </Col>
             <Col xs={24} sm={11}>
@@ -367,11 +446,57 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
             </Col>
           </Row>
 
+          {!editing && (
+            <Form.Item
+              name="repeatWeeks"
+              label={t('owner:booking.modal.repeatLabel')}
+              extra={t('owner:booking.modal.repeatHint')}
+            >
+              <Segmented
+                options={REPEAT_WEEKS.map((w) => ({
+                  value: w,
+                  label: w === 1 ? t('owner:booking.modal.repeatOnce') : t('owner:booking.modal.repeatWeeks', { count: w }),
+                }))}
+              />
+            </Form.Item>
+          )}
+
           <Form.Item name="note" label={t('owner:booking.drawer.note')}>
             <Input.TextArea maxLength={200} rows={2} showCount placeholder={t('owner:booking.modal.notePlaceholder')} />
           </Form.Item>
           <Text type="secondary" style={{ fontSize: 12 }}>
             {t('owner:booking.modal.bookingInfo')}
+          </Text>
+        </>
+      ) : mode === 'deal' ? (
+        <>
+          <Form.Item name="duration" label={t('owner:booking.modal.duration')}>
+            <Segmented options={DEAL_DURATIONS.map((d) => ({ value: d, label: t('owner:booking.minutes', { count: d }) }))} />
+          </Form.Item>
+          <Form.Item name="discount" label={t('owner:deal.discount')}>
+            <Segmented options={DEAL_DISCOUNTS.map((d) => ({ value: d, label: `%${d}` }))} />
+          </Form.Item>
+          <div className="mb-deal-preview">
+            {quote.loading ? (
+              <Text type="secondary">{t('owner:booking.modal.quoteLoading')}</Text>
+            ) : quote.error ? (
+              <Text type="danger">{quote.error}</Text>
+            ) : quote.value != null ? (
+              <span>
+                {t('owner:deal.pricePreview')}{' '}
+                <s>{formatPrice(quote.value)}</s> <strong>{formatPrice(Math.round(quote.value * (100 - (discount || 0))) / 100)}</strong>
+              </span>
+            ) : null}
+            {audience && (
+              <span>
+                <NotificationOutlined /> {t('owner:deal.audience', { count: audience.count })}
+                {' · '}
+                {t('owner:deal.dailyLimit', { sent: audience.sentToday, limit: audience.dailyLimit })}
+              </span>
+            )}
+          </div>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {t('owner:deal.info')}
           </Text>
         </>
       ) : (
@@ -402,8 +527,16 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
 
       <div className="mb-mbk-footer">
         <Button onClick={onClose}>{t('common:actions.cancel')}</Button>
-        <WriteButton type="primary" loading={saving} onClick={submit} icon={mode === 'close' ? <LockOutlined /> : undefined}>
-          {mode === 'close'
+        <WriteButton
+          type="primary"
+          loading={saving}
+          onClick={submit}
+          icon={mode === 'close' ? <LockOutlined /> : mode === 'deal' ? <ThunderboltOutlined /> : undefined}
+          disabled={mode === 'deal' && audience != null && audience.sentToday >= audience.dailyLimit}
+        >
+          {mode === 'deal'
+            ? t('owner:deal.send')
+            : mode === 'close'
             ? t('owner:booking.modal.modeClose')
             : editing
               ? t('owner:booking.modal.saveChanges')

@@ -247,7 +247,9 @@
       "minReliabilityNone": "Herkes",
       "minReliabilityMedium": "Puanı {{score}}+",
       "minReliabilityGood": "Puanı {{score}}+",
-      "minReliabilityHint": "Güvenilirlik puanı, son dakika iptal eden ve maça gelmeyen oyuncularda düşer. Yeni oyuncular bu sınıra takılmaz."
+      "minReliabilityHint": "Güvenilirlik puanı, son dakika iptal eden ve maça gelmeyen oyuncularda düşer. Yeni oyuncular bu sınıra takılmaz.",
+      "repeatWeekly": "Her hafta tekrarla",
+      "repeatWeeklyHint": "Her hafta aynı gün ve saatte maç otomatik açılır, geçen haftanın oyuncularına \"bu hafta da geliyor musun?\" daveti gider. İşletme bir kez onaylayınca sonraki haftalar otomatik onaylanır."
     },
     "extras": {
       "none": "Bu tesiste ek hizmet yok. Özeti kontrol edip rezervasyonunu gönderebilirsin.",

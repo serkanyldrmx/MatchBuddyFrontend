@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Alert, App, Button, Card, DatePicker, Grid, Segmented, Select, Skeleton, Space, Tooltip } from 'antd';
-import { CalendarOutlined, LeftOutlined, LockOutlined, PlusOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
+import { CalendarOutlined, LeftOutlined, LockOutlined, PlusOutlined, ReloadOutlined, RightOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { BLOCK_KIND, DAYS_SHORT, contractDayIndex, formatPrice, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
@@ -196,12 +196,12 @@ export default function OwnerCalendar() {
     });
   };
 
-  const openNew = () => {
+  const openNew = (draftMode = 'booking') => {
     if (!membershipActive) {
       message.info(inactiveTip());
       return;
     }
-    setDraft({ mode: 'booking', pitchId: mode === 'week' ? pitchId : pitches[0]?.pitchId, start: null, maxEnd: null });
+    setDraft({ mode: draftMode, pitchId: mode === 'week' ? pitchId : pitches[0]?.pitchId, start: null, maxEnd: null });
   };
 
   const onDraftSaved = () => {
@@ -273,7 +273,10 @@ export default function OwnerCalendar() {
             <Button icon={<ReloadOutlined />} onClick={() => load()} loading={loading}>
               {t('common:actions.refresh')}
             </Button>
-            <WriteButton type="primary" icon={<PlusOutlined />} onClick={openNew} disabled={!pitches.length}>
+            <WriteButton icon={<ThunderboltOutlined />} onClick={() => openNew('deal')} disabled={!pitches.length}>
+              {t('owner:deal.button')}
+            </WriteButton>
+            <WriteButton type="primary" icon={<PlusOutlined />} onClick={() => openNew()} disabled={!pitches.length}>
               {t('owner:calendar.addBooking')}
             </WriteButton>
           </Space>
@@ -501,6 +504,7 @@ export default function OwnerCalendar() {
         draft={draft}
         pitches={pitches}
         hours={hours}
+        stadiumId={venueId}
         onClose={() => setDraft(null)}
         onSaved={onDraftSaved}
       />

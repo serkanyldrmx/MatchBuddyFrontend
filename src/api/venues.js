@@ -98,7 +98,12 @@ export const ownerApi = {
   deleteCampaign: (campaignId) => api.post('/api/Owner/Campaigns/Delete', { campaignId }).then(data),
   blocks: (stadiumId, from, to) => api.get('/api/Owner/Blocks', { params: { stadiumId, from, to } }).then(data),
   saveBlock: (payload) => api.post('/api/Owner/Blocks/Save', payload).then(data),
-  deleteBlock: (slotBlockId) => api.post('/api/Owner/Blocks/Delete', { slotBlockId }).then(data),
+  deleteBlock: (slotBlockId, allFollowing = false) => api.post('/api/Owner/Blocks/Delete', { slotBlockId, allFollowing }).then(data),
+  /** Boş saat fırsatı (MatchBuddy/docs/venue-growth-api.md) */
+  slotDealAudience: (stadiumId) => api.get('/api/Owner/SlotDeal/Audience', { params: { stadiumId } }).then(data),
+  slotDeal: (payload) => api.post('/api/Owner/SlotDeal', payload).then(data),
+  /** Önceki telefon müşterileri: [{ name, phone, bookings, lastAt, lastPrice, lastTitle }] */
+  customers: (stadiumId, q) => api.get('/api/Owner/Customers', { params: { stadiumId, q: q || undefined } }).then(data),
   setBlockPaid: (slotBlockId, isPaid) => api.post('/api/Owner/Blocks/SetPaid', { slotBlockId, isPaid }).then(data),
   quote: (pitchId, start, durationMinutes) => api.post('/api/Owner/Quote', { pitchId, start, durationMinutes }).then(data),
   expenses: (stadiumId, from, to) => api.get('/api/Owner/Expenses', { params: { stadiumId, from, to } }).then(data),
