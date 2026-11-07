@@ -224,5 +224,39 @@
       "createTeam": "Takım kur"
     },
     "balanced": "Oyuncular güçlerine göre iki dengeli takıma ayrıldı."
+  },
+  "leave": {
+    "title": "Maça gelemiyorum",
+    "reasonQuestion": "Neden gelemiyorsun? (isteğe bağlı, kurucu görür)",
+    "reasons": {
+      "emergency": "Acil durum",
+      "health": "Sağlık",
+      "bereavement": "Vefat / taziye",
+      "work": "İş",
+      "transport": "Ulaşım",
+      "other": "Diğer"
+    },
+    "notePlaceholder": "Kısa bir not ekleyebilirsin (isteğe bağlı)",
+    "confirm": "Maçtan çekil",
+    "penalty_one": "Maça {{count}} saat kaldı. Güvenilirlik puanından {{penalty}} düşecek (yeni puan: {{score}}).",
+    "penalty_other": "Maça {{count}} saat kaldı. Güvenilirlik puanından {{penalty}} düşecek (yeni puan: {{score}}).",
+    "penaltyHint": "Kurucu mazeretini kabul ederse puanın iade edilir. Yerin bekleme listesindeki ilk kişiye geçer.",
+    "noPenalty": "Maça yeterince zaman var; puanın düşmez. Yerin bekleme listesindeki ilk kişiye geçer."
+  },
+  "reliability": {
+    "withdrawalsTitle": "Son dakika çekilenler ({{count}})",
+    "types": {
+      "lateCancel": "Geç iptal",
+      "veryLateCancel": "Çok geç iptal",
+      "noShow": "Gelmedi"
+    },
+    "acceptExcuse": "Mazereti kabul et",
+    "excused": "Kabul edildi",
+    "excuseAccepted": "Mazeret kabul edildi.",
+    "minusPoints_one": "-{{count}} puan",
+    "minusPoints_other": "-{{count}} puan",
+    "noShowTitle": "Gelmeyenleri işaretle",
+    "noShowHint": "Maça gelmeyen oyuncuları seç ve kaydet. Gelenlere birkaç saat sonra otomatik olarak puan eklenir.",
+    "noShowsSaved": "Kaydedildi."
   }
 }

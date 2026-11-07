@@ -51,13 +51,15 @@ import { matchesApi, PARTICIPANT_STATUS, SIDE } from '../../api/matches';
 import { aiApi } from '../../api/ai';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { useMessages } from '../../messaging/MessagesContext';
-import { CapacityRing, MatchStatusTag, PageLoader, PlayerAvatar } from '../../ui';
+import { CapacityRing, MatchStatusTag, PageLoader, PlayerAvatar, ReliabilityBadge } from '../../ui';
 import { apiErrorMessage, fullName, getCurrentUser, mediaUrl } from '../../utils/format';
 import { usePublicParams } from '../../api/parameters';
 import MatchComments from '../Post/MatchComments';
 import InviteModal from '../Invites/InviteModal';
 import FollowButton, { PlayerLink } from '../Social/FollowButton';
 import GuestModal from './GuestModal';
+import LeaveMatchModal from './LeaveMatchModal';
+import { NoShowCard, WithdrawalsCard } from './ReliabilityPanels';
 import { roleShort, ROLE_LABELS } from './formations';
 import Pitch, { guestInitials, sideRoster } from './Pitch';
 import './MatchDetails.css';
@@ -474,6 +476,7 @@ function MatchDetails() {
   const [claiming, setClaiming] = useState(false);
   // Misafir oyuncu modalı: { open, guest?, side? }
   const [guestModal, setGuestModal] = useState({ open: false });
+  const [leaveOpen, setLeaveOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -571,15 +574,8 @@ function MatchDetails() {
   const hoursLeft = date.diff(dayjs(), 'hour');
 
   const join = () => run(() => matchesApi.join(d.matchId), t('match:actions.joined'));
-  const leave = () =>
-    modal.confirm({
-      title: t('match:details.leaveTitle'),
-      content: waitlist.length ? t('match:details.leaveWaitlistContent') : t('match:details.leaveContent'),
-      okText: t('match:details.actions.leave'),
-      okButtonProps: { danger: true },
-      cancelText: t('common:actions.cancel'),
-      onOk: () => run(() => matchesApi.leave(d.matchId), t('match:details.left')),
-    });
+  // "Maça gelemiyorum": mazeret + ceza önizlemesi (docs/reliability-api.md)
+  const leave = () => setLeaveOpen(true);
   const confirmAttendance = () => run(() => matchesApi.confirm(d.matchId), t('match:details.confirmed'));
   const toggleLike = () =>
     run(() =>
@@ -816,6 +812,7 @@ function MatchDetails() {
                       {t('match:details.actions.balanceTeams')}
                     </Button>
                   )}
+                  <WithdrawalsCard detail={d} reload={load} />
                   <Card title={t('match:details.waitlistTitle', { count: waitlist.length })} size="small">
                     {waitlist.length === 0 ? (
                       <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.waitlistEmpty')} />
@@ -825,6 +822,7 @@ function MatchDetails() {
                           <li key={p.player.playerId}>
                             <PlayerAvatar player={p.player} size={30} />
                             <span>{p.player.playerId === me?.playerId ? t('match:pitch.you') : <PlayerLink player={p.player} />}</span>
+                            {d.canManage && <ReliabilityBadge reliability={p.reliability} compact />}
                           </li>
                         ))}
                       </ol>
@@ -896,7 +894,11 @@ function MatchDetails() {
             key: 'post',
             label: t('match:details.tabs.post'),
             children: d.isPast ? (
-              <PostMatch detail={d} me={me} reload={load} />
+              <>
+                <NoShowCard key={d.matchId} detail={d} me={me} reload={load} />
+                <WithdrawalsCard detail={d} reload={load} />
+                <PostMatch detail={d} me={me} reload={load} />
+              </>
             ) : (
               <Card>
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.postEmpty')} />
@@ -993,6 +995,7 @@ function MatchDetails() {
         )}
       </Modal>
 
+      <LeaveMatchModal matchId={d.matchId} open={leaveOpen} onClose={() => setLeaveOpen(false)} onLeft={load} />
       <GuestModal
         open={guestModal.open}
         matchId={d.matchId}

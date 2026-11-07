@@ -15,7 +15,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { PARTICIPANT_STATUS, SIDE } from '../../api/matches';
-import { PlayerAvatar } from '../../ui';
+import { PlayerAvatar, ReliabilityBadge } from '../../ui';
 import { intlLocale } from '../../i18n';
 import { fullName } from '../../utils/format';
 import { buildFormation, ROLE_LABELS, roleShort } from './formations';
@@ -139,6 +139,11 @@ function PlayerToken({ p, role, me, canManage, mvpId, avatarSize, onSwap, onMess
             <span className="mb-token__name">{isMe ? t('match:pitch.you') : p.player.playerName || p.player.userName}</span>
             <span className="mb-token__score">{p.player.userScore ?? 0}</span>
           </span>
+          {canManage && !isMe && p.reliability && (
+            <span className="mb-token__rel">
+              <ReliabilityBadge reliability={p.reliability} compact />
+            </span>
+          )}
         </div>
       </button>
     </Dropdown>

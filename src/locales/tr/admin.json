@@ -207,7 +207,10 @@
       "Social": "Sosyal",
       "Tournament": "Turnuva",
       "Osm": "OpenStreetMap",
-      "Security": "Güvenlik"
+      "Security": "Güvenlik",
+      "Reliability": "Güvenilirlik puanı",
+      "Auth": "Oturum ve giriş",
+      "Legal": "Yasal (KVKK)"
     }
   }
 }

@@ -35,6 +35,15 @@ export const PUBLIC_PARAM_DEFAULTS = Object.freeze({
   'auth.codeResendCooldownSeconds': 60,
   'auth.passwordRequireLetterAndDigit': false,
   'legal.termsVersion': '2026-11-06',
+  'reliability.newPlayerMatchCount': 3,
+  'reliability.levelGood': 90,
+  'reliability.levelMedium': 70,
+  'reliability.lateCancelHours': 24,
+  'reliability.lateCancelPenalty': 5,
+  'reliability.veryLateCancelHours': 3,
+  'reliability.veryLateCancelPenalty': 10,
+  'reliability.noShowPenalty': 20,
+  'reliability.noShowMarkWindowHours': 48,
 });
 
 /**

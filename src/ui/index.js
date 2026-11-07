@@ -7,6 +7,7 @@ import { useThemeMode } from '../theme/ThemeContext';
 import './common.css';
 
 export { default as BallLoader, PageLoader } from './BallLoader';
+export { default as ReliabilityBadge } from './ReliabilityBadge';
 
 const { Title, Text } = Typography;
 

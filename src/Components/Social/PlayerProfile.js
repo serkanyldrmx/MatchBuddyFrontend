@@ -15,7 +15,8 @@ import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
 import { emit, REPORT_REASONS, socialApi, SOCIAL_CHANGED } from '../../api/social';
 import { useMessages } from '../../messaging/MessagesContext';
-import { EmptyState, PlayerAvatar, Stat } from '../../ui';
+import { EmptyState, PlayerAvatar, ReliabilityBadge, Stat } from '../../ui';
+import { reliabilityApi } from '../../api/reliability';
 import { apiErrorMessage, fullName, getCurrentUser, isErrorCode } from '../../utils/format';
 import FollowButton, { PlayerLink } from './FollowButton';
 import '../User/User.css';
@@ -92,6 +93,7 @@ export default function PlayerProfile() {
   const [reason, setReason] = useState();
   const [details, setDetails] = useState('');
   const [reporting, setReporting] = useState(false);
+  const [reliability, setReliability] = useState(null);
 
   const load = useCallback(
     (silent) => {
@@ -117,6 +119,12 @@ export default function PlayerProfile() {
     setNotFound(false);
     load();
   }, [load]);
+
+  // Güvenilirlik özeti (docs/reliability-api.md)
+  useEffect(() => {
+    setReliability(null);
+    reliabilityApi.player(playerId).then(setReliability).catch(() => {});
+  }, [playerId]);
 
   if (loading && !profile) {
     return (
@@ -263,6 +271,18 @@ export default function PlayerProfile() {
                 />
               </button>
             </div>
+            {reliability && (
+              <div className="mb-pp-reliability">
+                <ReliabilityBadge reliability={reliability} />
+                <span>
+                  {t('social:profile.reliabilitySummary', {
+                    attended: reliability.attended,
+                    late: reliability.lateCancels,
+                    noShow: reliability.noShows,
+                  })}
+                </span>
+              </div>
+            )}
             <div className="mb-profile-hero__tags">
               {player.age ? <span>{t('social:profile.age', { count: player.age })}</span> : null}
               {player.size ? <span>{t('social:profile.height', { value: player.size })}</span> : null}

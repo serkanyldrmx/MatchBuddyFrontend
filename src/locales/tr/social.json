@@ -130,7 +130,8 @@
       "cta": "Bir maça birlikte katılın!"
     },
     "teams": "Takımları",
-    "noTeams": "Henüz bir takımda değil."
+    "noTeams": "Henüz bir takımda değil.",
+    "reliabilitySummary": "Son 10: {{attended}} geldi · {{late}} geç iptal · {{noShow}} gelmedi"
   },
   "feed": {
     "eyebrow": "Soyunma odası",

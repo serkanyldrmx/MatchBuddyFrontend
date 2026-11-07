@@ -199,3 +199,13 @@
     min-height: 56px;
   }
 }
+
+.mb-pp-reliability {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  font-size: 13px;
+  opacity: 0.9;
+}

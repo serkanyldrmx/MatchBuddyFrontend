@@ -23,7 +23,7 @@ import { matchesApi } from '../../api/matches';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { PageHeader } from '../../ui';
 import { apiErrorMessage, errorCode, fieldErrorsOf, getCurrentUser, mediaUrl } from '../../utils/format';
-import { bookingUserCountRange, usePublicParams } from '../../api/parameters';
+import { bookingUserCountRange, getParam, usePublicParams } from '../../api/parameters';
 import SlotPicker, { DateStrip } from './SlotPicker';
 import { AMENITY_ICONS, VenueRating } from './Venues';
 import './CreateMatch.css';
@@ -187,6 +187,7 @@ export default function CreateMatch() {
   // Ekstralar
   const [cleatCount, setCleatCount] = useState(0);
   const [cameraRequested, setCameraRequested] = useState(false);
+  const [minReliability, setMinReliability] = useState(0); // 0 = sınır yok
 
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
@@ -335,6 +336,7 @@ export default function CreateMatch() {
       homeTeamId: matchType === 'team' ? homeTeamId : null,
       awayTeamId: matchType === 'team' && opponentMode === 'invite' ? awayTeamId : null,
       lookingForOpponent: matchType === 'team' && opponentMode === 'looking',
+      minReliability: minReliability || null,
     };
     try {
       const res = await venuesApi.createMatch(body);
@@ -517,6 +519,19 @@ export default function CreateMatch() {
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t('venues:createMatch.squad.descriptionPlaceholder')}
         />
+      </div>
+      <div className="mb-cm-field">
+        <label>{t('venues:createMatch.squad.minReliability')}</label>
+        <Segmented
+          value={minReliability}
+          onChange={setMinReliability}
+          options={[
+            { value: 0, label: t('venues:createMatch.squad.minReliabilityNone') },
+            { value: Number(getParam('reliability.levelMedium')) || 70, label: t('venues:createMatch.squad.minReliabilityMedium', { score: Number(getParam('reliability.levelMedium')) || 70 }) },
+            { value: Number(getParam('reliability.levelGood')) || 90, label: t('venues:createMatch.squad.minReliabilityGood', { score: Number(getParam('reliability.levelGood')) || 90 }) },
+          ]}
+        />
+        <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.minReliabilityHint')}</p>
       </div>
 
       <div className="mb-cm-field">

@@ -1521,3 +1521,14 @@
   border-color: rgba(15, 61, 34, 0.3);
   box-shadow: 0 18px 40px rgba(15, 61, 34, 0.22);
 }
+
+/* Güvenilirlik rozeti (yalnızca kurucu görür) */
+.mb-token__rel {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.mb-token__rel .mb-rel {
+  background: rgba(5, 8, 14, 0.86);
+}

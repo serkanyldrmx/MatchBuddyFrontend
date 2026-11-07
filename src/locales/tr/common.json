@@ -70,5 +70,15 @@
     "light": "Açık",
     "dark": "Koyu"
   },
-  "languageName": "Türkçe"
+  "languageName": "Türkçe",
+  "reliability": {
+    "level": {
+      "new": "Yeni oyuncu",
+      "good": "Güvenilir",
+      "medium": "Orta",
+      "risky": "Riskli"
+    },
+    "tip": "Güvenilirlik: {{score}}/100 · {{label}} · {{count}} maç",
+    "tipNew": "Yeni oyuncu: henüz {{count}} maç tamamladı"
+  }
 }

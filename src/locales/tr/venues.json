@@ -241,7 +241,12 @@
       "inviteOpponent": "Rakip takım davet et",
       "opponentPlaceholder": "Rakip takımı seç",
       "inviteOpponentHint": "Rakip takımın üyelerine de davet gider, deplasman tarafına yerleşirler.",
-      "lookingHint": "Maçın \"Rakip aranıyor\" olarak listelenir; bir takım rakip olarak katılabilir."
+      "lookingHint": "Maçın \"Rakip aranıyor\" olarak listelenir; bir takım rakip olarak katılabilir.",
+      "minReliability": "Kimler katılabilir?",
+      "minReliabilityNone": "Herkes",
+      "minReliabilityMedium": "Puanı {{score}}+",
+      "minReliabilityGood": "Puanı {{score}}+",
+      "minReliabilityHint": "Güvenilirlik puanı, son dakika iptal eden ve maça gelmeyen oyuncularda düşer. Yeni oyuncular bu sınıra takılmaz."
     },
     "extras": {
       "none": "Bu tesiste ek hizmet yok. Özeti kontrol edip rezervasyonunu gönderebilirsin.",

@@ -52,7 +52,8 @@
     "matchCenter": "Maç merkezi",
     "emptyTitle": "Henüz bir maça yazılmadın",
     "emptyText": "Aşağıdan kadrosu eksik bir maç bul ya da kendi maçını kur.",
-    "findMatch": "Maç bul"
+    "findMatch": "Maç bul",
+    "cantMake": "Gelemiyorum"
   },
   "deals": {
     "title": "Kampanyalı tesisler",

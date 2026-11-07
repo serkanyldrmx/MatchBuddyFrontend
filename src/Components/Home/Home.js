@@ -16,6 +16,7 @@ import {
 import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
 import { aiApi } from '../../api/ai';
+import LeaveMatchModal from './LeaveMatchModal';
 import { matchesApi, playersApi, PARTICIPANT_STATUS } from '../../api/matches';
 import { INVITES_CHANGED, invitesApi } from '../../api/social';
 import { formatPrice, venuesApi } from '../../api/venues';
@@ -80,6 +81,7 @@ function Home() {
   const [search, setSearch] = useState('');
   const [stadiumFilter, setStadiumFilter] = useState();
   const [pendingInvites, setPendingInvites] = useState(0);
+  const [leaveMatchId, setLeaveMatchId] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -200,6 +202,17 @@ function Home() {
               <Countdown to={nextMatch.matchDate} />
               <div className="mb-next__footer">
                 <CapacityRing going={nextMatch.goingCount} capacity={nextMatch.capacity} size={40} />
+                <Button
+                  size="small"
+                  danger
+                  className="mb-next__cant"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLeaveMatchId(nextMatch.matchId);
+                  }}
+                >
+                  {t('home:next.cantMake')}
+                </Button>
                 <span className="mb-next__go">
                   {nextMatch.myStatus === PARTICIPANT_STATUS.WAITLIST ? t('home:next.waitlisted') : t('home:next.matchCenter')} <ArrowRightOutlined />
                 </span>
@@ -405,6 +418,7 @@ function Home() {
         </Col>
       </Row>
 
+      <LeaveMatchModal matchId={leaveMatchId} open={Boolean(leaveMatchId)} onClose={() => setLeaveMatchId(null)} onLeft={load} />
     </>
   );
 }
