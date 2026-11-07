@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, App, Button, Card, Input, Modal, Radio, Select, Skeleton, Switch, Tag } from 'antd';
-import { BellOutlined, BgColorsOutlined, GlobalOutlined, DeleteOutlined, LockOutlined, SettingOutlined, StopOutlined, WarningOutlined } from '@ant-design/icons';
+import { BellOutlined, BgColorsOutlined, DownloadOutlined, GlobalOutlined, DeleteOutlined, LockOutlined, LogoutOutlined, SettingOutlined, StopOutlined, WarningOutlined } from '@ant-design/icons';
 import { Trans, useTranslation } from 'react-i18next';
-import { logout } from '../../api/config';
+import { api, logout } from '../../api/config';
+import { authApi } from '../../api/auth';
 import { emit, MESSAGE_PERMISSION, PROFILE_VISIBILITY, socialApi, SOCIAL_CHANGED } from '../../api/social';
 import { availableLanguages, changePlayerLanguage, loadPlayerSettings, usePlayerSettings } from '../../api/playerSettings';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
@@ -121,6 +122,31 @@ export default function Settings() {
 
   const confirmWord = t('settings:deleteAccount.confirmWord');
   const canDelete = password && confirmText.trim().toLocaleUpperCase(i18n.language) === confirmWord.toLocaleUpperCase(i18n.language);
+
+  // KVKK: kişisel verilerin JSON olarak indirilmesi (docs/auth-api.md, /api/Me/Export)
+  const exportData = async () => {
+    try {
+      const res = await api.get('/api/Me/Export', { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `matchbuddy-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      message.error(apiErrorMessage(e));
+    }
+  };
+
+  const logoutAll = async () => {
+    try {
+      await authApi.logoutAll();
+    } catch {
+      // oturum zaten kapanmış olabilir
+    }
+    logout();
+    window.location.href = '/';
+  };
 
   const deleteAccount = async () => {
     setDeleting(true);
@@ -253,6 +279,20 @@ export default function Settings() {
       </Card>
 
       <Card bordered={false} className="mb-settings__danger" title={<span><WarningOutlined /> {t('settings:header.eyebrow')}</span>}>
+        <div className="mb-settings__danger-row">
+          <div>
+            <strong>{t('settings:account.exportTitle')}</strong>
+            <span>{t('settings:account.exportDescription')}</span>
+          </div>
+          <Button icon={<DownloadOutlined />} onClick={exportData}>{t('settings:account.exportButton')}</Button>
+        </div>
+        <div className="mb-settings__danger-row">
+          <div>
+            <strong>{t('settings:account.logoutAllTitle')}</strong>
+            <span>{t('settings:account.logoutAllDescription')}</span>
+          </div>
+          <Button icon={<LogoutOutlined />} onClick={logoutAll}>{t('settings:account.logoutAllButton')}</Button>
+        </div>
         <div className="mb-settings__danger-row">
           <div>
             <strong>{t('settings:deleteAccount.button')}</strong>
