@@ -7,8 +7,9 @@ import { api } from '../../api/config';
 import { USER_CHANGED } from '../../layout/AppLayout';
 import { PageHeader } from '../../ui';
 import ImageCrop from '../../ui/ImageCrop';
-import { apiErrorMessage, getCurrentUser, mediaUrl } from '../../utils/format';
-import { ACCEPTED_IMAGE_ACCEPT, MAX_IMAGE_BYTES, MAX_IMAGE_MB, imageError, prepareImage } from '../../utils/image';
+import { apiErrorMessage, formErrorMessage, getCurrentUser, mediaUrl } from '../../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../../utils/image';
+import { usePublicParams } from '../../api/parameters';
 import './User.css';
 
 const { Text } = Typography;
@@ -23,6 +24,9 @@ function UserUpdate() {
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
+  const params = usePublicParams();
+  const maxMb = params.get('media.maxUploadMb');
+  const passwordMin = params.get('security.passwordMinLength');
 
   useEffect(() => {
     // Formu sunucudaki güncel profil ile doldur
@@ -65,8 +69,9 @@ function UserUpdate() {
       return Upload.LIST_IGNORE;
     }
     const prepared = await prepareImage(f);
-    if (prepared.size > MAX_IMAGE_BYTES) {
-      message.error(t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB }));
+    const sizeErr = preparedImageError(prepared);
+    if (sizeErr) {
+      message.error(sizeErr);
       return Upload.LIST_IGNORE;
     }
     setFile(prepared);
@@ -102,7 +107,8 @@ function UserUpdate() {
       message.success(t('profile:edit.success'));
       navigate('/user');
     } catch (e) {
-      message.error(apiErrorMessage(e, t('profile:edit.error')));
+      // Sunucu alan hataları (errors sözlüğü) ilgili form alanlarının altında gösterilir
+      message.error(formErrorMessage(form, e, t('profile:edit.error')));
     } finally {
       setSaving(false);
     }
@@ -125,7 +131,7 @@ function UserUpdate() {
                       <Button icon={<UploadOutlined />}>{t('profile:edit.photo.select')}</Button>
                     </Upload>
                   </ImageCrop>
-                  <Text type="secondary" style={{ fontSize: 12 }}>{t('profile:edit.photo.hint', { maxMb: MAX_IMAGE_MB })}</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>{t('profile:edit.photo.hint', { maxMb })}</Text>
                   {file && <Text style={{ fontSize: 12 }}>{t('profile:edit.photo.selected', { name: file.name })}</Text>}
                 </Space>
               </div>
@@ -199,7 +205,7 @@ function UserUpdate() {
               <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
                 {t('profile:edit.password.hint')}
               </Text>
-              <Form.Item name="password" label={t('profile:edit.password.new')} rules={[{ min: 6, message: t('profile:edit.password.minLength', { count: 6 }) }]} hasFeedback>
+              <Form.Item name="password" label={t('profile:edit.password.new')} rules={[{ min: passwordMin, message: t('profile:edit.password.minLength', { count: passwordMin }) }]} hasFeedback>
                 <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
               </Form.Item>
               <Form.Item

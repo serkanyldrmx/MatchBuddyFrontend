@@ -5,11 +5,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SURFACE, formatPrice, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage } from '../utils/format';
+import { apiErrorMessage, formErrorMessage, isErrorCode } from '../utils/format';
+import { usePublicParams } from '../api/parameters';
 import { INACTIVE_TIP, WriteButton, asList, notifyOwnerChanged, useOwnerData } from './shared';
 
 const { Text } = Typography;
-const SIDES = [5, 6, 7, 8, 9, 10, 11];
+const range = (from, to) => Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => from + i);
 
 /** Tesisteki sahalar */
 export default function OwnerPitches() {
@@ -21,6 +22,13 @@ export default function OwnerPitches() {
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(null);
   const [form] = Form.useForm();
+  // Takım başına oyuncu aralığı ve en yüksek ücret sunucu parametrelerinden gelir
+  const params = usePublicParams();
+  const sideMin = params.get('venue.playersPerSideMin');
+  const sideMax = Math.max(sideMin, params.get('venue.playersPerSideMax'));
+  const SIDES = range(sideMin, sideMax);
+  const defaultSide = Math.min(Math.max(7, sideMin), sideMax);
+  const maxPrice = params.get('venue.maxPrice');
 
   const pitches = asList(data, 'pitches');
 
@@ -47,7 +55,7 @@ export default function OwnerPitches() {
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, t('facility:pitches.saveFailed')));
+      message.error(formErrorMessage(form, e, t('facility:pitches.saveFailed')));
     } finally {
       setSaving(false);
     }
@@ -81,7 +89,7 @@ export default function OwnerPitches() {
           notifyOwnerChanged();
           reload(true);
         } catch (e) {
-          if (e?.response?.status === 400) {
+          if (isErrorCode(e, 'OWNER_PITCH_HAS_RESERVATIONS')) {
             modal.warning({
               title: t('facility:pitches.deleteBlockedTitle'),
               content: (
@@ -105,7 +113,7 @@ export default function OwnerPitches() {
     form.setFieldsValue(
       p
         ? { name: p.name, surface: p.surface, isIndoor: p.isIndoor, playersPerSide: p.playersPerSide, basePrice: p.basePrice, isActive: p.isActive }
-        : { name: t('facility:pitches.defaultName', { n: pitches.length + 1 }), surface: 1, isIndoor: false, playersPerSide: 7, basePrice: 1500, isActive: true }
+        : { name: t('facility:pitches.defaultName', { n: pitches.length + 1 }), surface: 1, isIndoor: false, playersPerSide: defaultSide, basePrice: 1500, isActive: true }
     );
   };
 
@@ -244,7 +252,7 @@ export default function OwnerPitches() {
                 extra={t('facility:pitches.form.basePriceExtra')}
                 rules={[{ required: true, message: t('facility:pitches.form.priceRequired') }]}
               >
-                <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
+                <InputNumber min={0} max={maxPrice} step={50} addonAfter="₺" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={10}>

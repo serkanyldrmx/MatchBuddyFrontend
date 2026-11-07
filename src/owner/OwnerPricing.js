@@ -7,7 +7,8 @@ import { DAYS, DAYS_SHORT, daysToMask, formatPrice, maskToDays, ownerApi } from 
 import { intlLocale } from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage } from '../utils/format';
+import { apiErrorMessage, formErrorMessage } from '../utils/format';
+import { usePublicParam } from '../api/parameters';
 import { WriteButton, asList, effectivePrice, hourLabel, hourRange, normalizeHours, notifyOwnerChanged, useOwnerData } from './shared';
 
 const { Text } = Typography;
@@ -53,6 +54,7 @@ export default function OwnerPricing() {
   const [savingRule, setSavingRule] = useState(false);
   const [previewPitch, setPreviewPitch] = useState(null);
   const [form] = Form.useForm();
+  const maxPrice = usePublicParam('venue.maxPrice');
   // Telefonda kart başlığındaki ana aksiyonlar tam boy (44px) dokunma alanı alır
   const isPhone = Grid.useBreakpoint().md === false;
   const headBtnSize = isPhone ? 'middle' : 'small';
@@ -132,7 +134,7 @@ export default function OwnerPricing() {
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, t('facility:pricing.ruleSaveFailed')));
+      message.error(formErrorMessage(form, e, t('facility:pricing.ruleSaveFailed'), { aliases: { daysMask: 'days' } }));
     } finally {
       setSavingRule(false);
     }
@@ -457,7 +459,7 @@ export default function OwnerPricing() {
                 label={t('facility:pricing.columns.hourlyPrice')}
                 rules={[{ required: true, message: t('facility:pricing.priceRequired') }]}
               >
-                <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
+                <InputNumber min={0} max={maxPrice} step={50} addonAfter="₺" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>

@@ -11,6 +11,7 @@ import {
   MenuOutlined,
   MessageOutlined,
   ScheduleOutlined,
+  SettingOutlined,
   StarOutlined,
   TagsOutlined,
   BorderOutlined,
@@ -129,6 +130,7 @@ export default function VenueLayout() {
         { key: `${BASE}/pricing`, icon: <TagsOutlined />, label: t('layout:venue.menu.pricing') },
         { key: `${BASE}/campaigns`, icon: <GiftOutlined />, label: t('layout:venue.menu.campaigns') },
         { key: `${BASE}/reviews`, icon: <StarOutlined />, label: t('layout:venue.menu.reviews') },
+        { key: `${BASE}/settings`, icon: <SettingOutlined />, label: t('layout:venue.menu.settings') },
       ],
     },
   ];

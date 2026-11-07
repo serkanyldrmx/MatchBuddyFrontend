@@ -8,8 +8,8 @@ import { api } from '../api/config';
 import { uploadMedia } from '../api/media';
 import { socialApi } from '../api/social';
 import { PlayerAvatar } from '../ui';
-import { apiErrorMessage, fromNow, fullName, getCurrentUser, mediaUrl } from '../utils/format';
-import { ACCEPTED_IMAGE_ACCEPT, MAX_IMAGE_BYTES, MAX_IMAGE_MB, imageError, prepareImage } from '../utils/image';
+import { apiErrorMessage, fromNow, isErrorCode, fullName, getCurrentUser, mediaUrl } from '../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../utils/image';
 import './messages.css';
 
 const { Text } = Typography;
@@ -368,8 +368,9 @@ function Conversation({ me, target }) {
     setPreparing(true);
     try {
       const prepared = await prepareImage(file);
-      if (prepared.size > MAX_IMAGE_BYTES) {
-        message.error(t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB }));
+      const sizeErr = preparedImageError(prepared);
+      if (sizeErr) {
+        message.error(sizeErr);
         return;
       }
       setAttachment({ file: prepared, preview: URL.createObjectURL(prepared), name: file.name || t('messages:chat.photo') });
@@ -466,9 +467,9 @@ function Conversation({ me, target }) {
       await load();
     } catch (e) {
       setAttachment((a) => (a ? { ...a, progress: undefined } : a));
-      if (step === 'send' && !isGroup && e?.response?.status === 403) {
+      if (step === 'send' && !isGroup && (isErrorCode(e, 'MESSAGE_NOT_ALLOWED', 'MESSAGE_BLOCKED') || e?.response?.status === 403)) {
         setDenied(apiErrorMessage(e, t('messages:chat.deniedMessage')));
-      } else if (e?.response?.status === 429) {
+      } else if (isErrorCode(e, 'COMMON_RATE_LIMITED') || e?.response?.status === 429) {
         message.error(apiErrorMessage(e, t('messages:chat.uploadRateLimited')));
       } else {
         message.error(apiErrorMessage(e, step === 'upload' ? t('common:image.uploadFailed') : t('messages:chat.sendFailed')));

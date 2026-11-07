@@ -3,7 +3,8 @@ import { App, DatePicker, Form, Input, InputNumber, Modal, Radio, Select } from 
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { tournamentsApi, TOURNAMENT_FORMAT } from '../../api/tournaments';
-import { apiErrorMessage } from '../../utils/format';
+import { formErrorMessage } from '../../utils/format';
+import { usePublicParams } from '../../api/parameters';
 import { FormatIcon } from './tournamentUtils';
 
 const FORMAT_OPTIONS = [
@@ -28,6 +29,11 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
   const [saving, setSaving] = useState(false);
   const format = Form.useWatch('format', form);
   const maxTeams = Form.useWatch('maxTeams', form);
+  // Takım kapasitesi aralığı sunucu parametrelerinden (tournament.minTeams / maxTeams)
+  const params = usePublicParams();
+  const minCap = params.get('tournament.minTeams');
+  const maxCap = Math.max(minCap, params.get('tournament.maxTeams'));
+  const quickSizes = [4, 8, 16, 32, 64, 128].filter((n) => n >= minCap && n <= maxCap);
 
   const submit = async () => {
     const values = await form.validateFields();
@@ -49,7 +55,7 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
       form.resetFields();
       onCreated?.(res?.tournamentId);
     } catch (e) {
-      message.error(apiErrorMessage(e, t('tournaments:create.error')));
+      message.error(formErrorMessage(form, e, t('tournaments:create.error')));
     } finally {
       setSaving(false);
     }
@@ -76,7 +82,7 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
         form={form}
         layout="vertical"
         preserve={false}
-        initialValues={{ format: TOURNAMENT_FORMAT.LEAGUE, maxTeams: 8 }}
+        initialValues={{ format: TOURNAMENT_FORMAT.LEAGUE, maxTeams: Math.min(Math.max(8, minCap), maxCap) }}
         requiredMark={false}
       >
         <Form.Item
@@ -138,13 +144,13 @@ export default function CreateTournamentModal({ open, onClose, onCreated, stadiu
             help={knockoutHint}
             validateStatus={knockoutHint ? 'warning' : undefined}
           >
-            <InputNumber min={4} max={16} precision={0} style={{ width: '100%' }} />
+            <InputNumber min={minCap} max={maxCap} precision={0} style={{ width: '100%' }} />
           </Form.Item>
         </div>
 
         {format === TOURNAMENT_FORMAT.KNOCKOUT && (
           <div className="mb-tr-quick-sizes">
-            {[4, 8, 16].map((n) => (
+            {quickSizes.map((n) => (
               <button
                 type="button"
                 key={n}

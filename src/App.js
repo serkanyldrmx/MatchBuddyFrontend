@@ -25,6 +25,8 @@ import VenueDetail from './Components/Venues/VenueDetail';
 import CreateMatch from './Components/Venues/CreateMatch';
 import AdminBusinesses from './admin/Businesses';
 import AdminOsm from './admin/OsmCandidates';
+import AdminParameters from './admin/Parameters';
+import OwnerSettings from './owner/OwnerSettings';
 
 import UserLogin from './Components/UserLogin/UserLogin';
 import RegisterForm from './Components/UserLogin/Register';
@@ -119,6 +121,7 @@ function App() {
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="businesses" element={<AdminBusinesses />} />
                   <Route path="osm" element={<AdminOsm />} />
+                  <Route path="parameters" element={<AdminParameters />} />
                 </Route>
                 <Route path="/stadiumIsAdmin" element={<Navigate to="/adminPanel/stadiums/new" replace />} />
               </Route>
@@ -135,6 +138,7 @@ function App() {
                   <Route path="campaigns" element={<OwnerCampaigns />} />
                   <Route path="reviews" element={<OwnerReviews />} />
                   <Route path="finance" element={<OwnerFinance />} />
+                  <Route path="settings" element={<OwnerSettings />} />
                 </Route>
               </Route>
 

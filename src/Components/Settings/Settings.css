@@ -140,6 +140,21 @@
   min-width: 200px;
 }
 
+/* Dil */
+.mb-settings__language {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mb-border);
+}
+
+.mb-settings__language-control {
+  display: inline-flex;
+}
+
+.mb-settings__language-select {
+  min-width: 180px;
+}
+
 /* Engellenenler */
 .mb-settings__blocked-row {
   display: flex;
@@ -252,5 +267,9 @@
   }
   .mb-settings__theme .mb-theme-switch .ant-segmented-item {
     flex: 1;
+  }
+  .mb-settings__language-control,
+  .mb-settings__language-select {
+    width: 100%;
   }
 }

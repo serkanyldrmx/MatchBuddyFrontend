@@ -1,19 +1,30 @@
 import i18n from '../i18n';
+import { getParam } from '../api/parameters';
 
 // Tarayıcı tarafında resim hazırlığı (yükleme öncesi küçültme) — sözleşme: MatchBuddy/docs/media-api.md §5
 // Sunucu her resmi yine doğrular, döndürür, WebP'ye çevirir; burada amaç mobil veride hızlı yüklemedir.
 
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 export const ACCEPTED_IMAGE_ACCEPT = ACCEPTED_IMAGE_TYPES.join(',');
-export const MAX_IMAGE_MB = 10;
-export const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+
+/**
+ * En büyük yükleme boyutu (MB): sunucu parametresi `media.maxUploadMb` (GET /api/Parameters/Public).
+ * Parametreler henüz yüklenmediyse / istek başarısızsa katalog varsayılanı (10) kullanılır.
+ * Ekranda gösterirken tepkisel olması için bileşende usePublicParam('media.maxUploadMb') tercih edin.
+ */
+export const maxImageMb = () => Number(getParam('media.maxUploadMb')) || 10;
+export const maxImageBytes = () => maxImageMb() * 1024 * 1024;
 
 /** Dosya kabul edilebilir değilse (çevrilmiş) hata metni, uygunsa null */
 export const imageError = (file) => {
   if (!file || !ACCEPTED_IMAGE_TYPES.includes(file.type)) return i18n.t('common:image.invalidType');
-  if (file.size > MAX_IMAGE_BYTES) return i18n.t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB });
+  if (file.size > maxImageBytes()) return i18n.t('common:image.tooLarge', { maxMb: maxImageMb() });
   return null;
 };
+
+/** Hazırlanmış (küçültülmüş) dosya hâlâ sınırın üstündeyse hata metni, değilse null */
+export const preparedImageError = (file) =>
+  file && file.size > maxImageBytes() ? i18n.t('common:image.tooLarge', { maxMb: maxImageMb() }) : null;
 
 // Bu boyuttan küçük ve kenarı maxSide'ı aşmayan JPEG'ler olduğu gibi gönderilir
 const SMALL_BYTES = 1.5 * 1024 * 1024;

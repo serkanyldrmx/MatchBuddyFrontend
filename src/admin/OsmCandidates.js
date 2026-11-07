@@ -33,7 +33,6 @@ import {
 } from '@ant-design/icons';
 import { Trans, useTranslation } from 'react-i18next';
 import { adminVenuesApi } from '../api/venues';
-import { colors } from '../theme/theme';
 import { useThemeMode } from '../theme/ThemeContext';
 import { EmptyState, PageHeader } from '../ui';
 import { apiErrorMessage } from '../utils/format';
@@ -337,7 +336,7 @@ export default function OsmCandidates() {
                     size={72}
                     percent={Math.min(Math.round((elapsed / EXPECTED_SECONDS) * 100), 99)}
                     format={() => t('adminVenues:osm.seconds', { count: elapsed })}
-                    strokeColor={colors.primary}
+                    strokeColor={palette.primary}
                   />
                   <div style={{ marginTop: 12 }}>
                     <Text>{t('adminVenues:osm.querying')}</Text>

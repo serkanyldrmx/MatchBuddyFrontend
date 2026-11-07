@@ -4,7 +4,7 @@ import { App, Button, Checkbox, Col, DatePicker, Form, Input, InputNumber, Modal
 import { useTranslation } from 'react-i18next';
 import { EXPENSE_CATEGORIES, expenseCategoryLabel, formatPrice, ownerApi } from '../api/venues';
 import { EmptyState } from '../ui';
-import { apiErrorMessage } from '../utils/format';
+import { apiErrorMessage, formErrorMessage } from '../utils/format';
 import { CategoryChip } from './FinanceCharts';
 import { WriteButton, asList, notifyOwnerChanged, ymd } from './shared';
 
@@ -73,7 +73,7 @@ function ExpenseForm({ expense, month, venueId, onClose, onSaved }) {
       notifyOwnerChanged();
       onSaved?.();
     } catch (e) {
-      message.error(apiErrorMessage(e, t('finance:expenseModal.saveFailed')));
+      message.error(formErrorMessage(form, e, t('finance:expenseModal.saveFailed')));
     } finally {
       setSaving(false);
     }

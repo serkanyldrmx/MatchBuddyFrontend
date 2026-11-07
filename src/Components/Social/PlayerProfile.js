@@ -16,7 +16,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { emit, REPORT_REASONS, socialApi, SOCIAL_CHANGED } from '../../api/social';
 import { useMessages } from '../../messaging/MessagesContext';
 import { EmptyState, PlayerAvatar, Stat } from '../../ui';
-import { apiErrorMessage, fullName, getCurrentUser } from '../../utils/format';
+import { apiErrorMessage, fullName, getCurrentUser, isErrorCode } from '../../utils/format';
 import FollowButton, { PlayerLink } from './FollowButton';
 import '../User/User.css';
 import './PlayerProfile.css';
@@ -37,7 +37,7 @@ function FollowListModal({ playerId, kind, name, onClose }) {
       .then((r) => setList(r || []))
       .catch((e) =>
         setError(
-          e?.response?.status === 403
+          isErrorCode(e, 'SOCIAL_LIST_PRIVATE') || e?.response?.status === 403
             ? t('social:profile.followList.hidden')
             : apiErrorMessage(e, t('social:friends.loadFailed'))
         )

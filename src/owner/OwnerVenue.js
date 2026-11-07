@@ -9,8 +9,9 @@ import { AMENITIES, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader, PageLoader } from '../ui';
 import ImageCrop from '../ui/ImageCrop';
-import { apiErrorMessage, mediaUrl } from '../utils/format';
-import { ACCEPTED_IMAGE_ACCEPT, MAX_IMAGE_BYTES, MAX_IMAGE_MB, imageError, prepareImage } from '../utils/image';
+import { apiErrorMessage, formErrorMessage, isErrorCode, mediaUrl } from '../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../utils/image';
+import { usePublicParams } from '../api/parameters';
 import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
 import { WriteButton, notifyOwnerChanged } from './shared';
 
@@ -18,7 +19,6 @@ const { Text } = Typography;
 
 const markerIcon = new L.Icon({ iconUrl: LocationIcon, iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34] });
 const DEFAULT_CENTER = [39.0, 35.0];
-const MAX_PHOTOS = 20; // backend: EFVenueDal.MaxPhotosPerVenue
 
 // Detail.amenities anahtarı → Venue/Update alanı
 const AMENITY_FIELD = {
@@ -32,6 +32,8 @@ const AMENITY_FIELD = {
   bibs: 'providesBibs',
   ball: 'providesBall',
 };
+// Sunucu alan hatası (Venue/Update alanı) → form alanı
+const FIELD_ALIASES = Object.fromEntries(Object.entries(AMENITY_FIELD).map(([k, field]) => [field, ['amenities', k]]));
 
 const parseLocation = (s) => {
   if (!s) return null;
@@ -75,6 +77,11 @@ export default function OwnerVenue() {
   const [photoBusy, setPhotoBusy] = useState(null);
   const [batch, setBatch] = useState(null); // toplu yükleme ilerlemesi { done, total }
   const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
+  // Sunucu parametreleri: tesis başına en fazla fotoğraf, yükleme boyutu, en yüksek ücret
+  const params = usePublicParams();
+  const MAX_PHOTOS = params.get('venue.maxPhotos');
+  const maxMb = params.get('media.maxUploadMb');
+  const maxPrice = params.get('venue.maxPrice');
 
   const location = Form.useWatch('location', form);
   const cleatOn = Form.useWatch(['amenities', 'cleatRental'], form);
@@ -159,7 +166,7 @@ export default function OwnerVenue() {
       message.success(t('facility:venue.saved'));
       notifyOwnerChanged();
     } catch (e) {
-      message.error(apiErrorMessage(e, t('facility:venue.saveFailed')));
+      message.error(formErrorMessage(form, e, t('facility:venue.saveFailed'), { aliases: FIELD_ALIASES }));
     } finally {
       setSaving(false);
     }
@@ -181,8 +188,9 @@ export default function OwnerVenue() {
       return Upload.LIST_IGNORE;
     }
     const prepared = await prepareImage(file);
-    if (prepared.size > MAX_IMAGE_BYTES) {
-      message.error(t('common:image.tooLarge', { maxMb: MAX_IMAGE_MB }));
+    const sizeErr = preparedImageError(prepared);
+    if (sizeErr) {
+      message.error(sizeErr);
       return Upload.LIST_IGNORE;
     }
     return prepared;
@@ -277,8 +285,8 @@ export default function OwnerVenue() {
         });
       } catch (e) {
         failed.push(`${f.name}: ${apiErrorMessage(e, t('facility:venue.uploadFailedShort'))}`);
-        // Sınır aşıldıysa (429) kalanları deneme
-        if (e?.response?.status === 429) break;
+        // İstek sınırı (429) ya da fotoğraf sınırı aşıldıysa kalanları deneme
+        if (isErrorCode(e, 'COMMON_RATE_LIMITED', 'OWNER_PHOTO_LIMIT_REACHED', 'VENUE_PHOTO_LIMIT_EXCEEDED') || e?.response?.status === 429) break;
       }
       processed += 1;
       setBatch({ done: processed, total: queue.length });
@@ -359,7 +367,7 @@ export default function OwnerVenue() {
                           label={t('facility:venue.cleatRentalPrice')}
                           rules={[{ required: true, message: t('facility:venue.feeRequired') }]}
                         >
-                          <InputNumber min={0} step={10} addonAfter="₺" style={{ width: '100%' }} />
+                          <InputNumber min={0} max={maxPrice} step={10} addonAfter="₺" style={{ width: '100%' }} />
                         </Form.Item>
                       </Col>
                     )}
@@ -370,7 +378,7 @@ export default function OwnerVenue() {
                           label={t('facility:venue.cameraPrice')}
                           rules={[{ required: true, message: t('facility:venue.feeRequired') }]}
                         >
-                          <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
+                          <InputNumber min={0} max={maxPrice} step={50} addonAfter="₺" style={{ width: '100%' }} />
                         </Form.Item>
                       </Col>
                     )}
@@ -475,7 +483,7 @@ export default function OwnerVenue() {
                           icon={<UploadOutlined />}
                           loading={uploading}
                           size="small"
-                          tooltip={t('facility:venue.addPhotoTooltip', { maxMb: MAX_IMAGE_MB })}
+                          tooltip={t('facility:venue.addPhotoTooltip', { maxMb })}
                         >
                           {t('facility:venue.addPhoto')}
                         </WriteButton>

@@ -10,7 +10,10 @@
   "appearance": {
     "title": "Görünüm",
     "theme": "Tema",
-    "themeHint": "Sistem seçiliyse cihazının açık/koyu ayarını izler."
+    "themeHint": "Sistem seçiliyse cihazının açık/koyu ayarını izler.",
+    "language": "Dil",
+    "languageHint": "Arayüz ve sunucu mesajları bu dilde gösterilir.",
+    "languageSingle": "Şu anda yalnızca Türkçe kullanılabilir. Yeni diller eklendiğinde buradan seçebilirsin."
   },
   "privacy": {
     "title": "Gizlilik",

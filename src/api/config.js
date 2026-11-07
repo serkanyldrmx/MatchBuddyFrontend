@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n, { DEFAULT_LANG } from '../i18n';
 
 // API adresleri ortam değişkenlerinden okunur (bkz. .env.example)
 // Boş değer ("") = aynı origin: /api ve /media istekleri barındırma tarafından API'ye yönlendirilir (ör. Vercel rewrites)
@@ -16,6 +17,12 @@ export const authHeaders = () => {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
+/**
+ * İstek dili (Accept-Language): uygulamanın o anki i18n dili (PlayerSettings.language ile eşitlenir).
+ * Sunucu mesajları (hata/başarı) bu dilde döner — bkz. MatchBuddy/docs/platform-api.md §2.
+ */
+export const requestLanguage = () => (i18n.resolvedLanguage || i18n.language || DEFAULT_LANG).split('-')[0];
 
 // Oturumu kapat: token ve kullanıcı bilgilerini temizle
 export const logout = () => {
@@ -37,11 +44,13 @@ const handleUnauthorized = () => {
 export const api = axios.create({ baseURL: API_BASE_URL });
 
 api.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
   const token = getToken();
   if (token) {
-    config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+  if (typeof config.headers.set === 'function') config.headers.set('Accept-Language', requestLanguage());
+  else config.headers['Accept-Language'] = requestLanguage();
   return config;
 });
 
@@ -58,7 +67,7 @@ api.interceptors.response.use(
 // fetch sarmalayıcısı: base URL ve Bearer token ekler, 401'de çıkış yapar
 export const apiFetch = async (path, options = {}) => {
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
-  const headers = { ...(options.headers || {}), ...authHeaders() };
+  const headers = { 'Accept-Language': requestLanguage(), ...(options.headers || {}), ...authHeaders() };
   const response = await fetch(url, { ...options, headers });
   if (response.status === 401 && !isLoginRequest(url)) {
     handleUnauthorized();

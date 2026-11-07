@@ -7,7 +7,8 @@ import { DAYS_SHORT, daysToMask, formatPrice, maskToDays, ownerApi } from '../ap
 import i18n from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage, formatDate } from '../utils/format';
+import { apiErrorMessage, formErrorMessage, formatDate } from '../utils/format';
+import { usePublicParam } from '../api/parameters';
 import { INACTIVE_TIP, WriteButton, asList, hourLabel, hourRange, notifyOwnerChanged, useOwnerData, ymd } from './shared';
 
 const { Text } = Typography;
@@ -45,6 +46,7 @@ export default function OwnerCampaigns() {
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(null);
   const [form] = Form.useForm();
+  const maxPrice = usePublicParam('venue.maxPrice');
   const kind = Form.useWatch('kind', form);
 
   const pitches = useMemo(() => data?.pitches || [], [data]);
@@ -134,7 +136,11 @@ export default function OwnerCampaigns() {
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, t('facility:campaigns.saveFailed')));
+      message.error(
+        formErrorMessage(form, e, t('facility:campaigns.saveFailed'), {
+          aliases: { daysMask: 'days', startDate: 'range', endDate: 'range' },
+        })
+      );
     } finally {
       setSaving(false);
     }
@@ -303,7 +309,7 @@ export default function OwnerCampaigns() {
               label={t('facility:campaigns.form.fixedPrice')}
               rules={[{ required: true, message: t('facility:campaigns.form.priceRequired') }]}
             >
-              <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
+              <InputNumber min={0} max={maxPrice} step={50} addonAfter="₺" style={{ width: '100%' }} />
             </Form.Item>
           ) : (
             <Form.Item
@@ -311,7 +317,8 @@ export default function OwnerCampaigns() {
               label={t('facility:campaigns.form.discountPercent')}
               rules={[{ required: true, message: t('facility:campaigns.form.rateRequired') }]}
             >
-              <InputNumber min={1} max={90} addonBefore="%" style={{ width: '100%' }} />
+              {/* Üst sınır (venue.maxDiscountPercent) herkese açık değil: sunucu doğrular, hata alanın altında gösterilir */}
+              <InputNumber min={1} max={100} addonBefore="%" style={{ width: '100%' }} />
             </Form.Item>
           )}
           <Form.Item

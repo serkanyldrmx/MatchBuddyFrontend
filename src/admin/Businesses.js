@@ -56,8 +56,9 @@ import { adminVenuesApi } from '../api/venues';
 import i18n from '../i18n';
 import { colors } from '../theme/theme';
 import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage, formatDate } from '../utils/format';
-import { ACCEPTED_IMAGE_ACCEPT, ACCEPTED_IMAGE_TYPES, MAX_IMAGE_MB, prepareImage } from '../utils/image';
+import { apiErrorMessage, applyFieldErrors, errorCode, fieldErrorsOf, formErrorMessage, formatDate } from '../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, ACCEPTED_IMAGE_TYPES, prepareImage } from '../utils/image';
+import { usePublicParams } from '../api/parameters';
 import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
 import './AdminResponsive.css';
 import './Businesses.css';
@@ -65,8 +66,6 @@ import OwnerDetailModal from './OwnerDetailModal';
 
 const { Text } = Typography;
 const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
-const MAX_PHOTOS = 10;
-const MAX_PHOTO_MB = MAX_IMAGE_MB;
 
 const pinIcon = new L.Icon({
   iconUrl: LocationIcon,
@@ -106,14 +105,9 @@ function parseLocation(location) {
 
 const formatCoords = (pos) => `${Number(pos[0]).toFixed(6)}, ${Number(pos[1]).toFixed(6)}`;
 
-/** Sunucu hata mesajı (400 alan bazlı mesajlar ve ASP.NET ModelState dahil) */
+/** Sunucu hata mesajı: standart mesaj + forma bağlanmayan alan hataları (errors sözlüğü) */
 function serverError(e, fallback) {
-  const data = e?.response?.data;
-  if (data?.errors && typeof data.errors === 'object') {
-    const list = Object.values(data.errors).flat().filter(Boolean);
-    if (list.length) return list.join(' ');
-  }
-  return apiErrorMessage(e, fallback);
+  return formErrorMessage(null, e, fallback);
 }
 
 /** Üyelik durumu */
@@ -197,12 +191,59 @@ const STEP_FIELDS = [
 ];
 const REQUIRED_FIELDS = ['bizName', 'contactName', 'userName', 'email', 'phoneNumber', 'password', 'venueName', 'city', 'district', 'address', 'location'];
 
-/** Sunucu mesajından ilgili adımı tahmin eder */
-function stepForError(msg) {
-  const m = (msg || '').toLocaleLowerCase('tr');
-  if (m.includes('foto')) return 2;
-  if (['konum', 'adres', 'tesis', 'ilçe', ' il '].some((k) => m.includes(k))) return 1;
-  if (['kullanıcı', 'e-posta', 'eposta', 'email', 'şifre', 'parola', 'telefon', 'üyelik'].some((k) => m.includes(k))) return 0;
+// Sunucu alan adları (CreateOwner model: owner.* / venue.*) → sihirbaz form alanları
+const CREATE_OWNER_FIELD_ALIASES = {
+  'owner.name': 'bizName',
+  'owner.contactName': 'contactName',
+  'owner.userName': 'userName',
+  'owner.email': 'email',
+  'owner.phoneNumber': 'phoneNumber',
+  'owner.password': 'password',
+  'owner.membershipUntil': 'membershipUntil',
+  'venue.name': 'venueName',
+  'venue.city': 'city',
+  'venue.district': 'district',
+  'venue.address': 'address',
+  'venue.location': 'location',
+  'venue.phone': 'venuePhone',
+  'venue.description': 'description',
+};
+
+// Hata kodu → sihirbaz adımı (0 hesap, 1 tesis, 2 fotoğraflar)
+const STEP_BY_CODE = {
+  ADMIN_USERNAME_TAKEN: 0,
+  ADMIN_CREATE_OWNER_FAILED: 0,
+  VENUE_USERNAME_TAKEN: 0,
+  AUTH_USERNAME_TAKEN: 0,
+  AUTH_USERNAME_REQUIRED: 0,
+  AUTH_PASSWORD_REQUIRED: 0,
+  AUTH_PASSWORD_TOO_SHORT: 0,
+  VENUE_OWNER_INFO_REQUIRED: 0,
+  VALIDATION_INVALID_EMAIL: 0,
+  VENUE_INFO_REQUIRED: 1,
+  VENUE_INFO_EMPTY: 1,
+  VENUE_ADDRESS_EMPTY: 1,
+  VENUE_INVALID_LOCATION: 1,
+  VENUE_INVALID_LOCATION_FORMAT: 1,
+  VENUE_LOCATION_REQUIRED: 1,
+  VENUE_PHOTO_REQUIRED: 2,
+  VENUE_PHOTO_LIMIT_EXCEEDED: 2,
+  ADMIN_PHOTO_UPLOAD_FAILED: 2,
+};
+
+/** Hatanın ilgili olduğu sihirbaz adımı: önce hata kodu, sonra alan hataları (errors sözlüğü) */
+function stepForError(e, appliedFields) {
+  const code = errorCode(e);
+  if (code && STEP_BY_CODE[code] != null) return STEP_BY_CODE[code];
+  if (code && /^(MEDIA_|OWNER_PHOTO_)/.test(code)) return 2;
+  const steps = (appliedFields || [])
+    .map((name) => STEP_FIELDS.findIndex((fields) => fields.includes(Array.isArray(name) ? name[0] : name)))
+    .filter((i) => i >= 0);
+  if (steps.length) return Math.min(...steps);
+  const keys = Object.keys(fieldErrorsOf(e) || {}).map((k) => k.toLowerCase());
+  if (keys.some((k) => k.startsWith('photo'))) return 2;
+  if (keys.some((k) => k.startsWith('venue.'))) return 1;
+  if (keys.some((k) => k.startsWith('owner.'))) return 0;
   return null;
 }
 
@@ -211,6 +252,10 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
   const { message } = App.useApp();
   const isPhone = Grid.useBreakpoint().md === false;
   const [form] = Form.useForm();
+  // Fotoğraf sınırları: yükleme boyutu herkese açık parametreden; adet (venue.createOwnerMaxPhotos) herkese açık değil → katalog varsayılanı
+  const params = usePublicParams();
+  const MAX_PHOTO_MB = params.get('media.maxUploadMb');
+  const MAX_PHOTOS = params.get('venue.createOwnerMaxPhotos');
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState([]); // { uid, file, url }
   const [photoError, setPhotoError] = useState(null);
@@ -384,9 +429,11 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
       message.success(t('adminVenues:businesses.wizard.messages.created'));
       onCreated?.();
     } catch (e) {
-      const msg = serverError(e, t('adminVenues:businesses.wizard.messages.createFailed'));
-      setError(msg);
-      const target = stepForError(msg);
+      // Alan hataları ilgili form alanlarının altında; eşleşmeyenler genel mesajda gösterilir
+      const { applied, unmatched } = applyFieldErrors(form, e, { aliases: CREATE_OWNER_FIELD_ALIASES, scroll: false });
+      const base = apiErrorMessage(e, t('adminVenues:businesses.wizard.messages.createFailed'));
+      setError([base, ...unmatched.filter((m) => m !== base)].join(' '));
+      const target = stepForError(e, applied);
       if (target != null) setStep(target);
     } finally {
       setSubmitting(false);
@@ -941,7 +988,7 @@ export default function Businesses() {
       setMembershipOwner(null);
       load();
     } catch (e) {
-      message.error(serverError(e, t('adminVenues:businesses.messages.membershipUpdateFailed')));
+      message.error(formErrorMessage(membershipForm, e, t('adminVenues:businesses.messages.membershipUpdateFailed'), { aliases: { membershipUntil: 'until' } }));
     } finally {
       setSaving(false);
     }

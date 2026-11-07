@@ -40,11 +40,26 @@
     "missingTitle": "Tesis profiliniz eksik",
     "missingText": "Aşağıdaki bilgileri tamamlayana kadar tesisiniz oyunculara görünmez ve rezervasyon alamazsınız.",
     "missing": {
-      "photo": { "label": "Tesis fotoğrafı", "hint": "En az bir fotoğraf ekleyin" },
-      "pitch": { "label": "Aktif saha", "hint": "En az bir sahayı aktif edin" },
-      "location": { "label": "Harita konumu", "hint": "Haritada tesisinizi işaretleyin" },
-      "address": { "label": "Adres", "hint": "Açık adresinizi girin" },
-      "hours": { "label": "Açılış saatleri", "hint": "Haftalık çalışma saatlerinizi belirleyin" },
+      "photo": {
+        "label": "Tesis fotoğrafı",
+        "hint": "En az bir fotoğraf ekleyin"
+      },
+      "pitch": {
+        "label": "Aktif saha",
+        "hint": "En az bir sahayı aktif edin"
+      },
+      "location": {
+        "label": "Harita konumu",
+        "hint": "Haritada tesisinizi işaretleyin"
+      },
+      "address": {
+        "label": "Adres",
+        "hint": "Açık adresinizi girin"
+      },
+      "hours": {
+        "label": "Açılış saatleri",
+        "hint": "Haftalık çalışma saatlerinizi belirleyin"
+      },
       "fallbackHint": "Bilgiyi tamamlayın"
     },
     "stats": {
@@ -132,11 +147,26 @@
     "subtitle": "Oyuncuların rezervasyon taleplerini yanıtlayın, maçlarınızı takip edin.",
     "addBooking": "Rezervasyon ekle",
     "views": {
-      "pending": { "label": "Bekleyen", "empty": "Yanıt bekleyen talep yok" },
-      "approved": { "label": "Onaylı", "empty": "Yaklaşan onaylı maç yok" },
-      "rejected": { "label": "Reddedilen", "empty": "Reddedilen talep yok" },
-      "past": { "label": "Geçmiş", "empty": "Geçmiş maç bulunmuyor" },
-      "manual": { "label": "Harici", "empty": "Bu tarih aralığında harici rezervasyon yok" }
+      "pending": {
+        "label": "Bekleyen",
+        "empty": "Yanıt bekleyen talep yok"
+      },
+      "approved": {
+        "label": "Onaylı",
+        "empty": "Yaklaşan onaylı maç yok"
+      },
+      "rejected": {
+        "label": "Reddedilen",
+        "empty": "Reddedilen talep yok"
+      },
+      "past": {
+        "label": "Geçmiş",
+        "empty": "Geçmiş maç bulunmuyor"
+      },
+      "manual": {
+        "label": "Harici",
+        "empty": "Bu tarih aralığında harici rezervasyon yok"
+      }
     },
     "table": {
       "date": "Tarih",
@@ -294,5 +324,43 @@
     },
     "emptyFilter": "Bu filtrede yorum yok",
     "empty": "Henüz yorum yapılmamış. Maç sonrası oyuncular tesisinizi değerlendirebilir."
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "subtitle": "Oyuncuların bu tesiste nasıl rezervasyon yapabileceğini belirleyin.",
+    "intro": "Bir alanı boş bırakırsanız sistem varsayılanı kullanılır; varsayılan değiştiğinde tesisiniz de otomatik olarak güncellenir. Kendi oluşturduğunuz harici rezervasyon ve bloklar bu kurallardan etkilenmez.",
+    "saved": "Ayarlar kaydedildi.",
+    "saveFailed": "Ayarlar kaydedilemedi.",
+    "usingDefault": "Sistem varsayılanı",
+    "custom": "Özel değer",
+    "systemDefault": "Sistem varsayılanı: {{value}}",
+    "allowedRange": "izin verilen: {{min}}–{{max}}",
+    "rangeError": "Değer {{min}} ile {{max}} arasında olmalıdır.",
+    "defaultPlaceholder": "Varsayılan ({{value}})",
+    "useDefault": "Sistem varsayılanını kullan",
+    "updatedAt": "Son kaydedilme: {{date}}",
+    "neverSaved": "Bu tesis için henüz özel ayar kaydedilmedi; tüm değerler sistem varsayılanı.",
+    "units": {
+      "hours_one": "{{count}} saat",
+      "hours_other": "{{count}} saat",
+      "days_one": "{{count}} gün",
+      "days_other": "{{count}} gün",
+      "hoursShort": "saat",
+      "daysShort": "gün"
+    },
+    "fields": {
+      "minBookingNoticeHours": {
+        "label": "En az rezervasyon süresi",
+        "help": "Oyuncular maçı en az {{unit}} önceden ayırtabilir. 0 = son dakikaya kadar."
+      },
+      "maxAdvanceBookingDays": {
+        "label": "En fazla ileri tarih",
+        "help": "Oyuncular en fazla {{unit}} sonrasına rezervasyon yapabilir."
+      },
+      "freeCancellationHours": {
+        "label": "Ücretsiz iptal süresi",
+        "help": "Maçtan {{unit}} öncesine kadar iptal ücretsizdir. Bilgilendirme amaçlıdır; oyunculara iptal politikasıyla birlikte gösterilir."
+      }
+    }
   }
 }

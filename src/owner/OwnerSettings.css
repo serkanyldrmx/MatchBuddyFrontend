@@ -1,0 +1,71 @@
+/* İşletme: tesis ayarları */
+.mb-owner-settings__intro {
+  margin-bottom: 20px;
+}
+
+.mb-owner-settings__field {
+  height: 100%;
+  padding: 16px;
+  border: 1px solid var(--mb-border);
+  border-radius: var(--mb-radius);
+  background: var(--mb-surface-2);
+}
+
+.mb-owner-settings__field .ant-form-item {
+  margin-bottom: 4px;
+}
+
+.mb-owner-settings__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mb-owner-settings__label .ant-tag {
+  margin-inline-end: 0;
+}
+
+.mb-owner-settings__help {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mb-owner-settings__help > span:first-child {
+  color: var(--mb-text-2);
+}
+
+.mb-owner-settings__help > span:last-child {
+  color: var(--mb-text-3);
+}
+
+.mb-owner-settings__reset.ant-btn {
+  padding-inline: 0;
+}
+
+.mb-owner-settings__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mb-border);
+}
+
+@media (max-width: 767px) {
+  .mb-owner-settings__field {
+    padding: 14px;
+  }
+  .mb-owner-settings__footer > .ant-btn,
+  .mb-owner-settings__footer > .ant-tooltip-open,
+  .mb-owner-settings__footer > span:last-child .ant-btn {
+    width: 100%;
+  }
+}

@@ -4,7 +4,8 @@ import { App, Button, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Seg
 import { CalendarOutlined, LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { BLOCK_KIND, contractDayIndex, formatPrice, ownerApi } from '../api/venues';
-import { apiErrorMessage } from '../utils/format';
+import { apiErrorMessage, formErrorMessage } from '../utils/format';
+import { usePublicParam } from '../api/parameters';
 import { WriteButton, isoLocal, notifyOwnerChanged } from './shared';
 
 const { Text } = Typography;
@@ -57,6 +58,7 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const [form] = Form.useForm();
+  const maxPrice = usePublicParam('venue.maxPrice');
   const booking = draft.booking;
   const editing = Boolean(booking);
   const [mode, setMode] = useState(editing ? 'booking' : draft.mode || 'booking');
@@ -194,7 +196,9 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
       onSaved?.(res, payload);
     } catch (e) {
       message.error(
-        apiErrorMessage(e, mode === 'close' ? t('owner:booking.modal.closeFailed') : t('owner:booking.modal.saveFailed'))
+        formErrorMessage(form, e, mode === 'close' ? t('owner:booking.modal.closeFailed') : t('owner:booking.modal.saveFailed'), {
+          aliases: { startAt: 'time', endAt: mode === 'booking' ? 'endTime' : 'closeDuration' },
+        })
       );
     } finally {
       setSaving(false);
@@ -345,7 +349,7 @@ function BookingForm({ draft, pitches, hours, onClose, onSaved }) {
               >
                 <InputNumber
                   min={0}
-                  max={1000000}
+                  max={maxPrice}
                   step={50}
                   style={{ width: '100%' }}
                   addonAfter="₺"

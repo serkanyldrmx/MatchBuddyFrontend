@@ -63,7 +63,8 @@
       "venueAdd": "Halı Saha Ekle",
       "corporateGroup": "Kurumsal",
       "about": "Hakkımızda",
-      "contact": "İletişim"
+      "contact": "İletişim",
+      "parameters": "Parametreler"
     }
   },
   "venue": {
@@ -79,7 +80,8 @@
       "pitches": "Sahalar",
       "pricing": "Saatler ve Fiyatlar",
       "campaigns": "Kampanyalar",
-      "reviews": "Yorumlar"
+      "reviews": "Yorumlar",
+      "settings": "Ayarlar"
     },
     "membershipInactive": "Üyeliğiniz aktif değil",
     "membershipInactiveDesc": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız. Yenilemek için Match Buddy ile iletişime geçin.",

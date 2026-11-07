@@ -51,6 +51,7 @@ import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { useMessages } from '../../messaging/MessagesContext';
 import { CapacityRing, MatchStatusTag, PageLoader, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName, getCurrentUser, mediaUrl } from '../../utils/format';
+import { usePublicParams } from '../../api/parameters';
 import MatchComments from '../Post/MatchComments';
 import InviteModal from '../Invites/InviteModal';
 import FollowButton, { PlayerLink } from '../Social/FollowButton';
@@ -67,6 +68,11 @@ const awayName = (d) =>
 function PostMatch({ detail, me, reload }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
+  // Skor / oyuncu istatistiği / puan üst sınırları sunucu parametrelerinden
+  const params = usePublicParams();
+  const maxScore = params.get('match.maxScore');
+  const maxPlayerStat = params.get('match.maxPlayerStat');
+  const ratingMax = params.get('match.ratingMax');
   const going = detail.participants.filter((p) => p.status === PARTICIPANT_STATUS.GOING);
   const iPlayed = detail.myStatus === PARTICIPANT_STATUS.GOING;
   const others = going.filter((p) => p.player.playerId !== me?.playerId);
@@ -153,7 +159,7 @@ function PostMatch({ detail, me, reload }) {
       render: (_, p) => (
         <InputNumber
           min={0}
-          max={30}
+          max={maxPlayerStat}
           size="small"
           value={stats[p.player.playerId]?.[k]}
           onChange={(v) => setStats((s) => ({ ...s, [p.player.playerId]: { ...s[p.player.playerId], [k]: v || 0 } }))}
@@ -170,12 +176,12 @@ function PostMatch({ detail, me, reload }) {
             <div className="mb-result-form">
               <div className="mb-result-form__side is-home">
                 <span>{homeName(detail)}</span>
-                <InputNumber min={0} max={50} size="large" value={score.home} onChange={(v) => setScore((s) => ({ ...s, home: v || 0 }))} />
+                <InputNumber min={0} max={maxScore} size="large" value={score.home} onChange={(v) => setScore((s) => ({ ...s, home: v || 0 }))} />
               </div>
               <span className="mb-result-form__sep">:</span>
               <div className="mb-result-form__side is-away">
                 <span>{awayName(detail)}</span>
-                <InputNumber min={0} max={50} size="large" value={score.away} onChange={(v) => setScore((s) => ({ ...s, away: v || 0 }))} />
+                <InputNumber min={0} max={maxScore} size="large" value={score.away} onChange={(v) => setScore((s) => ({ ...s, away: v || 0 }))} />
               </div>
             </div>
             <Table rowKey={(p) => p.player.playerId} size="small" pagination={false} columns={statColumns} dataSource={going} style={{ marginTop: 16 }} />
@@ -264,7 +270,7 @@ function PostMatch({ detail, me, reload }) {
                         {p.avgRating != null && <small> · {t('match:post.avgRating', { value: p.avgRating.toFixed(1) })}</small>}
                       </span>
                     </span>
-                    <Rate value={ratings[p.player.playerId] || 0} onChange={(v) => setRatings((r) => ({ ...r, [p.player.playerId]: v }))} />
+                    <Rate count={ratingMax} value={ratings[p.player.playerId] || 0} onChange={(v) => setRatings((r) => ({ ...r, [p.player.playerId]: v }))} />
                   </div>
                 ))}
               </div>

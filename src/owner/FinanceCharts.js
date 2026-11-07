@@ -209,8 +209,8 @@ export function MonthlyChart({ data = [], selected, onSelect, height = 270 }) {
                     className={sel ? 'mb-fin-band is-selected' : 'mb-fin-band'}
                   />
                 )}
-                <path d={barPath(cx(i) - barW - 1, y(Number(d.income) || 0), base, barW)} fill={INCOME_COLOR} />
-                <path d={barPath(cx(i) + 1, y(Number(d.expenses) || 0), base, barW)} fill={EXPENSE_COLOR} />
+                <path d={barPath(cx(i) - barW - 1, y(Number(d.income) || 0), base, barW)} style={{ fill: INCOME_COLOR }} />
+                <path d={barPath(cx(i) + 1, y(Number(d.expenses) || 0), base, barW)} style={{ fill: EXPENSE_COLOR }} />
                 {showLabel(i) && (
                   <text x={cx(i)} y={height - pad.b + 16} textAnchor="middle" className={`mb-fin-xlabel${sel ? ' is-selected' : ''}`}>
                     {label.format('MMM')}
@@ -298,8 +298,8 @@ export function DailyChart({ data = [], height = 270 }) {
             const isToday = dd.isSame(today, 'day');
             return (
               <g key={d.date} opacity={hover == null || hover === i ? 1 : 0.55}>
-                <path d={barPath(x(i), y(Number(d.income) || 0), base - 1, barW, 3)} fill={INCOME_COLOR} />
-                <path d={barPath(x(i), y(-(Number(d.expense) || 0)), base + 1, barW, 3)} fill={EXPENSE_COLOR} />
+                <path d={barPath(x(i), y(Number(d.income) || 0), base - 1, barW, 3)} style={{ fill: INCOME_COLOR }} />
+                <path d={barPath(x(i), y(-(Number(d.expense) || 0)), base + 1, barW, 3)} style={{ fill: EXPENSE_COLOR }} />
                 {(day === 1 || day % 5 === 0 || isToday) && (
                   <text x={x(i) + barW / 2} y={height - 8} textAnchor="middle" className={`mb-fin-xlabel${isToday ? ' is-selected' : ''}`}>
                     {day}

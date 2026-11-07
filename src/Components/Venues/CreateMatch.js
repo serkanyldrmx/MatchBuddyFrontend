@@ -22,12 +22,28 @@ import { api } from '../../api/config';
 import { matchesApi } from '../../api/matches';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { PageHeader } from '../../ui';
-import { apiErrorMessage, getCurrentUser, mediaUrl } from '../../utils/format';
+import { apiErrorMessage, errorCode, fieldErrorsOf, getCurrentUser, mediaUrl } from '../../utils/format';
+import { bookingUserCountRange, usePublicParams } from '../../api/parameters';
 import SlotPicker, { DateStrip } from './SlotPicker';
 import { AMENITY_ICONS, VenueRating } from './Venues';
 import './CreateMatch.css';
 
-const DURATIONS = [60, 90, 120];
+// Sunucu hata kodları → sihirbazda dönülecek adım
+// Seçilen saat artık kullanılamıyor: saat seçimi sıfırlanır
+const SLOT_GONE_CODES = ['VENUE_SLOT_TAKEN', 'MATCH_TIME_CONFLICT', 'VENUE_PAST_SLOT', 'VENUE_CLOSED_AT_TIME', 'RESERVATION_PITCH_UNAVAILABLE', 'OWNER_BLOCK_CLOSED_CONFLICT'];
+// Saat / süre / tesis kuralı hataları: 1. adıma dönülür (seçim korunur)
+const SLOT_STEP_CODES = [
+  'VENUE_BOOKING_TOO_SOON',
+  'VENUE_BOOKING_TOO_FAR_AHEAD',
+  'VENUE_INVALID_START_MINUTE',
+  'VENUE_INVALID_DURATION',
+  'VENUE_DURATION_OUT_OF_RANGE',
+  'VENUE_CHOOSE_SLOT',
+  'VENUE_PITCH_REQUIRED',
+  'RESERVATION_VENUE_CLOSED',
+];
+// Kadro adımındaki alanlar (errors sözlüğü anahtarları, küçük harf)
+const SQUAD_FIELDS = ['matchname', 'description', 'usercount', 'hometeamid', 'awayteamid', 'lookingforopponent'];
 
 const toApiDate = (d) => dayjs(d).format('YYYY-MM-DDTHH:mm:ss');
 const numParam = (v) => (v && Number.isFinite(Number(v)) ? Number(v) : undefined);
@@ -208,14 +224,22 @@ export default function CreateMatch() {
   }, [stadiumId, message, t]);
 
   const pitch = useMemo(() => venue?.pitches?.find((p) => p.pitchId === slot?.pitchId) || null, [venue, slot?.pitchId]);
+  // Kişi sayısı aralığı ve süreler sunucu parametrelerinden (GET /api/Parameters/Public) gelir
+  const publicParams = usePublicParams();
   const perSide = pitch?.playersPerSide || 7;
-  const maxPlayers = perSide * 2 + 4;
+  const { min: minPlayers, max: maxPlayers } = bookingUserCountRange(perSide, publicParams.get);
   const players = userCount || perSide * 2;
+  const durations = publicParams.get('venue.allowedDurations');
 
   // Saha değişince oyuncu sayısını sahaya göre ayarla
   useEffect(() => {
-    if (pitch) setUserCount((c) => (c && c >= 8 && c <= pitch.playersPerSide * 2 + 4 ? c : pitch.playersPerSide * 2));
-  }, [pitch]);
+    if (pitch) setUserCount((c) => (c && c >= minPlayers && c <= maxPlayers ? c : pitch.playersPerSide * 2));
+  }, [pitch, minPlayers, maxPlayers]);
+
+  // İzin verilen süreler değişirse (parametreler yüklendi) geçersiz seçimi ilk seçeneğe çek
+  useEffect(() => {
+    if (durations.length && !durations.includes(duration)) setDuration(durations[0]);
+  }, [durations, duration]);
 
   // Tesiste olmayan ekstraları sıfırla
   useEffect(() => {
@@ -253,7 +277,7 @@ export default function CreateMatch() {
     value: tm.teamId,
     label: t('venues:createMatch.teamOption', { name: tm.teamName, count: (tm.playerId || []).length }),
   });
-  const durationOptions = DURATIONS.map((d) => ({ value: d, label: t('venues:createMatch.minutes', { count: d }) }));
+  const durationOptions = durations.map((d) => ({ value: d, label: t('venues:createMatch.minutes', { count: d }) }));
 
   /* ---------- Aksiyonlar ---------- */
   const changeVenue = (id) => {
@@ -329,9 +353,18 @@ export default function CreateMatch() {
       setDone({ matchId, message: res?.message });
     } catch (e) {
       message.error(apiErrorMessage(e, t('venues:createMatch.errors.createFailed')));
-      if (e?.response?.status === 400 && /dolu/i.test(apiErrorMessage(e, ''))) {
+      // Mesaj metnine değil, hata koduna göre ilgili adıma dön
+      const code = errorCode(e);
+      if (SLOT_GONE_CODES.includes(code)) {
         setStep(0);
         setSlot(null);
+      } else if (SLOT_STEP_CODES.includes(code)) {
+        setStep(0);
+      } else if (
+        /^(MATCH_NAME_|TEAM_|RESERVATION_(HOME|AWAY|SAME|OPPONENT|NOT_HOME))/.test(code || '') ||
+        Object.keys(fieldErrorsOf(e) || {}).some((k) => SQUAD_FIELDS.includes(k.toLowerCase()))
+      ) {
+        setStep(1);
       }
     } finally {
       setSubmitting(false);
@@ -463,7 +496,7 @@ export default function CreateMatch() {
             <label>{t('venues:createMatch.squad.playerCount')}</label>
             <InputNumber
               size="large"
-              min={8}
+              min={minPlayers}
               max={maxPlayers}
               value={players}
               onChange={(v) => setUserCount(v)}

@@ -107,6 +107,10 @@ export const ownerApi = {
   finance: (stadiumId, year, month) => api.get('/api/Owner/Finance', { params: { stadiumId, year, month } }).then(data),
   reviews: (stadiumId) => api.get('/api/Owner/Reviews', { params: { stadiumId } }).then(data),
   reply: (reviewId, reply) => api.post('/api/Owner/Reviews/Reply', { reviewId, reply }).then(data),
+  /** Tesis ayarları (platform-api.md §5): { stadiumId, minBookingNoticeHours, freeCancellationHours, maxAdvanceBookingDays, effective, defaults, updatedAt } — null = sistem varsayılanı */
+  settings: (stadiumId) => api.get('/api/Owner/Settings', { params: { stadiumId } }).then(data),
+  /** Tam değiştirme: gönderilmeyen / null alanlar sistem varsayılanına döner */
+  saveSettings: (stadiumId, settings) => api.put('/api/Owner/Settings', { stadiumId, ...settings }, { params: { stadiumId } }).then(data),
 };
 
 /* ---------- Admin ---------- */

@@ -22,6 +22,7 @@ import {
   UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { logout } from '../api/config';
+import { usePlayerPreferencesSync } from '../api/playerSettings';
 import { useMessages } from '../messaging/MessagesContext';
 import { PlayerAvatar } from '../ui';
 import { fullName, getCurrentUser } from '../utils/format';
@@ -182,6 +183,8 @@ export default function AppLayout() {
   const { openMessages, isOpen: messagesOpen } = useMessages();
   const { t } = useTranslation();
   useAppBodyClass();
+  // Sunucudaki tema/dil tercihini uygula, tema değişikliklerini PlayerSettings'e kaydet
+  usePlayerPreferencesSync();
 
   // Eski /chat bağlantısı: mesaj panelini aç
   useEffect(() => {

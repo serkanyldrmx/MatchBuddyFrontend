@@ -3,6 +3,7 @@ import { Avatar, Empty, Progress, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { initials, mediaUrl } from '../utils/format';
+import { useThemeMode } from '../theme/ThemeContext';
 import './common.css';
 
 export { default as BallLoader, PageLoader } from './BallLoader';
@@ -65,6 +66,8 @@ export function CapacityRing({ going = 0, capacity = 0, size = 46, label }) {
   const { t } = useTranslation();
   const pct = capacity ? Math.min(Math.round((going / capacity) * 100), 100) : 0;
   const full = capacity && going >= capacity;
+  // Halka SVG nitelikleriyle (stroke=) çizilir: CSS değişkeni çözülmez, temanın somut rengi verilir
+  const { palette } = useThemeMode();
   return (
     <div className="mb-capacity">
       <Progress
@@ -73,7 +76,7 @@ export function CapacityRing({ going = 0, capacity = 0, size = 46, label }) {
         percent={pct}
         showInfo={false}
         strokeWidth={10}
-        strokeColor={full ? 'var(--mb-gold)' : 'var(--mb-primary)'}
+        strokeColor={full ? palette.gold : palette.primary}
         trailColor="rgba(148,163,184,0.16)"
       />
       <div className="mb-capacity__text">

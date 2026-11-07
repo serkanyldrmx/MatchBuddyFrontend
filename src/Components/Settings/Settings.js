@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, App, Button, Card, Input, Modal, Radio, Skeleton, Switch, Tag } from 'antd';
-import { BellOutlined, BgColorsOutlined, DeleteOutlined, LockOutlined, SettingOutlined, StopOutlined, WarningOutlined } from '@ant-design/icons';
+import { Alert, App, Button, Card, Input, Modal, Radio, Select, Skeleton, Switch, Tag } from 'antd';
+import { BellOutlined, BgColorsOutlined, GlobalOutlined, DeleteOutlined, LockOutlined, SettingOutlined, StopOutlined, WarningOutlined } from '@ant-design/icons';
 import { Trans, useTranslation } from 'react-i18next';
 import { logout } from '../../api/config';
 import { emit, MESSAGE_PERMISSION, PROFILE_VISIBILITY, socialApi, SOCIAL_CHANGED } from '../../api/social';
+import { availableLanguages, changePlayerLanguage, loadPlayerSettings, usePlayerSettings } from '../../api/playerSettings';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName } from '../../utils/format';
 import ThemeSwitch from '../../theme/ThemeSwitch';
@@ -54,9 +55,12 @@ function OptionCards({ value, options, onChange, disabled }) {
 export default function Settings() {
   const { message } = App.useApp();
   const { t, i18n } = useTranslation();
-  const [settings, setSettings] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Ayarlar ortak depodan (tema/dil senkronu ile aynı kaynak)
+  const { settings, loaded, error: settingsError, save } = usePlayerSettings();
+  const loading = !loaded && !settingsError;
   const [saving, setSaving] = useState(false);
+  const languages = availableLanguages();
+  const currentLang = (i18n.resolvedLanguage || i18n.language || '').split('-')[0];
   const [blocked, setBlocked] = useState([]);
   const [blockedLoading, setBlockedLoading] = useState(true);
   const [unblocking, setUnblocking] = useState(null);
@@ -67,11 +71,7 @@ export default function Settings() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    socialApi
-      .getSettings()
-      .then(setSettings)
-      .catch((e) => message.error(apiErrorMessage(e, t('settings:loadError'))))
-      .finally(() => setLoading(false));
+    loadPlayerSettings({ force: true }).catch((e) => message.error(apiErrorMessage(e, t('settings:loadError'))));
     socialApi
       .blocked()
       .then((list) => setBlocked(list || []))
@@ -79,17 +79,26 @@ export default function Settings() {
       .finally(() => setBlockedLoading(false));
   }, [message, t]);
 
-  // Her değişiklik anında kaydedilir; hata olursa eski değere döner
+  // Her değişiklik anında kaydedilir; hata olursa eski değere döner (depo geri alır)
   const update = async (patch) => {
-    const prev = settings;
-    const next = { ...settings, ...patch };
-    setSettings(next);
     setSaving(true);
     try {
-      await socialApi.saveSettings(next);
+      await save(patch);
       message.success({ content: t('common:status.saved'), key: 'settings-save', duration: 1.5 });
     } catch (e) {
-      setSettings(prev);
+      message.error(apiErrorMessage(e, t('settings:saveError')));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Dil: arayüz hemen değişir, PlayerSettings.language kaydedilir (Accept-Language bu dilden gönderilir)
+  const changeLang = async (lng) => {
+    setSaving(true);
+    try {
+      await changePlayerLanguage(lng);
+      message.success({ content: t('common:status.saved'), key: 'settings-save', duration: 1.5 });
+    } catch (e) {
       message.error(apiErrorMessage(e, t('settings:saveError')));
     } finally {
       setSaving(false);
@@ -147,6 +156,24 @@ export default function Settings() {
             <span>{t('settings:appearance.themeHint')}</span>
           </div>
           <ThemeSwitch />
+        </div>
+        <div className="mb-settings__theme mb-settings__language">
+          <div>
+            <strong>
+              <GlobalOutlined /> {t('settings:appearance.language')}
+            </strong>
+            <span>{languages.length > 1 ? t('settings:appearance.languageHint') : t('settings:appearance.languageSingle')}</span>
+          </div>
+          <span className="mb-settings__language-control">
+            <Select
+              className="mb-settings__language-select"
+              value={currentLang}
+              options={languages}
+              onChange={changeLang}
+              disabled={languages.length < 2 || saving}
+              aria-label={t('settings:appearance.language')}
+            />
+          </span>
         </div>
       </Card>
 
