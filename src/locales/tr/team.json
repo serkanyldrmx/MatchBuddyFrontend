@@ -65,7 +65,7 @@
   },
   "ai": {
     "title": "AI ile takım oluştur",
-    "subtitle": "Oyuncuların yaş, boy, kilo ve puanlarına göre birbirine denk iki takım kurulur.",
+    "subtitle": "Seçtiğin oyuncular, maç sonrası aldıkları puanlara göre birbirine denk iki takıma bölünür.",
     "team1Placeholder": "1. takımın adı",
     "team2Placeholder": "2. takımın adı",
     "points_one": "{{count}} puan",
@@ -73,17 +73,18 @@
     "playerStats": "{{age}} yaş · {{size}} cm · {{weight}} kg",
     "generateError": "Takımlar oluşturulamadı.",
     "generateSuccess": "Dengeli takımlar oluşturuldu.",
-    "serviceUnreachable": "Yapay zeka servisine ulaşılamadı.",
     "namesRequired": "İki takıma da isim verin.",
     "saveSuccess": "Takımlar kaydedildi.",
     "saveError": "Takımlar kaydedilemedi.",
-    "teamSize": "Takım başına oyuncu",
     "regenerate": "Yeniden oluştur",
     "generate": "Takımları oluştur",
-    "scoreDiff": "Puan farkı",
+    "scoreDiff": "Güç farkı",
     "save": "Takımları kaydet",
     "balancing": "Takımlar dengeleniyor…",
     "highDiff": "Takımlar arasındaki puan farkı yüksek. Daha dengeli bir dağılım için yeniden oluşturmayı deneyin.",
-    "empty": "Takım boyutunu seçip 'Takımları oluştur' butonuna basın"
+    "empty": "Oyuncuları seçip 'Takımları oluştur' butonuna bas.",
+    "players": "Oyuncular",
+    "playersPlaceholder": "Boş bırakırsan sen ve takip ettiğin oyuncular",
+    "power": "Güç {{power}}"
   }
 }

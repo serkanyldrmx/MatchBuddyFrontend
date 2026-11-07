@@ -15,13 +15,13 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
-import { aiFetch, AI_BASE_URL } from '../../api/config';
+import { aiApi } from '../../api/ai';
 import { matchesApi, playersApi, PARTICIPANT_STATUS } from '../../api/matches';
 import { INVITES_CHANGED, invitesApi } from '../../api/social';
 import { formatPrice, venuesApi } from '../../api/venues';
 import { intlLocale } from '../../i18n';
 import { CapacityRing, EmptyState, PlayerAvatar } from '../../ui';
-import { apiErrorMessage, fullName, getCurrentUser, isPast, mediaUrl } from '../../utils/format';
+import { apiErrorMessage, fullName, isPast, mediaUrl } from '../../utils/format';
 import MatchCard from '../Post/Post';
 import './Home.css';
 
@@ -69,7 +69,6 @@ function Home() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const navigate = useNavigate();
-  const me = getCurrentUser();
 
   const [matches, setMatches] = useState([]);
   const [deals, setDeals] = useState([]);
@@ -112,16 +111,14 @@ function Home() {
   const sortWithAI = async () => {
     setAiLoading(true);
     try {
-      const res = await aiFetch(AI_BASE_URL, `/sort-matches?playerId=${me.playerId}`);
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || t('home:ai.failed'));
+      const list = await aiApi.matchRecommendations();
       const order = {};
-      (data.matches || []).forEach((m, i) => (order[m.matchId] = { rank: i, message: m.personalizedMessage }));
+      list.forEach((r, i) => (order[r.matchId] = { rank: i, message: t(`home:ai.reasons.${r.reason}`, { ...(r.args || {}), defaultValue: '' }) }));
       setAiOrder(order);
       setFilter('upcoming');
-      message.success(t('home:ai.sorted'));
+      message.success(list.length ? t('home:ai.sorted') : t('home:ai.noSuggestions'));
     } catch (e) {
-      message.error(e.message === 'Failed to fetch' ? t('home:ai.unreachable') : e.message);
+      message.error(apiErrorMessage(e, t('home:ai.failed')));
     } finally {
       setAiLoading(false);
     }

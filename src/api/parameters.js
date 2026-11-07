@@ -31,6 +31,10 @@ export const PUBLIC_PARAM_DEFAULTS = Object.freeze({
   'tournament.minTeams': 4,
   'tournament.maxTeams': 16,
   'security.passwordMinLength': 6,
+  'auth.codeTtlMinutes': 15,
+  'auth.codeResendCooldownSeconds': 60,
+  'auth.passwordRequireLetterAndDigit': false,
+  'legal.termsVersion': '2026-11-06',
 });
 
 /**

@@ -580,3 +580,60 @@
   border-color: var(--auth-line-strong);
   color: var(--mb-text);
 }
+
+/* ---------- Sosyal giriş ---------- */
+.mb-auth__social {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.mb-auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mb-text-2);
+  font-size: 13px;
+}
+
+.mb-auth__divider::before,
+.mb-auth__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--auth-line);
+}
+
+.mb-auth__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.mb-auth .mb-auth__facebook.ant-btn {
+  height: 44px;
+  border: none;
+  border-radius: 4px;
+  background: #1877f2;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mb-auth .mb-auth__facebook.ant-btn:not(:disabled):hover {
+  background: #166fe5;
+  color: #fff;
+}
+
+/* ---------- Koşullar sayfası ---------- */
+.mb-legal h3 {
+  margin: 18px 0 6px;
+  font-size: 16px;
+  color: var(--mb-text);
+}
+
+.mb-legal p {
+  margin: 0 0 10px;
+  color: var(--mb-text-2);
+  line-height: 1.6;
+}

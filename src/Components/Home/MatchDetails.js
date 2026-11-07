@@ -41,12 +41,14 @@ import {
   SwapOutlined,
   UserAddOutlined,
   VideoCameraOutlined,
+  RobotOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
 import { api } from '../../api/config';
 import { matchesApi, PARTICIPANT_STATUS, SIDE } from '../../api/matches';
+import { aiApi } from '../../api/ai';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { useMessages } from '../../messaging/MessagesContext';
 import { CapacityRing, MatchStatusTag, PageLoader, PlayerAvatar } from '../../ui';
@@ -588,6 +590,9 @@ function MatchDetails() {
       () => matchesApi.setSide(d.matchId, p.player.playerId, p.side === SIDE.AWAY ? SIDE.HOME : SIDE.AWAY),
       t('match:details.sideChanged')
     );
+  // Katılan oyuncuları güçlerine göre iki dengeli tarafa böler (yalnızca kurucu)
+  const balanceSides = () =>
+    run(() => aiApi.balanceTeams({ matchId: d.matchId, apply: true }), t('match:details.balanced'));
   const msg = (player) => openMessages({ type: 'user', data: player });
   const openGuestModal = (side, guest) => setGuestModal({ open: true, side, guest });
   const editGuest = (g) => openGuestModal(undefined, g);
@@ -806,6 +811,11 @@ function MatchDetails() {
                   />
                 </Col>
                 <Col xs={24} xl={7}>
+                  {d.canManage && !closed && going.length >= 2 && (
+                    <Button block icon={<RobotOutlined />} loading={busy} onClick={balanceSides} style={{ marginBottom: 12 }}>
+                      {t('match:details.actions.balanceTeams')}
+                    </Button>
+                  )}
                   <Card title={t('match:details.waitlistTitle', { count: waitlist.length })} size="small">
                     {waitlist.length === 0 ? (
                       <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.waitlistEmpty')} />

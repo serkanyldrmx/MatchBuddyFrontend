@@ -5,6 +5,9 @@ import React, { useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import AuthShell from "./AuthShell";
 import { api } from '../../api/config';
+import { usePublicParam } from '../../api/parameters';
+import SocialLogin from './SocialLogin';
+import useLoginFlow from './useLoginFlow';
 import { apiErrorMessage } from '../../utils/format';
 import ImageCrop from "../../ui/ImageCrop";
 import { ACCEPTED_IMAGE_ACCEPT, imageError, prepareImage } from "../../utils/image";
@@ -17,6 +20,8 @@ const RegisterForm = () => {
   const [fileList, setFileList] = useState([]);
   const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
   const { t } = useTranslation();
+  const termsVersion = usePublicParam('legal.termsVersion');
+  const { finish, termsModal } = useLoginFlow();
 
   const success = () => {
     message.success(t('auth:register.success'));
@@ -43,6 +48,9 @@ const RegisterForm = () => {
       age: parseInt(values.age),
       matchNotificationPermission: values.matchNotificationPermission ? 1 : 0,
       userScore: 0,
+      // KVKK: güncel kullanım koşulları + aydınlatma metni sürümü (docs/auth-api.md)
+      termsVersion: values.acceptTerms ? termsVersion : null,
+      marketingConsent: Boolean(values.marketingConsent),
     };
 
     // PlayerModel'i FormData'ya ekle
@@ -56,11 +64,9 @@ const RegisterForm = () => {
 
     try {
       // Verileri ve fotoğrafı SavePlayer endpoint'ine gönder
-      console.log("Sending FormData:", formData);
-      const response = await api.post("/api/Players/SavePlayer", formData, {
+      await api.post("/api/Players/SavePlayer", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log("Response:", response.data);
       success();
       setTimeout(() => {
         navigate("/");
@@ -287,12 +293,27 @@ const RegisterForm = () => {
           </Col>
         </Row>
 
+        <Form.Item
+          name="acceptTerms"
+          valuePropName="checked"
+          rules={[{ validator: (_, v) => (v ? Promise.resolve() : Promise.reject(new Error(t('auth:terms.required')))) }]}
+        >
+          <Checkbox className="mb-auth__check">
+            <Trans i18nKey="auth:terms.accept" components={{ a: <Link to="/terms" target="_blank" rel="noopener" /> }} />
+          </Checkbox>
+        </Form.Item>
+        <Form.Item name="marketingConsent" valuePropName="checked">
+          <Checkbox className="mb-auth__check">{t('auth:terms.marketing')}</Checkbox>
+        </Form.Item>
+
         <Form.Item className="mb-auth__submit">
           <Button type="primary" htmlType="submit" size="large" block>
             {t('auth:register.submit')}
           </Button>
         </Form.Item>
       </Form>
+      <SocialLogin onSuccess={finish} />
+      {termsModal}
       <p className="mb-auth__switch">
         {t('auth:register.haveAccount')} <Link to="/" className="mb-auth__link">{t('auth:register.signIn')}</Link>
       </p>

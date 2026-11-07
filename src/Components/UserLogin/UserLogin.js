@@ -1,10 +1,14 @@
 import { LockOutlined, UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate, Link } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import AuthShell from "./AuthShell";
-import { api, getToken } from '../../api/config';
+import { getToken } from '../../api/config';
+import { authApi } from '../../api/auth';
+import { apiErrorMessage } from '../../utils/format';
+import SocialLogin from './SocialLogin';
+import useLoginFlow from './useLoginFlow';
 import { homePathFor } from '../../utils/roles';
 
 const UserLogin = () => {
@@ -19,43 +23,23 @@ const UserLogin = () => {
     }
   }, [navigate]);
 
-  const success = () => {
-    message.success(t('auth:login.success'));
-  };
-
-  const error = (text) => {
-    message.error(text || t('auth:login.failed'));
-  };
+  const { finish, termsModal } = useLoginFlow();
+  const [form] = Form.useForm();
+  const remember = Form.useWatch('remember', form) ?? true;
+  const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
-    const user = {
-      userName: values.username,
-      password: values.password,
-    };
-
+    setLoading(true);
     try {
-      const response = await api.post("/api/Players/PlayerLogin", user);
-      const data = response.data;
-      if (!data || !data.token || !data.player) {
-        error();
-        return;
-      }
-
-      // JWT token ve kullanıcı bilgisi saklanır
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.player));
-      success();
-
-      setTimeout(() => {
-        navigate(homePathFor(data.player), { replace: true });
-      }, 1500);
+      finish(await authApi.login(values.username, values.password, values.remember !== false));
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        error(t('auth:login.invalidCredentials'));
+        message.error(t('auth:login.invalidCredentials'));
       } else {
-        error();
+        message.error(apiErrorMessage(err, t('auth:login.failed')));
       }
-      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,6 +49,7 @@ const UserLogin = () => {
       subtitle={t('auth:login.subtitle')}
     >
       <Form
+        form={form}
         name="normal_login"
         className="mb-auth__form"
         layout="vertical"
@@ -115,14 +100,16 @@ const UserLogin = () => {
           <Form.Item name="remember" valuePropName="checked" noStyle>
             <Checkbox>{t('auth:login.remember')}</Checkbox>
           </Form.Item>
-          <Link to="#" className="mb-auth__link">{t('auth:login.forgotPassword')}</Link>
+          <Link to="/forgot-password" className="mb-auth__link">{t('auth:login.forgotPassword')}</Link>
         </div>
         <Form.Item className="mb-auth__submit">
-          <Button type="primary" htmlType="submit" size="large" block>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading}>
             {t('auth:login.submit')}
           </Button>
         </Form.Item>
       </Form>
+      <SocialLogin rememberMe={remember} onSuccess={finish} />
+      {termsModal}
       <p className="mb-auth__switch">
         {t('auth:login.noAccount')} <Link to="/register" className="mb-auth__link">{t('auth:login.signUpNow')}</Link>
       </p>

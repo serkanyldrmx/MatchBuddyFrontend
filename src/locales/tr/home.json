@@ -16,11 +16,25 @@
   "ai": {
     "failed": "Sıralama başarısız oldu.",
     "sorted": "Maçlar sana göre sıralandı.",
-    "unreachable": "Yapay zeka servisine ulaşılamadı.",
     "sortButton": "Bana göre sırala",
-    "banner": "Liste yapay zeka tarafından senin geçmişine göre sıralandı.",
+    "banner": "Liste senin geçmişine, arkadaşlarına ve maç saatine göre sıralandı.",
     "reset": "Varsayılana dön",
-    "sorting": "Maçlar sana göre sıralanıyor…"
+    "sorting": "Maçlar sana göre sıralanıyor…",
+    "noSuggestions": "Şu an sana uygun, yeri olan yaklaşan maç bulunamadı.",
+    "reasons": {
+      "friends_one": "Tanıdığın {{count}} oyuncu bu maçta.",
+      "friends_other": "Tanıdığın {{count}} oyuncu bu maçta.",
+      "lastSpots_one": "Son {{count}} yer kaldı, kaçırma!",
+      "lastSpots_other": "Son {{count}} yer kaldı, kaçırma!",
+      "venue_one": "{{venue}} sana tanıdık, burada {{count}} maç oynadın.",
+      "venue_other": "{{venue}} sana tanıdık, burada {{count}} maç oynadın.",
+      "soon": "Maç çok yakında, hemen yerini kap!",
+      "level": "Bu maçta senin seviyende oyuncular var.",
+      "popular_one": "Popüler maç: {{count}} kişi katılıyor.",
+      "popular_other": "Popüler maç: {{count}} kişi katılıyor.",
+      "open_one": "{{count}} boş yer var.",
+      "open_other": "{{count}} boş yer var."
+    }
   },
   "hero": {
     "thisWeek_one": "Bu hafta {{count}} maç oynanıyor",

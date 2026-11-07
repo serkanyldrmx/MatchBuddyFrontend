@@ -30,6 +30,8 @@ import OwnerSettings from './owner/OwnerSettings';
 
 import UserLogin from './Components/UserLogin/UserLogin';
 import RegisterForm from './Components/UserLogin/Register';
+import ForgotPassword from './Components/UserLogin/ForgotPassword';
+import Terms from './Components/Information/Terms';
 
 import Home from './Components/Home/Home';
 import MatchDetails from './Components/Home/MatchDetails';
@@ -72,6 +74,8 @@ function App() {
               {/* Giriş / kayıt */}
               <Route path="/" element={<UserLogin />} />
               <Route path="/register" element={<RegisterForm />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/terms" element={<Terms />} />
 
               {/* Oyuncu ekranları: ortak AppLayout içinde */}
               <Route element={<PrivateRoute role={ROLE.PLAYER} />}>

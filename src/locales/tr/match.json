@@ -168,7 +168,8 @@
       "invite": "Davet et",
       "claim": "Takımınla rakip ol",
       "otherSlot": "Başka saat seç",
-      "deleteMatch": "Maçı sil"
+      "deleteMatch": "Maçı sil",
+      "balanceTeams": "Takımları dengele"
     },
     "backLink": "Fikstür",
     "founder": "Kurucu: <b>{{name}}</b>",
@@ -221,6 +222,7 @@
       "teamOption_other": "{{name}} · {{count}} oyuncu",
       "empty": "Rakip olabileceğin bir takımın yok.",
       "createTeam": "Takım kur"
-    }
+    },
+    "balanced": "Oyuncular güçlerine göre iki dengeli takıma ayrıldı."
   }
 }
