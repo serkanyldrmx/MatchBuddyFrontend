@@ -3,6 +3,7 @@ import { App, Button, Input, List, Typography } from 'antd';
 import { DeleteOutlined, SendOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
+import { joinMatchChannel, onRealtime } from '../../api/realtime';
 import { PlayerAvatar } from '../../ui';
 import { apiErrorMessage, getCurrentUser } from '../../utils/format';
 
@@ -30,6 +31,18 @@ export default function MatchComments({ matchId }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Soyunma odası anlık: bu maça yorum eklenince/silinince yenile
+  useEffect(() => {
+    const leave = joinMatchChannel(matchId);
+    const off = onRealtime('matchComment', (e) => {
+      if (Number(e.matchId) === Number(matchId)) load();
+    });
+    return () => {
+      off();
+      leave();
+    };
+  }, [matchId, load]);
 
   const post = async () => {
     const body = text.trim();

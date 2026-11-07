@@ -7,13 +7,15 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { uploadMedia } from '../api/media';
 import { socialApi } from '../api/social';
+import { onRealtime } from '../api/realtime';
 import { PlayerAvatar } from '../ui';
 import { apiErrorMessage, fromNow, isErrorCode, fullName, getCurrentUser, mediaUrl } from '../utils/format';
 import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../utils/image';
 import './messages.css';
 
 const { Text } = Typography;
-const POLL_MS = 5000;
+// Anlık bağlantı (SignalR) varken yoklama yalnızca yedektir
+const POLL_MS = 30000;
 
 const useIsMobile = () => {
   const [mobile, setMobile] = useState(() => window.innerWidth < 768);
@@ -91,6 +93,14 @@ function ConversationList({ me, onSelect }) {
       .catch((e) => message.error(apiErrorMessage(e, t('messages:list.loadFailed'))))
       .finally(() => setLoading(false));
   }, [me, loadGroups, t]);
+
+  // Yeni mesaj gelince konuşma listesi (son mesaj / sıra) tazelenir
+  useEffect(() => {
+    if (!me) return undefined;
+    return onRealtime('message', () => {
+      socialApi.messageContacts().then((list) => setContacts(list || [])).catch(() => {});
+    });
+  }, [me]);
 
   const q = search.trim().toLocaleLowerCase('tr');
 
@@ -330,15 +340,22 @@ function Conversation({ me, target }) {
     }
   }, [isGroup, target, me, t]);
 
-  // İlk yükleme + periyodik yenileme (gerçek zamanlı altyapı gelene kadar)
+  // İlk yükleme + anlık sinyal (SignalR) + yedek yoklama
   useEffect(() => {
     setLoading(true);
     setMessages([]);
     setDenied(null);
     load();
     const timer = setInterval(load, POLL_MS);
-    return () => clearInterval(timer);
-  }, [load]);
+    const off = onRealtime('message', (e) => {
+      if (isGroup ? e.kind === 'group' && e.groupId === target.data.groupId
+        : e.kind === 'user' && [e.senderId, e.recipientId].includes(target.data.playerId)) load();
+    });
+    return () => {
+      clearInterval(timer);
+      off();
+    };
+  }, [load, isGroup, target]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -35,6 +35,7 @@ export const saveSession = (data) => {
 const clearSession = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  window.dispatchEvent(new Event('mb:logout')); // anlık bağlantı kapansın (api/realtime.js)
 };
 
 // Oturumu kapat: sunucudaki refresh token iptal edilir (çerez), yerel bilgiler temizlenir
