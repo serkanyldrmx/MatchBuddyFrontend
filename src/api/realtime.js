@@ -6,12 +6,13 @@ import { API_BASE_URL, getToken, refreshSession } from './config';
  * Sunucu yalnızca "değişti" sinyali yollar; ekranlar veriyi her zamanki REST çağrılarıyla yeniler.
  *  - "message"      { kind: 'user' | 'group', senderId, recipientId?, groupId? }
  *  - "matchComment" { matchId }   (joinMatch ile abone olunan maçlar için)
+ *  - "notification" {}            (yeni bildirim: zil yenilenir)
  * Bağlantı kurulamazsa ekranlar yavaş yoklamaya (polling) devam eder; uygulama bozulmaz.
  */
 
 let connection = null;
 let starting = null;
-const handlers = { message: new Set(), matchComment: new Set() };
+const handlers = { message: new Set(), matchComment: new Set(), notification: new Set() };
 const joinedMatches = new Map(); // matchId -> abone sayısı
 
 const build = () => {

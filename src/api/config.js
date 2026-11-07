@@ -40,6 +40,7 @@ const clearSession = () => {
 
 // Oturumu kapat: sunucudaki refresh token iptal edilir (çerez), yerel bilgiler temizlenir
 export const logout = () => {
+  window.dispatchEvent(new Event('mb:before-logout')); // bu cihazın telefon bildirimi aboneliği kalksın (pwa.js)
   fetch(`${API_BASE_URL}/api/Auth/Logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
   clearSession();
 };

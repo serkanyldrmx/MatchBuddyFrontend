@@ -9,6 +9,7 @@ import { availableLanguages, changePlayerLanguage, loadPlayerSettings, usePlayer
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName } from '../../utils/format';
 import ThemeSwitch from '../../theme/ThemeSwitch';
+import { disablePush, enablePush, getPushState } from '../../pwa';
 import './Settings.css';
 
 // Metinler render sırasında çevrilir (settings:privacy.* / settings:notifications.*)
@@ -36,6 +37,44 @@ const NOTIFY = [
 ];
 
 /** Seçenek kartları olarak radyo grubu */
+/** Bu cihaza (telefon / tarayıcı) bildirim: izin + abonelik. Durum cihaza özeldir, hesap ayarı değildir. */
+function PushToggle() {
+  const { t } = useTranslation();
+  const { message } = App.useApp();
+  const [state, setState] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    getPushState().then(setState).catch(() => setState('unsupported'));
+  }, []);
+
+  const toggle = async (on) => {
+    setBusy(true);
+    try {
+      const next = on ? await enablePush() : await disablePush();
+      setState(next);
+      if (on && next === 'on') message.success(t('settings:push.enabled'));
+      if (on && next === 'denied') message.warning(t('settings:push.denied'));
+    } catch (e) {
+      message.error(apiErrorMessage(e, t('settings:push.failed')));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (state == null) return null;
+  const hint = { 'ios-install': 'settings:push.iosInstall', denied: 'settings:push.deniedHint', unsupported: 'settings:push.unsupported' }[state];
+  return (
+    <div className="mb-settings__switch mb-settings__switch--push">
+      <div>
+        <strong>{t('settings:push.title')}</strong>
+        <span>{hint ? t(hint) : t('settings:push.desc')}</span>
+      </div>
+      <Switch checked={state === 'on'} loading={busy} disabled={!!hint} onChange={toggle} />
+    </div>
+  );
+}
+
 function OptionCards({ value, options, onChange, disabled }) {
   const { t } = useTranslation();
   return (
@@ -240,6 +279,7 @@ export default function Settings() {
           <Skeleton active paragraph={{ rows: 5 }} />
         ) : settings ? (
           <div className="mb-settings__switches">
+            <PushToggle />
             {NOTIFY.map((n) => (
               <div key={n.key} className="mb-settings__switch">
                 <div>

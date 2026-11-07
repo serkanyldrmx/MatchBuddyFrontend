@@ -4,6 +4,8 @@ import { BellOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
+import { onRealtime } from '../api/realtime';
+import { syncPushSubscription } from '../pwa';
 import { fromNow, getCurrentUser } from '../utils/format';
 import { NOTIFICATION_TYPES } from './notificationTypes';
 
@@ -33,9 +35,13 @@ export default function NotificationBell() {
 
   useEffect(() => {
     load();
+    // Yeni bildirim anında gelir (anlık bağlantı); bağlantı yoksa yavaş yoklama devam eder
     const timer = setInterval(load, 60000);
+    const off = onRealtime('notification', load);
     window.addEventListener(NOTIFICATIONS_CHANGED, load);
+    syncPushSubscription();
     return () => {
+      off();
       clearInterval(timer);
       window.removeEventListener(NOTIFICATIONS_CHANGED, load);
     };

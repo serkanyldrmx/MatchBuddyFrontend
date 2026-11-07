@@ -10,6 +10,10 @@ export const reliabilityApi = {
   markNoShows: (matchId, playerIds) => api.post('/api/Reliability/MarkNoShows', { matchId, playerIds }).then((r) => r.data),
   acceptExcuse: (matchId, playerId) => api.post('/api/Reliability/AcceptExcuse', { matchId, playerId }).then((r) => r.data),
   /** { score, level, completedMatches, attended, lateCancels, noShows, history? } */
+  /** Yedek bul (kurucu): { openSpots, candidates: [{ playerId, …, reliability, matchesTogether, invited }] } */
+  substituteCandidates: (matchId) => api.get('/api/Invites/SubstituteCandidates', { params: { matchId } }).then((r) => r.data),
+  /** Seçilenlere "yer açıldı" bildirimi (maç daveti; ilk kabul eden yeri alır) → { message, invited, skipped } */
+  callSubstitutes: (matchId, playerIds) => api.post('/api/Invites/CallSubstitutes', { matchId, playerIds }).then((r) => r.data),
   player: (playerId) => api.get('/api/Reliability/Player', { params: { playerId } }).then((r) => r.data),
 };
 

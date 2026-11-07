@@ -59,7 +59,7 @@ import InviteModal from '../Invites/InviteModal';
 import FollowButton, { PlayerLink } from '../Social/FollowButton';
 import GuestModal from './GuestModal';
 import LeaveMatchModal from './LeaveMatchModal';
-import { NoShowCard, WithdrawalsCard } from './ReliabilityPanels';
+import { NoShowCard, SubstituteCard, WithdrawalsCard } from './ReliabilityPanels';
 import { roleShort, ROLE_LABELS } from './formations';
 import Pitch, { guestInitials, sideRoster } from './Pitch';
 import './MatchDetails.css';
@@ -814,6 +814,9 @@ function MatchDetails() {
                     <Button block icon={<RobotOutlined />} loading={busy} onClick={balanceSides} style={{ marginBottom: 12 }}>
                       {t('match:details.actions.balanceTeams')}
                     </Button>
+                  )}
+                  {d.canManage && !closed && waitlist.length === 0 && d.capacity - rosterCount > 0 && (
+                    <SubstituteCard detail={d} openSpots={d.capacity - rosterCount} />
                   )}
                   <WithdrawalsCard detail={d} reload={load} />
                   <Card title={t('match:details.waitlistTitle', { count: waitlist.length })} size="small">

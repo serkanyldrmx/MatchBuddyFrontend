@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Button, Card, Checkbox, List, Tag, message } from 'antd';
-import { CheckOutlined, UserDeleteOutlined } from '@ant-design/icons';
+import { Button, Card, Checkbox, Empty, List, Modal, Skeleton, Tag, message } from 'antd';
+import { CheckOutlined, NotificationOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { reliabilityApi } from '../../api/reliability';
 import { PARTICIPANT_STATUS } from '../../api/matches';
@@ -11,7 +11,105 @@ import { apiErrorMessage, fromNow, fullName } from '../../utils/format';
  * Kurucu panelleri (docs/reliability-api.md):
  *  - WithdrawalsCard: son dakika çekilenler / gelmeyenler, mazeretleriyle; "Mazereti kabul et" puanı iade eder.
  *  - NoShowCard: maçtan sonra (pencere açıkken) gelmeyenleri işaretleme.
+ *  - SubstituteCard: maçta boş yer varken (yedek listesi boşsa) kurucu seçtiği oyunculara "yer açıldı" bildirimi gönderir.
  */
+
+export function SubstituteCard({ detail, openSpots }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState(null);
+  const [selected, setSelected] = useState([]);
+  const [sending, setSending] = useState(false);
+
+  const show = async () => {
+    setOpen(true);
+    setData(null);
+    setSelected([]);
+    try {
+      setData(await reliabilityApi.substituteCandidates(detail.matchId));
+    } catch (e) {
+      message.error(apiErrorMessage(e));
+      setOpen(false);
+    }
+  };
+
+  const send = async () => {
+    setSending(true);
+    try {
+      const res = await reliabilityApi.callSubstitutes(detail.matchId, selected);
+      message.success(res?.message || t('match:substitute.sent'));
+      setOpen(false);
+    } catch (e) {
+      message.error(apiErrorMessage(e));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const toggle = (id, on) => setSelected((s) => (on ? [...s, id] : s.filter((x) => x !== id)));
+  const candidates = data?.candidates || [];
+
+  return (
+    <>
+      <Card size="small" className="mb-substitute-card" style={{ marginBottom: 12 }}>
+        <div className="mb-substitute-card__body">
+          <div>
+            <strong>{t('match:substitute.openSpots', { count: openSpots })}</strong>
+            <span>{t('match:substitute.hint')}</span>
+          </div>
+          <Button type="primary" icon={<NotificationOutlined />} onClick={show}>
+            {t('match:substitute.find')}
+          </Button>
+        </div>
+      </Card>
+      <Modal
+        open={open}
+        title={t('match:substitute.modalTitle')}
+        onCancel={() => setOpen(false)}
+        okText={t('match:substitute.send', { count: selected.length })}
+        okButtonProps={{ disabled: selected.length === 0, loading: sending }}
+        onOk={send}
+        destroyOnClose
+      >
+        <p className="mb-hint">{t('match:substitute.modalHint')}</p>
+        {!data ? (
+          <Skeleton active avatar paragraph={{ rows: 3 }} />
+        ) : candidates.length === 0 ? (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:substitute.empty')} />
+        ) : (
+          <List
+            className="mb-substitute-list"
+            dataSource={candidates}
+            renderItem={(c) => (
+              <List.Item
+                onClick={() => !c.invited && toggle(c.playerId, !selected.includes(c.playerId))}
+                className={c.invited ? 'is-invited' : undefined}
+              >
+                <Checkbox
+                  checked={c.invited || selected.includes(c.playerId)}
+                  disabled={c.invited}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => toggle(c.playerId, e.target.checked)}
+                />
+                <List.Item.Meta
+                  avatar={<PlayerAvatar player={c} size={32} />}
+                  title={<span>{fullName(c)} <ReliabilityBadge reliability={c.reliability} compact /></span>}
+                  description={
+                    c.invited
+                      ? t('match:substitute.alreadyNotified')
+                      : c.matchesTogether > 0
+                        ? t('match:substitute.together', { count: c.matchesTogether })
+                        : t('match:substitute.following')
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        )}
+      </Modal>
+    </>
+  );
+}
 export function WithdrawalsCard({ detail, reload }) {
   const { t } = useTranslation();
   const [busyId, setBusyId] = useState(null);

@@ -244,6 +244,22 @@
     "penaltyHint": "Kurucu mazeretini kabul ederse puanın iade edilir. Yerin bekleme listesindeki ilk kişiye geçer.",
     "noPenalty": "Maça yeterince zaman var; puanın düşmez. Yerin bekleme listesindeki ilk kişiye geçer."
   },
+  "substitute": {
+    "openSpots_one": "{{count}} yer boş",
+    "openSpots_other": "{{count}} yer boş",
+    "hint": "Yedek listesi boş. Haber vermek istediğin oyuncuları sen seç; ilk katılan yeri alır.",
+    "find": "Yedek bul",
+    "modalTitle": "Kimlere haber verelim?",
+    "modalHint": "Birlikte oynadığın ve takip ettiğin oyuncular, güvenilirlik puanına göre sıralı. Seçtiklerine bildirim gider; ilk kabul eden kadroya girer, diğerleri yedeğe düşer.",
+    "send_one": "{{count}} kişiye haber ver",
+    "send_other": "{{count}} kişiye haber ver",
+    "sent": "Haber verildi.",
+    "empty": "Henüz önerilecek oyuncu yok. Birlikte oynadıkça ya da birilerini takip ettikçe burada görünürler.",
+    "together_one": "{{count}} maç birlikte oynadınız",
+    "together_other": "{{count}} maç birlikte oynadınız",
+    "following": "Takip ettiğin oyuncu",
+    "alreadyNotified": "Haber verildi, yanıt bekleniyor"
+  },
   "reliability": {
     "withdrawalsTitle": "Son dakika çekilenler ({{count}})",
     "types": {
