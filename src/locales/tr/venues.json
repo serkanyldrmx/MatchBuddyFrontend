@@ -178,6 +178,7 @@
       "extras": "Ekstralar",
       "total": "Toplam",
       "perPlayer": "Kişi başı",
+      "cleatOnlyRenter": "Krampon ücreti kişi başına bölünmez: kiralayan ayrıca {{price}} öder.",
       "splitAmong_one": "{{count}} oyuncuya bölünür",
       "splitAmong_other": "{{count}} oyuncuya bölünür",
       "unavailable": "Bu saat müsait değil.",

@@ -132,6 +132,7 @@
     "recording": "maç kaydı",
     "total": "Toplam",
     "perPlayer": "Kişi başı",
+    "cleatOnlyRenter": "Krampon kiralayan ayrıca {{price}} öder.",
     "payOnSite": "Ödeme sahada yapılır.",
     "goToVenue": "Tesise git",
     "messageOwner": "İşletmeye yaz"

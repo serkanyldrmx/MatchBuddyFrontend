@@ -437,6 +437,9 @@ function ReservationCard({ d, onMessageOwner }) {
           <strong>{formatPrice(d.perPlayer)}</strong>
         </div>
       )}
+      {d.perPlayer != null && d.cleatPrice != null && (
+        <p className="mb-hint">{t('match:booking.cleatOnlyRenter', { price: formatPrice(d.cleatPrice) })}</p>
+      )}
       {info?.cancellationPolicy && (
         <p className="mb-booking__policy">
           <InfoCircleOutlined /> <span>{info.cancellationPolicy}</span>

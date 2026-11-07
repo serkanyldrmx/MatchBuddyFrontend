@@ -134,6 +134,9 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
               <strong>{formatPrice(quote.perPlayer)}</strong>
               <small>{t('venues:createMatch.receipt.splitAmong', { count: userCount })}</small>
             </div>
+            {quote.cleatTotal > 0 && quote.cleatPrice != null && (
+              <p className="mb-hint">{t('venues:createMatch.receipt.cleatOnlyRenter', { price: formatPrice(quote.cleatPrice) })}</p>
+            )}
           </>
         ) : quote?.available === false ? (
           <Alert type="error" showIcon message={quote.reason || t('venues:createMatch.receipt.unavailable')} />
