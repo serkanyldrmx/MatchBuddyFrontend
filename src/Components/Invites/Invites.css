@@ -17,7 +17,7 @@
   height: 26px;
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
   font-size: 15px;
   font-style: normal;
@@ -257,7 +257,7 @@
 
 .mb-invite-row.is-on {
   background: var(--mb-primary-soft);
-  border-color: rgba(198, 244, 50, 0.3);
+  border-color: rgba(var(--mb-primary-rgb), 0.3);
 }
 
 .mb-invite-row__name {
@@ -277,4 +277,70 @@
 .mb-invite-row__name small {
   font-size: 12px;
   color: var(--mb-text-2);
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 575px) {
+  .mb-invites-section {
+    margin-bottom: 24px;
+  }
+  .mb-invite-card {
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 12px 14px;
+    padding: 14px 14px 14px 14px;
+  }
+  .mb-invite-card::before {
+    top: 14px;
+    bottom: 14px;
+  }
+  .mb-invite-card__stub {
+    min-height: 80px;
+    padding-right: 12px;
+  }
+  .mb-invite-card__day {
+    font-size: 34px;
+  }
+  .mb-invite-card__time {
+    margin-top: 6px;
+    padding: 2px 6px;
+    font-size: 14px;
+  }
+  .mb-invite-card__logo {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+    border-radius: 12px;
+  }
+  .mb-invite-card__title {
+    font-size: 21px;
+  }
+  .mb-invite-card__meta {
+    gap: 4px 12px;
+  }
+  .mb-invite-card__meta span {
+    min-width: 0;
+  }
+  .mb-invite-card__side {
+    gap: 10px;
+  }
+  .mb-invite-card__actions {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .mb-invite-card__actions .ant-btn {
+    flex: 1 1 0;
+    max-width: 160px;
+  }
+
+  /* Davet penceresi: tek kaydırma alanı (pencere gövdesi) kalsın */
+  .mb-invite-list {
+    max-height: none;
+    overflow-y: visible;
+  }
+  .mb-invite-row {
+    padding: 10px 8px;
+  }
+  .mb-invite-modal__title span {
+    font-size: 21px;
+  }
 }

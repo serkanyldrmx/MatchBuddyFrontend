@@ -1,19 +1,57 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { App, Card, Segmented, Skeleton, Table } from 'antd';
+import { App, Card, Grid, Segmented, Skeleton, Table } from 'antd';
 import { CrownFilled, StarFilled, TrophyOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { playersApi } from '../../api/matches';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName, getCurrentUser } from '../../utils/format';
 import './Leaderboard.css';
 
+// labelKey: çeviri anahtarı (render anında t() ile çözülür)
 const SORTS = {
-  score: { label: 'Puan', key: (r) => r.userScore },
-  goals: { label: 'Gol', key: (r) => r.goals },
-  mvp: { label: 'MVP', key: (r) => r.mvpCount },
-  matches: { label: 'Maç', key: (r) => r.matchesPlayed },
+  score: { labelKey: 'social:leaderboard.sort.score', key: (r) => r.userScore },
+  goals: { labelKey: 'social:leaderboard.sort.goals', key: (r) => r.goals },
+  mvp: { labelKey: 'social:leaderboard.sort.mvp', key: (r) => r.mvpCount },
+  matches: { labelKey: 'social:leaderboard.sort.matches', key: (r) => r.matchesPlayed },
 };
 
+/** Telefonda tablo yerine kompakt liste: sıra, avatar, isim, seçili sıralamanın değeri */
+function RankList({ rows, sort, meId }) {
+  const { t } = useTranslation();
+  return (
+    <ol className="mb-rank-list">
+      {rows.map((r, i) => (
+        <li key={r.player.playerId} className={r.player.playerId === meId ? 'is-me' : ''}>
+          <span className={`mb-rank-list__rank r${i + 1}`}>{i + 1}</span>
+          <PlayerAvatar player={r.player} size={40} />
+          <div className="mb-rank-list__name">
+            <strong>{fullName(r.player)}</strong>
+            <span>
+              {t('social:leaderboard.rankLine', { matches: r.matchesPlayed, goals: r.goals, assists: r.assists ?? 0 })}
+              {r.mvpCount > 0 && (
+                <>
+                  {' '}· <CrownFilled style={{ color: 'var(--mb-gold)' }} /> {r.mvpCount}
+                </>
+              )}
+              {r.avgRating != null && (
+                <>
+                  {' '}· <StarFilled style={{ color: 'var(--mb-gold)' }} /> {r.avgRating.toFixed(1)}
+                </>
+              )}
+            </span>
+          </div>
+          <span className="mb-rank-list__stat">
+            <strong>{SORTS[sort].key(r) ?? 0}</strong>
+            <small>{t(SORTS[sort].labelKey)}</small>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function Podium({ rows }) {
+  const { t } = useTranslation();
   const order = [rows[1], rows[0], rows[2]].filter(Boolean);
   return (
     <div className="mb-podium">
@@ -26,7 +64,7 @@ function Podium({ rows }) {
             <strong>{fullName(r.player)}</strong>
             <span className="mb-podium__score">{r.userScore}</span>
             <span className="mb-podium__meta">
-              {r.matchesPlayed} maç · {r.goals} gol · {r.mvpCount} MVP
+              {t('social:leaderboard.podiumLine', { matches: r.matchesPlayed, goals: r.goals, mvp: r.mvpCount })}
             </span>
             <div className="mb-podium__base">{rank}</div>
           </div>
@@ -38,29 +76,31 @@ function Podium({ rows }) {
 
 export default function Leaderboard() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const me = getCurrentUser();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('score');
+  const isPhone = Grid.useBreakpoint().md === false;
 
   useEffect(() => {
     playersApi
       .leaderboard(50)
       .then(setRows)
-      .catch((e) => message.error(apiErrorMessage(e, 'Sıralama yüklenemedi.')))
+      .catch((e) => message.error(apiErrorMessage(e, t('social:leaderboard.loadFailed'))))
       .finally(() => setLoading(false));
-  }, [message]);
+  }, [message, t]);
 
   const sorted = useMemo(() => rows.slice().sort((a, b) => SORTS[sort].key(b) - SORTS[sort].key(a)), [rows, sort]);
 
   return (
     <>
       <PageHeader
-        eyebrow="Sezon tablosu"
-        title="Sıralama"
-        subtitle="Maç sonrası puanlar, goller ve MVP oylarıyla belirlenir."
+        eyebrow={t('social:leaderboard.eyebrow')}
+        title={t('social:leaderboard.title')}
+        subtitle={t('social:leaderboard.subtitle')}
         icon={<TrophyOutlined />}
-        extra={<Segmented value={sort} onChange={setSort} options={Object.entries(SORTS).map(([value, s]) => ({ value, label: s.label }))} />}
+        extra={<Segmented value={sort} onChange={setSort} options={Object.entries(SORTS).map(([value, s]) => ({ value, label: t(s.labelKey) }))} />}
       />
 
       {loading ? (
@@ -69,11 +109,16 @@ export default function Leaderboard() {
         </Card>
       ) : rows.length === 0 ? (
         <Card>
-          <EmptyState description="Henüz puanlanmış maç yok. İlk maçını oyna, tabloya gir!" />
+          <EmptyState description={t('social:leaderboard.empty')} />
         </Card>
       ) : (
         <>
           {sorted.length >= 3 && <Podium rows={sorted} />}
+          {isPhone ? (
+            <Card className="mb-rank-card">
+              <RankList rows={sorted} sort={sort} meId={me?.playerId} />
+            </Card>
+          ) : (
           <Card>
             <Table
               rowKey={(r) => r.player.playerId}
@@ -87,7 +132,7 @@ export default function Leaderboard() {
                   render: (_, __, i) => <span className="mb-rank">{i + 1}</span>,
                 },
                 {
-                  title: 'Oyuncu',
+                  title: t('social:leaderboard.columns.player'),
                   render: (_, r) => (
                     <span className="mb-inline-player">
                       <PlayerAvatar player={r.player} size={34} />
@@ -99,25 +144,25 @@ export default function Leaderboard() {
                     </span>
                   ),
                 },
-                { title: 'Maç', dataIndex: 'matchesPlayed', width: 80, align: 'center' },
-                { title: 'Gol', dataIndex: 'goals', width: 80, align: 'center' },
-                { title: 'Asist', dataIndex: 'assists', width: 80, align: 'center' },
+                { title: t('social:leaderboard.columns.matches'), dataIndex: 'matchesPlayed', width: 80, align: 'center' },
+                { title: t('social:leaderboard.columns.goals'), dataIndex: 'goals', width: 80, align: 'center' },
+                { title: t('social:leaderboard.columns.assists'), dataIndex: 'assists', width: 80, align: 'center' },
                 {
-                  title: 'MVP',
+                  title: t('social:leaderboard.columns.mvp'),
                   dataIndex: 'mvpCount',
                   width: 80,
                   align: 'center',
                   render: (v) => (v > 0 ? <span style={{ color: 'var(--mb-gold)' }}><CrownFilled /> {v}</span> : 0),
                 },
                 {
-                  title: 'Ort.',
+                  title: t('social:leaderboard.columns.avg'),
                   dataIndex: 'avgRating',
                   width: 90,
                   align: 'center',
                   render: (v) => (v != null ? <span><StarFilled style={{ color: 'var(--mb-gold)' }} /> {v.toFixed(1)}</span> : '-'),
                 },
                 {
-                  title: 'Puan',
+                  title: t('social:leaderboard.columns.score'),
                   dataIndex: 'userScore',
                   width: 90,
                   align: 'right',
@@ -126,6 +171,7 @@ export default function Leaderboard() {
               ]}
             />
           </Card>
+          )}
         </>
       )}
     </>

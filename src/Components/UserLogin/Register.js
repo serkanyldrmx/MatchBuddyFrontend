@@ -1,29 +1,34 @@
-import { Button, Form, Input, Select, Row, Col, message, Checkbox, Card, Upload } from "antd";
-import { EditOutlined, UserOutlined, MailOutlined, HomeOutlined, NumberOutlined, UploadOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Select, Row, Col, message, Checkbox, Upload } from "antd";
+import { LockOutlined, UserOutlined, MailOutlined, HomeOutlined, NumberOutlined, UploadOutlined, ColumnHeightOutlined, DashboardOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
-import React, { useState } from "react";
-import "./Login.css";
-import Logo from "../../images/mutch_buddy_Logo.png";
+import React, { useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import AuthShell from "./AuthShell";
 import { api } from '../../api/config';
+import { usePublicParam } from '../../api/parameters';
+import SocialLogin from './SocialLogin';
+import useLoginFlow from './useLoginFlow';
+import { apiErrorMessage } from '../../utils/format';
+import ImageCrop from "../../ui/ImageCrop";
+import { ACCEPTED_IMAGE_ACCEPT, imageError, prepareImage } from "../../utils/image";
 
 const { Option } = Select;
-
-const formItemLayout = {
-  labelCol: { xs: { span: 24 }, sm: { span: 4 } },
-  wrapperCol: { xs: { span: 24 }, sm: { span: 20 } },
-};
 
 const RegisterForm = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [fileList, setFileList] = useState([]);
+  const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
+  const { t } = useTranslation();
+  const termsVersion = usePublicParam('legal.termsVersion');
+  const { finish, termsModal } = useLoginFlow();
 
   const success = () => {
-    message.success("Kayıt başarılı, yönlendiriliyor");
+    message.success(t('auth:register.success'));
   };
 
   const error = (errorMessage) => {
-    message.error(errorMessage || "Kayıt başarısız");
+    message.error(errorMessage || t('auth:register.failed'));
   };
 
   const onFinish = async (values) => {
@@ -43,6 +48,9 @@ const RegisterForm = () => {
       age: parseInt(values.age),
       matchNotificationPermission: values.matchNotificationPermission ? 1 : 0,
       userScore: 0,
+      // KVKK: güncel kullanım koşulları + aydınlatma metni sürümü (docs/auth-api.md)
+      termsVersion: values.acceptTerms ? termsVersion : null,
+      marketingConsent: Boolean(values.marketingConsent),
     };
 
     // PlayerModel'i FormData'ya ekle
@@ -50,25 +58,27 @@ const RegisterForm = () => {
 
     // Fotoğrafı ekle (varsa)
     if (fileList.length > 0) {
-      formData.append("profilePicture", fileList[0]);
+      // Kırpılmış fotoğrafı tarayıcıda küçült (başarısız olursa orijinal gönderilir)
+      formData.append("profilePicture", await prepareImage(fileList[0]));
     }
 
     try {
       // Verileri ve fotoğrafı SavePlayer endpoint'ine gönder
-      console.log("Sending FormData:", formData);
-      const response = await api.post("/api/Players/SavePlayer", formData, {
+      await api.post("/api/Players/SavePlayer", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log("Response:", response.data);
       success();
       setTimeout(() => {
         navigate("/");
       }, 1500);
     } catch (err) {
       // Extract error message
-      let errorMessage = "Kayıt başarısız";
+      let errorMessage = t('auth:register.failed');
       if (err.response?.data) {
-        if (err.response.data.message) {
+        if (err.response.data.code || err.response.data.Code) {
+          // Sunucu hata kodu varsa errors namespace'inden çevrilir
+          errorMessage = apiErrorMessage(err, t('auth:register.failed'));
+        } else if (err.response.data.message) {
           errorMessage = err.response.data.message;
         } else if (err.response.data.errors) {
           // Handle validation errors
@@ -96,17 +106,22 @@ const RegisterForm = () => {
     </Form.Item>
   );
 
+  // Kırpmadan önce tür/boyut kontrolü; uygun değilse kırpma penceresi açılmaz
+  const beforeCrop = (file) => {
+    const err = imageError(file);
+    if (!err) return true;
+    message.error(err);
+    rejectedRef.current = file;
+    return false;
+  };
+
   const uploadProps = {
     onRemove: () => {
       setFileList([]);
     },
     beforeUpload: (file) => {
-      if (!file.type.startsWith("image/")) {
-        message.error("Sadece resim dosyaları yüklenebilir!");
-        return Upload.LIST_IGNORE;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        message.error("Dosya boyutu 5 MB'tan büyük olamaz!");
+      if (file === rejectedRef.current) {
+        rejectedRef.current = null;
         return Upload.LIST_IGNORE;
       }
       setFileList([file]);
@@ -115,185 +130,194 @@ const RegisterForm = () => {
     fileList,
   };
 
-  const renderRegister = (
-    <Card className="register-card">
-      <div className="register-header">
-        <img src={Logo} alt="Logo" className="logo-reg" />
-        <h1 className="register-title">Register</h1>
-      </div>
+  return (
+    <AuthShell
+      wide
+      title={<Trans i18nKey="auth:register.title" components={{ em: <em /> }} />}
+      subtitle={t('auth:register.subtitle')}
+    >
       <Form
-        {...formItemLayout}
+        layout="vertical"
         form={form}
         name="register"
-        className="register-form"
+        className="mb-auth__form"
         onFinish={onFinish}
         initialValues={{ prefix: "90" }}
         scrollToFirstError
       >
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="name"
-              tooltip="Başkalarının sana ne demesini istiyorsun?"
-              rules={[{ required: true, message: "Lütfen Tam Adınızı girin!", whitespace: true }]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="İsim" className="input-large" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="lastName"
-              rules={[{ required: true, message: "Lütfen Soyadınızı girin!" }]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="Soyisim" className="input-large" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="email"
-              rules={[
-                { type: "email", message: "Giriş geçerli değil E-mail!" },
-                { required: true, message: "Lütfen E-posta adresinizi giriniz!" },
-              ]}
-            >
-              <Input prefix={<MailOutlined />} placeholder="E-mail" className="input-large" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="phone"
-              rules={[{ required: true, message: "Lütfen telefon numaranızı giriniz!" }]}
-            >
-              <Input
-                addonBefore={prefixSelector}
-                style={{ width: "100%" }}
-                placeholder="Telefon Numarası"
-                className="input-large"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="address"
-              rules={[{ required: true, message: "Lütfen adresinizi girin!" }]}
-            >
-              <Input prefix={<HomeOutlined />} placeholder="Adres" className="input-large" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="size"
-              rules={[{ required: true, message: "Lütfen boyunuzu girin!" }]}
-            >
-              <Input prefix={<NumberOutlined />} placeholder="Boy (cm)" className="input-large" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="weight"
-              rules={[{ required: true, message: "Lütfen kilonuzu girin!" }]}
-            >
-              <Input prefix={<NumberOutlined />} placeholder="Kilo (kg)" className="input-large" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              name="age"
-              rules={[{ required: true, message: "Lütfen yaşınızı girin!" }]}
-            >
-              <Input prefix={<NumberOutlined />} placeholder="Yaş" className="input-large" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
+        <h3 className="mb-auth__section"><span>01</span> {t('auth:register.sections.account')}</h3>
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="username"
-              rules={[{ required: true, message: "Lütfen kullanıcı adınızı girin!" }]}
+              label={t('auth:register.username')}
+              rules={[{ required: true, message: t('auth:register.usernameRequired') }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Kullanıcı Adı" className="input-large" />
+              <Input prefix={<UserOutlined />} placeholder={t('auth:register.usernamePlaceholder')} autoComplete="username" autoCapitalize="none" />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item name="matchNotificationPermission" valuePropName="checked">
-              <Checkbox>Maç Bildirim İzni</Checkbox>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="email"
+              label={t('auth:register.email')}
+              rules={[
+                { type: "email", message: t('auth:register.emailInvalid') },
+                { required: true, message: t('auth:register.emailRequired') },
+              ]}
+            >
+              <Input prefix={<MailOutlined />} placeholder={t('auth:register.emailPlaceholder')} inputMode="email" autoComplete="email" autoCapitalize="none" />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="password"
-              rules={[{ required: true, message: "Lütfen şifrenizi giriniz!" }]}
+              label={t('auth:register.password')}
+              rules={[{ required: true, message: t('auth:register.passwordRequired') }]}
               hasFeedback
             >
-              <Input.Password prefix={<EditOutlined />} placeholder="Şifre" className="input-large" />
+              <Input.Password prefix={<LockOutlined />} placeholder={t('auth:register.passwordPlaceholder')} autoComplete="new-password" />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="confirm"
+              label={t('auth:register.confirmPassword')}
               dependencies={["password"]}
               hasFeedback
               rules={[
-                { required: true, message: "Lütfen şifrenizi doğrulayınız!" },
+                { required: true, message: t('auth:register.confirmPasswordRequired') },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue("password") === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error("Girdiğiniz iki şifre eşleşmiyor!"));
+                    return Promise.reject(new Error(t('auth:register.passwordMismatch')));
                   },
                 }),
               ]}
             >
-              <Input.Password
-                prefix={<EditOutlined />}
-                placeholder="Şifreyi Onayla"
-                className="input-large"
+              <Input.Password prefix={<LockOutlined />} placeholder={t('auth:register.confirmPasswordPlaceholder')} autoComplete="new-password" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <h3 className="mb-auth__section"><span>02</span> {t('auth:register.sections.personal')}</h3>
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="name"
+              label={t('auth:register.name')}
+              tooltip={t('auth:register.nameTooltip')}
+              rules={[{ required: true, message: t('auth:register.nameRequired'), whitespace: true }]}
+            >
+              <Input prefix={<UserOutlined />} placeholder={t('auth:register.namePlaceholder')} autoComplete="given-name" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="lastName"
+              label={t('auth:register.lastName')}
+              rules={[{ required: true, message: t('auth:register.lastNameRequired') }]}
+            >
+              <Input prefix={<UserOutlined />} placeholder={t('auth:register.lastNamePlaceholder')} autoComplete="family-name" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="phone"
+              label={t('auth:register.phone')}
+              rules={[{ required: true, message: t('auth:register.phoneRequired') }]}
+            >
+              <Input
+                addonBefore={prefixSelector}
+                style={{ width: "100%" }}
+                placeholder={t('auth:register.phonePlaceholder')}
+                inputMode="tel"
+                autoComplete="tel-national"
               />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={16} justify="center">
-          <Col xs={24} sm={12}>
-            <Form.Item name="profilePicture" rules={[{ required: false }]}>
-              <Upload {...uploadProps} accept="image/*" maxCount={1}>
-                <Button icon={<UploadOutlined />}>Fotoğraf Yükle</Button>
-              </Upload>
+          <Col xs={24} md={12}>
+            <Form.Item
+              name="address"
+              label={t('auth:register.address')}
+              rules={[{ required: true, message: t('auth:register.addressRequired') }]}
+            >
+              <Input prefix={<HomeOutlined />} placeholder={t('auth:register.addressPlaceholder')} autoComplete="address-level2" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item className="register-button">
-          <Button type="primary" htmlType="submit">
-            Kayıt Ol
+        <h3 className="mb-auth__section"><span>03</span> {t('auth:register.sections.physical')}</h3>
+        <Row gutter={16}>
+          <Col xs={24} sm={8}>
+            <Form.Item
+              name="size"
+              label={t('auth:register.height')}
+              rules={[{ required: true, message: t('auth:register.heightRequired') }]}
+            >
+              <Input prefix={<ColumnHeightOutlined />} placeholder={t('auth:register.heightPlaceholder')} inputMode="decimal" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Form.Item
+              name="weight"
+              label={t('auth:register.weight')}
+              rules={[{ required: true, message: t('auth:register.weightRequired') }]}
+            >
+              <Input prefix={<DashboardOutlined />} placeholder={t('auth:register.weightPlaceholder')} inputMode="decimal" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Form.Item
+              name="age"
+              label={t('auth:register.age')}
+              rules={[{ required: true, message: t('auth:register.ageRequired') }]}
+            >
+              <Input prefix={<NumberOutlined />} placeholder={t('auth:register.agePlaceholder')} inputMode="numeric" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item name="profilePicture" label={t('auth:register.profilePicture')} rules={[{ required: false }]}>
+              <ImageCrop variant="avatar" beforeCrop={beforeCrop}>
+                <Upload {...uploadProps} accept={ACCEPTED_IMAGE_ACCEPT} maxCount={1}>
+                  <Button icon={<UploadOutlined />} className="mb-auth__upload">{t('auth:register.uploadPhoto')}</Button>
+                </Upload>
+              </ImageCrop>
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item name="matchNotificationPermission" valuePropName="checked" label={t('auth:register.notifications')}>
+              <Checkbox className="mb-auth__check">{t('auth:register.matchNotificationPermission')}</Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item
+          name="acceptTerms"
+          valuePropName="checked"
+          rules={[{ validator: (_, v) => (v ? Promise.resolve() : Promise.reject(new Error(t('auth:terms.required')))) }]}
+        >
+          <Checkbox className="mb-auth__check">
+            <Trans i18nKey="auth:terms.accept" components={{ a: <Link to="/terms" target="_blank" rel="noopener" /> }} />
+          </Checkbox>
+        </Form.Item>
+        <Form.Item name="marketingConsent" valuePropName="checked">
+          <Checkbox className="mb-auth__check">{t('auth:terms.marketing')}</Checkbox>
+        </Form.Item>
+
+        <Form.Item className="mb-auth__submit">
+          <Button type="primary" htmlType="submit" size="large" block>
+            {t('auth:register.submit')}
           </Button>
         </Form.Item>
-        <hr />
-        Veya <Link to="/">Oturum Açmaya Git</Link>
       </Form>
-    </Card>
-  );
-
-  return (
-    <div className="register">
-      <Row type="flex" justify="center" align="middle" style={{ minHeight: "100vh" }}>
-        <Col>{renderRegister}</Col>
-      </Row>
-    </div>
+      <SocialLogin onSuccess={finish} />
+      {termsModal}
+      <p className="mb-auth__switch">
+        {t('auth:register.haveAccount')} <Link to="/" className="mb-auth__link">{t('auth:register.signIn')}</Link>
+      </p>
+    </AuthShell>
   );
 };
 

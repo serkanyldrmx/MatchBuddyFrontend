@@ -1,15 +1,20 @@
-import { LockOutlined, UserOutlined, EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Row, Col, message, Card } from "antd";
+import { LockOutlined, UserOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Form, Input, message } from "antd";
 import { useNavigate, Link } from "react-router-dom";
-import React, { useEffect } from "react";
-import "./Login.css";
-import Logo from '../../images/mutch_buddy_Logo.png'; // Logoyu import edin
-import { api, getToken } from '../../api/config';
+import React, { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import AuthShell from "./AuthShell";
+import { getToken } from '../../api/config';
+import { authApi } from '../../api/auth';
+import { apiErrorMessage } from '../../utils/format';
+import SocialLogin from './SocialLogin';
+import useLoginFlow from './useLoginFlow';
 import { homePathFor } from '../../utils/roles';
 
 const UserLogin = () => {
   const navigate = useNavigate();
-  
+  const { t } = useTranslation();
+
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     // Token yoksa oturum geçersiz sayılır
@@ -18,128 +23,97 @@ const UserLogin = () => {
     }
   }, [navigate]);
 
-  const success = () => {
-    message.success("Giriş başarılı, yönlendiriliyorsunuz");
-  };
-
-  const error = (text = "Giriş başarısız") => {
-    message.error(text);
-  };
+  const { finish, termsModal } = useLoginFlow();
+  const [form] = Form.useForm();
+  const remember = Form.useWatch('remember', form) ?? true;
+  const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
-    const user = {
-      userName: values.username,
-      password: values.password,
-    };
-
+    setLoading(true);
     try {
-      const response = await api.post("/api/Players/PlayerLogin", user);
-      const data = response.data;
-      if (!data || !data.token || !data.player) {
-        error();
-        return;
-      }
-
-      // JWT token ve kullanıcı bilgisi saklanır
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.player));
-      success();
-
-      setTimeout(() => {
-        navigate(homePathFor(data.player), { replace: true });
-      }, 1500);
+      finish(await authApi.login(values.username, values.password, values.remember !== false));
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        error("Kullanıcı adı veya şifre hatalı");
+        message.error(t('auth:login.invalidCredentials'));
       } else {
-        error();
+        message.error(apiErrorMessage(err, t('auth:login.failed')));
       }
-      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderForm = (
-    <div className="login-background">      
-      <img src={Logo} alt="Logo" className="logo" />
-      <Card className="login-card">
-        <div className="login-header">
-          <h1 className="login-title">Log In</h1>
-        </div>
-        <Form
-          name="normal_login"
-          className="login-form"
-          initialValues={{
-            remember: true,
-          }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            name="username"
-            rules={[
-              {
-                required: true,
-                message: "Lütfen Kullanıcı adınızı giriniz!",
-              },
-            ]}
-          >
-            <Input
-              style={{
-                borderRadius: "1.2rem",
-                color: "#0f0e0f",
-                fontSize: "bold",
-              }}
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="Kullanıcı Adı"
-              autoFocus
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: "Lütfen Şifrenizi Giriniz!",
-              },
-            ]}
-          >
-            <Input.Password
-              style={{ borderRadius: "1.2rem", color: "#0f0e0f" }}
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              placeholder="Şifre"
-              iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>Beni Hatırla</Checkbox>
-            </Form.Item>
-            <Link to="#">Parolanızı mı unuttunuz?</Link>
-          </Form.Item>
-          <Form.Item>
-            <Form.Item className="register-button">
-              <Button type="primary" htmlType="submit">
-                Giriş Yap
-              </Button>
-            </Form.Item>
-            <div className="divider"></div> {/* Beyaz çizgi */}
-            Veya <Link to="/register">Şimdi Üye Ol!</Link>
-          </Form.Item>
-        </Form>
-      </Card>
-    </div>
-  );
-
   return (
-    <div className="login">
-      <Row
-        type="flex"
-        justify="center"
-        align="middle"
-        style={{ minHeight: "100vh" }}
+    <AuthShell
+      title={<Trans i18nKey="auth:login.title" components={{ em: <em /> }} />}
+      subtitle={t('auth:login.subtitle')}
+    >
+      <Form
+        form={form}
+        name="normal_login"
+        className="mb-auth__form"
+        layout="vertical"
+        requiredMark={false}
+        initialValues={{
+          remember: true,
+        }}
+        onFinish={onFinish}
       >
-        <Col>{renderForm}</Col>
-      </Row>
-    </div>
+        <Form.Item
+          name="username"
+          label={t('auth:login.username')}
+          rules={[
+            {
+              required: true,
+              message: t('auth:login.usernameRequired'),
+            },
+          ]}
+        >
+          <Input
+            size="large"
+            prefix={<UserOutlined />}
+            placeholder={t('auth:login.usernamePlaceholder')}
+            autoComplete="username"
+            autoCapitalize="none"
+            autoFocus
+          />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          label={t('auth:login.password')}
+          rules={[
+            {
+              required: true,
+              message: t('auth:login.passwordRequired'),
+            },
+          ]}
+        >
+          <Input.Password
+            size="large"
+            prefix={<LockOutlined />}
+            placeholder={t('auth:login.passwordPlaceholder')}
+            autoComplete="current-password"
+            iconRender={visible => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
+          />
+        </Form.Item>
+        <div className="mb-auth__row">
+          <Form.Item name="remember" valuePropName="checked" noStyle>
+            <Checkbox>{t('auth:login.remember')}</Checkbox>
+          </Form.Item>
+          <Link to="/forgot-password" className="mb-auth__link">{t('auth:login.forgotPassword')}</Link>
+        </div>
+        <Form.Item className="mb-auth__submit">
+          <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+            {t('auth:login.submit')}
+          </Button>
+        </Form.Item>
+      </Form>
+      <SocialLogin rememberMe={remember} onSuccess={finish} />
+      {termsModal}
+      <p className="mb-auth__switch">
+        {t('auth:login.noAccount')} <Link to="/register" className="mb-auth__link">{t('auth:login.signUpNow')}</Link>
+      </p>
+    </AuthShell>
   );
 };
 

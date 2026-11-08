@@ -1,0 +1,82 @@
+{
+  "copyright": "© 2024 MatchBuddy. Tüm hakları saklıdır.",
+  "about": {
+    "title": "Hakkında",
+    "subtitle": "MatchBuddy ve ekibi hakkında",
+    "tagline": "Halı saha arkadaşını bul, eğlenceye katıl!",
+    "whoWeAre": {
+      "title": "Biz Kimiz?",
+      "text": "MatchBuddy, halı saha maçı yapmak isteyen ancak takım arkadaşlarını bulmakta zorlanan kişiler için oluşturulmuş bir sosyal platformdur. Amacımız, insanların hem spor yapmasını hem de sosyalleşmesini desteklemektir."
+    },
+    "mission": {
+      "title": "Misyonumuz",
+      "text": "Takım ruhunu desteklemek, spor yapmayı teşvik etmek ve insanları bir araya getirerek unutulmaz anılar yaratmak. Halı saha maçlarını daha eğlenceli ve erişilebilir hale getiriyoruz."
+    },
+    "team": {
+      "title": "Ekibimiz",
+      "otherMember": "Diğer Üye",
+      "roles": {
+        "founder": "Kurucu & Geliştirici, UI/UX Tasarımcı, Backend Geliştirici",
+        "frontend": "Frontend Geliştirici"
+      }
+    },
+    "stats": {
+      "title": "İstatistikler",
+      "users": "Kayıtlı Kullanıcı",
+      "matches": "Organize Edilen Maç",
+      "teams": "Takım"
+    },
+    "contact": {
+      "title": "Bize Ulaşın",
+      "address": "Coşandere Cd. No:3 Bosna Hersek, 42250 Selçuklu/Konya",
+      "followUs": "İlişkin güncel haberler için bizi sosyal medya hesaplarımızdan takip edin."
+    }
+  },
+  "aboutPage": {
+    "title": "Hakkımızda",
+    "subtitle": "Match Buddy, spor severlerin halı saha rezervasyonlarını kolaylaştırmak ve ekipler arasında iletişim kurmalarını sağlamak için tasarlanmış bir platformdur.",
+    "purposeTitle": "Amacımız",
+    "purposeText": "Sporun birleştirici gücüne inanıyoruz. Kullanıcılarımızın daha kolay maç organize edebilmeleri, ekiplerini oluşturabilmeleri ve eğlenceli bir deneyim yaşamaları için buradayız.",
+    "advantagesTitle": "Avantajlarımız",
+    "advantages": {
+      "booking": "Kolay rezervasyon yönetimi",
+      "communication": "Ekipler arasında hızlı iletişim",
+      "reliable": "Güvenilir saha bilgisi ve fiyatlandırma"
+    },
+    "features": {
+      "fastBooking": {
+        "title": "Hızlı Rezervasyon",
+        "text": "Halı saha rezervasyonlarınızı birkaç tıkla yapabilirsiniz."
+      },
+      "teamManagement": {
+        "title": "Takım Yönetimi",
+        "text": "Takım arkadaşlarınızı kolayca ekleyin ve organize olun."
+      },
+      "reliableInfo": {
+        "title": "Güvenilir Bilgi",
+        "text": "Halı saha bilgilerine ve kullanıcı yorumlarına anında erişin."
+      }
+    },
+    "otherSites": "Diğer Maç Siteleri"
+  },
+  "contact": {
+    "title": "Bizimle İletişime Geçin",
+    "subtitle": "Sorularınız, önerileriniz ve görüşleriniz bizim için çok değerlidir.",
+    "infoTitle": "İletişim Bilgilerimiz",
+    "address": "Adres",
+    "addressValue": "Malazgirt, Türkiye",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "formTitle": "Bize Ulaşın",
+    "name": "Adınız",
+    "nameRequired": "Adınızı girin",
+    "namePlaceholder": "Adınızı girin",
+    "emailRequired": "E-posta adresinizi girin",
+    "emailInvalid": "Geçerli bir e-posta adresi girin",
+    "emailPlaceholder": "E-posta adresinizi girin",
+    "message": "Mesajınız",
+    "messageRequired": "Mesajınızı yazın",
+    "messagePlaceholder": "Mesajınızı yazın",
+    "submitted": "Mesajınız not alındı. Teşekkür ederiz!"
+  }
+}

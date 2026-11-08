@@ -73,3 +73,59 @@
     max-height: 420px;
   }
 }
+
+/* ---------------- Telefon ---------------- */
+@media (max-width: 767px) {
+  /* Arama çubuğu: şehir araması ve alan araması alt alta, tam genişlik */
+  .mb-osm-toolbar.ant-space {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  .mb-osm-toolbar > .ant-space-item {
+    width: 100%;
+    min-width: 0;
+  }
+  .mb-osm-city.ant-space-compact {
+    display: flex;
+    width: 100%;
+    min-width: 0 !important;
+  }
+  .mb-osm-city > .ant-select {
+    flex: 1 1 auto;
+    width: auto !important;
+    min-width: 0;
+  }
+  .mb-osm-area.ant-space {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+  }
+  .mb-osm-area .ant-btn {
+    width: 100%;
+  }
+
+  .mb-osm-map {
+    height: 320px;
+  }
+  .mb-osm-list {
+    max-height: 380px;
+  }
+
+  .mb-osm-item {
+    padding: 12px;
+  }
+  .mb-osm-item__head > .ant-space {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .mb-osm-item__title {
+    overflow-wrap: anywhere;
+  }
+  .mb-osm-item__head > .ant-btn {
+    flex: none;
+  }
+}

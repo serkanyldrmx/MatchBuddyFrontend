@@ -12,7 +12,7 @@
   padding: 18px;
   border-radius: 20px;
   background:
-    radial-gradient(900px 300px at 100% 0%, rgba(198, 244, 50, 0.08), transparent 60%),
+    radial-gradient(900px 300px at 100% 0%, rgba(var(--mb-primary-rgb), 0.08), transparent 60%),
     var(--mb-surface);
   border: 1px solid var(--mb-border);
 }
@@ -73,6 +73,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(7, 11, 18, 0.65);
+  color: #fff;
   font-family: var(--mb-display);
   font-size: 22px;
   font-weight: 800;
@@ -218,9 +219,9 @@
   padding: 14px;
   border-radius: var(--mb-radius);
   background:
-    radial-gradient(400px 160px at 0% 0%, rgba(251, 191, 36, 0.18), transparent 70%),
+    radial-gradient(400px 160px at 0% 0%, rgba(var(--mb-gold-rgb), 0.18), transparent 70%),
     var(--mb-surface);
-  border: 1px solid rgba(251, 191, 36, 0.4);
+  border: 1px solid rgba(var(--mb-gold-rgb), 0.4);
 }
 
 .mb-campaign__badge {
@@ -230,7 +231,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: var(--mb-gold);
+  background: var(--mb-gold-fill);
   color: var(--mb-primary-ink);
   text-align: center;
   padding: 6px;
@@ -508,4 +509,50 @@
 .mb-vd-address {
   margin: 0 0 4px;
   font-size: 15px;
+}
+
+/* =========================================================
+   Telefon
+   ========================================================= */
+@media (max-width: 767px) {
+  .mb-vd-hero {
+    gap: 16px;
+    padding: 12px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+  }
+  .mb-vd-info__name {
+    font-size: 32px;
+    overflow-wrap: anywhere;
+  }
+  .mb-vd-info__stats > div {
+    min-width: 0;
+    padding: 8px 10px;
+  }
+  .mb-vd-info__stats strong {
+    font-size: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mb-vd-info__stats span {
+    font-size: 10px;
+  }
+  .mb-vd-info__actions > * {
+    flex: 1 1 auto;
+  }
+  .mb-vd-tabs .ant-tabs-tab {
+    font-size: 15px;
+  }
+  .mb-pitch-card__size {
+    font-size: 30px;
+  }
+  .mb-vd-score strong {
+    font-size: 44px;
+  }
+  .mb-vd-review__head {
+    flex-wrap: wrap;
+  }
+  .mb-vd-map {
+    height: 240px;
+  }
 }

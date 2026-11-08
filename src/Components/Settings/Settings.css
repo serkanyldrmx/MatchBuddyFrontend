@@ -89,7 +89,7 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--mb-primary-ink);
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
 }
 
 .mb-option-card__desc {
@@ -112,6 +112,7 @@
 }
 
 .mb-settings__switch div,
+.mb-settings__theme > div,
 .mb-settings__danger-row div {
   display: flex;
   flex-direction: column;
@@ -119,9 +120,39 @@
 }
 
 .mb-settings__switch span,
+.mb-settings__theme > div > span,
 .mb-settings__danger-row span {
   font-size: 12px;
   color: var(--mb-text-2);
+}
+
+/* Görünüm (tema) */
+.mb-settings__theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mb-settings__theme > div {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Dil */
+.mb-settings__language {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mb-border);
+}
+
+.mb-settings__language-control {
+  display: inline-flex;
+}
+
+.mb-settings__language-select {
+  min-width: 180px;
 }
 
 /* Engellenenler */
@@ -152,7 +183,7 @@
 
 /* Tehlikeli bölge */
 .mb-settings__danger.ant-card {
-  border-color: rgba(244, 63, 94, 0.35) !important;
+  border-color: rgba(var(--mb-danger-rgb), 0.35) !important;
 }
 
 .mb-settings__danger .ant-card-head-title,
@@ -183,4 +214,62 @@
 .mb-settings__field label {
   font-size: 13px;
   color: var(--mb-text-2);
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 767px) {
+  .mb-settings > .ant-card {
+    margin-bottom: 16px;
+  }
+  .mb-option-cards.ant-radio-group {
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  }
+  .mb-option-card.ant-radio-wrapper {
+    padding: 12px;
+  }
+  .mb-option-card > span:last-child {
+    min-width: 0;
+  }
+  .mb-settings__switch > div {
+    min-width: 0;
+  }
+  .mb-settings__switch .ant-switch {
+    flex-shrink: 0;
+  }
+  .mb-settings__blocked-row {
+    flex-wrap: wrap;
+  }
+  .mb-settings__blocked-name strong,
+  .mb-settings__blocked-name span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mb-settings__blocked-row .ant-btn {
+    height: 36px;
+  }
+  .mb-settings__danger-row div {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .mb-settings__danger-row > .ant-btn {
+    width: 100%;
+  }
+  .mb-settings__theme > div {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .mb-settings__theme .mb-theme-switch {
+    width: 100%;
+  }
+  .mb-settings__theme .mb-theme-switch .ant-segmented-group {
+    width: 100%;
+  }
+  .mb-settings__theme .mb-theme-switch .ant-segmented-item {
+    flex: 1;
+  }
+  .mb-settings__language-control,
+  .mb-settings__language-select {
+    width: 100%;
+  }
 }

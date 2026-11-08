@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, App, Button, Card, Col, Input, Row, Segmented, Skeleton, Space, Typography } from 'antd';
 import { EditOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader, PlayerAvatar } from '../ui';
@@ -11,6 +12,7 @@ const { Text } = Typography;
 
 function ReviewItem({ review, onSaved }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const { membershipActive } = useOwnerVenue();
   const [editing, setEditing] = useState(!review.ownerReply);
   const [text, setText] = useState(review.ownerReply || '');
@@ -23,12 +25,12 @@ function ReviewItem({ review, onSaved }) {
     setSaving(true);
     try {
       await ownerApi.reply(review.reviewId, text.trim());
-      message.success('Yanıtınız yayınlandı.');
+      message.success(t('owner:reviews.replyPublished'));
       onSaved(review.reviewId, text.trim());
       setEditing(false);
       notifyOwnerChanged();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Yanıt kaydedilemedi.'));
+      message.error(apiErrorMessage(e, t('owner:reviews.replyFailed')));
     } finally {
       setSaving(false);
     }
@@ -41,7 +43,7 @@ function ReviewItem({ review, onSaved }) {
         <div className="mb-owner-review__who">
           <Text strong>{fullName(review.player)}</Text>
           <span>
-            {matchName ? `${matchName}${matchDate ? ` · ${formatDate(matchDate)}` : ''}` : 'Maç bilgisi yok'}
+            {matchName ? `${matchName}${matchDate ? ` · ${formatDate(matchDate)}` : ''}` : t('owner:reviews.noMatchInfo')}
           </span>
         </div>
         <div className="mb-owner-review__rating">
@@ -49,16 +51,17 @@ function ReviewItem({ review, onSaved }) {
           <span>{fromNow(review.createdAt)}</span>
         </div>
       </div>
-      {review.comment ? <p className="mb-owner-review__comment">{review.comment}</p> : <Text type="secondary">Yorum yazılmamış, sadece puan verilmiş.</Text>}
+      {review.comment ? <p className="mb-owner-review__comment">{review.comment}</p> : <Text type="secondary">{t('owner:reviews.ratingOnly')}</Text>}
 
       {!editing && review.ownerReply ? (
         <div className="mb-owner-review__reply">
           <div className="mb-owner-review__reply-head">
             <span>
-              <MessageOutlined /> İşletme yanıtı{review.repliedAt ? ` · ${fromNow(review.repliedAt)}` : ''}
+              <MessageOutlined /> {t('owner:reviews.ownerReply')}
+              {review.repliedAt ? ` · ${fromNow(review.repliedAt)}` : ''}
             </span>
             <WriteButton size="small" type="text" icon={<EditOutlined />} onClick={() => setEditing(true)}>
-              Düzenle
+              {t('common:actions.edit')}
             </WriteButton>
           </div>
           <p>{review.ownerReply}</p>
@@ -72,7 +75,7 @@ function ReviewItem({ review, onSaved }) {
             maxLength={500}
             showCount
             disabled={!membershipActive}
-            placeholder="Oyuncuya teşekkür edin ya da geri bildirimine yanıt verin. Yanıtınız tesis sayfanızda herkese görünür."
+            placeholder={t('owner:reviews.replyPlaceholder')}
           />
           <Space style={{ marginTop: 8 }}>
             {review.ownerReply && (
@@ -83,11 +86,11 @@ function ReviewItem({ review, onSaved }) {
                   setEditing(false);
                 }}
               >
-                Vazgeç
+                {t('common:actions.cancel')}
               </Button>
             )}
             <WriteButton size="small" type="primary" onClick={save} loading={saving} disabled={!text.trim()}>
-              {review.ownerReply ? 'Yanıtı güncelle' : 'Yanıtla'}
+              {review.ownerReply ? t('owner:reviews.updateReply') : t('owner:reviews.reply')}
             </WriteButton>
           </Space>
         </div>
@@ -98,6 +101,7 @@ function ReviewItem({ review, onSaved }) {
 
 /** Oyuncu yorumları ve puan özeti */
 export default function OwnerReviews() {
+  const { t } = useTranslation();
   const { venue } = useOwnerVenue();
   const { data, loading, error, setData } = useOwnerData((id) => ownerApi.reviews(id));
   const [filter, setFilter] = useState('all');
@@ -136,9 +140,9 @@ export default function OwnerReviews() {
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Yorumlar"
+        title={t('owner:reviews.title')}
         icon={<StarOutlined />}
-        subtitle="Oyuncuların tesisiniz hakkındaki değerlendirmeleri. Yanıtlarınız herkese açık görünür."
+        subtitle={t('owner:reviews.subtitle')}
       />
       {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} />}
       <Row gutter={[16, 16]}>
@@ -151,7 +155,7 @@ export default function OwnerReviews() {
                 <div className="mb-owner-rating__big">{summary.count ? summary.avg.toFixed(1) : '-'}</div>
                 <Stars value={summary.avg} size={20} />
                 <Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
-                  {summary.count} değerlendirme
+                  {t('owner:reviews.ratingCount', { count: summary.count })}
                 </Text>
                 <div className="mb-owner-rating__bars">
                   {[5, 4, 3, 2, 1].map((s) => {
@@ -170,7 +174,7 @@ export default function OwnerReviews() {
                 </div>
                 {summary.unanswered > 0 && (
                   <div className="mb-owner-note" style={{ marginTop: 16 }}>
-                    {summary.unanswered} yorum yanıtınızı bekliyor. Yorumlara yanıt vermek oyuncuların güvenini artırır.
+                    {t('owner:reviews.unansweredNote', { count: summary.unanswered })}
                   </div>
                 )}
               </>
@@ -180,16 +184,16 @@ export default function OwnerReviews() {
         <Col xs={24} lg={16}>
           <Card
             bordered={false}
-            title="Değerlendirmeler"
+            title={t('owner:reviews.listTitle')}
             extra={
               <Segmented
                 size="small"
                 value={filter}
                 onChange={setFilter}
                 options={[
-                  { value: 'all', label: 'Tümü' },
-                  { value: 'unanswered', label: `Yanıtsız (${summary.unanswered})` },
-                  { value: 'low', label: '3 ve altı' },
+                  { value: 'all', label: t('common:all') },
+                  { value: 'unanswered', label: t('owner:reviews.filters.unanswered', { count: summary.unanswered }) },
+                  { value: 'low', label: t('owner:reviews.filters.low') },
                 ]}
               />
             }
@@ -197,7 +201,7 @@ export default function OwnerReviews() {
             {loading && !data ? (
               <Skeleton active avatar paragraph={{ rows: 4 }} />
             ) : shown.length === 0 ? (
-              <EmptyState description={reviews.length ? 'Bu filtrede yorum yok' : 'Henüz yorum yapılmamış. Maç sonrası oyuncular tesisinizi değerlendirebilir.'} />
+              <EmptyState description={reviews.length ? t('owner:reviews.emptyFilter') : t('owner:reviews.empty')} />
             ) : (
               <div className="mb-owner-reviews">
                 {shown.map((r) => (

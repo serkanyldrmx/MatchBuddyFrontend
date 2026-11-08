@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { App, Button, Input, List, Typography } from 'antd';
 import { DeleteOutlined, SendOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
+import { joinMatchChannel, onRealtime } from '../../api/realtime';
 import { PlayerAvatar } from '../../ui';
 import { apiErrorMessage, getCurrentUser } from '../../utils/format';
 
@@ -9,6 +11,7 @@ const { Text } = Typography;
 
 /** Maç yorumları (maç detay sayfasında) */
 export default function MatchComments({ matchId }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const me = getCurrentUser();
   const [comments, setComments] = useState(null);
@@ -21,13 +24,25 @@ export default function MatchComments({ matchId }) {
       setComments(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
       setComments([]);
-      message.error(apiErrorMessage(e, 'Yorumlar yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('match:comments.loadFailed')));
     }
-  }, [matchId, message]);
+  }, [matchId, message, t]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Soyunma odası anlık: bu maça yorum eklenince/silinince yenile
+  useEffect(() => {
+    const leave = joinMatchChannel(matchId);
+    const off = onRealtime('matchComment', (e) => {
+      if (Number(e.matchId) === Number(matchId)) load();
+    });
+    return () => {
+      off();
+      leave();
+    };
+  }, [matchId, load]);
 
   const post = async () => {
     const body = text.trim();
@@ -38,7 +53,7 @@ export default function MatchComments({ matchId }) {
       setText('');
       load();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Yorum gönderilemedi.'));
+      message.error(apiErrorMessage(e, t('match:comments.sendFailed')));
     } finally {
       setPosting(false);
     }
@@ -49,7 +64,7 @@ export default function MatchComments({ matchId }) {
       await api.post(`/api/MatchComment/DeleteMatchComment?commentId=${commentId}`);
       setComments((c) => c.filter((x) => x.commentsId !== commentId));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Yorum silinemedi.'));
+      message.error(apiErrorMessage(e, t('match:comments.deleteFailed')));
     }
   };
 
@@ -58,14 +73,14 @@ export default function MatchComments({ matchId }) {
       <List
         loading={comments === null}
         dataSource={comments || []}
-        locale={{ emptyText: 'Henüz yorum yok. Soyunma odasında ilk sözü sen söyle.' }}
+        locale={{ emptyText: t('match:comments.empty') }}
         renderItem={(c) => {
           const canDelete = me && (c.playerId === me.playerId || me.isAdmin === 1);
           return (
             <List.Item
               actions={
                 canDelete
-                  ? [<Button key="d" type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => remove(c.commentsId)} aria-label="Yorumu sil" />]
+                  ? [<Button key="d" type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => remove(c.commentsId)} aria-label={t('match:comments.deleteAria')} />]
                   : []
               }
             >
@@ -81,7 +96,7 @@ export default function MatchComments({ matchId }) {
       <div className="mb-comments__composer">
         <PlayerAvatar player={me} size={34} />
         <Input
-          placeholder="Yorum yaz…"
+          placeholder={t('match:comments.placeholder')}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onPressEnter={post}

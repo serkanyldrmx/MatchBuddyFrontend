@@ -1,0 +1,51 @@
+/* Admin sayfaları: telefon düzeni (masaüstü görünümü değişmez) */
+@media (max-width: 767px) {
+  /* Filtre araç çubukları: alt alta, tam genişlik */
+  .mb-admin-toolbar.ant-space,
+  .mb-admin-filters.ant-space {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+  }
+  .mb-admin-toolbar > .ant-space-item,
+  .mb-admin-filters > .ant-space-item {
+    width: 100%;
+    min-width: 0;
+  }
+  .mb-admin-filter.ant-input-affix-wrapper,
+  .mb-admin-filter.ant-select,
+  .mb-admin-filter {
+    width: 100% !important;
+  }
+
+  /* İstatistik kartları iki sütunda eşit yükseklikte */
+  .mb-admin-stat-card {
+    height: 100%;
+  }
+  .mb-admin-stat-card .ant-statistic-content {
+    font-size: 22px;
+  }
+
+  /* Uzun kart başlıkları kırpılmak yerine sarılsın */
+  .mb-admin-card-wrap .ant-card-head-title {
+    white-space: normal;
+    overflow: visible;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Maç detay paneli: iki eşit genişlikte karar butonu */
+  .mb-admin-drawer-actions.ant-space {
+    display: flex;
+  }
+  .mb-admin-drawer-actions > .ant-space-item {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .mb-admin-drawer-actions > .ant-space-item .ant-btn {
+    width: 100%;
+  }
+}

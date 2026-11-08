@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, App, DatePicker, InputNumber, Modal, Radio } from 'antd';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { FIXTURE_STATUS, tournamentsApi } from '../../api/tournaments';
 import { apiErrorMessage } from '../../utils/format';
 import '../Home/MatchDetails.css';
@@ -8,6 +9,7 @@ import '../Home/MatchDetails.css';
 /** Sonuç girme: iki büyük skor kutusu; elemede beraberlikte penaltı kazananı seçilir */
 export function ResultModal({ fixture, knockout, onClose, onSaved }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [score, setScore] = useState({ home: 0, away: 0 });
   const [winner, setWinner] = useState();
   const [saving, setSaving] = useState(false);
@@ -24,7 +26,7 @@ export function ResultModal({ fixture, knockout, onClose, onSaved }) {
 
   const submit = async () => {
     if (needsWinner && !winner) {
-      message.warning('Berabere biten eleme maçında penaltıları kazanan takımı seç.');
+      message.warning(t('tournaments:result.pickPenaltyWinner'));
       return;
     }
     setSaving(true);
@@ -33,13 +35,13 @@ export function ResultModal({ fixture, knockout, onClose, onSaved }) {
       if (needsWinner) payload.winnerTeamId = winner;
       const res = await tournamentsApi.submitResult(payload);
       if (res?.success === false) {
-        message.error(res.message || 'Sonuç kaydedilemedi.');
+        message.error(res.message || t('tournaments:result.error'));
         return;
       }
-      message.success(res?.message || 'Sonuç kaydedildi.');
+      message.success(res?.message || t('tournaments:result.success'));
       onSaved?.();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Sonuç kaydedilemedi.'));
+      message.error(apiErrorMessage(e, t('tournaments:result.error')));
     } finally {
       setSaving(false);
     }
@@ -48,9 +50,9 @@ export function ResultModal({ fixture, knockout, onClose, onSaved }) {
   return (
     <Modal
       open={!!fixture}
-      title="Sonuç gir"
-      okText="Kaydet"
-      cancelText="Vazgeç"
+      title={t('tournaments:result.title')}
+      okText={t('common:actions.save')}
+      cancelText={t('common:actions.cancel')}
       confirmLoading={saving}
       onOk={submit}
       onCancel={onClose}
@@ -86,7 +88,7 @@ export function ResultModal({ fixture, knockout, onClose, onSaved }) {
 
           {needsWinner && (
             <div className="mb-tr-penalty">
-              <span>Beraberlik! Penaltıları kim kazandı?</span>
+              <span>{t('tournaments:result.penaltyQuestion')}</span>
               <Radio.Group value={winner} onChange={(e) => setWinner(e.target.value)} optionType="button" buttonStyle="solid">
                 <Radio value={fixture.homeTeam?.teamId}>{fixture.homeTeam?.teamName}</Radio>
                 <Radio value={fixture.awayTeam?.teamId}>{fixture.awayTeam?.teamName}</Radio>
@@ -99,7 +101,7 @@ export function ResultModal({ fixture, knockout, onClose, onSaved }) {
               style={{ marginTop: 16 }}
               type="info"
               showIcon
-              message="Bu maçın sonucu zaten girilmiş; kaydedersen düzeltilir."
+              message={t('tournaments:result.alreadyEntered')}
             />
           )}
         </>
@@ -111,6 +113,7 @@ export function ResultModal({ fixture, knockout, onClose, onSaved }) {
 /** Fikstür tarihini değiştirme */
 export function DateModal({ fixture, onClose, onSaved }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [value, setValue] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -120,20 +123,20 @@ export function DateModal({ fixture, onClose, onSaved }) {
 
   const submit = async () => {
     if (!value) {
-      message.warning('Bir tarih seç.');
+      message.warning(t('tournaments:date.pickDate'));
       return;
     }
     setSaving(true);
     try {
       const res = await tournamentsApi.updateFixtureDate(fixture.fixtureId, value.format('YYYY-MM-DDTHH:mm:00'));
       if (res?.success === false) {
-        message.error(res.message || 'Tarih güncellenemedi.');
+        message.error(res.message || t('tournaments:date.error'));
         return;
       }
-      message.success(res?.message || 'Maç tarihi güncellendi.');
+      message.success(res?.message || t('tournaments:date.success'));
       onSaved?.();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Tarih güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('tournaments:date.error')));
     } finally {
       setSaving(false);
     }
@@ -142,9 +145,9 @@ export function DateModal({ fixture, onClose, onSaved }) {
   return (
     <Modal
       open={!!fixture}
-      title="Tarihi değiştir"
-      okText="Kaydet"
-      cancelText="Vazgeç"
+      title={t('tournaments:date.title')}
+      okText={t('common:actions.save')}
+      cancelText={t('common:actions.cancel')}
       confirmLoading={saving}
       onOk={submit}
       onCancel={onClose}
@@ -153,7 +156,7 @@ export function DateModal({ fixture, onClose, onSaved }) {
       {fixture && (
         <>
           <p className="mb-tr-modal-sub">
-            {fixture.homeTeam?.teamName || 'Belli değil'} – {fixture.awayTeam?.teamName || 'Belli değil'}
+            {fixture.homeTeam?.teamName || t('tournaments:teamTbd')} – {fixture.awayTeam?.teamName || t('tournaments:teamTbd')}
           </p>
           <DatePicker
             showTime={{ format: 'HH:mm', minuteStep: 15 }}
@@ -161,7 +164,7 @@ export function DateModal({ fixture, onClose, onSaved }) {
             value={value}
             onChange={setValue}
             style={{ width: '100%' }}
-            placeholder="Tarih ve saat"
+            placeholder={t('tournaments:create.dateTimePlaceholder')}
           />
         </>
       )}

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { App, Input, Modal, Table, Typography } from 'antd';
 import { SearchOutlined, StarFilled } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName } from '../../utils/format';
@@ -9,6 +10,7 @@ const { Text } = Typography;
 
 /** Oyuncu seçim tablosu: takım oluşturma ve kadro düzenlemede ortak kullanılır */
 export function PlayerPickerTable({ players, selected, onChange, loading, height = 420 }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const data = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -20,7 +22,7 @@ export function PlayerPickerTable({ players, selected, onChange, loading, height
       <Input
         allowClear
         prefix={<SearchOutlined />}
-        placeholder="Oyuncu ara"
+        placeholder={t('team:picker.searchPlaceholder')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: 12 }}
@@ -40,20 +42,20 @@ export function PlayerPickerTable({ players, selected, onChange, loading, height
         })}
         columns={[
           {
-            title: 'Oyuncu',
+            title: t('team:picker.player'),
             render: (_, p) => (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <PlayerAvatar player={p} size={32} />
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3, minWidth: 0 }}>
                   <Text>{fullName(p)}</Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>@{p.userName}</Text>
                 </div>
               </div>
             ),
           },
-          { title: 'Yaş', dataIndex: 'age', width: 70, sorter: (a, b) => a.age - b.age },
+          { title: t('team:picker.age'), dataIndex: 'age', width: 70, sorter: (a, b) => a.age - b.age, responsive: ['sm'] },
           {
-            title: 'Puan',
+            title: t('team:picker.score'),
             dataIndex: 'userScore',
             width: 90,
             sorter: (a, b) => a.userScore - b.userScore,
@@ -72,6 +74,7 @@ export function PlayerPickerTable({ players, selected, onChange, loading, height
 /** Mevcut takımın kadrosunu düzenleme penceresi */
 const PlayerSelectionPopup = ({ visible, onClose, team, onSave }) => {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [players, setPlayers] = useState([]);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -84,23 +87,23 @@ const PlayerSelectionPopup = ({ visible, onClose, team, onSave }) => {
     api
       .get('/api/Players/GetPlayerList')
       .then((r) => setPlayers((r.data || []).filter((p) => p.isAdmin !== 1)))
-      .catch((e) => message.error(apiErrorMessage(e, 'Oyuncular yüklenemedi.')))
+      .catch((e) => message.error(apiErrorMessage(e, t('team:loadPlayersError'))))
       .finally(() => setLoading(false));
-  }, [visible, team, message]);
+  }, [visible, team, message, t]);
 
   const save = async () => {
     if (selected.length === 0) {
-      message.warning('Takımda en az bir oyuncu olmalı.');
+      message.warning(t('team:editSquad.atLeastOne'));
       return;
     }
     setSaving(true);
     try {
       await api.post('/api/Team/SaveTeamByPlayerId', { teamId: team.teamId, playerIds: selected });
-      message.success('Kadro güncellendi.');
+      message.success(t('team:editSquad.success'));
       onSave?.();
       onClose();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Kadro güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('team:editSquad.error')));
     } finally {
       setSaving(false);
     }
@@ -108,12 +111,12 @@ const PlayerSelectionPopup = ({ visible, onClose, team, onSave }) => {
 
   return (
     <Modal
-      title={`Kadroyu düzenle · ${team?.teamName || ''}`}
+      title={t('team:editSquad.title', { name: team?.teamName || '' })}
       open={visible}
       onCancel={onClose}
       onOk={save}
-      okText={`Kaydet (${selected.length} oyuncu)`}
-      cancelText="Vazgeç"
+      okText={t('team:editSquad.save', { count: selected.length })}
+      cancelText={t('common:actions.cancel')}
       confirmLoading={saving}
       width={640}
       destroyOnClose

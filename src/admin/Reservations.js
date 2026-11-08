@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, App, Button, Card, Input, Popconfirm, Segmented, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { Alert, App, Button, Card, Grid, Input, Popconfirm, Segmented, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import { CheckOutlined, CloseOutlined, EyeOutlined, ReloadOutlined, ScheduleOutlined, SearchOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { formatPrice } from '../api/venues';
 import { RESERVATIONS_CHANGED } from '../layout/AdminLayout';
 import { EmptyState, MatchStatusTag, PageHeader, PlayerAvatar } from '../ui';
 import { apiErrorMessage, formatDate, formatTime, fromNow, fullName, isPast } from '../utils/format';
-import MatchDetailDrawer, { OVERRIDE_WARNING } from './MatchDetailDrawer';
+import MatchDetailDrawer from './MatchDetailDrawer';
 import useAdminData, { matchStadiumId, venueLabel } from './useAdminData';
+import './AdminResponsive.css';
 
 const { Text } = Typography;
 
@@ -16,6 +18,8 @@ const createdOf = (m) => m.createdAt || m.createDate || m.createdDate || null;
 /** İşletme onayı bekleyen rezervasyonların izlenmesi (admin yalnızca gerekirse geçersiz kılar) */
 export default function Reservations() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
+  const isPhone = Grid.useBreakpoint().md === false;
   const { matches, setMatches, stadiums, stadiumNames, loading, reload } = useAdminData();
   const [view, setView] = useState('upcoming');
   const [search, setSearch] = useState('');
@@ -50,12 +54,12 @@ export default function Reservations() {
     setBusy({ matchId, status });
     try {
       await api.post('/api/Match/MatchStatusUpdate', { matchId, status });
-      message.success(status === 2 ? 'Rezervasyon admin olarak onaylandı.' : 'Rezervasyon admin olarak reddedildi.');
+      message.success(status === 2 ? t('admin:shared.approvedAsAdmin') : t('admin:shared.rejectedAsAdmin'));
       setMatches((list) => list.map((m) => (m.matchId === matchId ? { ...m, isActive: status } : m)));
       setSelected(null);
       window.dispatchEvent(new Event(RESERVATIONS_CHANGED));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Durum güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('admin:shared.statusUpdateFailed')));
     } finally {
       setBusy(null);
     }
@@ -63,26 +67,31 @@ export default function Reservations() {
 
   const columns = [
     {
-      title: 'Maç',
+      title: t('admin:shared.columns.match'),
       dataIndex: 'matchName',
       render: (name, m) => (
         <Space direction="vertical" size={0}>
           <Text strong>{name}</Text>
           {(m.homeTeam || m.awayTeam) && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {m.homeTeam?.teamName || 'Karma'} vs {m.awayTeam?.teamName || (m.lookingForOpponent ? 'Rakip aranıyor' : 'Karma')}
+              {t('admin:reservations.teamsLine', {
+                home: m.homeTeam?.teamName || t('admin:shared.mixed'),
+                away:
+                  m.awayTeam?.teamName ||
+                  (m.lookingForOpponent ? t('admin:shared.lookingForOpponent') : t('admin:shared.mixed')),
+              })}
             </Text>
           )}
         </Space>
       ),
     },
     {
-      title: 'Tesis · Saha',
+      title: t('admin:shared.columns.venuePitch'),
       key: 'venue',
       render: (_, m) => venueLabel(m, stadiumNames) || <Text type="secondary">-</Text>,
     },
     {
-      title: 'Tarih & saat',
+      title: t('admin:shared.columns.dateTime'),
       dataIndex: 'matchDate',
       sorter: (a, b) => new Date(a.matchDate) - new Date(b.matchDate),
       render: (d, m) => (
@@ -92,14 +101,15 @@ export default function Reservations() {
           </Text>
           <Text type="secondary" style={{ fontSize: 12 }}>
             {fromNow(d)}
-            {m.durationMinutes ? ` · ${m.durationMinutes} dk` : ''}
+            {m.durationMinutes ? t('admin:reservations.durationShort', { count: m.durationMinutes }) : ''}
           </Text>
         </Space>
       ),
     },
     {
-      title: 'Kurucu',
+      title: t('admin:shared.columns.creator'),
       key: 'creator',
+      responsive: ['md'],
       render: (_, m) =>
         m.createdBy ? (
           <Space size={8}>
@@ -111,7 +121,7 @@ export default function Reservations() {
         ),
     },
     {
-      title: 'Tutar',
+      title: t('admin:shared.columns.amount'),
       dataIndex: 'totalPrice',
       align: 'right',
       sorter: (a, b) => (a.totalPrice || 0) - (b.totalPrice || 0),
@@ -120,54 +130,57 @@ export default function Reservations() {
           <Text strong>{formatPrice(v)}</Text>
           {m.perPlayer != null && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              kişi başı {formatPrice(m.perPlayer)}
+              {t('admin:shared.perPlayer', { price: formatPrice(m.perPlayer) })}
             </Text>
           )}
         </Space>
       ),
     },
     {
-      title: 'Bekleme süresi',
+      title: t('admin:reservations.waiting'),
       key: 'waiting',
+      responsive: ['md'],
       sorter: (a, b) => new Date(createdOf(a) || a.matchDate) - new Date(createdOf(b) || b.matchDate),
       render: (_, m) => {
         const created = createdOf(m);
         return (
           <Space size={4} wrap>
             {created ? (
-              <Tooltip title={`Oluşturulma: ${formatDate(created)} ${formatTime(created)}`}>
+              <Tooltip
+                title={t('admin:reservations.createdAt', { date: formatDate(created), time: formatTime(created) })}
+              >
                 <Text>{fromNow(created)}</Text>
               </Tooltip>
             ) : (
               <Text type="secondary">{formatDate(m.matchDate)}</Text>
             )}
-            {isPast(m.matchDate) && <Tag color="volcano">Tarihi geçti</Tag>}
+            {isPast(m.matchDate) && <Tag color="volcano">{t('admin:shared.expired')}</Tag>}
           </Space>
         );
       },
     },
     {
-      title: 'Durum',
+      title: t('admin:shared.columns.status'),
       key: 'status',
       render: (_, m) => <MatchStatusTag status={m.isActive} />,
     },
     {
-      title: 'İşlemler',
+      title: t('admin:shared.columns.actions'),
       key: 'actions',
       align: 'right',
       render: (_, m) => (
         <Space size={4} onClick={(e) => e.stopPropagation()}>
-          <Tooltip title="Detay">
+          <Tooltip title={t('common:actions.detail')}>
             <Button size="small" icon={<EyeOutlined />} onClick={() => setSelected(m)} />
           </Tooltip>
           <Popconfirm
-            title="Admin olarak onaylansın mı?"
-            description={<div style={{ maxWidth: 260 }}>{OVERRIDE_WARNING}</div>}
-            okText="Onayla"
-            cancelText="Vazgeç"
+            title={t('admin:shared.approveAsAdminConfirm')}
+            description={<div style={{ maxWidth: 260 }}>{t('admin:matchDetail.overrideWarning')}</div>}
+            okText={t('common:actions.confirm')}
+            cancelText={t('common:actions.cancel')}
             onConfirm={() => updateStatus(m.matchId, 2)}
           >
-            <Tooltip title="Admin olarak onayla">
+            <Tooltip title={t('admin:shared.approveAsAdmin')}>
               <Button
                 size="small"
                 icon={<CheckOutlined />}
@@ -176,14 +189,14 @@ export default function Reservations() {
             </Tooltip>
           </Popconfirm>
           <Popconfirm
-            title="Admin olarak reddedilsin mi?"
-            description={<div style={{ maxWidth: 260 }}>{OVERRIDE_WARNING}</div>}
-            okText="Reddet"
-            cancelText="Vazgeç"
+            title={t('admin:shared.rejectAsAdminConfirm')}
+            description={<div style={{ maxWidth: 260 }}>{t('admin:matchDetail.overrideWarning')}</div>}
+            okText={t('common:actions.reject')}
+            cancelText={t('common:actions.cancel')}
             okButtonProps={{ danger: true }}
             onConfirm={() => updateStatus(m.matchId, 3)}
           >
-            <Tooltip title="Admin olarak reddet">
+            <Tooltip title={t('admin:shared.rejectAsAdmin')}>
               <Button
                 size="small"
                 danger
@@ -200,12 +213,12 @@ export default function Reservations() {
   return (
     <>
       <PageHeader
-        title="Rezervasyonlar"
-        subtitle="İşletme onayı bekleyen talepler"
+        title={t('admin:reservations.title')}
+        subtitle={t('admin:reservations.subtitle')}
         icon={<ScheduleOutlined />}
         extra={
           <Button icon={<ReloadOutlined />} onClick={reload} loading={loading}>
-            Yenile
+            {t('common:actions.refresh')}
           </Button>
         }
       />
@@ -213,34 +226,41 @@ export default function Reservations() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="Rezervasyon talepleri artık tesis işletmeleri tarafından onaylanır."
-        description="Bu ekran izleme amaçlıdır. Admin onayı/reddi yalnızca istisnai durumlarda işletmenin kararını geçersiz kılmak için kullanılmalıdır."
+        message={t('admin:reservations.alertMessage')}
+        description={t('admin:reservations.alertDescription')}
       />
       <Card bordered={false}>
-        <Space wrap size={12} style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+        <Space
+          wrap
+          size={12}
+          className="mb-admin-toolbar"
+          style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}
+        >
           <Segmented
             value={view}
             onChange={setView}
             options={[
-              { label: `Bekleyenler (${pending.length - expiredCount})`, value: 'upcoming' },
-              { label: `Tarihi geçenler (${expiredCount})`, value: 'expired' },
-              { label: `Tümü (${pending.length})`, value: 'all' },
+              { label: t('admin:reservations.tabs.upcoming', { count: pending.length - expiredCount }), value: 'upcoming' },
+              { label: t('admin:reservations.tabs.expired', { count: expiredCount }), value: 'expired' },
+              { label: t('admin:reservations.tabs.all', { count: pending.length }), value: 'all' },
             ]}
           />
-          <Space wrap>
+          <Space wrap className="mb-admin-filters">
             <Input
+              className="mb-admin-filter"
               allowClear
               prefix={<SearchOutlined />}
-              placeholder="Maç, tesis veya kurucu ara"
+              placeholder={t('admin:reservations.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ width: 240 }}
             />
             <Select
+              className="mb-admin-filter"
               allowClear
               showSearch
               optionFilterProp="label"
-              placeholder="Tesis"
+              placeholder={t('admin:shared.venuePlaceholder')}
               value={stadiumId}
               onChange={setStadiumId}
               style={{ width: 200 }}
@@ -253,10 +273,10 @@ export default function Reservations() {
           columns={columns}
           dataSource={data}
           loading={loading}
-          scroll={{ x: 1100 }}
+          scroll={{ x: isPhone ? 'max-content' : 1100 }}
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
           onRow={(m) => ({ onClick: () => setSelected(m), style: { cursor: 'pointer' } })}
-          locale={{ emptyText: <EmptyState description="İşletme onayı bekleyen talep yok" /> }}
+          locale={{ emptyText: <EmptyState description={t('admin:reservations.empty')} /> }}
         />
       </Card>
       <MatchDetailDrawer

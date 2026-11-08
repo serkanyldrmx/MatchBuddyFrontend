@@ -1,0 +1,90 @@
+{
+  "loadPlayersError": "Oyuncular yüklenemedi.",
+  "list": {
+    "title": "Takımlar",
+    "subtitle": "Takımlarını yönet, kadroyu düzenle veya yeni bir takım kur.",
+    "createWithAI": "AI ile oluştur",
+    "create": "Takım oluştur",
+    "loadError": "Takımlar yüklenemedi.",
+    "deleteConfirm": {
+      "title": "Takımı sil",
+      "content": "\"{{name}}\" takımı silinecek. Bu işlem geri alınamaz."
+    },
+    "deleteSuccess": "Takım silindi.",
+    "deleteError": "Takım silinemedi. Takım bir maça kayıtlı olabilir.",
+    "tabs": {
+      "mine_one": "Takımlarım ({{count}})",
+      "mine_other": "Takımlarım ({{count}})",
+      "all_one": "Tüm takımlar ({{count}})",
+      "all_other": "Tüm takımlar ({{count}})"
+    },
+    "searchPlaceholder": "Takım ara",
+    "emptyMine": "Henüz bir takımda değilsiniz",
+    "empty": "Takım bulunamadı",
+    "players_one": "{{count}} oyuncu",
+    "players_other": "{{count}} oyuncu",
+    "invite": "Davet et",
+    "editSquad": "Kadroyu düzenle",
+    "actions": "Takım işlemleri",
+    "youSuffix": " (sen)",
+    "morePlayers_one": "+{{count}} oyuncu daha",
+    "morePlayers_other": "+{{count}} oyuncu daha",
+    "emptySquad": "Kadro boş"
+  },
+  "create": {
+    "back": "Takımlara dön",
+    "subtitle": "Takımına bir isim ver ve oyuncularını seç.",
+    "selectAtLeastOne": "En az bir oyuncu seçin.",
+    "error": "Takım oluşturulamadı.",
+    "success": "Takım oluşturuldu.",
+    "infoTitle": "Takım bilgileri",
+    "teamName": "Takım adı",
+    "teamNameRequired": "Takım adı zorunludur.",
+    "minChars_one": "En az {{count}} karakter olmalıdır.",
+    "minChars_other": "En az {{count}} karakter olmalıdır.",
+    "teamNamePlaceholder": "Örn. Kadıköy Kartalları",
+    "selectedPlayers_one": "Seçilen oyuncular ({{count}})",
+    "selectedPlayers_other": "Seçilen oyuncular ({{count}})",
+    "noneSelected": "Henüz oyuncu seçilmedi.",
+    "submit": "Takımı oluştur",
+    "playersTitle": "Oyuncular"
+  },
+  "picker": {
+    "searchPlaceholder": "Oyuncu ara",
+    "player": "Oyuncu",
+    "age": "Yaş",
+    "score": "Puan"
+  },
+  "editSquad": {
+    "title": "Kadroyu düzenle · {{name}}",
+    "atLeastOne": "Takımda en az bir oyuncu olmalı.",
+    "success": "Kadro güncellendi.",
+    "error": "Kadro güncellenemedi.",
+    "save_one": "Kaydet ({{count}} oyuncu)",
+    "save_other": "Kaydet ({{count}} oyuncu)"
+  },
+  "ai": {
+    "title": "AI ile takım oluştur",
+    "subtitle": "Seçtiğin oyuncular, maç sonrası aldıkları puanlara göre birbirine denk iki takıma bölünür.",
+    "team1Placeholder": "1. takımın adı",
+    "team2Placeholder": "2. takımın adı",
+    "points_one": "{{count}} puan",
+    "points_other": "{{count}} puan",
+    "playerStats": "{{age}} yaş · {{size}} cm · {{weight}} kg",
+    "generateError": "Takımlar oluşturulamadı.",
+    "generateSuccess": "Dengeli takımlar oluşturuldu.",
+    "namesRequired": "İki takıma da isim verin.",
+    "saveSuccess": "Takımlar kaydedildi.",
+    "saveError": "Takımlar kaydedilemedi.",
+    "regenerate": "Yeniden oluştur",
+    "generate": "Takımları oluştur",
+    "scoreDiff": "Güç farkı",
+    "save": "Takımları kaydet",
+    "balancing": "Takımlar dengeleniyor…",
+    "highDiff": "Takımlar arasındaki puan farkı yüksek. Daha dengeli bir dağılım için yeniden oluşturmayı deneyin.",
+    "empty": "Oyuncuları seçip 'Takımları oluştur' butonuna bas.",
+    "players": "Oyuncular",
+    "playersPlaceholder": "Boş bırakırsan sen ve takip ettiğin oyuncular",
+    "power": "Güç {{power}}"
+  }
+}

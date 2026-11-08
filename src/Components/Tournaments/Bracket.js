@@ -1,18 +1,21 @@
 import React, { useMemo } from 'react';
 import { CrownFilled } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { FIXTURE_STATUS } from '../../api/tournaments';
 import { roundName } from './tournamentUtils';
 
 function BracketTeam({ team, score, isWinner, isLoser, isMine, bye }) {
+  const { t } = useTranslation();
   return (
     <div className={`mb-bk-team ${isWinner ? 'is-winner' : ''} ${isLoser ? 'is-loser' : ''} ${isMine ? 'is-mine' : ''} ${team ? '' : 'is-empty'}`}>
-      <span className="mb-bk-team__name">{team ? team.teamName : bye ? 'Bay' : 'Belli değil'}</span>
+      <span className="mb-bk-team__name">{team ? team.teamName : bye ? t('tournaments:bracket.bye') : t('tournaments:teamTbd')}</span>
       <span className="mb-bk-team__score">{score ?? ''}</span>
     </div>
   );
 }
 
 function BracketMatch({ fixture, myTeamIds, isFinal }) {
+  const { t } = useTranslation();
   if (!fixture) {
     return (
       <div className="mb-bk-match is-placeholder">
@@ -39,13 +42,14 @@ function BracketMatch({ fixture, myTeamIds, isFinal }) {
       {isFinal && w && <CrownFilled className="mb-bk-match__crown" />}
       {side(fixture.homeTeam, fixture.homeScore)}
       {side(fixture.awayTeam, fixture.awayScore)}
-      {bye && <span className="mb-bk-match__tag">Bay geçti</span>}
+      {bye && <span className="mb-bk-match__tag">{t('tournaments:bracket.byePassed')}</span>}
     </div>
   );
 }
 
 /** Eleme ağacı: her tur bir sütun, kazanan (r, p) → (r+1, p/2) */
 export default function Bracket({ tournament }) {
+  useTranslation(); // dil değişince tur adları yeniden çizilsin
   const myTeamIds = useMemo(
     () => new Set((tournament.teams || []).filter((t) => t.isMine).map((t) => t.teamId).concat(tournament.myTeamIds || [])),
     [tournament]

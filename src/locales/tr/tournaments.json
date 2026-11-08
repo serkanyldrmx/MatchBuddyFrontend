@@ -1,0 +1,179 @@
+{
+  "format": {
+    "league": "Lig",
+    "knockout": "Eleme"
+  },
+  "status": {
+    "registration": "Kayıt açık",
+    "ongoing": "Devam ediyor",
+    "finished": "Tamamlandı"
+  },
+  "round": {
+    "week": "{{round}}. Hafta",
+    "final": "Final",
+    "semiFinal": "Yarı final",
+    "quarterFinal": "Çeyrek final",
+    "last16": "Son 16",
+    "round": "{{round}}. Tur"
+  },
+  "teamTbd": "Belli değil",
+  "list": {
+    "eyebrow": "Rekabet",
+    "title": "Turnuvalar",
+    "subtitle": "Takımını kur, lige ya da elemeye katıl, kupayı kaldır.",
+    "create": "Turnuva oluştur",
+    "loadError": "Turnuvalar yüklenemedi.",
+    "filters": {
+      "open": "Kayıt açık",
+      "ongoing": "Devam eden",
+      "finished": "Tamamlanan",
+      "mine": "Benimkiler"
+    },
+    "empty": {
+      "all": "Henüz turnuva yok. İlkini sen başlat!",
+      "open": "Şu an kaydı açık turnuva yok.",
+      "ongoing": "Devam eden turnuva yok.",
+      "finished": "Tamamlanan turnuva yok.",
+      "mine": "Katıldığın ya da düzenlediğin bir turnuva yok."
+    }
+  },
+  "card": {
+    "yourTeamJoined": "Takımın katılıyor",
+    "tournament": "Turnuva",
+    "noPitch": "Saha belirlenmedi",
+    "champion": "Şampiyon",
+    "teams": "Takımlar",
+    "teamCount_one": "{{count}}/{{max}} takım",
+    "teamCount_other": "{{count}}/{{max}} takım",
+    "organizedBy": "<link>{{name}}</link> düzenliyor"
+  },
+  "create": {
+    "ok": "Oluştur",
+    "error": "Turnuva oluşturulamadı.",
+    "success": "Turnuva oluşturuldu, takımları bekliyoruz!",
+    "leagueHint": "Herkes herkesle oynar, puan tablosu belirler.",
+    "knockoutHint": "Kaybeden elenir, kazanan finale yürür.",
+    "powerOfTwoHint": "Eleme için 4, 8 veya 16 takım önerilir; eksik yerler bay geçer.",
+    "name": "Ad",
+    "nameRequired": "Turnuvaya bir ad ver.",
+    "namePlaceholder": "Örn. Kış Ligi",
+    "maxChars_one": "En fazla {{count}} karakter.",
+    "maxChars_other": "En fazla {{count}} karakter.",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "Kurallar, ödül, maç günleri…",
+    "format": "Format",
+    "startDate": "Başlangıç tarihi ve saati",
+    "startDateRequired": "Başlangıç tarihini seç.",
+    "pastDate": "Geçmiş bir tarih seçemezsin.",
+    "dateTimePlaceholder": "Tarih ve saat",
+    "maxTeams": "Maks. takım",
+    "maxTeamsRequired": "Takım sayısını gir.",
+    "teamSize_one": "{{count}} takım",
+    "teamSize_other": "{{count}} takım",
+    "pitch": "Halı saha (isteğe bağlı)",
+    "pitchPlaceholder": "Halı saha seç"
+  },
+  "result": {
+    "title": "Sonuç gir",
+    "pickPenaltyWinner": "Berabere biten eleme maçında penaltıları kazanan takımı seç.",
+    "error": "Sonuç kaydedilemedi.",
+    "success": "Sonuç kaydedildi.",
+    "penaltyQuestion": "Beraberlik! Penaltıları kim kazandı?",
+    "alreadyEntered": "Bu maçın sonucu zaten girilmiş; kaydedersen düzeltilir."
+  },
+  "date": {
+    "title": "Tarihi değiştir",
+    "pickDate": "Bir tarih seç.",
+    "error": "Tarih güncellenemedi.",
+    "success": "Maç tarihi güncellendi."
+  },
+  "bracket": {
+    "bye": "Bay",
+    "byePassed": "Bay geçti"
+  },
+  "fixtures": {
+    "noDate": "Tarih belirlenmedi",
+    "onPenalties": "Penaltılarla",
+    "resultNeedsTeams": "İki takım da belli olunca sonuç girebilirsin",
+    "editResult": "Sonucu düzelt",
+    "emptyBeforeStart": "Fikstür, turnuva başladığında otomatik oluşturulur.",
+    "empty": "Fikstür bulunamadı."
+  },
+  "standings": {
+    "empty": "Puan tablosu, turnuva başlayınca oluşur.",
+    "team": "Takım",
+    "yours": "Senin",
+    "cols": {
+      "played": "O",
+      "won": "G",
+      "drawn": "B",
+      "lost": "M",
+      "goalsFor": "A",
+      "goalsAgainst": "Y",
+      "goalDiff": "AV",
+      "points": "P"
+    },
+    "legend": "O: oynanan · G: galibiyet · B: beraberlik · M: mağlubiyet · A: atılan · Y: yenilen · AV: averaj · P: puan"
+  },
+  "teams": {
+    "empty": "Henüz kayıtlı takım yok. İlk takım senin olsun!",
+    "players_one": "{{count}} oyuncu",
+    "players_other": "{{count}} oyuncu",
+    "yourTeam": "Senin takımın",
+    "withdraw": "Kaydı çek"
+  },
+  "join": {
+    "full": "Kontenjan doldu, yeni takım alınmıyor.",
+    "needTeam": "Katılmak için bir takımın olmalı.",
+    "createTeam": "Takım kur",
+    "createTeamAI": "AI ile dengeli takım kur",
+    "selectTeam": "Takımını seç",
+    "join": "Takımımla katıl"
+  },
+  "detail": {
+    "loadError": "Turnuva yüklenemedi.",
+    "notFound": "Turnuva bulunamadı",
+    "notFoundSub": "Silinmiş ya da hiç var olmamış olabilir.",
+    "backToList": "Turnuvalara dön",
+    "joinSuccess": "Takımın turnuvaya kaydoldu!",
+    "joinError": "Takım kaydedilemedi.",
+    "withdrawConfirm": {
+      "title": "{{name}} turnuvadan çekilsin mi?",
+      "content": "Kayıt açık olduğu sürece tekrar katılabilirsin."
+    },
+    "withdrawSuccess": "Takım turnuvadan çekildi.",
+    "withdrawError": "Takım çekilemedi.",
+    "startConfirm": {
+      "title": "Turnuvayı başlatalım mı?",
+      "intro": "Başlattığında:",
+      "closed": "Kayıtlar kapanır, yeni takım katılamaz.",
+      "league": "Herkesin herkesle bir kez oynadığı lig fikstürü oluşturulur; haftalar 7 gün arayla, başlangıç saatinde oynanır.",
+      "knockout": "Takımlar rastgele eşleşir ve eleme ağacı kurulur; eksik yerlerde takımlar bay geçer.",
+      "notify": "Kayıtlı takımların tüm oyuncularına bildirim gider.",
+      "registered_one": "Şu an <b>{{count}}</b> takım kayıtlı.",
+      "registered_other": "Şu an <b>{{count}}</b> takım kayıtlı.",
+      "ok": "Başlat"
+    },
+    "startSuccess": "Turnuva başladı, bol şans!",
+    "startError": "Turnuva başlatılamadı.",
+    "deleteConfirm": {
+      "title": "Turnuva silinsin mi?",
+      "content": "Bu işlem geri alınamaz; kayıtlı takımların kaydı da silinir."
+    },
+    "deleteSuccess": "Turnuva silindi.",
+    "deleteError": "Turnuva silinemedi.",
+    "withdrawTeam": "Takımını çek",
+    "tabs": {
+      "fixtures": "Fikstür",
+      "standings": "Puan tablosu",
+      "bracket": "Ağaç",
+      "teams_one": "Takımlar ({{count}})",
+      "teams_other": "Takımlar ({{count}})"
+    },
+    "bracketEmpty": "Eleme ağacı, turnuva başladığında kurulur.",
+    "congrats": "Tebrikler, kupa sizin!",
+    "minTeams_one": "Başlatmak için en az {{count}} takım gerekli",
+    "minTeams_other": "Başlatmak için en az {{count}} takım gerekli",
+    "start": "Turnuvayı başlat"
+  }
+}

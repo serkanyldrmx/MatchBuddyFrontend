@@ -20,7 +20,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
   font: inherit;
   font-size: 14px;
   cursor: pointer;
@@ -173,4 +173,39 @@
   flex-direction: column;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+@media (max-width: 767px) {
+  .mb-pp-counts {
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+  .mb-pp-counts button {
+    min-height: 36px;
+  }
+  .mb-pp-actions > .ant-btn {
+    flex: 1 1 auto;
+  }
+  .mb-pp-locked .ant-card-body {
+    padding: 32px 16px;
+  }
+  .mb-pp-together strong {
+    font-size: 20px;
+  }
+  .mb-pp-list {
+    max-height: none;
+  }
+  .mb-pp-list__row {
+    min-height: 56px;
+  }
+}
+
+.mb-pp-reliability {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  font-size: 13px;
+  opacity: 0.9;
 }

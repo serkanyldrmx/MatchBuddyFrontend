@@ -1,0 +1,8 @@
+{
+  "required": "Bu alan zorunludur.",
+  "select": "Seçin.",
+  "email": "Geçerli bir e-posta girin.",
+  "minLength": "En az {{count}} karakter olmalı.",
+  "maxLength": "En fazla {{count}} karakter olabilir.",
+  "passwordMismatch": "Şifreler eşleşmiyor."
+}

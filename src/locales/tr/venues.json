@@ -1,0 +1,362 @@
+{
+  "surface": {
+    "artificialTurf": "Suni çim",
+    "naturalGrass": "Doğal çim",
+    "parquet": "Parke",
+    "other": "Diğer"
+  },
+  "days": {
+    "mon": "Pazartesi",
+    "tue": "Salı",
+    "wed": "Çarşamba",
+    "thu": "Perşembe",
+    "fri": "Cuma",
+    "sat": "Cumartesi",
+    "sun": "Pazar"
+  },
+  "daysShort": {
+    "mon": "Pzt",
+    "tue": "Sal",
+    "wed": "Çar",
+    "thu": "Per",
+    "fri": "Cum",
+    "sat": "Cmt",
+    "sun": "Paz"
+  },
+  "amenities": {
+    "camera": "Maç kaydı (kamera)",
+    "cleatRental": "Krampon kiralama",
+    "shower": "Duş",
+    "lockerRoom": "Soyunma odası",
+    "parking": "Otopark",
+    "cafe": "Kafeterya",
+    "shuttle": "Servis",
+    "bibs": "Yelek",
+    "ball": "Top"
+  },
+  "amenityShort": {
+    "camera": "Kamera",
+    "cleatRental": "Krampon",
+    "shower": "Duş",
+    "lockerRoom": "Soyunma odası",
+    "parking": "Otopark",
+    "cafe": "Kafe",
+    "shuttle": "Servis",
+    "bibs": "Yelek",
+    "ball": "Top"
+  },
+  "shared": {
+    "campaign": "Kampanya",
+    "newVenue": "Yeni tesis",
+    "pickTime": "Saat seç",
+    "closed": "Kapalı",
+    "freeSlots_one": "{{count}} boş saat",
+    "freeSlots_other": "{{count}} boş saat",
+    "noFreeSlots": "Boş saat yok",
+    "venuesLoadError": "Tesisler yüklenemedi.",
+    "venueLoadError": "Tesis yüklenemedi.",
+    "paymentOnSite": "Ödeme sahada yapılır."
+  },
+  "list": {
+    "eyebrow": "Anlaşmalı tesisler",
+    "title": "Halı Sahalar",
+    "subtitle": "Boş saatleri gör, sahanı seç, maçını dakikalar içinde kur.",
+    "viewList": "Liste",
+    "viewMap": "Harita",
+    "searchPlaceholder": "Tesis, semt ara",
+    "allCities": "Tüm şehirler",
+    "datePlaceholder": "Boş saat ara",
+    "campaignOnly": "Kampanyalı",
+    "emptyFiltered": "Bu filtrelere uyan tesis yok",
+    "emptyNone": "Henüz anlaşmalı tesis yok",
+    "venueCount_one": "{{count}} tesis",
+    "venueCount_other": "{{count}} tesis",
+    "notFound": "Tesis bulunamadı",
+    "yourLocation": "Konumun",
+    "popupPriceFrom": "{{price}}'den başlayan /saat",
+    "locationPermissionNeeded": "Konum izni gerekiyor",
+    "drawRoute": "Rota çiz",
+    "card": {
+      "pitchCount_one": "{{count}} saha",
+      "pitchCount_other": "{{count}} saha",
+      "priceFrom": "<b>{{price}}</b><s>'den başlayan /saat</s>",
+      "clickForPrice": "Fiyat için tıkla"
+    }
+  },
+  "slotPicker": {
+    "prevDays": "Önceki günler",
+    "nextDays": "Sonraki günler",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "otherDay": "Başka gün",
+    "status": {
+      "booked": "Dolu",
+      "blocked": "Kapalı",
+      "past": "Geçti"
+    },
+    "loadError": "Saatler yüklenemedi.",
+    "pickVenueFirst": "Önce bir tesis seç",
+    "closedDay": "Tesis bu gün kapalı. Başka bir gün seç.",
+    "noPitch": "Bu gün için uygun saha yok",
+    "noSlots": "Bu gün saat yok",
+    "legend": {
+      "free": "Boş",
+      "deal": "Kampanyalı",
+      "booked": "Dolu",
+      "blocked": "Kapalı"
+    }
+  },
+  "detail": {
+    "campaign": {
+      "discountValue": "%{{value}}",
+      "discount": "indirim",
+      "perHour": "/saat",
+      "everyDay": "Her gün",
+      "until": "{{date}} tarihine kadar"
+    },
+    "notFoundTitle": "Tesis bulunamadı",
+    "notFoundSubtitle": "Bu tesis şu an yayında olmayabilir.",
+    "backToVenues": "Tesislere dön",
+    "ownerUserName": "işletme",
+    "cancellationPolicy": "İptal politikası",
+    "allVenues": "Tüm tesisler",
+    "eyebrow": "Anlaşmalı tesis",
+    "stats": {
+      "lowestPerHour": "en düşük /saat",
+      "pitches": "saha",
+      "today": "bugün"
+    },
+    "messageOwner": "İşletmeye yaz",
+    "tabs": {
+      "pitches": "Sahalar ({{count}})",
+      "prices": "Fiyatlar & saatler",
+      "reviews": "Yorumlar ({{count}})",
+      "location": "Konum"
+    },
+    "howTo": {
+      "title": "Nasıl çalışır?",
+      "step1": "Boş bir saate tıkla.",
+      "step2": "Kadronu ve ekstraları seç, kişi başı ücreti gör.",
+      "step3": "İşletme onaylayınca maçın kesinleşir."
+    },
+    "pitchCard": {
+      "players_one": "{{count}} oyuncu",
+      "players_other": "{{count}} oyuncu",
+      "priceFromSuffix": "/saat'ten başlayan"
+    },
+    "noPitchInfo": "Saha bilgisi yok",
+    "prices": {
+      "openingHours": "Açılış saatleri",
+      "title": "Fiyatlar",
+      "hourly": "{{name}} · saatlik",
+      "cleatRentalPair": "Krampon kiralama (çift)",
+      "note": "Akşam saatlerinde ve hafta sonu fiyat değişebilir. Kesin ücreti saat seçince görürsün.",
+      "activeCampaigns": "Aktif kampanyalar",
+      "noCampaigns": "Şu an aktif kampanya yok"
+    },
+    "reviews": {
+      "count_one": "{{count}} değerlendirme",
+      "count_other": "{{count}} değerlendirme",
+      "empty": "Henüz yorum yok. Burada maç yap, ilk yorumu sen yaz!",
+      "player": "Oyuncu",
+      "ownerReply": "İşletmenin yanıtı"
+    },
+    "location": {
+      "noLocation": "Konum bilgisi yok",
+      "address": "Adres",
+      "directions": "Yol tarifi"
+    }
+  },
+  "createMatch": {
+    "minutes_one": "{{count}} dk",
+    "minutes_other": "{{count}} dk",
+    "receipt": {
+      "title": "Rezervasyon özeti",
+      "emptyHint": "Tesis, saha ve saat seçince ücret burada hesaplanacak.",
+      "pitchLine": "Saha {{label}}",
+      "cleats": "Krampon × {{count}}",
+      "extras": "Ekstralar",
+      "total": "Toplam",
+      "perPlayer": "Kişi başı",
+      "cleatOnlyRenter": "Krampon ücreti kişi başına bölünmez: kiralayan ayrıca {{price}} öder.",
+      "splitAmong_one": "{{count}} oyuncuya bölünür",
+      "splitAmong_other": "{{count}} oyuncuya bölünür",
+      "unavailable": "Bu saat müsait değil.",
+      "note": "Ödeme sahada yapılır. Rezervasyon işletme onayından sonra kesinleşir."
+    },
+    "quoteError": "Ücret hesaplanamadı.",
+    "teamOption_one": "{{name}} · {{count}} oyuncu",
+    "teamOption_other": "{{name}} · {{count}} oyuncu",
+    "errors": {
+      "nameRequired": "Maçına bir isim ver.",
+      "teamRequired": "Takımını seç.",
+      "opponentRequired": "Davet edeceğin rakip takımı seç.",
+      "createFailed": "Rezervasyon oluşturulamadı."
+    },
+    "autoName": {
+      "morning": "{{day}} sabah maçı",
+      "noon": "{{day}} öğlen maçı",
+      "evening": "{{day}} akşam maçı"
+    },
+    "done": {
+      "title": "Rezervasyon talebin gönderildi!",
+      "notify": "İşletme onayladığında bildirim alacaksın.",
+      "teamInvited": "Takım arkadaşlarına davet gönderildi.",
+      "goToMatch": "Maç merkezine git",
+      "backHome": "Fikstüre dön",
+      "myCalendar": "Takvimim"
+    },
+    "viewVenue": "Tesisi incele",
+    "slot": {
+      "venue": "Tesis",
+      "venuePlaceholder": "Anlaşmalı bir tesis seç",
+      "day": "Gün",
+      "pitchAndTime": "Saha ve saat",
+      "duration": "Süre",
+      "longMatchHint": "Uzun maçlarda sonraki saat(ler)in de boş olması gerekir; bunu senin için kontrol ediyoruz.",
+      "unavailable": "Seçtiğin süre için saha müsait değil.",
+      "unavailableHint": "Süreyi kısalt ya da başka bir saat seç.",
+      "pickVenueHint": "Maç kurmak için önce anlaşmalı bir tesis seç.",
+      "browseVenues": "Tesislere göz at"
+    },
+    "squad": {
+      "matchName": "Maç adı",
+      "matchNamePlaceholder": "Örn. Perşembe akşam maçı",
+      "playerCount": "Oyuncu sayısı",
+      "personUnit": "kişi",
+      "pitchSizeHint": "{{perSide}}+{{perSide}} saha · en fazla {{max}}",
+      "description": "Açıklama",
+      "descriptionPlaceholder": "Seviye, forma rengi, buluşma noktası…",
+      "matchType": "Maç türü",
+      "openMatch": "Açık maç",
+      "openMatchDesc": "Herkes katılabilir, kadroyu birlikte tamamlarsınız.",
+      "withTeam": "Takımımla",
+      "withTeamDesc": "Kendi takımınla sahaya çık, rakibini davet et ya da ara.",
+      "yourTeam": "Takımın",
+      "yourTeamPlaceholder": "Takımını seç",
+      "noTeam": "Henüz bir takımın yok.",
+      "createTeam": "Takım kur",
+      "teamInviteHint": "Takımındaki herkese otomatik davet gider; kabul edenler ev sahibi tarafına yerleşir.",
+      "opponent": "Rakip",
+      "lookingForOpponent": "Rakip aranıyor",
+      "inviteOpponent": "Rakip takım davet et",
+      "opponentPlaceholder": "Rakip takımı seç",
+      "inviteOpponentHint": "Rakip takımın üyelerine de davet gider, deplasman tarafına yerleşirler.",
+      "lookingHint": "Maçın \"Rakip aranıyor\" olarak listelenir; bir takım rakip olarak katılabilir.",
+      "minReliability": "Kimler katılabilir?",
+      "minReliabilityNone": "Herkes",
+      "minReliabilityMedium": "Puanı {{score}}+",
+      "minReliabilityGood": "Puanı {{score}}+",
+      "minReliabilityHint": "Güvenilirlik puanı, son dakika iptal eden ve maça gelmeyen oyuncularda düşer. Yeni oyuncular bu sınıra takılmaz.",
+      "repeatWeekly": "Her hafta tekrarla",
+      "repeatWeeklyHint": "Her hafta aynı gün ve saatte maç otomatik açılır, geçen haftanın oyuncularına \"bu hafta da geliyor musun?\" daveti gider. İşletme bir kez onaylayınca sonraki haftalar otomatik onaylanır."
+    },
+    "extras": {
+      "none": "Bu tesiste ek hizmet yok. Özeti kontrol edip rezervasyonunu gönderebilirsin.",
+      "perPair": "{{price}} / çift",
+      "pairUnit": "çift",
+      "cameraDesc": "{{price}} · maç sonrası videoyu al"
+    },
+    "review": {
+      "title": "Maç",
+      "name": "Ad",
+      "squad": "Kadro",
+      "players_one": "{{count}} oyuncu",
+      "players_other": "{{count}} oyuncu",
+      "type": "Tür",
+      "versus": "{{home}} vs {{away}}"
+    },
+    "header": {
+      "eyebrow": "Rezervasyon",
+      "title": "Maç Kur",
+      "subtitle": "Sahanı seç, kadronu kur, kişi başı ücreti anında gör."
+    },
+    "steps": {
+      "slot": "Saha & saat",
+      "squad": "Kadro & takım",
+      "extras": "Ekstralar & özet"
+    },
+    "submit": "Rezervasyon talebi gönder"
+  },
+  "stadium": {
+    "list": {
+      "loadError": "Halı sahalar alınamadı.",
+      "listedOn": "Tesis yayına alındı.",
+      "listedOff": "Tesis yayından kaldırıldı.",
+      "listedError": "Yayın durumu değiştirilemedi.",
+      "noOwner": "İşletmesi yok",
+      "activeOwner": "Aktif işletme",
+      "membershipInactive": "Üyelik aktif değil",
+      "ownerFallback": "İşletme",
+      "title": "Halı Saha Listesi",
+      "subtitle": "Sistemde kayıtlı halı sahalar ve harita üzerindeki konumları",
+      "add": "Halı saha ekle",
+      "visibilityInfo": "Oyuncular yalnızca şu koşulları sağlayan tesisleri görür: yayında, aktif üyeliği olan bir işletmesi var, en az 1 fotoğraf ve 1 aktif saha, konum ve adres dolu.",
+      "newVenueHint": "Yeni anlaşmalı tesis eklemek için <link>Yeni işletme</link> sihirbazını kullanın.",
+      "cardTitle": "Halı sahalar ({{count}})",
+      "searchPlaceholder": "Ad veya adres ara",
+      "empty": "Halı saha bulunamadı",
+      "noLocation": "Konum yok",
+      "notListed": "Yayında değil",
+      "visible": "Oyunculara görünür",
+      "notVisible": "Oyunculara görünmüyor",
+      "yourLocation": "Mevcut konumunuz",
+      "selectedTitle": "Seçili halı saha",
+      "linkOwner": "İşletmeye bağla",
+      "invalidLocation": "Geçersiz konum",
+      "selectHint": "Ayrıntıları görmek için listeden veya haritadan bir halı saha seçin.",
+      "fields": {
+        "name": "Ad",
+        "owner": "İşletme",
+        "listed": "Yayında",
+        "hours": "Çalışma saatleri",
+        "address": "Adres",
+        "location": "Konum",
+        "description": "Açıklama"
+      }
+    },
+    "add": {
+      "citiesError": "İl listesi alınamadı.",
+      "locationNotFound": "Konum bulunamadı.",
+      "searchError": "Konum araması yapılamadı.",
+      "pickLocationWarning": "Lütfen haritadan konum seçin.",
+      "saveError": "Halı saha kaydedilemedi.",
+      "saved": "Halı saha başarıyla kaydedildi.",
+      "title": "Halı Saha Ekle",
+      "subtitle": "Yeni bir halı saha kaydı oluşturun ve harita üzerinde konumunu belirleyin",
+      "warning": "Bu ekranla eklenen tesisin işletmesi olmaz ve oyunculara görünmez.",
+      "warningDescription": "Anlaşmalı bir tesis eklemek için işletme hesabı, fotoğraflar ve konumu tek adımda oluşturan <link>Yeni işletme</link> sihirbazını kullanmanızı öneririz. Burada eklenen tesis daha sonra İşletmeler ekranından bir işletmeye bağlanabilir.",
+      "formTitle": "Halı saha bilgileri",
+      "name": "Halı saha adı",
+      "nameRequired": "Halı saha adını girin",
+      "namePlaceholder": "Örn. Yıldız Halı Saha",
+      "city": "İl",
+      "cityRequired": "İl seçin",
+      "district": "İlçe",
+      "districtRequired": "İlçe seçin",
+      "cityFirst": "Önce il seçin",
+      "address": "Açık adres",
+      "addressRequired": "Açık adresi girin",
+      "addressPlaceholder": "Mahalle, cadde, no",
+      "openingTime": "Açılış saati",
+      "openingTimeRequired": "Açılış saatini seçin",
+      "closingTime": "Kapanış saati",
+      "closingTimeRequired": "Kapanış saatini seçin",
+      "description": "Açıklama",
+      "descriptionRequired": "Açıklama girin",
+      "descriptionPlaceholder": "Saha özellikleri, otopark, duş vb.",
+      "location": "Konum",
+      "locationExtraPhone": "Aşağıdaki haritaya dokunarak konum seçin",
+      "locationExtra": "Haritaya tıklayarak konum seçin",
+      "locationRequired": "Haritadan konum seçin",
+      "locationPlaceholder": "Konum seçilmedi",
+      "save": "Halı sahayı kaydet",
+      "mapTitle": "Konum seçimi",
+      "searchPlaceholder": "Adres veya yer ara (örn. Selçuklu, Konya)",
+      "yourLocation": "Mevcut konumunuz",
+      "selectedLocation": "Seçilen konum",
+      "selectedLocationValue": "Seçilen konum: {{coords}}",
+      "noLocationYet": "Henüz konum seçilmedi."
+    }
+  }
+}

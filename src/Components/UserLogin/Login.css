@@ -1,117 +1,639 @@
-.login {
-    background-image: url("../../images/Login-ArkaPlan.jpg");
-    background-size: cover;
-  }
-  
-  .login-header {
-    text-align: left; /* Başlığı sola hizalayın */
-    margin-bottom: 0.5rem; /* Başlık ile kartın üst kısmı arasındaki boşluğu azaltın */
-    margin-top: 0; /* Kartın üst kısmıyla başlık arasındaki boşluğu kaldırın */
-    padding-top: 0; /* Kartın üst kısmıyla başlık arasındaki boşluğu kaldırın */
-  }
-  
-  .login-title {
-    font-size: 3rem; /* Yazı boyutunu biraz küçültün */
-    color: #141617;
-    font-family: 'Arial Black', 'Arial Bold', Gadget, sans-serif; /* Daha keskin hatlara sahip bir yazı tipi */
-    font-weight: bold;
-    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-  }
-  
-  .login-card {
-    backdrop-filter: blur(10px); /* Kartın arka planını bulanıklaştırır */
-    -webkit-backdrop-filter: blur(10px); /* Safari desteği için */
-    padding: 1rem; /* Kartın içindeki boşlukları azaltın */
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-width: 2px;
-    border-style: solid; /* Kesik çizgi */
-    border-color: rgb(0, 0, 0);
-    background-color: transparent; /* Şeffaf arka plan rengi */
-    width: 100%;
-    max-width: 400px; /* Kart genişliği */
-  }
-  
-  .logo {
-    max-width: 270px; /* Logonun maksimum genişliği artırıldı */
+/* =========================================================
+   Giriş / kayıt — "gece maçı" + buzlu cam kart
+   Tüm kurallar .mb-auth altında; diğer sayfalara sızmaz.
+   ========================================================= */
+.mb-auth {
+  --auth-glass: rgba(10, 16, 26, 0.52);
+  --auth-field: rgba(5, 9, 15, 0.55);
+  --auth-field-solid: #0c131d; /* autofill zemini (cam + alan karışımına yakın) */
+  --auth-line: rgba(255, 255, 255, 0.12);
+  --auth-line-strong: rgba(255, 255, 255, 0.22);
 
-  }
-
-  .register-card {
-    backdrop-filter: blur(10px); /* Kartın arka planını bulanıklaştırır */
-    -webkit-backdrop-filter: blur(10px); /* Safari desteği için */
-    padding: 2rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-width: 2px;
-    border-style: solid; /* Kesik çizgi */
-    border-color: rgb(0, 0, 0);
-    background-color: transparent; /* Şeffaf arka plan rengi */
-    width: 100%;
-    max-width: 600px; /* Maksimum genişlik artırıldı */
-  }
-  
-  .register {
-    background-image: url("../../images/Login-ArkaPlan.jpg");
-    background-size: cover; /* Resmi ekranda ortalar */
-  }
-  
-  .register-header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* Sol üst köşeden başlatmak için */
-    margin-bottom: 20px;
-  }
-  
-  .logo-reg {
-    max-width: 150px; /* Logonun maksimum genişliği artırıldı */
-    margin-right: 10px; /* Logoyu başlıktan ayırmak için */
-  }
-  
-  .register-title {
-    font-size: 3rem;
-    color: #141617;
-    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-    font-family: 'Arial', sans-serif; /* Yazı tipi */
-  }
-
-  .input-large {
-    width: 100%; /* Giriş alanlarının genişliğini artırın */
-  }
-  
-  .register-button {
-    display: flex;
-    justify-content: center; /* Butonu ortalar */
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  color: var(--mb-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--mb-bg);
+  overflow-x: hidden;
+  isolation: isolate;
 }
 
-.register-button button {
-    background-color: #2b2b2b; /* Gri ile siyah arası bir ton */
-    color: rgb(215, 55, 55); /* Kırmızı yazı */
-    padding: 16px 50px; /* Daha geniş buton */
-    font-size: 18px; /* Daha büyük ve okunaklı yazı */
-    font-weight: bold;
-    border: none;
-    border-radius: 30px; /* Daha oval köşeler */
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* ---------- Arka plan: projektör altında saha + karartma ---------- */
+.mb-auth__bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 30%, rgba(7, 11, 18, 0) 0%, rgba(7, 11, 18, 0.55) 70%, rgba(7, 11, 18, 0.9) 100%),
+    linear-gradient(180deg, rgba(7, 11, 18, 0.35) 0%, rgba(7, 11, 18, 0.1) 40%, rgba(7, 11, 18, 0.75) 100%),
+    url('../../images/login-bg.webp') 52% 30% / cover no-repeat,
+    var(--mb-bg);
 }
 
-.register-button button:hover {
-    background-color: #201f1f; /* Üzerine gelindiğinde biraz daha açık gri */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+.mb-auth__lines {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 34%;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 2;
 }
 
-.register-button button:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.mb-auth__lines circle {
+  fill: rgba(255, 255, 255, 0.1);
+  stroke: none;
 }
 
-  .register-form {
-    max-width: 800px; /* Formun maksimum genişliğini ayarlayın */
-    margin: 0 auto; /* Formu ortalayın */
+/* ---------- Yerleşim ---------- */
+.mb-auth__shell {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    16px
+    max(16px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+.mb-auth__intro {
+  display: none;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 480px;
+}
+
+@media (min-width: 992px) {
+  .mb-auth:not(.mb-auth--wide) .mb-auth__intro {
+    display: block;
   }
-  .divider {
-    border-top: 1px solid white; /* Beyaz çizgi */
-    margin: 16px 0; /* Üst ve alt boşluk */
+  .mb-auth:not(.mb-auth--wide) .mb-auth__shell {
+    justify-content: space-between;
   }
+}
+
+@media (min-width: 1200px) {
+  .mb-auth--wide .mb-auth__intro {
+    display: block;
+  }
+  .mb-auth--wide .mb-auth__shell {
+    justify-content: space-between;
+    gap: 48px;
+  }
+}
+
+/* ---------- Sol tanıtım ---------- */
+.mb-auth__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(7, 11, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mb-text);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.mb-auth__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mb-primary);
+  box-shadow: 0 0 10px var(--mb-primary);
+}
+
+.mb-auth__intro-title {
+  margin: 20px 0 14px;
+  font-family: var(--mb-display);
+  font-size: clamp(48px, 5vw, 72px);
+  font-weight: 800;
+  font-style: italic;
+  line-height: 0.92;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.mb-auth__intro-title em,
+.mb-auth__title em,
+.mb-auth__brand-name em {
+  color: var(--mb-primary);
+  font-style: italic;
+}
+
+.mb-auth__intro-text {
+  max-width: 420px;
+  margin: 0 0 28px;
+  color: rgba(var(--mb-text-rgb), 0.82);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.mb-auth__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.mb-auth__features li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mb-auth__features strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.mb-auth__features small {
+  display: block;
+  font-size: 13px;
+  color: var(--mb-text-2);
+}
+
+.mb-auth__feature-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--mb-primary);
+  background: var(--mb-primary-soft);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.22);
+}
+
+/* ---------- Buzlu cam kart ---------- */
+.mb-auth__card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  padding: 32px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(20, 29, 43, 0.6) 0%, var(--auth-glass) 100%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--auth-line);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.mb-auth--wide .mb-auth__card {
+  max-width: 760px;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mb-auth__card {
+    background: rgba(12, 18, 28, 0.92);
+  }
+}
+
+.mb-auth__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.mb-auth__brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--mb-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(var(--mb-primary-rgb), 0.3);
+}
+
+.mb-auth__brand-mark img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.mb-auth__brand-name {
+  font-family: var(--mb-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #fff;
+}
+
+.mb-auth__title {
+  margin: 0;
+  font-family: var(--mb-display);
+  font-size: clamp(38px, 9vw, 48px);
+  font-weight: 800;
+  font-style: italic;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+
+.mb-auth__subtitle {
+  margin: 10px 0 24px;
+  color: rgba(var(--mb-text-rgb), 0.72);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.mb-auth__section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 14px;
+  font-family: var(--mb-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.mb-auth__section span {
+  font-style: italic;
+  color: var(--mb-primary);
+}
+
+.mb-auth__section::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--auth-line);
+}
+
+/* ---------- Form alanları (koyu cam üstünde okunaklı) ---------- */
+.mb-auth .ant-form-item-label > label {
+  color: rgba(var(--mb-text-rgb), 0.78);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.mb-auth .ant-form-item-label {
+  padding-bottom: 6px;
+}
+
+.mb-auth .ant-form-item {
+  margin-bottom: 18px;
+}
+
+.mb-auth .ant-input-affix-wrapper,
+.mb-auth .ant-input-group .ant-input,
+.mb-auth .ant-input-group-addon {
+  background: var(--auth-field);
+  border-color: var(--auth-line);
+}
+
+.mb-auth .ant-input-affix-wrapper,
+.mb-auth .ant-input-group .ant-input {
+  min-height: 46px;
+  border-radius: 12px;
+}
+
+.mb-auth .ant-input-group .ant-input {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.mb-auth .ant-input-group-addon {
+  border-start-start-radius: 12px;
+  border-end-start-radius: 12px;
+  color: var(--mb-text);
+}
+
+.mb-auth .ant-input-affix-wrapper:hover,
+.mb-auth .ant-input-group .ant-input:hover {
+  border-color: var(--auth-line-strong);
+}
+
+.mb-auth .ant-input-affix-wrapper-focused,
+.mb-auth .ant-input-affix-wrapper:focus-within,
+.mb-auth .ant-input-group .ant-input:focus {
+  border-color: var(--mb-primary);
+  box-shadow: 0 0 0 3px rgba(var(--mb-primary-rgb), 0.16);
+  background: rgba(5, 9, 15, 0.7);
+}
+
+.mb-auth .ant-form-item-has-error .ant-input-affix-wrapper,
+.mb-auth .ant-input-affix-wrapper-status-error {
+  border-color: var(--mb-danger);
+}
+
+.mb-auth .ant-input-affix-wrapper > input.ant-input,
+.mb-auth .ant-input {
+  color: var(--mb-text);
+  background: transparent;
+  font-size: 15px;
+}
+
+.mb-auth .ant-input::placeholder {
+  color: rgba(var(--mb-text-rgb), 0.42);
+}
+
+.mb-auth .ant-input-prefix {
+  margin-inline-end: 10px;
+  color: rgba(var(--mb-text-rgb), 0.55);
+}
+
+.mb-auth .ant-input-affix-wrapper-focused .ant-input-prefix,
+.mb-auth .ant-input-affix-wrapper:focus-within .ant-input-prefix {
+  color: var(--mb-primary);
+}
+
+.mb-auth .ant-input-password-icon,
+.mb-auth .ant-input-suffix .anticon {
+  color: rgba(var(--mb-text-rgb), 0.6);
+}
+
+.mb-auth .ant-input-password-icon:hover {
+  color: #fff;
+}
+
+/* Tarayıcı otomatik doldurma: sarı/beyaz zemin ve görünmez yazıyı engelle */
+.mb-auth input:-webkit-autofill,
+.mb-auth input:-webkit-autofill:hover,
+.mb-auth input:-webkit-autofill:focus,
+.mb-auth input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--mb-text);
+  caret-color: var(--mb-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--auth-field-solid) inset;
+  box-shadow: 0 0 0 1000px var(--auth-field-solid) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
+.mb-auth .ant-select-selection-item {
+  color: var(--mb-text);
+}
+
+.mb-auth .ant-checkbox-wrapper {
+  color: rgba(var(--mb-text-rgb), 0.85);
+  min-height: 44px;
+  align-items: center;
+}
+
+.mb-auth .ant-form-item-explain-error {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.mb-auth .ant-form-item-tooltip {
+  color: rgba(var(--mb-text-rgb), 0.55);
+}
+
+.mb-auth__check {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--auth-field);
+  border: 1px solid var(--auth-line);
+  box-sizing: border-box;
+}
+
+.mb-auth__upload.ant-btn {
+  min-height: 46px;
+  border-radius: 12px;
+  background: var(--auth-field);
+  border: 1px dashed var(--auth-line-strong);
+  color: var(--mb-text);
+}
+
+.mb-auth__upload.ant-btn:hover {
+  border-color: var(--mb-primary) !important;
+  color: var(--mb-primary) !important;
+}
+
+.mb-auth .ant-upload-list-item {
+  color: var(--mb-text-2);
+}
+
+/* ---------- Satır, buton, bağlantılar ---------- */
+.mb-auth__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: -6px 0 14px;
+}
+
+.mb-auth__link,
+.mb-auth a.mb-auth__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--mb-primary);
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.mb-auth a.mb-auth__link:hover,
+.mb-auth a.mb-auth__link:focus-visible {
+  color: #d8ff5c;
+  text-decoration: underline;
+}
+
+.mb-auth__submit {
+  margin: 8px 0 0 !important;
+}
+
+.mb-auth__submit .ant-btn {
+  height: 50px;
+  border-radius: 12px;
+  font-family: var(--mb-display);
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mb-primary-ink);
+}
+
+.mb-auth__submit .ant-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(var(--mb-primary-rgb), 0.35);
+}
+
+.mb-auth__switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 6px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--auth-line);
+  color: var(--mb-text-2);
+  font-size: 14px;
+}
+
+/* ---------- Alt imza ---------- */
+.mb-auth__credit {
+  padding: 8px 16px max(14px, env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: rgba(var(--mb-text-rgb), 0.45);
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 767px) {
+  .mb-auth__bg {
+    background-position: center, center, 52% 22%, 0 0;
+  }
+
+  .mb-auth__lines {
+    height: 22%;
+  }
+
+  .mb-auth__shell {
+    align-items: flex-start;
+    padding-top: max(28px, env(safe-area-inset-top));
+  }
+
+  .mb-auth__card {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+
+  /* iOS 16 px altındaki alanlarda sayfayı yakınlaştırır */
+  .mb-auth .ant-input,
+  .mb-auth .ant-input-affix-wrapper > input.ant-input,
+  .mb-auth .ant-select-selection-item {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mb-auth__card {
+    padding: 22px 14px;
+  }
+  .mb-auth__row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---------- Açık tema ----------
+   Giriş ekranı iki temada da gece sahası fotoğrafı + koyu buzlu cam kart olarak kalır
+   (.mb-auth koyu "ada"dır: --mb-* değişkenleri koyu değerlerine döner, bkz. App.css).
+   antd bileşenleri açık token'larla çizildiği için koyu cama uyacak birkaç düzeltme: */
+[data-theme='light'] .mb-auth .ant-checkbox-inner {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+[data-theme='light'] .mb-auth .ant-checkbox-checked .ant-checkbox-inner {
+  background: var(--mb-primary-fill);
+  border-color: var(--mb-primary-fill);
+}
+
+[data-theme='light'] .mb-auth .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: var(--mb-primary-ink);
+}
+
+[data-theme='light'] .mb-auth .ant-form-item-explain-error {
+  color: #fb7185;
+}
+
+[data-theme='light'] .mb-auth .ant-select-arrow {
+  color: rgba(var(--mb-text-rgb), 0.6);
+}
+
+[data-theme='light'] .mb-auth .ant-btn-default:not(.mb-auth__upload) {
+  background: var(--auth-field);
+  border-color: var(--auth-line-strong);
+  color: var(--mb-text);
+}
+
+/* ---------- Sosyal giriş ---------- */
+.mb-auth__social {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.mb-auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mb-text-2);
+  font-size: 13px;
+}
+
+.mb-auth__divider::before,
+.mb-auth__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--auth-line);
+}
+
+.mb-auth__google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.mb-auth .mb-auth__facebook.ant-btn {
+  height: 44px;
+  border: none;
+  border-radius: 4px;
+  background: #1877f2;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mb-auth .mb-auth__facebook.ant-btn:not(:disabled):hover {
+  background: #166fe5;
+  color: #fff;
+}
+
+/* ---------- Koşullar sayfası ---------- */
+.mb-legal h3 {
+  margin: 18px 0 6px;
+  font-size: 16px;
+  color: var(--mb-text);
+}
+
+.mb-legal p {
+  margin: 0 0 10px;
+  color: var(--mb-text-2);
+  line-height: 1.6;
+}

@@ -14,6 +14,7 @@ import {
   UserSwitchOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { Trans, useTranslation } from 'react-i18next';
 import { ACTIVITY, SOCIAL_CHANGED, socialApi } from '../../api/social';
 import { matchesApi } from '../../api/matches';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
@@ -33,14 +34,16 @@ const TYPE_META = {
   [ACTIVITY.TOURNAMENT_WON]: { icon: <TrophyFilled />, className: 'is-trophy' },
 };
 
-const MatchLink = ({ match }) =>
-  match ? (
+function MatchLink({ match }) {
+  const { t } = useTranslation();
+  return match ? (
     <Link to={`/match-details/${match.matchId}`} className="mb-player-link">
       <strong>{match.matchName}</strong>
     </Link>
   ) : (
-    <strong>bir maç</strong>
+    <strong>{t('social:feed.aMatch')}</strong>
   );
+}
 
 // Türkçe belirtme hâli eki: Kaan'ı, Elif'i, Burcu'yu, Ömür'ü
 const accusative = (name) => {
@@ -55,6 +58,7 @@ const accusative = (name) => {
 /** Akış içindeki küçük fikstür bileti */
 function MiniFixture({ match, showJoin }) {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [joined, setJoined] = useState(null);
@@ -67,10 +71,10 @@ function MiniFixture({ match, showJoin }) {
     setBusy(true);
     try {
       const res = await matchesApi.join(match.matchId);
-      message.success(res?.message || 'Maça katıldın.');
-      setJoined(res?.status === 2 ? 'Yedektesin' : 'Kadrodasın');
+      message.success(res?.message || t('social:feed.fixture.joined'));
+      setJoined(res?.status === 2 ? t('social:feed.fixture.onBench') : t('social:feed.fixture.inSquad'));
     } catch (err) {
-      message.error(apiErrorMessage(err, 'Maça katılamadın.'));
+      message.error(apiErrorMessage(err, t('social:feed.fixture.joinFailed')));
     } finally {
       setBusy(false);
     }
@@ -94,7 +98,7 @@ function MiniFixture({ match, showJoin }) {
       <div className="mb-mini-fixture__body">
         <strong>{match.matchName}</strong>
         <span>
-          <EnvironmentOutlined /> {match.stadiumName || 'Halı saha'} · {date.format('DD MMM, HH:mm')}
+          <EnvironmentOutlined /> {match.stadiumName || t('social:feed.fixture.defaultVenue')} · {date.format('DD MMM, HH:mm')}
         </span>
       </div>
       {showJoin && !past && (
@@ -102,7 +106,7 @@ function MiniFixture({ match, showJoin }) {
           <span className="mb-chip is-live">{joined}</span>
         ) : (
           <Button type="primary" size="small" loading={busy} onClick={join}>
-            Katıl
+            {t('social:feed.fixture.join')}
           </Button>
         )
       )}
@@ -111,39 +115,48 @@ function MiniFixture({ match, showJoin }) {
 }
 
 function ActivityCard({ item, me }) {
+  const { t } = useTranslation();
   const meta = TYPE_META[item.type] || { icon: <ArrowRightOutlined />, className: '' };
   const actor = <PlayerLink player={item.actor} className="mb-activity__actor" />;
   const isMine = item.actor?.playerId === me?.playerId;
+  // Etkinlik cümleleri: <actor/> ve <match/> yer tutucuları çeviri metnine yerleştirilir
+  const sentence = (key, extraComponents, values) => (
+    <Trans
+      i18nKey={`social:feed.activity.${key}`}
+      values={values}
+      components={{ actor, match: <MatchLink match={item.match} />, ...extraComponents }}
+    />
+  );
 
   let headline;
   let body = null;
 
   switch (item.type) {
     case ACTIVITY.MATCH_CREATED:
-      headline = <>{actor} yeni bir maç kurdu</>;
+      headline = sentence('matchCreated');
       body = item.match && <MiniFixture match={item.match} showJoin={!isMine} />;
       break;
     case ACTIVITY.JOINED_MATCH:
-      headline = <>{actor} <MatchLink match={item.match} /> maçının kadrosuna girdi</>;
+      headline = sentence('joinedMatch');
       body = item.match && <MiniFixture match={item.match} showJoin={!isMine} />;
       break;
     case ACTIVITY.SCORED:
-      headline = <>{actor}, <MatchLink match={item.match} /> maçında fileleri havalandırdı</>;
+      headline = sentence('scored');
       body = (
         <div className="mb-activity__goals">
-          <span className="mb-activity__ball" role="img" aria-label="gol">⚽</span>
+          <span className="mb-activity__ball" role="img" aria-label={t('social:feed.goalAria')}>⚽</span>
           <span className="mb-activity__big">×{item.value || 1}</span>
           <span className="mb-activity__goals-text">
-            {item.value > 2 ? 'Hat-trick!' : item.value === 2 ? 'Çift vuruş' : 'Gol'}
+            {item.value > 2 ? t('social:feed.hatTrick') : item.value === 2 ? t('social:feed.brace') : t('social:feed.goal')}
             {item.match && item.match.homeScore != null && (
-              <small>Maç sonucu {item.match.homeScore}-{item.match.awayScore}</small>
+              <small>{t('social:feed.matchResult', { home: item.match.homeScore, away: item.match.awayScore })}</small>
             )}
           </span>
         </div>
       );
       break;
     case ACTIVITY.MVP_WON:
-      headline = <>{actor}, <MatchLink match={item.match} /> maçının MVP'si seçildi</>;
+      headline = sentence('mvpWon');
       body = (
         <div className="mb-activity__mvp">
           <div className="mb-activity__mvp-avatar">
@@ -151,15 +164,15 @@ function ActivityCard({ item, me }) {
             <PlayerAvatar player={item.actor} size={64} />
           </div>
           <div>
-            <span className="mb-activity__mvp-label">Maçın oyuncusu</span>
+            <span className="mb-activity__mvp-label">{t('social:feed.playerOfTheMatch')}</span>
             <strong>{fullName(item.actor)}</strong>
-            {item.value > 0 && <small>{item.value} oy aldı</small>}
+            {item.value > 0 && <small>{t('social:feed.votesReceived', { count: item.value })}</small>}
           </div>
         </div>
       );
       break;
     case ACTIVITY.TEAM_CREATED:
-      headline = <>{actor} yeni bir takım kurdu</>;
+      headline = sentence('teamCreated');
       body = item.team && (
         <div className="mb-activity__team">
           <span className="mb-activity__team-logo">{(item.team.teamName || '?').charAt(0).toUpperCase()}</span>
@@ -170,11 +183,9 @@ function ActivityCard({ item, me }) {
     case ACTIVITY.FOLLOWED: {
       const target = item.target;
       const targetIsMe = target?.playerId === me?.playerId;
-      headline = (
-        <>
-          {actor}, {targetIsMe ? <strong>seni</strong> : <><PlayerLink player={target} />{accusative(fullName(target))}</>} takip etmeye başladı
-        </>
-      );
+      headline = targetIsMe
+        ? sentence('followedYou', { b: <strong /> })
+        : sentence('followed', { target: <PlayerLink player={target} /> }, { suffix: accusative(fullName(target)) });
       body = target && !targetIsMe && (
         <div className="mb-activity__person">
           <PlayerAvatar player={target} size={40} />
@@ -188,19 +199,19 @@ function ActivityCard({ item, me }) {
       break;
     }
     case ACTIVITY.TOURNAMENT_WON:
-      headline = <>{actor} bir turnuva kazandı</>;
+      headline = sentence('tournamentWon');
       body = (
         <div className="mb-activity__trophy">
           <TrophyFilled />
           <div>
-            <span>Şampiyon</span>
+            <span>{t('social:feed.champion')}</span>
             <strong>{item.team?.teamName || fullName(item.actor)}</strong>
           </div>
         </div>
       );
       break;
     default:
-      headline = <>{actor} bir şeyler yaptı</>;
+      headline = sentence('default');
   }
 
   return (
@@ -222,8 +233,9 @@ function ActivityCard({ item, me }) {
 
 function Suggestions({ items, loading, prominent }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   if (loading) return <Skeleton active avatar paragraph={{ rows: 3 }} />;
-  if (!items.length) return <EmptyState description="Şimdilik önerimiz yok" />;
+  if (!items.length) return <EmptyState description={t('social:feed.noSuggestions')} />;
   return (
     <div className={`mb-suggest ${prominent ? 'is-prominent' : ''}`}>
       {items.map((p) => (
@@ -233,9 +245,9 @@ function Suggestions({ items, loading, prominent }) {
             <PlayerLink player={p} />
             <small>
               {p.playedTogether > 0
-                ? `${p.playedTogether} maç birlikte oynadınız`
+                ? t('social:feed.playedTogether', { count: p.playedTogether })
                 : p.followsMe
-                ? 'Seni takip ediyor'
+                ? t('social:friends.followsYou')
                 : `@${p.userName}`}
             </small>
           </div>
@@ -248,6 +260,7 @@ function Suggestions({ items, loading, prominent }) {
 
 export default function Feed() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const me = getCurrentUser();
   const [items, setItems] = useState([]);
@@ -265,11 +278,11 @@ export default function Feed() {
       setItems(data);
       setHasMore(data.length >= PAGE);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Akış yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('social:feed.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [message]);
+  }, [message, t]);
 
   const loadSide = useCallback(() => {
     socialApi
@@ -311,7 +324,7 @@ export default function Feed() {
       });
       setHasMore(data.length >= PAGE);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Daha fazla yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('social:feed.loadMoreFailed')));
     } finally {
       setMore(false);
     }
@@ -323,13 +336,13 @@ export default function Feed() {
   return (
     <>
       <PageHeader
-        eyebrow="Soyunma odası"
-        title="Akış"
+        eyebrow={t('social:feed.eyebrow')}
+        title={t('social:feed.title')}
         icon={<FireOutlined />}
-        subtitle="Takip ettiklerin sahada neler yapıyor, hepsi burada."
+        subtitle={t('social:feed.subtitle')}
         extra={
           <Button icon={<ReloadOutlined />} onClick={load} loading={loading && items.length > 0}>
-            Yenile
+            {t('common:actions.refresh')}
           </Button>
         }
       />
@@ -348,16 +361,16 @@ export default function Feed() {
             <Card className="mb-feed-empty">
               <div className="mb-feed-empty__intro">
                 <UserAddOutlined className="mb-feed-empty__icon" />
-                <h3>{notFollowing ? 'Akışın şimdilik sessiz' : 'Henüz hareket yok'}</h3>
+                <h3>{notFollowing ? t('social:feed.empty.notFollowingTitle') : t('social:feed.empty.quietTitle')}</h3>
                 <p>
                   {notFollowing
-                    ? 'Birkaç oyuncuyu takip et; kurdukları maçlar, attıkları goller ve MVP ödülleri burada akmaya başlasın.'
-                    : 'Takip ettiklerin maç kurdukça, gol attıkça burası dolacak. Bu arada birkaç oyuncu daha ekleyebilirsin.'}
+                    ? t('social:feed.empty.notFollowingText')
+                    : t('social:feed.empty.quietText')}
                 </p>
               </div>
               <Suggestions items={suggestions} loading={sLoading} prominent />
               <Button type="primary" block style={{ marginTop: 16 }} onClick={() => navigate('/friends?tab=discover')}>
-                Daha fazla oyuncu keşfet
+                {t('social:feed.discoverMore')}
               </Button>
             </Card>
           ) : (
@@ -370,11 +383,11 @@ export default function Feed() {
               {hasMore && (
                 <div className="mb-feed-more">
                   <Button size="large" loading={more} onClick={loadMore}>
-                    Daha fazla
+                    {t('social:feed.loadMore')}
                   </Button>
                 </div>
               )}
-              {!hasMore && items.length > 5 && <div className="mb-feed-end">Hepsi bu kadar. Sahaya çıkma vakti!</div>}
+              {!hasMore && items.length > 5 && <div className="mb-feed-end">{t('social:feed.end')}</div>}
             </>
           )}
         </Col>
@@ -383,10 +396,10 @@ export default function Feed() {
         <Col xs={24} xl={8}>
           <div className="mb-feed-side">
             <Card
-              title="Kimi takip etmeli?"
+              title={t('social:feed.whoToFollow')}
               extra={
                 <Button type="link" onClick={() => navigate('/friends?tab=discover')}>
-                  Keşfet
+                  {t('social:friends.tabs.discover')}
                 </Button>
               }
             >

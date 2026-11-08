@@ -1,0 +1,209 @@
+{
+  "reportReasons": {
+    "spam": "Spam / reklam",
+    "harassment": "Hakaret veya taciz",
+    "fakeAccount": "Sahte hesap",
+    "noShow": "Sürekli maça gelmiyor",
+    "other": "Diğer"
+  },
+  "follow": {
+    "nowFriends": "{{name}} ile artık arkadaşsınız.",
+    "unfollow": "Takibi bırak",
+    "friends": "Arkadaşsınız",
+    "following": "Takiptesin",
+    "followBack": "Geri takip et",
+    "follow": "Takip et"
+  },
+  "friends": {
+    "eyebrow": "Topluluk",
+    "title": "Arkadaşlar",
+    "subtitle": "Takip et, geri takip edilince arkadaş olursunuz. Arkadaşlarınla kolayca mesajlaş ve maça çağır.",
+    "reason": {
+      "playedTogether_one": "{{count}} maçta birlikte oynadınız",
+      "playedTogether_other": "{{count}} maçta birlikte oynadınız",
+      "followedByFollowing": "Takip ettiklerin de takip ediyor"
+    },
+    "followsYou": "Seni takip ediyor",
+    "playerScore": "Oyuncu puanı",
+    "friend": "Arkadaş",
+    "matchesTogether_one": "{{count}} maç birlikte",
+    "matchesTogether_other": "{{count}} maç birlikte",
+    "sendMessage": "Mesaj gönder",
+    "loadFailed": "Liste yüklenemedi.",
+    "searchFailed": "Arama yapılamadı.",
+    "discoverPlayers": "Oyuncu keşfet",
+    "tabs": {
+      "friends_one": "Arkadaşlar ({{count}})",
+      "friends_other": "Arkadaşlar ({{count}})",
+      "following_one": "Takip ettiklerim ({{count}})",
+      "following_other": "Takip ettiklerim ({{count}})",
+      "followers_one": "Takipçilerim ({{count}})",
+      "followers_other": "Takipçilerim ({{count}})",
+      "discover": "Keşfet"
+    },
+    "notFollowedBackHint": "Geri takip etmediklerin var",
+    "filterPlaceholder": "Listede ara",
+    "notFollowedBackNote_one": "{{count}} takipçini henüz geri takip etmiyorsun. Geri takip edersen arkadaş olursunuz.",
+    "notFollowedBackNote_other": "{{count}} takipçini henüz geri takip etmiyorsun. Geri takip edersen arkadaş olursunuz.",
+    "discoverPlaceholder": "İsim veya kullanıcı adıyla oyuncu ara",
+    "suggestionsTitle": "Senin için öneriler",
+    "empty": {
+      "noMatchingFriends": "Eşleşen arkadaş yok.",
+      "noFriends": "Henüz arkadaşın yok. Birini takip et, o da seni takip edince arkadaş olursunuz.",
+      "noMatchingPlayers": "Eşleşen oyuncu yok.",
+      "noFollowing": "Henüz kimseyi takip etmiyorsun.",
+      "noMatchingFollowers": "Eşleşen takipçi yok.",
+      "noFollowers": "Henüz takipçin yok.",
+      "noSearchResults": "\"{{query}}\" için oyuncu bulunamadı.",
+      "noSuggestions": "Şimdilik öneri yok. Birkaç maça katıl, öneriler gelsin."
+    }
+  },
+  "profile": {
+    "eyebrow": "Oyuncu kartı",
+    "loadFailed": "Profil yüklenemedi.",
+    "notFound": {
+      "title": "Oyuncu bulunamadı",
+      "subtitle": "Bu oyuncu yok ya da profiline erişemiyorsun."
+    },
+    "followList": {
+      "hidden": "Bu oyuncu listelerini gizli tutuyor.",
+      "followersTitle": "{{name}} — Takipçiler",
+      "followingTitle": "{{name}} — Takip ettikleri",
+      "noFollowers": "Henüz takipçisi yok.",
+      "noFollowing": "Henüz kimseyi takip etmiyor."
+    },
+    "block": {
+      "confirmTitle": "{{name}} engellensin mi?",
+      "effectFollows": "Aranızdaki tüm takipler (iki yönlü) kaldırılır.",
+      "effectVisibility": "Birbirinizi listelerde, aramada ve akışta görmezsiniz.",
+      "effectContact": "Sana mesaj, takip isteği ya da davet gönderemez.",
+      "effectUndo": "Engeli istediğin zaman Ayarlar'dan kaldırabilirsin.",
+      "block": "Engelle",
+      "blocked": "{{name}} engellendi.",
+      "unblocked": "Engel kaldırıldı.",
+      "unblock": "Engeli kaldır",
+      "blockedChip": "Engellendi",
+      "alertTitle": "Bu oyuncuyu engelledin",
+      "alertDescription": "Birbirinize mesaj, takip ya da davet gönderemezsiniz."
+    },
+    "report": {
+      "action": "Şikayet et",
+      "success": "Şikayetin alındı, teşekkürler. Ekibimiz inceleyecek.",
+      "title": "{{name}} adlı oyuncuyu şikayet et",
+      "hint": "Neden şikayet ediyorsun? Şikayetin gizli tutulur.",
+      "detailsPlaceholder": "Eklemek istediğin bir detay var mı? (isteğe bağlı)"
+    },
+    "followersCount_one": "<b>{{count}}</b> takipçi",
+    "followersCount_other": "<b>{{count}}</b> takipçi",
+    "followingCount_one": "<b>{{count}}</b> takip",
+    "followingCount_other": "<b>{{count}}</b> takip",
+    "age_one": "{{count}} yaş",
+    "age_other": "{{count}} yaş",
+    "height": "{{value}} cm",
+    "weight": "{{value}} kg",
+    "overallRating": "Genel puan",
+    "friendsOnlyMessages": "Bu oyuncu sadece arkadaşlarından mesaj kabul ediyor",
+    "locked": {
+      "title": "Bu oyuncu istatistiklerini gizli tutuyor",
+      "description": "Maçlarını ve takımlarını sadece izin verdiği kişiler görebilir."
+    },
+    "stats": {
+      "matches": "Maç",
+      "goals": "Gol",
+      "assists": "Asist",
+      "mvp": "MVP",
+      "avgRating_one": "Ort. puan ({{count}})",
+      "avgRating_other": "Ort. puan ({{count}})"
+    },
+    "recentMatches": "Son maçlar",
+    "noRecentMatches": "Henüz oynanmış maçı yok.",
+    "resultShort": {
+      "win": "G",
+      "loss": "M",
+      "draw": "B"
+    },
+    "together": {
+      "count_one": "Birlikte {{count}} maç",
+      "count_other": "Birlikte {{count}} maç",
+      "played": "oynadınız",
+      "none": "Henüz birlikte oynamadınız",
+      "cta": "Bir maça birlikte katılın!"
+    },
+    "teams": "Takımları",
+    "noTeams": "Henüz bir takımda değil.",
+    "reliabilitySummary": "Son 10: {{attended}} geldi · {{late}} geç iptal · {{noShow}} gelmedi"
+  },
+  "feed": {
+    "eyebrow": "Soyunma odası",
+    "title": "Akış",
+    "subtitle": "Takip ettiklerin sahada neler yapıyor, hepsi burada.",
+    "aMatch": "bir maç",
+    "fixture": {
+      "joined": "Maça katıldın.",
+      "onBench": "Yedektesin",
+      "inSquad": "Kadrodasın",
+      "joinFailed": "Maça katılamadın.",
+      "defaultVenue": "Halı saha",
+      "join": "Katıl"
+    },
+    "activity": {
+      "matchCreated": "<actor/> yeni bir maç kurdu",
+      "joinedMatch": "<actor/> <match/> maçının kadrosuna girdi",
+      "scored": "<actor/>, <match/> maçında fileleri havalandırdı",
+      "mvpWon": "<actor/>, <match/> maçının MVP'si seçildi",
+      "teamCreated": "<actor/> yeni bir takım kurdu",
+      "followedYou": "<actor/>, <b>seni</b> takip etmeye başladı",
+      "followed": "<actor/>, <target/>{{suffix}} takip etmeye başladı",
+      "tournamentWon": "<actor/> bir turnuva kazandı",
+      "default": "<actor/> bir şeyler yaptı"
+    },
+    "goalAria": "gol",
+    "hatTrick": "Hat-trick!",
+    "brace": "Çift vuruş",
+    "goal": "Gol",
+    "matchResult": "Maç sonucu {{home}}-{{away}}",
+    "playerOfTheMatch": "Maçın oyuncusu",
+    "votesReceived_one": "{{count}} oy aldı",
+    "votesReceived_other": "{{count}} oy aldı",
+    "champion": "Şampiyon",
+    "noSuggestions": "Şimdilik önerimiz yok",
+    "playedTogether_one": "{{count}} maç birlikte oynadınız",
+    "playedTogether_other": "{{count}} maç birlikte oynadınız",
+    "loadFailed": "Akış yüklenemedi.",
+    "loadMoreFailed": "Daha fazla yüklenemedi.",
+    "empty": {
+      "notFollowingTitle": "Akışın şimdilik sessiz",
+      "quietTitle": "Henüz hareket yok",
+      "notFollowingText": "Birkaç oyuncuyu takip et; kurdukları maçlar, attıkları goller ve MVP ödülleri burada akmaya başlasın.",
+      "quietText": "Takip ettiklerin maç kurdukça, gol attıkça burası dolacak. Bu arada birkaç oyuncu daha ekleyebilirsin."
+    },
+    "discoverMore": "Daha fazla oyuncu keşfet",
+    "loadMore": "Daha fazla",
+    "end": "Hepsi bu kadar. Sahaya çıkma vakti!",
+    "whoToFollow": "Kimi takip etmeli?"
+  },
+  "leaderboard": {
+    "eyebrow": "Sezon tablosu",
+    "title": "Sıralama",
+    "subtitle": "Maç sonrası puanlar, goller ve MVP oylarıyla belirlenir.",
+    "loadFailed": "Sıralama yüklenemedi.",
+    "empty": "Henüz puanlanmış maç yok. İlk maçını oyna, tabloya gir!",
+    "sort": {
+      "score": "Puan",
+      "goals": "Gol",
+      "mvp": "MVP",
+      "matches": "Maç"
+    },
+    "rankLine": "{{matches}} maç · {{goals}} gol · {{assists}} asist",
+    "podiumLine": "{{matches}} maç · {{goals}} gol · {{mvp}} MVP",
+    "columns": {
+      "player": "Oyuncu",
+      "matches": "Maç",
+      "goals": "Gol",
+      "assists": "Asist",
+      "mvp": "MVP",
+      "avg": "Ort.",
+      "score": "Puan"
+    }
+  }
+}

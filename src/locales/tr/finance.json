@@ -1,0 +1,171 @@
+{
+  "expenseCategories": {
+    "staff": "Personel",
+    "rent": "Kira",
+    "electricity": "Elektrik",
+    "water": "Su",
+    "naturalGas": "Doğalgaz",
+    "maintenance": "Bakım-onarım",
+    "supplies": "Malzeme",
+    "tax": "Vergi",
+    "advertising": "Reklam",
+    "other": "Diğer"
+  },
+  "percent": "%{{value}}",
+  "income": "Gelir",
+  "expense": "Gider",
+  "netProfit": "Net kâr",
+  "unpaid": "Tahsil edilmemiş",
+  "source": {
+    "match": "Uygulama maçı",
+    "manual": "Harici rezervasyon",
+    "expense": "Gider",
+    "manualShort": "Harici",
+    "app": "Uygulama"
+  },
+  "filters": {
+    "unpaidWithCount": "Tahsil edilmemiş ({{count}})"
+  },
+  "delta": {
+    "noPrevious": "Geçen ay verisi yok",
+    "vsLastMonth": "geçen aya göre"
+  },
+  "csv": {
+    "date": "Tarih",
+    "time": "Saat",
+    "type": "Tür",
+    "source": "Kaynak",
+    "description": "Açıklama",
+    "category": "Kategori",
+    "pitch": "Saha",
+    "amount": "Tutar (TL)",
+    "paymentStatus": "Ödeme durumu",
+    "paid": "Ödendi",
+    "unpaid": "Ödenmedi",
+    "venueFallback": "tesis",
+    "fileName": "gelir-gider-{{slug}}-{{month}}.csv"
+  },
+  "page": {
+    "title": "Gelir & Gider",
+    "subtitle": "Aylık gelirinizi, giderlerinizi ve net kârınızı tek ekranda takip edin.",
+    "prevMonth": "Önceki ay",
+    "nextMonth": "Sonraki ay",
+    "thisMonth": "Bu ay",
+    "addExpense": "Gider ekle"
+  },
+  "messages": {
+    "expenseDeleted": "Gider silindi.",
+    "expenseDeleteFailed": "Gider silinemedi."
+  },
+  "table": {
+    "date": "Tarih",
+    "type": "Tür",
+    "source": "Kaynak",
+    "description": "Açıklama",
+    "amount": "Tutar",
+    "payment": "Ödeme",
+    "received": "Alındı",
+    "notReceived": "Alınmadı",
+    "deleteTitle": "Gideri sil",
+    "deleteDescription": "Bu gider kaydı kalıcı olarak silinecek. Emin misiniz?"
+  },
+  "kpi": {
+    "incomeSplit": "Uygulama {{matches}} · Harici {{manual}}",
+    "categories_one": "{{count}} kategori",
+    "categories_other": "{{count}} kategori",
+    "margin": "Kâr marjı <b>{{value}}</b>",
+    "unpaidTitle": "Ödemesi alınmamış harici rezervasyonları göster",
+    "unpaidList_one": "{{count}} harici rezervasyon · listele →",
+    "unpaidList_other": "{{count}} harici rezervasyon · listele →",
+    "noPending": "Bekleyen ödeme yok",
+    "expected": "Beklenen gelir",
+    "expectedHint": "Henüz oynanmamış onaylı maçlar ve harici rezervasyonlar"
+  },
+  "mini": {
+    "matches_one": "<b>{{count}}</b> maç",
+    "matches_other": "<b>{{count}}</b> maç",
+    "manualBookings_one": "<b>{{count}}</b> harici rezervasyon",
+    "manualBookings_other": "<b>{{count}}</b> harici rezervasyon",
+    "hoursSold": "<b>{{hours}}</b> saat satıldı",
+    "avgPerHour": "Saat başı ortalama <b>{{value}}</b>"
+  },
+  "pitchHours": "{{hours}} saat",
+  "cards": {
+    "last12Months": "Son 12 ay",
+    "noMonthlyData": "Henüz aylık veri yok",
+    "monthlyHint": "Bir aya tıklayarak o ayın ayrıntılarını görebilirsiniz.",
+    "dailyTitle": "Günlük akış · {{month}}",
+    "dailyHint": "Gelir çizginin üstünde, gider altında gösterilir.",
+    "incomeDistribution": "Gelir dağılımı",
+    "bySource": "Kaynağa göre",
+    "byPitch": "Sahaya göre",
+    "noPitchIncome": "Bu ay sahalardan gelir oluşmadı.",
+    "expenseDistribution": "Gider dağılımı",
+    "copyFromLastMonth": "Geçen aydan kopyala",
+    "totalExpense": "Toplam gider",
+    "noExpenses": "Bu ay için gider girilmemiş",
+    "movements": "Hareketler",
+    "searchPlaceholder": "Açıklama, kategori ya da saha ara",
+    "downloadCsv": "CSV indir",
+    "noMatchingMovements": "Bu filtreye uyan hareket yok",
+    "movementCount_one": "{{count}} hareket",
+    "movementCount_other": "{{count}} hareket",
+    "net": "Net {{value}}"
+  },
+  "empty": {
+    "noRecords": "{{month}} için henüz gelir ya da gider kaydı yok",
+    "explanation": "Geliriniz otomatik hesaplanır: <b>onaylanmış ve oynanmış</b> uygulama maçları ile <b>ödemesi alınmış</b> harici rezervasyonlar, maçın oynandığı aya yazılır. Giderlerinizi (kira, fatura, personel…) buradan ekleyerek net kârınızı görebilirsiniz."
+  },
+  "charts": {
+    "monthlyAria": "Son 12 ayın gelir, gider ve net kâr grafiği",
+    "dailyAria": "Seçili ayın günlük gelir ve gider grafiği",
+    "clickToSelect": "{{month}}.{{year}} — seçmek için tıklayın",
+    "difference": "Fark",
+    "sourceAria": "Gelirin kaynağa göre dağılımı",
+    "sourceLabel": {
+      "matches": "Uygulama maçları",
+      "manual": "Harici rezervasyonlar"
+    }
+  },
+  "expenseModal": {
+    "titleEdit": "Gideri düzenle",
+    "titleAdd": "Gider ekle",
+    "updated": "Gider güncellendi.",
+    "added": "Gider eklendi.",
+    "saveFailed": "Gider kaydedilemedi.",
+    "quickAdd": "Hızlı ekle",
+    "quick": {
+      "rent": { "label": "Kira", "description": "Aylık kira" },
+      "electricity": { "label": "Elektrik faturası", "description": "Elektrik faturası" },
+      "water": { "label": "Su faturası", "description": "Su faturası" },
+      "naturalGas": { "label": "Doğalgaz faturası", "description": "Doğalgaz faturası" },
+      "staff": { "label": "Personel maaşı", "description": "Personel maaşı" },
+      "maintenance": { "label": "Saha bakımı", "description": "Saha bakımı" }
+    },
+    "date": "Tarih",
+    "dateRequired": "Tarih seçin.",
+    "category": "Kategori",
+    "categoryRequired": "Kategori seçin.",
+    "categoryPlaceholder": "Kategori seçin",
+    "amount": "Tutar",
+    "amountRequired": "Tutar girin.",
+    "amountPositive": "Tutar sıfırdan büyük olmalı.",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "Örn. Kasım ayı elektrik faturası",
+    "saveChanges": "Değişiklikleri kaydet",
+    "submitAdd": "Gideri ekle"
+  },
+  "copyModal": {
+    "title": "Geçen aydan kopyala",
+    "loadFailed": "Geçen ayın giderleri alınamadı.",
+    "copied_one": "{{count}} gider {{month}} ayına kopyalandı.",
+    "copied_other": "{{count}} gider {{month}} ayına kopyalandı.",
+    "copyFailed_one": "{{count}} gider kopyalanamadı.",
+    "copyFailed_other": "{{count}} gider kopyalanamadı.",
+    "intro": "{{prev}} giderlerinden tekrar edenleri seçin; {{month}} ayına aynı günle eklenir.",
+    "empty": "Geçen ay kayıtlı gider yok",
+    "summary_one": "{{count}} kalem · {{total}}",
+    "summary_other": "{{count}} kalem · {{total}}",
+    "copySelected": "Seçilenleri kopyala"
+  }
+}

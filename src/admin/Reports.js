@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { App, Badge, Button, Card, Popconfirm, Segmented, Space, Table, Tooltip, Typography } from 'antd';
 import { CheckOutlined, FlagOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { adminSocialApi, REPORT_REASONS } from '../api/social';
+import i18n from '../i18n';
 import { EmptyState, PageHeader, PlayerAvatar } from '../ui';
 import { apiErrorMessage, formatDateTime, fromNow, fullName } from '../utils/format';
 
@@ -10,9 +12,15 @@ const { Text } = Typography;
 const reasonLabel = (value) => REPORT_REASONS.find((r) => r.value === value)?.label || value || '-';
 
 function PlayerCell({ player, count }) {
+  const { t } = useTranslation();
   return (
     <Space size={10}>
-      <Badge count={count} size="small" offset={[-4, 4]} title={count ? `Toplam ${count} şikayet` : undefined}>
+      <Badge
+        count={count}
+        size="small"
+        offset={[-4, 4]}
+        title={count ? t('admin:reports.totalCount', { count }) : undefined}
+      >
         <PlayerAvatar player={player} size={36} />
       </Badge>
       <Space direction="vertical" size={0}>
@@ -30,6 +38,7 @@ function PlayerCell({ player, count }) {
 /** Oyuncu şikayetleri */
 export default function Reports() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [status, setStatus] = useState(0);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +49,7 @@ export default function Reports() {
     adminSocialApi
       .reports(status)
       .then((list) => setReports(list || []))
-      .catch((e) => message.error(apiErrorMessage(e, 'Şikayetler yüklenemedi.')))
+      .catch((e) => message.error(apiErrorMessage(e, i18n.t('admin:reports.loadFailed'))))
       .finally(() => setLoading(false));
   }, [status, message]);
 
@@ -52,10 +61,10 @@ export default function Reports() {
     setBusy(reportId);
     try {
       await adminSocialApi.resolve(reportId);
-      message.success('Şikayet incelendi olarak işaretlendi.');
+      message.success(t('admin:reports.resolved'));
       setReports((list) => list.filter((r) => r.reportId !== reportId));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Şikayet güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('admin:reports.updateFailed')));
     } finally {
       setBusy(null);
     }
@@ -63,24 +72,24 @@ export default function Reports() {
 
   const columns = [
     {
-      title: 'Şikayet edilen',
+      title: t('admin:reports.columns.reported'),
       key: 'reported',
       render: (_, r) => <PlayerCell player={r.reported} count={r.reportedCount} />,
     },
     {
-      title: 'Şikayet eden',
+      title: t('admin:reports.columns.reporter'),
       key: 'reporter',
       render: (_, r) => <PlayerCell player={r.reporter} />,
     },
     {
-      title: 'Sebep',
+      title: t('admin:reports.columns.reason'),
       dataIndex: 'reason',
       filters: REPORT_REASONS.map((x) => ({ text: x.label, value: x.value })),
       onFilter: (value, r) => r.reason === value,
       render: (v) => <span className="mb-chip is-rejected">{reasonLabel(v)}</span>,
     },
     {
-      title: 'Detay',
+      title: t('admin:reports.columns.details'),
       dataIndex: 'details',
       render: (d) =>
         d ? (
@@ -92,7 +101,7 @@ export default function Reports() {
         ),
     },
     {
-      title: 'Tarih',
+      title: t('admin:reports.columns.date'),
       dataIndex: 'createdAt',
       sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       defaultSortOrder: 'descend',
@@ -105,18 +114,18 @@ export default function Reports() {
     ...(status === 0
       ? [
           {
-            title: 'İşlem',
+            title: t('admin:reports.columns.action'),
             key: 'actions',
             align: 'right',
             render: (_, r) => (
               <Popconfirm
-                title="İncelendi olarak işaretlensin mi?"
-                okText="İşaretle"
-                cancelText="Vazgeç"
+                title={t('admin:reports.resolveConfirm')}
+                okText={t('admin:reports.mark')}
+                cancelText={t('common:actions.cancel')}
                 onConfirm={() => resolve(r.reportId)}
               >
                 <Button size="small" type="primary" icon={<CheckOutlined />} loading={busy === r.reportId}>
-                  İncelendi olarak işaretle
+                  {t('admin:reports.markResolved')}
                 </Button>
               </Popconfirm>
             ),
@@ -128,12 +137,12 @@ export default function Reports() {
   return (
     <>
       <PageHeader
-        title="Şikayetler"
-        subtitle="Oyuncuların birbirleri hakkında gönderdiği şikayetler"
+        title={t('admin:reports.title')}
+        subtitle={t('admin:reports.subtitle')}
         icon={<FlagOutlined />}
         extra={
           <Button icon={<ReloadOutlined />} onClick={load} loading={loading}>
-            Yenile
+            {t('common:actions.refresh')}
           </Button>
         }
       />
@@ -143,8 +152,14 @@ export default function Reports() {
             value={status}
             onChange={setStatus}
             options={[
-              { label: status === 0 && !loading ? `Yeni (${reports.length})` : 'Yeni', value: 0 },
-              { label: 'İncelenenler', value: 1 },
+              {
+                label:
+                  status === 0 && !loading
+                    ? t('admin:reports.tabs.newWithCount', { count: reports.length })
+                    : t('admin:reports.tabs.new'),
+                value: 0,
+              },
+              { label: t('admin:reports.tabs.resolved'), value: 1 },
             ]}
           />
         </Space>
@@ -156,7 +171,11 @@ export default function Reports() {
           scroll={{ x: 960 }}
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
           locale={{
-            emptyText: <EmptyState description={status === 0 ? 'Yeni şikayet yok' : 'İncelenmiş şikayet yok'} />,
+            emptyText: (
+              <EmptyState
+                description={status === 0 ? t('admin:reports.emptyNew') : t('admin:reports.emptyResolved')}
+              />
+            ),
           }}
         />
       </Card>

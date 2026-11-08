@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Badge, Button, Drawer, Dropdown, Grid, Layout, Menu, Tooltip, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
 import {
   AppstoreOutlined,
   CalendarOutlined,
+  ControlOutlined,
   EnvironmentOutlined,
   InfoCircleOutlined,
   LogoutOutlined,
@@ -18,7 +20,8 @@ import {
 import { api, logout } from '../api/config';
 import { PlayerAvatar } from '../ui';
 import { fullName, isPast } from '../utils/format';
-import { Brand, useCurrentUser } from './AppLayout';
+import { Brand, useAppBodyClass, useCurrentUser } from './AppLayout';
+import { themeMenuItem } from '../theme/ThemeSwitch';
 import './layout.css';
 
 const { Sider, Header, Content } = Layout;
@@ -52,51 +55,54 @@ export default function AdminLayout() {
   const isMobile = !screens.lg;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
+  useAppBodyClass();
   const pending = usePendingCount();
+  const { t } = useTranslation();
 
   useEffect(() => setMobileNavOpen(false), [location.pathname]);
 
   const items = [
-    { key: BASE, icon: <AppstoreOutlined />, label: 'Genel Bakış' },
+    { key: BASE, icon: <AppstoreOutlined />, label: t('layout:admin.menu.overview') },
     {
       key: `${BASE}/reservations`,
       icon: <ScheduleOutlined />,
       label: (
         <span className="mb-menu-badge">
-          Rezervasyonlar <Badge count={pending} size="small" />
+          {t('layout:admin.menu.reservations')} <Badge count={pending} size="small" />
         </span>
       ),
     },
-    { key: `${BASE}/matches`, icon: <CalendarOutlined />, label: 'Tüm Maçlar' },
-    { key: `${BASE}/reports`, icon: <WarningOutlined />, label: 'Şikayetler' },
-    { key: `${BASE}/businesses`, icon: <ShopOutlined />, label: 'İşletmeler' },
-    { key: `${BASE}/osm`, icon: <GlobalOutlined />, label: 'Aday Tesis Bul' },
+    { key: `${BASE}/matches`, icon: <CalendarOutlined />, label: t('layout:admin.menu.matches') },
+    { key: `${BASE}/reports`, icon: <WarningOutlined />, label: t('layout:admin.menu.reports') },
+    { key: `${BASE}/businesses`, icon: <ShopOutlined />, label: t('layout:admin.menu.businesses') },
+    { key: `${BASE}/osm`, icon: <GlobalOutlined />, label: t('layout:admin.menu.osm') },
+    { key: `${BASE}/parameters`, icon: <ControlOutlined />, label: t('layout:admin.menu.parameters') },
     {
       type: 'group',
-      label: 'Halı Sahalar',
+      label: t('layout:admin.menu.venuesGroup'),
       children: [
-        { key: `${BASE}/stadiums`, icon: <EnvironmentOutlined />, label: 'Halı Saha Listesi' },
-        { key: `${BASE}/stadiums/new`, icon: <PlusCircleOutlined />, label: 'Halı Saha Ekle' },
+        { key: `${BASE}/stadiums`, icon: <EnvironmentOutlined />, label: t('layout:admin.menu.venueList') },
+        { key: `${BASE}/stadiums/new`, icon: <PlusCircleOutlined />, label: t('layout:admin.menu.venueAdd') },
       ],
     },
     {
       type: 'group',
-      label: 'Kurumsal',
+      label: t('layout:admin.menu.corporateGroup'),
       children: [
-        { key: `${BASE}/about`, icon: <InfoCircleOutlined />, label: 'Hakkımızda' },
-        { key: `${BASE}/contact`, icon: <MailOutlined />, label: 'İletişim' },
+        { key: `${BASE}/about`, icon: <InfoCircleOutlined />, label: t('layout:admin.menu.about') },
+        { key: `${BASE}/contact`, icon: <MailOutlined />, label: t('layout:admin.menu.contact') },
       ],
     },
   ];
 
   // En uzun eşleşen menü anahtarı seçili olur
-  const allKeys = [BASE, `${BASE}/reservations`, `${BASE}/matches`, `${BASE}/reports`, `${BASE}/businesses`, `${BASE}/osm`, `${BASE}/stadiums`, `${BASE}/stadiums/new`, `${BASE}/about`, `${BASE}/contact`];
+  const allKeys = [BASE, `${BASE}/reservations`, `${BASE}/matches`, `${BASE}/reports`, `${BASE}/businesses`, `${BASE}/osm`, `${BASE}/parameters`, `${BASE}/stadiums`, `${BASE}/stadiums/new`, `${BASE}/about`, `${BASE}/contact`];
   const path = location.pathname.replace(/\/$/, '');
   const selected = allKeys
     .filter((k) => path.toLowerCase() === k.toLowerCase() || path.toLowerCase().startsWith(`${k.toLowerCase()}/`))
     .sort((a, b) => b.length - a.length)[0] || BASE;
 
-  const brand = <Brand to={BASE} badge="Admin" />;
+  const brand = <Brand to={BASE} badge={t('layout:admin.badge')} />;
 
   const menu = (
     <Menu
@@ -110,10 +116,12 @@ export default function AdminLayout() {
 
   const userMenu = {
     items: [
+      themeMenuItem(),
+      { type: 'divider' },
       {
         key: 'logout',
         icon: <LogoutOutlined />,
-        label: 'Çıkış yap',
+        label: t('layout:userMenu.logout'),
         danger: true,
         onClick: () => {
           logout();
@@ -138,7 +146,8 @@ export default function AdminLayout() {
           onClose={() => setMobileNavOpen(false)}
           width={260}
           closable={false}
-          styles={{ body: { padding: 0, background: '#05080e' } }}
+          rootClassName="mb-nav-drawer"
+          styles={{ body: { padding: 0, background: 'var(--mb-sider-bg)' } }}
         >
           {brand}
           {menu}
@@ -147,16 +156,21 @@ export default function AdminLayout() {
       <Layout>
         <Header className="mb-header">
           <div className="mb-header__left">
-            {isMobile && <Button type="text" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />}
+            {isMobile && (
+              <>
+                <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label={t('layout:header.menuAria')} />
+                <Brand to={BASE} variant="header" />
+              </>
+            )}
           </div>
           <div className="mb-header__right">
-            <Tooltip title="Onay bekleyen rezervasyonlar">
+            <Tooltip title={t('layout:admin.pendingTooltip')}>
               <Badge count={pending} size="small" offset={[-4, 4]}>
                 <Button
                   className="mb-icon-btn"
                   icon={<ScheduleOutlined />}
                   onClick={() => navigate(`${BASE}/reservations`)}
-                  aria-label="Rezervasyonlar"
+                  aria-label={t('layout:admin.reservationsAria')}
                 />
               </Badge>
             </Tooltip>
@@ -166,7 +180,7 @@ export default function AdminLayout() {
                 {!isMobile && (
                   <span className="mb-user-button__text">
                     <Text strong>{fullName(user)}</Text>
-                    <Text type="secondary">Yönetici</Text>
+                    <Text type="secondary">{t('layout:admin.role')}</Text>
                   </span>
                 )}
               </button>

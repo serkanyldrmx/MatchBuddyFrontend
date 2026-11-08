@@ -1,0 +1,35 @@
+{
+  "title": "Kullanım koşulları ve aydınlatma metni",
+  "version": "Sürüm: {{version}}",
+  "back": "Girişe dön",
+  "sections": [
+    {
+      "heading": "1. Hizmet",
+      "paragraphs": [
+        "MatchBuddy; halı saha maçı kurmak, maça oyuncu bulmak, saha rezervasyonu yapmak ve maç sonrası puanlama için bir platformdur. Hizmeti kullanarak bu koşulları kabul etmiş olursunuz."
+      ]
+    },
+    {
+      "heading": "2. Hesap ve davranış",
+      "paragraphs": [
+        "Hesap bilgilerinizin doğruluğundan ve şifrenizin gizliliğinden siz sorumlusunuz.",
+        "Katıldığınız maçlara zamanında gelmeniz beklenir. Son dakika iptalleri ve maça gelmemek güvenilirlik puanınızı düşürür; bu puan maç kurucularına gösterilir. Gerçek bir mazeretiniz varsa uygulamadan maçtan çekilirken mazeretinizi seçebilirsiniz; kurucu mazeretinizi kabul ederse puanınız iade edilir."
+      ]
+    },
+    {
+      "heading": "3. Kişisel verilerin işlenmesi (KVKK aydınlatma metni)",
+      "paragraphs": [
+        "Ad, soyad, kullanıcı adı, e-posta, telefon, profil fotoğrafı, boy/kilo/yaş ve maç geçmişiniz; hesabınızı oluşturmak, maç eşleştirmesi ve takım dengeleme yapmak, rezervasyonları yürütmek ve güvenliği sağlamak amacıyla işlenir.",
+        "Google veya Facebook ile giriş yaparsanız sağlayıcının paylaştığı ad, e-posta ve profil fotoğrafı alınır.",
+        "Verileriniz yalnızca hizmetin gerektirdiği ölçüde, maç kurucuları ve rezervasyon yaptığınız tesislerle paylaşılır. Şifre sıfırlama kodları e-posta veya SMS sağlayıcısı aracılığıyla gönderilir.",
+        "Verilerinize erişme, düzeltilmesini veya silinmesini isteme haklarınız vardır. Verilerinizin bir kopyasını Ayarlar sayfasından indirebilirsiniz."
+      ]
+    },
+    {
+      "heading": "4. Ticari ileti",
+      "paragraphs": [
+        "Kampanya ve duyuru iletileri yalnızca ayrıca onay verdiyseniz gönderilir; onayınızı istediğiniz zaman geri çekebilirsiniz."
+      ]
+    }
+  ]
+}

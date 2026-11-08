@@ -3,11 +3,31 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#070b12" />
+    <script>
+      /* Tema (src/theme/ThemeContext.js ile aynı mantık): React yüklenmeden önce uygula → yanıp sönme olmaz */
+      (function () {
+        var m = null;
+        try { m = localStorage.getItem('mb.theme'); } catch (e) {}
+        if (m !== 'system' && m !== 'light' && m !== 'dark') m = 'dark';
+        var r = m;
+        if (m === 'system') r = window.matchMedia && !window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+        var d = document.documentElement;
+        d.setAttribute('data-theme', r);
+        d.style.colorScheme = r;
+        var t = document.querySelector('meta[name="theme-color"]');
+        if (t) t.setAttribute('content', r === 'light' ? '#f3f6f1' : '#070b12');
+      })();
+    </script>
     <meta name="description" content="Match Buddy — halı saha maçını kur, kadroyu tamamla, maçın yıldızı ol." />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!-- Ana ekrana eklenince uygulama gibi açılır (iOS bildirimleri için gerekli) -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="MatchBuddy" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,9 +35,58 @@
       rel="stylesheet"
     />
     <title>Match Buddy</title>
+    <style>
+      /* React yüklenene kadar gösterilen açılış topu: #root içinde, React ilk render'da kendiliğinden siler */
+      html, body { background: #070b12; }
+      html[data-theme='light'], html[data-theme='light'] body { background: #f3f6f1; }
+      .mb-boot { --mb-boot-glow: 198, 244, 50; --mb-boot-ring: #c6f432; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #070b12; color: #8b9bb0; font: 700 14px/1.2 'Barlow Condensed', 'Inter', system-ui, sans-serif; letter-spacing: 1.4px; text-transform: uppercase; }
+      .mb-boot__ball { position: relative; width: 84px; height: 84px; }
+      .mb-boot__hop { position: absolute; top: 0; left: 12px; width: 60px; height: 60px; animation: mb-boot-hop 0.9s infinite; }
+      .mb-boot__squash { display: block; width: 100%; height: 100%; transform-origin: 50% 100%; animation: mb-boot-squash 0.9s infinite; }
+      .mb-boot__hop svg { display: block; width: 100%; height: 100%; animation: mb-boot-spin 1.8s linear infinite; }
+      .mb-boot__shadow { position: absolute; left: 50%; bottom: 1px; width: 50px; height: 8px; margin-left: -25px; border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--mb-boot-glow), 0.5), rgba(var(--mb-boot-glow), 0.12) 60%, transparent); animation: mb-boot-shadow 0.9s infinite; }
+      html[data-theme='light'] .mb-boot { --mb-boot-glow: 70, 114, 17; --mb-boot-ring: #5d8f12; background: #f3f6f1; color: #4a5a50; }
+      .mb-boot__ring { stroke: var(--mb-boot-ring); }
+      @keyframes mb-boot-hop { 0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.5); } 50% { transform: translateY(18px); animation-timing-function: cubic-bezier(0.1, 0.5, 0.55, 1); } }
+      @keyframes mb-boot-squash { 0%, 40% { transform: scale(1, 1); } 50% { transform: scale(1.16, 0.8); } 60% { transform: scale(0.94, 1.06); } 72%, 100% { transform: scale(1, 1); } }
+      @keyframes mb-boot-shadow { 0%, 100% { transform: scaleX(0.5); opacity: 0.35; } 50% { transform: scaleX(1.05); opacity: 1; } }
+      @keyframes mb-boot-spin { to { transform: rotate(360deg); } }
+      @keyframes mb-boot-pulse { 0%, 100% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1); opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        .mb-boot__hop, .mb-boot__squash, .mb-boot__hop svg, .mb-boot__shadow { animation: none; }
+        .mb-boot__hop { top: 16px; animation: mb-boot-pulse 1.6s ease-in-out infinite; }
+      }
+    </style>
   </head>
   <body>
     <noscript>Match Buddy'yi kullanmak için JavaScript'i etkinleştirin.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <div class="mb-boot" role="status" aria-label="Yükleniyor">
+        <div class="mb-boot__ball">
+          <span class="mb-boot__shadow"></span>
+          <span class="mb-boot__hop">
+            <span class="mb-boot__squash">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <defs>
+                  <clipPath id="mb-boot-clip"><circle cx="50" cy="50" r="47" /></clipPath>
+                  <radialGradient id="mb-boot-shade" cx="36%" cy="30%" r="75%">
+                    <stop offset="55%" stop-color="#0b1220" stop-opacity="0" />
+                    <stop offset="100%" stop-color="#0b1220" stop-opacity="0.38" />
+                  </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="47" fill="#f4f7fb" />
+                <g clip-path="url(#mb-boot-clip)">
+                  <path fill="none" stroke="#1b2433" stroke-width="2.4" stroke-linecap="round" d="M50 35L50 18M64.3 45.4L80.4 40.1M58.8 62.1L68.8 75.9M41.2 62.1L31.2 75.9M35.7 45.4L19.6 40.1M64.3 7.6L85.9 23.3M94.7 50.5L86.4 75.9M63.4 92.7L36.6 92.7M13.6 75.9L5.3 50.5M14.1 23.3L35.7 7.6" />
+                  <path fill="#0b1220" d="M50 35L64.3 45.4L58.8 62.1L41.2 62.1L35.7 45.4ZM50 18L35.7 7.6L41.2 -9.1L58.8 -9.1L64.3 7.6ZM80.4 40.1L85.9 23.3L103.5 23.3L109 40.1L94.7 50.5ZM68.8 75.9L86.4 75.9L91.9 92.7L77.6 103L63.4 92.7ZM31.2 75.9L36.6 92.7L22.4 103L8.1 92.7L13.6 75.9ZM19.6 40.1L5.3 50.5L-9 40.1L-3.5 23.3L14.1 23.3Z" />
+                  <circle cx="50" cy="50" r="47" fill="url(#mb-boot-shade)" />
+                </g>
+                <circle class="mb-boot__ring" cx="50" cy="50" r="47" fill="none" stroke="#c6f432" stroke-width="3.5" />
+              </svg>
+            </span>
+          </span>
+        </div>
+        <span>Yükleniyor…</span>
+      </div>
+    </div>
   </body>
 </html>

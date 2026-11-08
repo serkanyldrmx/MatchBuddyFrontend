@@ -14,6 +14,7 @@ import {
   DatePicker,
   Descriptions,
   Form,
+  Grid,
   Input,
   Modal,
   Popconfirm,
@@ -49,19 +50,22 @@ import {
   StarOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { adminVenuesApi } from '../api/venues';
+import i18n from '../i18n';
 import { colors } from '../theme/theme';
 import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage, formatDate } from '../utils/format';
+import { apiErrorMessage, applyFieldErrors, errorCode, fieldErrorsOf, formErrorMessage, formatDate } from '../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, ACCEPTED_IMAGE_TYPES, prepareImage } from '../utils/image';
+import { usePublicParams } from '../api/parameters';
 import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
+import './AdminResponsive.css';
 import './Businesses.css';
 import OwnerDetailModal from './OwnerDetailModal';
 
 const { Text } = Typography;
 const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
-const MAX_PHOTOS = 10;
-const MAX_PHOTO_MB = 5;
 
 const pinIcon = new L.Icon({
   iconUrl: LocationIcon,
@@ -101,37 +105,32 @@ function parseLocation(location) {
 
 const formatCoords = (pos) => `${Number(pos[0]).toFixed(6)}, ${Number(pos[1]).toFixed(6)}`;
 
-/** Sunucu hata mesajı (400 alan bazlı mesajlar ve ASP.NET ModelState dahil) */
+/** Sunucu hata mesajı: standart mesaj + forma bağlanmayan alan hataları (errors sözlüğü) */
 function serverError(e, fallback) {
-  const data = e?.response?.data;
-  if (data?.errors && typeof data.errors === 'object') {
-    const list = Object.values(data.errors).flat().filter(Boolean);
-    if (list.length) return list.join(' ');
-  }
-  return apiErrorMessage(e, fallback);
+  return formErrorMessage(null, e, fallback);
 }
 
 /** Üyelik durumu */
 export function membershipInfo(o) {
-  if (o.membershipSuspended) return { key: 'suspended', label: 'Askıda', cls: 'is-rejected' };
+  if (o.membershipSuspended) return { key: 'suspended', label: i18n.t('adminVenues:businesses.membership.suspended'), cls: 'is-rejected' };
   if (o.membershipUntil) {
     const until = dayjs(o.membershipUntil);
-    if (until.isBefore(dayjs())) return { key: 'expired', label: 'Süresi doldu', cls: 'is-done' };
+    if (until.isBefore(dayjs())) return { key: 'expired', label: i18n.t('adminVenues:businesses.membership.expired'), cls: 'is-done' };
     const days = Math.ceil(until.diff(dayjs(), 'day', true));
-    if (days < 30) return { key: 'soon', label: `${days} gün kaldı`, cls: 'is-pending' };
+    if (days < 30) return { key: 'soon', label: i18n.t('adminVenues:businesses.membership.daysLeft', { count: days }), cls: 'is-pending' };
   }
-  return { key: 'active', label: 'Aktif', cls: 'is-approved' };
+  return { key: 'active', label: i18n.t('adminVenues:businesses.membership.active'), cls: 'is-approved' };
 }
 
-const ownerName = (o) => o.owner?.name || o.owner?.playerName || o.owner?.userName || 'İşletme';
+const ownerName = (o) => o.owner?.name || o.owner?.playerName || o.owner?.userName || i18n.t('adminVenues:businesses.ownerFallback');
 const ownerContact = (o) => o.owner?.contactName || o.owner?.playerSurname || null;
 
 async function copyText(text, message) {
   try {
     await navigator.clipboard.writeText(text);
-    message.success('Kopyalandı.');
+    message.success(i18n.t('adminVenues:businesses.copied'));
   } catch {
-    message.error('Kopyalanamadı.');
+    message.error(i18n.t('adminVenues:businesses.copyFailed'));
   }
 }
 
@@ -192,18 +191,71 @@ const STEP_FIELDS = [
 ];
 const REQUIRED_FIELDS = ['bizName', 'contactName', 'userName', 'email', 'phoneNumber', 'password', 'venueName', 'city', 'district', 'address', 'location'];
 
-/** Sunucu mesajından ilgili adımı tahmin eder */
-function stepForError(msg) {
-  const m = (msg || '').toLocaleLowerCase('tr');
-  if (m.includes('foto')) return 2;
-  if (['konum', 'adres', 'tesis', 'ilçe', ' il '].some((k) => m.includes(k))) return 1;
-  if (['kullanıcı', 'e-posta', 'eposta', 'email', 'şifre', 'parola', 'telefon', 'üyelik'].some((k) => m.includes(k))) return 0;
+// Sunucu alan adları (CreateOwner model: owner.* / venue.*) → sihirbaz form alanları
+const CREATE_OWNER_FIELD_ALIASES = {
+  'owner.name': 'bizName',
+  'owner.contactName': 'contactName',
+  'owner.userName': 'userName',
+  'owner.email': 'email',
+  'owner.phoneNumber': 'phoneNumber',
+  'owner.password': 'password',
+  'owner.membershipUntil': 'membershipUntil',
+  'venue.name': 'venueName',
+  'venue.city': 'city',
+  'venue.district': 'district',
+  'venue.address': 'address',
+  'venue.location': 'location',
+  'venue.phone': 'venuePhone',
+  'venue.description': 'description',
+};
+
+// Hata kodu → sihirbaz adımı (0 hesap, 1 tesis, 2 fotoğraflar)
+const STEP_BY_CODE = {
+  ADMIN_USERNAME_TAKEN: 0,
+  ADMIN_CREATE_OWNER_FAILED: 0,
+  VENUE_USERNAME_TAKEN: 0,
+  AUTH_USERNAME_TAKEN: 0,
+  AUTH_USERNAME_REQUIRED: 0,
+  AUTH_PASSWORD_REQUIRED: 0,
+  AUTH_PASSWORD_TOO_SHORT: 0,
+  VENUE_OWNER_INFO_REQUIRED: 0,
+  VALIDATION_INVALID_EMAIL: 0,
+  VENUE_INFO_REQUIRED: 1,
+  VENUE_INFO_EMPTY: 1,
+  VENUE_ADDRESS_EMPTY: 1,
+  VENUE_INVALID_LOCATION: 1,
+  VENUE_INVALID_LOCATION_FORMAT: 1,
+  VENUE_LOCATION_REQUIRED: 1,
+  VENUE_PHOTO_REQUIRED: 2,
+  VENUE_PHOTO_LIMIT_EXCEEDED: 2,
+  ADMIN_PHOTO_UPLOAD_FAILED: 2,
+};
+
+/** Hatanın ilgili olduğu sihirbaz adımı: önce hata kodu, sonra alan hataları (errors sözlüğü) */
+function stepForError(e, appliedFields) {
+  const code = errorCode(e);
+  if (code && STEP_BY_CODE[code] != null) return STEP_BY_CODE[code];
+  if (code && /^(MEDIA_|OWNER_PHOTO_)/.test(code)) return 2;
+  const steps = (appliedFields || [])
+    .map((name) => STEP_FIELDS.findIndex((fields) => fields.includes(Array.isArray(name) ? name[0] : name)))
+    .filter((i) => i >= 0);
+  if (steps.length) return Math.min(...steps);
+  const keys = Object.keys(fieldErrorsOf(e) || {}).map((k) => k.toLowerCase());
+  if (keys.some((k) => k.startsWith('photo'))) return 2;
+  if (keys.some((k) => k.startsWith('venue.'))) return 1;
+  if (keys.some((k) => k.startsWith('owner.'))) return 0;
   return null;
 }
 
 function NewBusinessWizard({ open, onClose, onCreated }) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [form] = Form.useForm();
+  // Fotoğraf sınırları: yükleme boyutu herkese açık parametreden; adet (venue.createOwnerMaxPhotos) herkese açık değil → katalog varsayılanı
+  const params = usePublicParams();
+  const MAX_PHOTO_MB = params.get('media.maxUploadMb');
+  const MAX_PHOTOS = params.get('venue.createOwnerMaxPhotos');
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState([]); // { uid, file, url }
   const [photoError, setPhotoError] = useState(null);
@@ -258,10 +310,10 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
         pickPosition(pos);
         setView({ center: pos, zoom: 16 });
       } else {
-        message.warning('Konum bulunamadı. Haritaya tıklayarak seçebilirsiniz.');
+        message.warning(t('adminVenues:businesses.wizard.messages.locationNotFound'));
       }
     } catch {
-      message.error('Konum araması yapılamadı.');
+      message.error(t('adminVenues:businesses.wizard.messages.locationSearchFailed'));
     } finally {
       setSearching(false);
     }
@@ -270,7 +322,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
   const geocodeAddress = () => {
     const { address, district, city: c } = form.getFieldsValue(['address', 'district', 'city']);
     if (!address?.trim()) {
-      message.warning('Önce açık adresi yazın.');
+      message.warning(t('adminVenues:businesses.wizard.messages.enterAddressFirst'));
       return;
     }
     geocode([address, district, c, 'Türkiye'].filter(Boolean).join(', '));
@@ -278,18 +330,18 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
 
   /* Fotoğraflar */
   const beforeUpload = (file) => {
-    const okType = ['image/jpeg', 'image/png'].includes(file.type);
+    const okType = ACCEPTED_IMAGE_TYPES.includes(file.type);
     if (!okType) {
-      message.error(`${file.name}: sadece JPG veya PNG yükleyebilirsiniz.`);
+      message.error(t('adminVenues:businesses.wizard.messages.photoInvalidType', { name: file.name }));
       return false;
     }
     if (file.size / 1024 / 1024 > MAX_PHOTO_MB) {
-      message.error(`${file.name}: dosya ${MAX_PHOTO_MB} MB'tan büyük olamaz.`);
+      message.error(t('adminVenues:businesses.wizard.messages.photoTooLarge', { name: file.name, maxMb: MAX_PHOTO_MB }));
       return false;
     }
     // Çoklu seçimde beforeUpload art arda çağrılır; güncel listeyi ref üzerinden tut
     if (photosRef.current.length >= MAX_PHOTOS) {
-      message.warning(`En fazla ${MAX_PHOTOS} fotoğraf ekleyebilirsiniz: ${file.name} eklenmedi.`);
+      message.warning(t('adminVenues:businesses.wizard.messages.photoLimit', { max: MAX_PHOTOS, name: file.name }));
       return false;
     }
     const nextList = [...photosRef.current, { uid: file.uid, file, url: URL.createObjectURL(file) }];
@@ -320,7 +372,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
     setError(null);
     if (step === 2) {
       if (photos.length < 1) {
-        setPhotoError('En az 1 fotoğraf eklemelisiniz.');
+        setPhotoError(t('adminVenues:businesses.wizard.messages.photoRequired'));
         return;
       }
       setStep(3);
@@ -343,7 +395,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
     }
     if (photos.length < 1) {
       setStep(2);
-      setPhotoError('En az 1 fotoğraf eklemelisiniz.');
+      setPhotoError(t('adminVenues:businesses.wizard.messages.photoRequired'));
       return;
     }
     const model = {
@@ -369,18 +421,19 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await adminVenuesApi.createOwner(
-        model,
-        photos.map((p) => p.file)
-      );
+      // Kırpma yok; sadece tarayıcıda küçült (başarısız olursa orijinal gönderilir)
+      const files = await Promise.all(photos.map((p) => prepareImage(p.file)));
+      const res = await adminVenuesApi.createOwner(model, files);
       if (res && res.success === false) throw Object.assign(new Error(res.message), { response: { data: res } });
       setCreated({ name: model.owner.name, userName: model.owner.userName, password: model.owner.password, email: model.owner.email });
-      message.success('İşletme oluşturuldu.');
+      message.success(t('adminVenues:businesses.wizard.messages.created'));
       onCreated?.();
     } catch (e) {
-      const msg = serverError(e, 'İşletme oluşturulamadı.');
-      setError(msg);
-      const target = stepForError(msg);
+      // Alan hataları ilgili form alanlarının altında; eşleşmeyenler genel mesajda gösterilir
+      const { applied, unmatched } = applyFieldErrors(form, e, { aliases: CREATE_OWNER_FIELD_ALIASES, scroll: false });
+      const base = apiErrorMessage(e, t('adminVenues:businesses.wizard.messages.createFailed'));
+      setError([base, ...unmatched.filter((m) => m !== base)].join(' '));
+      const target = stepForError(e, applied);
       if (target != null) setStep(target);
     } finally {
       setSubmitting(false);
@@ -389,34 +442,34 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
 
   const loginUrl = `${window.location.origin}/`;
   const credentialsText = created
-    ? `MatchBuddy işletme paneli\nGiriş: ${loginUrl}\nKullanıcı adı: ${created.userName}\nGeçici şifre: ${created.password}\nİlk girişte şifrenizi değiştirmenizi öneririz.`
+    ? t('adminVenues:businesses.wizard.credentialsText', { url: loginUrl, userName: created.userName, password: created.password })
     : '';
 
   const footer = created
     ? [
         <Button key="copy" icon={<CopyOutlined />} onClick={() => copyText(credentialsText, message)}>
-          Tümünü kopyala
+          {t('adminVenues:businesses.wizard.copyAll')}
         </Button>,
         <Button key="close" type="primary" onClick={close}>
-          Kapat
+          {t('common:actions.close')}
         </Button>,
       ]
     : [
         <Button key="cancel" onClick={close} disabled={submitting}>
-          Vazgeç
+          {t('common:actions.cancel')}
         </Button>,
         step > 0 && (
           <Button key="back" onClick={() => setStep(step - 1)} disabled={submitting}>
-            Geri
+            {t('common:actions.back')}
           </Button>
         ),
         step < 3 ? (
           <Button key="next" type="primary" onClick={next}>
-            İleri
+            {t('adminVenues:businesses.wizard.next')}
           </Button>
         ) : (
           <Button key="submit" type="primary" icon={<ThunderboltOutlined />} loading={submitting} onClick={submit}>
-            İşletmeyi oluştur
+            {t('adminVenues:businesses.wizard.create')}
           </Button>
         ),
       ].filter(Boolean);
@@ -431,7 +484,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
       width={920}
       title={
         <Space>
-          <ShopOutlined /> Yeni işletme
+          <ShopOutlined /> {t('adminVenues:businesses.wizard.title')}
         </Space>
       }
       footer={footer}
@@ -442,21 +495,21 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
       {created ? (
         <Result
           status="success"
-          title={`${created.name} oluşturuldu`}
-          subTitle="Bu bilgileri işletmeye iletin; şifre bir daha gösterilmeyecek."
+          title={t('adminVenues:businesses.wizard.result.title', { name: created.name })}
+          subTitle={t('adminVenues:businesses.wizard.result.subTitle')}
           extra={
             <div className="mb-biz-credentials">
               <Descriptions column={1} size="small" bordered>
-                <Descriptions.Item label="Giriş adresi">
+                <Descriptions.Item label={t('adminVenues:businesses.wizard.result.loginUrl')}>
                   <Text copyable={{ text: loginUrl }}>{loginUrl}</Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Kullanıcı adı">
+                <Descriptions.Item label={t('adminVenues:businesses.wizard.result.userName')}>
                   <Text copyable>{created.userName}</Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Geçici şifre">
+                <Descriptions.Item label={t('adminVenues:businesses.wizard.result.tempPassword')}>
                   <Text copyable>{created.password}</Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="E-posta">{created.email}</Descriptions.Item>
+                <Descriptions.Item label={t('adminVenues:businesses.wizard.result.email')}>{created.email}</Descriptions.Item>
               </Descriptions>
             </div>
           }
@@ -466,7 +519,13 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
           <Steps
             current={step}
             size="small"
-            items={[{ title: 'İşletme hesabı' }, { title: 'Tesis' }, { title: 'Fotoğraflar' }, { title: 'Özet & oluştur' }]}
+            responsive={false}
+            items={[
+              { title: t('adminVenues:businesses.wizard.steps.account') },
+              { title: t('adminVenues:businesses.wizard.steps.venue') },
+              { title: t('adminVenues:businesses.wizard.steps.photos') },
+              { title: t('adminVenues:businesses.wizard.steps.summary') },
+            ]}
           />
           {error && (
             <Alert type="error" showIcon closable onClose={() => setError(null)} message={error} style={{ marginBottom: 16 }} />
@@ -484,44 +543,55 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
             {step === 0 && (
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Form.Item name="bizName" label="İşletme adı" rules={[{ required: true, whitespace: true, message: 'İşletme adını girin' }]}>
-                    <Input placeholder="Örn. Yeşil Vadi Spor Tesisleri" maxLength={100} />
+                  <Form.Item
+                    name="bizName"
+                    label={t('adminVenues:businesses.wizard.account.bizName')}
+                    rules={[{ required: true, whitespace: true, message: t('adminVenues:businesses.wizard.account.bizNameRequired') }]}
+                  >
+                    <Input placeholder={t('adminVenues:businesses.wizard.account.bizNamePlaceholder')} maxLength={100} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item name="contactName" label="Yetkili kişi" rules={[{ required: true, whitespace: true, message: 'Yetkili kişiyi girin' }]}>
-                    <Input placeholder="Ad Soyad" maxLength={100} />
+                  <Form.Item
+                    name="contactName"
+                    label={t('adminVenues:businesses.wizard.account.contactName')}
+                    rules={[{ required: true, whitespace: true, message: t('adminVenues:businesses.wizard.account.contactNameRequired') }]}
+                  >
+                    <Input placeholder={t('adminVenues:businesses.wizard.account.contactNamePlaceholder')} maxLength={100} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="userName"
-                    label="Kullanıcı adı"
+                    label={t('adminVenues:businesses.wizard.account.userName')}
                     rules={[
-                      { required: true, whitespace: true, message: 'Kullanıcı adını girin' },
-                      { pattern: /^[A-Za-z0-9_.]{3,30}$/, message: '3–30 karakter; harf, rakam, _ ve . kullanılabilir' },
+                      { required: true, whitespace: true, message: t('adminVenues:businesses.wizard.account.userNameRequired') },
+                      { pattern: /^[A-Za-z0-9_.]{3,30}$/, message: t('adminVenues:businesses.wizard.account.userNamePattern') },
                     ]}
                   >
-                    <Input placeholder="isletme_yesilvadi" maxLength={30} autoComplete="off" />
+                    <Input placeholder={t('adminVenues:businesses.wizard.account.userNamePlaceholder')} maxLength={30} autoComplete="off" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="email"
-                    label="E-posta"
+                    label={t('adminVenues:businesses.wizard.account.email')}
                     rules={[
-                      { required: true, message: 'E-posta girin' },
-                      { type: 'email', message: 'Geçerli bir e-posta girin' },
+                      { required: true, message: t('adminVenues:businesses.wizard.account.emailRequired') },
+                      { type: 'email', message: t('adminVenues:businesses.wizard.account.emailInvalid') },
                     ]}
                   >
-                    <Input placeholder="ornek@isletme.com" maxLength={120} autoComplete="off" />
+                    <Input placeholder={t('adminVenues:businesses.wizard.account.emailPlaceholder')} maxLength={120} autoComplete="off" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="phoneNumber"
-                    label="Telefon"
-                    rules={[{ required: true, whitespace: true, message: 'Telefon girin' }, { pattern: /^[0-9+()\s-]{7,20}$/, message: 'Geçerli bir telefon girin' }]}
+                    label={t('adminVenues:businesses.wizard.account.phone')}
+                    rules={[
+                      { required: true, whitespace: true, message: t('adminVenues:businesses.wizard.account.phoneRequired') },
+                      { pattern: /^[0-9+()\s-]{7,20}$/, message: t('adminVenues:businesses.wizard.account.phoneInvalid') },
+                    ]}
                   >
                     <Input placeholder="05xx xxx xx xx" maxLength={20} />
                   </Form.Item>
@@ -529,8 +599,8 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="membershipUntil"
-                    label="Üyelik bitişi"
-                    extra="Boş bırakılırsa süresiz olur"
+                    label={t('adminVenues:businesses.wizard.account.membershipUntil')}
+                    extra={t('adminVenues:businesses.wizard.account.membershipUntilExtra')}
                   >
                     <DatePicker
                       format="DD.MM.YYYY"
@@ -540,17 +610,21 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                   </Form.Item>
                 </Col>
                 <Col xs={24}>
-                  <Form.Item label="Geçici şifre" required extra="İşletme ilk girişten sonra şifresini değiştirebilir.">
+                  <Form.Item
+                    label={t('adminVenues:businesses.wizard.account.tempPassword')}
+                    required
+                    extra={t('adminVenues:businesses.wizard.account.tempPasswordExtra')}
+                  >
                     <Space.Compact style={{ width: '100%' }}>
                       <Form.Item
                         name="password"
                         noStyle
                         rules={[
-                          { required: true, message: 'Şifre oluşturun' },
-                          { min: 8, message: 'En az 8 karakter olmalı' },
+                          { required: true, message: t('adminVenues:businesses.wizard.account.passwordRequired') },
+                          { min: 8, message: t('adminVenues:businesses.wizard.account.passwordMin') },
                         ]}
                       >
-                        <Input.Password placeholder="En az 8 karakter" autoComplete="new-password" />
+                        <Input.Password placeholder={t('adminVenues:businesses.wizard.account.passwordPlaceholder')} autoComplete="new-password" />
                       </Form.Item>
                       <Button
                         icon={<ThunderboltOutlined />}
@@ -559,9 +633,9 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                           form.validateFields(['password']).catch(() => {});
                         }}
                       >
-                        Oluştur
+                        {t('adminVenues:businesses.wizard.account.generate')}
                       </Button>
-                      <Tooltip title="Kopyala">
+                      <Tooltip title={t('adminVenues:businesses.wizard.account.copy')}>
                         <Button
                           icon={<CopyOutlined />}
                           onClick={() => {
@@ -588,56 +662,85 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
             {step === 1 && (
               <Row gutter={16}>
                 <Col xs={24} md={10}>
-                  <Form.Item name="venueName" label="Tesis adı" rules={[{ required: true, whitespace: true, message: 'Tesis adını girin' }]}>
-                    <Input placeholder="Örn. Yeşil Vadi Halı Saha" maxLength={100} />
+                  <Form.Item
+                    name="venueName"
+                    label={t('adminVenues:businesses.wizard.venue.name')}
+                    rules={[{ required: true, whitespace: true, message: t('adminVenues:businesses.wizard.venue.nameRequired') }]}
+                  >
+                    <Input placeholder={t('adminVenues:businesses.wizard.venue.namePlaceholder')} maxLength={100} />
                   </Form.Item>
                   <Row gutter={12}>
                     <Col span={12}>
-                      <Form.Item name="city" label="İl" rules={[{ required: true, message: 'İl seçin' }]}>
+                      <Form.Item
+                        name="city"
+                        label={t('adminVenues:businesses.wizard.venue.city')}
+                        rules={[{ required: true, message: t('adminVenues:businesses.wizard.venue.cityRequired') }]}
+                      >
                         <Select
                           showSearch
                           loading={provincesLoading}
-                          placeholder="İl seçin"
+                          placeholder={t('adminVenues:businesses.wizard.venue.cityPlaceholder')}
                           optionFilterProp="label"
                           options={provinces.map((p) => ({ value: p.name, label: p.name }))}
                         />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
-                      <Form.Item name="district" label="İlçe" rules={[{ required: true, message: 'İlçe seçin' }]}>
+                      <Form.Item
+                        name="district"
+                        label={t('adminVenues:businesses.wizard.venue.district')}
+                        rules={[{ required: true, message: t('adminVenues:businesses.wizard.venue.districtRequired') }]}
+                      >
                         <Select
                           showSearch
                           disabled={!city}
-                          placeholder={city ? 'İlçe seçin' : 'Önce il seçin'}
+                          placeholder={
+                            city ? t('adminVenues:businesses.wizard.venue.districtPlaceholder') : t('adminVenues:businesses.wizard.venue.selectCityFirst')
+                          }
                           optionFilterProp="label"
                           options={districts.map((d) => ({ value: d.name, label: d.name }))}
                         />
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Form.Item name="address" label="Açık adres" rules={[{ required: true, whitespace: true, message: 'Açık adresi girin' }]}>
-                    <Input.TextArea rows={2} placeholder="Mahalle, cadde, no" maxLength={250} />
+                  <Form.Item
+                    name="address"
+                    label={t('adminVenues:businesses.wizard.venue.address')}
+                    rules={[{ required: true, whitespace: true, message: t('adminVenues:businesses.wizard.venue.addressRequired') }]}
+                  >
+                    <Input.TextArea rows={2} placeholder={t('adminVenues:businesses.wizard.venue.addressPlaceholder')} maxLength={250} />
                   </Form.Item>
-                  <Form.Item name="venuePhone" label="Tesis telefonu" rules={[{ pattern: /^[0-9+()\s-]{7,20}$/, message: 'Geçerli bir telefon girin' }]}>
+                  <Form.Item
+                    name="venuePhone"
+                    label={t('adminVenues:businesses.wizard.venue.phone')}
+                    rules={[{ pattern: /^[0-9+()\s-]{7,20}$/, message: t('adminVenues:businesses.wizard.account.phoneInvalid') }]}
+                  >
                     <Input placeholder="0xxx xxx xx xx" maxLength={20} />
                   </Form.Item>
-                  <Form.Item name="description" label="Açıklama">
-                    <Input.TextArea rows={3} placeholder="Tesis hakkında kısa bilgi" maxLength={500} showCount />
+                  <Form.Item name="description" label={t('adminVenues:businesses.wizard.venue.description')}>
+                    <Input.TextArea rows={3} placeholder={t('adminVenues:businesses.wizard.venue.descriptionPlaceholder')} maxLength={500} showCount />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={14}>
                   <div style={{ marginBottom: 12 }}>
                       <Space.Compact style={{ width: '100%', marginBottom: 8 }}>
                         <Input.Search
-                          placeholder="Yer ara (örn. Kadıköy Moda)"
+                          placeholder={t('adminVenues:businesses.wizard.venue.searchPlaceholder')}
                           enterButton={<SearchOutlined />}
                           allowClear
                           loading={searching}
                           onSearch={geocode}
                         />
-                        <Button icon={<AimOutlined />} onClick={geocodeAddress} loading={searching}>
-                          Adresten bul
-                        </Button>
+                        <Tooltip title={isPhone ? t('adminVenues:businesses.wizard.venue.findFromAddress') : undefined}>
+                          <Button
+                            icon={<AimOutlined />}
+                            onClick={geocodeAddress}
+                            loading={searching}
+                            aria-label={t('adminVenues:businesses.wizard.venue.findFromAddress')}
+                          >
+                            {isPhone ? null : t('adminVenues:businesses.wizard.venue.findFromAddress')}
+                          </Button>
+                        </Tooltip>
                       </Space.Compact>
                       <MapContainer center={position || DEFAULT_CENTER} zoom={position ? 16 : 6} className="mb-biz-map">
                         <TileLayer
@@ -652,14 +755,19 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                   </div>
                   <Form.Item
                     name="location"
-                    label="Konum"
+                    label={t('adminVenues:businesses.wizard.venue.location')}
                     rules={[
-                      { required: true, message: 'Haritadan konum seçin' },
-                      { validator: (_, v) => (!v || parseLocation(v) ? Promise.resolve() : Promise.reject(new Error('Geçersiz konum'))) },
+                      { required: true, message: t('adminVenues:businesses.wizard.venue.locationRequired') },
+                      {
+                        validator: (_, v) =>
+                          !v || parseLocation(v)
+                            ? Promise.resolve()
+                            : Promise.reject(new Error(t('adminVenues:businesses.wizard.venue.locationInvalid'))),
+                      },
                     ]}
-                    extra="Haritaya tıklayın, yer arayın ya da “Adresten bul” ile açık adresi haritada bulun."
+                    extra={t('adminVenues:businesses.wizard.venue.locationExtra')}
                   >
-                    <Input readOnly prefix={<EnvironmentOutlined />} placeholder="Konum seçilmedi" />
+                    <Input readOnly prefix={<EnvironmentOutlined />} placeholder={t('adminVenues:businesses.wizard.venue.locationPlaceholder')} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -669,7 +777,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
           {step === 2 && (
             <>
               <Upload.Dragger
-                accept=".jpg,.jpeg,.png"
+                accept={ACCEPTED_IMAGE_ACCEPT}
                 multiple
                 fileList={[]}
                 showUploadList={false}
@@ -679,9 +787,9 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
-                <p className="ant-upload-text">Fotoğrafları sürükleyip bırakın ya da seçmek için tıklayın</p>
+                <p className="ant-upload-text">{t('adminVenues:businesses.wizard.photos.dropText')}</p>
                 <p className="ant-upload-hint">
-                  JPG/PNG, en fazla {MAX_PHOTO_MB} MB · 1–{MAX_PHOTOS} fotoğraf · ilk fotoğraf kapak olur ({photos.length}/{MAX_PHOTOS})
+                  {t('adminVenues:businesses.wizard.photos.hint', { maxMb: MAX_PHOTO_MB, max: MAX_PHOTOS, count: photos.length })}
                 </p>
               </Upload.Dragger>
               {photoError && <Alert type="error" showIcon message={photoError} style={{ marginTop: 12 }} />}
@@ -689,17 +797,17 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 <div className="mb-biz-photos">
                   {photos.map((p, i) => (
                     <div key={p.uid} className={`mb-biz-photo${i === 0 ? ' is-cover' : ''}`}>
-                      <img src={p.url} alt={p.file.name} />
-                      {i === 0 && <span className="mb-biz-photo__badge">Kapak</span>}
+                      <img src={p.url} alt={p.file.name} decoding="async" />
+                      {i === 0 && <span className="mb-biz-photo__badge">{t('adminVenues:businesses.wizard.photos.cover')}</span>}
                       <div className="mb-biz-photo__actions">
                         {i === 0 ? (
                           <span />
                         ) : (
                           <Button size="small" icon={<StarOutlined />} onClick={() => makeCover(p.uid)}>
-                            Kapak yap
+                            {t('adminVenues:businesses.wizard.photos.makeCover')}
                           </Button>
                         )}
-                        <Tooltip title="Kaldır">
+                        <Tooltip title={t('adminVenues:businesses.wizard.photos.remove')}>
                           <Button size="small" danger icon={<DeleteOutlined />} onClick={() => removePhoto(p.uid)} />
                         </Tooltip>
                       </div>
@@ -707,7 +815,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                   ))}
                 </div>
               ) : (
-                <EmptyState description="Henüz fotoğraf eklenmedi" />
+                <EmptyState description={t('adminVenues:businesses.wizard.photos.empty')} />
               )}
             </>
           )}
@@ -715,37 +823,37 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
           {step === 3 && (
             <Row gutter={[16, 16]}>
               <Col xs={24} md={12}>
-                <Card size="small" title="İşletme hesabı">
+                <Card size="small" title={t('adminVenues:businesses.wizard.summary.account')}>
                   <Descriptions column={1} size="small">
-                    <Descriptions.Item label="İşletme">{values.bizName}</Descriptions.Item>
-                    <Descriptions.Item label="Yetkili">{values.contactName || '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Kullanıcı adı">{values.userName}</Descriptions.Item>
-                    <Descriptions.Item label="E-posta">{values.email}</Descriptions.Item>
-                    <Descriptions.Item label="Telefon">{values.phoneNumber || '-'}</Descriptions.Item>
-                    <Descriptions.Item label="Üyelik bitişi">
-                      {values.membershipUntil ? formatDate(values.membershipUntil) : 'Süresiz'}
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.business')}>{values.bizName}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.contact')}>{values.contactName || '-'}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.userName')}>{values.userName}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.email')}>{values.email}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.phone')}>{values.phoneNumber || '-'}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.membershipUntil')}>
+                      {values.membershipUntil ? formatDate(values.membershipUntil) : t('adminVenues:businesses.wizard.summary.unlimited')}
                     </Descriptions.Item>
                   </Descriptions>
                 </Card>
               </Col>
               <Col xs={24} md={12}>
-                <Card size="small" title="Tesis">
+                <Card size="small" title={t('adminVenues:businesses.wizard.summary.venue')}>
                   <Descriptions column={1} size="small">
-                    <Descriptions.Item label="Tesis">{values.venueName}</Descriptions.Item>
-                    <Descriptions.Item label="İl / ilçe">
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.venue')}>{values.venueName}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.cityDistrict')}>
                       {values.city} / {values.district}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Adres">{values.address}</Descriptions.Item>
-                    <Descriptions.Item label="Konum">{values.location}</Descriptions.Item>
-                    <Descriptions.Item label="Telefon">{values.venuePhone || '-'}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.address')}>{values.address}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.location')}>{values.location}</Descriptions.Item>
+                    <Descriptions.Item label={t('adminVenues:businesses.wizard.summary.phone')}>{values.venuePhone || '-'}</Descriptions.Item>
                   </Descriptions>
                 </Card>
               </Col>
               <Col xs={24}>
-                <Card size="small" title={`Fotoğraflar (${photos.length})`}>
+                <Card size="small" title={t('adminVenues:businesses.wizard.summary.photos', { count: photos.length })}>
                   <div className="mb-biz-summary-photos">
                     {photos.map((p) => (
-                      <img key={p.uid} src={p.url} alt={p.file.name} />
+                      <img key={p.uid} src={p.url} alt={p.file.name} decoding="async" />
                     ))}
                   </div>
                 </Card>
@@ -754,7 +862,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
                 <Alert
                   type="info"
                   showIcon
-                  message="Oluşturulunca tesise varsayılan “Saha 1” (7+7, suni çim, kapalı, saatlik 1.500 ₺) ve 09:00–00:00 açılış saatleri eklenir. İşletme bunları kendi panelinden düzenleyebilir."
+                  message={t('adminVenues:businesses.wizard.summary.defaultsInfo')}
                 />
               </Col>
             </Row>
@@ -769,7 +877,9 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
 
 /** Admin: anlaşmalı işletmeler ve üyelikleri */
 export default function Businesses() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [searchParams, setSearchParams] = useSearchParams();
   const [owners, setOwners] = useState([]);
   const [stadiums, setStadiums] = useState([]);
@@ -796,11 +906,11 @@ export default function Businesses() {
       setStadiums(Array.isArray(s) ? s : []);
       setListedOverrides({});
     } catch (e) {
-      message.error(apiErrorMessage(e, 'İşletmeler alınamadı.'));
+      message.error(apiErrorMessage(e, t('adminVenues:businesses.messages.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [message]);
+  }, [message, t]);
 
   useEffect(() => {
     load();
@@ -874,11 +984,11 @@ export default function Businesses() {
         v.until ? v.until.endOf('day').format('YYYY-MM-DDTHH:mm:ss') : null,
         Boolean(v.suspended)
       );
-      message.success('Üyelik güncellendi.');
+      message.success(t('adminVenues:businesses.messages.membershipUpdated'));
       setMembershipOwner(null);
       load();
     } catch (e) {
-      message.error(serverError(e, 'Üyelik güncellenemedi.'));
+      message.error(formErrorMessage(membershipForm, e, t('adminVenues:businesses.messages.membershipUpdateFailed'), { aliases: { membershipUntil: 'until' } }));
     } finally {
       setSaving(false);
     }
@@ -886,18 +996,18 @@ export default function Businesses() {
 
   const saveAssign = async () => {
     if (!assignStadiumId) {
-      message.warning('Bir tesis seçin.');
+      message.warning(t('adminVenues:businesses.messages.selectVenue'));
       return;
     }
     setSaving(true);
     try {
       await adminVenuesApi.assignVenue(assignStadiumId, assignOwner.owner.playerId);
-      message.success('Tesis işletmeye bağlandı.');
+      message.success(t('adminVenues:businesses.messages.venueAssigned'));
       setAssignOwner(null);
       setAssignStadiumId(undefined);
       load();
     } catch (e) {
-      message.error(serverError(e, 'Tesis bağlanamadı.'));
+      message.error(serverError(e, t('adminVenues:businesses.messages.venueAssignFailed')));
     } finally {
       setSaving(false);
     }
@@ -909,10 +1019,10 @@ export default function Businesses() {
     try {
       await adminVenuesApi.setListed(venue.stadiumId, nextValue);
       setListedOverrides((m) => ({ ...m, [venue.stadiumId]: nextValue }));
-      message.success(nextValue ? 'Tesis yayına alındı.' : 'Tesis yayından kaldırıldı.');
+      message.success(nextValue ? t('adminVenues:businesses.listing.listed') : t('adminVenues:businesses.listing.unlisted'));
       load();
     } catch (e) {
-      message.error(serverError(e, 'Yayın durumu değiştirilemedi.'));
+      message.error(serverError(e, t('adminVenues:businesses.listing.failed')));
     } finally {
       setListedBusy(null);
     }
@@ -920,7 +1030,7 @@ export default function Businesses() {
 
   const columns = [
     {
-      title: 'İşletme',
+      title: t('adminVenues:businesses.table.business'),
       key: 'name',
       sorter: (a, b) => ownerName(a).localeCompare(ownerName(b), 'tr'),
       render: (_, o) => (
@@ -928,24 +1038,25 @@ export default function Businesses() {
           <Text strong>{ownerName(o)}</Text>
           {ownerContact(o) && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Yetkili: {ownerContact(o)}
+              {t('adminVenues:businesses.table.contactPerson', { name: ownerContact(o) })}
             </Text>
           )}
           {o.createdAt && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Kayıt: {formatDate(o.createdAt)}
+              {t('adminVenues:businesses.table.registered', { date: formatDate(o.createdAt) })}
             </Text>
           )}
         </Space>
       ),
     },
     {
-      title: 'Kullanıcı adı',
+      title: t('adminVenues:businesses.table.userName'),
       key: 'userName',
+      responsive: ['md'],
       render: (_, o) => <Text copyable={o.owner?.userName ? { text: o.owner.userName } : false}>@{o.owner?.userName || '-'}</Text>,
     },
     {
-      title: 'E-posta / telefon',
+      title: t('adminVenues:businesses.table.contact'),
       key: 'contact',
       render: (_, o) => (
         <Space direction="vertical" size={0}>
@@ -957,32 +1068,34 @@ export default function Businesses() {
       ),
     },
     {
-      title: 'Tesisler',
+      title: t('adminVenues:businesses.table.venues'),
       key: 'venues',
       render: (_, o) =>
         (o.venues || []).length === 0 ? (
-          <Text type="secondary">Tesis yok</Text>
+          <Text type="secondary">{t('adminVenues:businesses.table.noVenues')}</Text>
         ) : (
           <div className="mb-biz-venues">
             {o.venues.map((v) => {
               const listed = isListed(v.stadiumId);
               return (
                 <span key={v.stadiumId} className={`mb-biz-venue${listed ? '' : ' is-unlisted'}`}>
-                  <Tooltip title={v.isVisible ? 'Oyunculara görünüyor' : 'Oyunculara görünmüyor'}>
+                  <Tooltip title={v.isVisible ? t('adminVenues:businesses.visibleToPlayers') : t('adminVenues:businesses.notVisibleToPlayers')}>
                     <span className={`mb-biz-dot${v.isVisible ? ' is-visible' : ''}`} />
                   </Tooltip>
                   <span className="mb-biz-venue__name" title={v.name}>
                     {v.name}
                   </span>
                   <Popconfirm
-                    title={listed ? 'Tesis yayından kaldırılsın mı?' : 'Tesis yayına alınsın mı?'}
-                    description={listed ? 'Oyuncular bu tesisi göremez.' : 'Koşullar sağlanıyorsa oyuncular tesisi görür.'}
-                    okText={listed ? 'Yayından kaldır' : 'Yayına al'}
-                    cancelText="Vazgeç"
+                    title={listed ? t('adminVenues:businesses.listing.unlistConfirm') : t('adminVenues:businesses.listing.listConfirm')}
+                    description={
+                      listed ? t('adminVenues:businesses.listing.unlistDescription') : t('adminVenues:businesses.listing.listDescription')
+                    }
+                    okText={listed ? t('adminVenues:businesses.listing.unlist') : t('adminVenues:businesses.listing.list')}
+                    cancelText={t('common:actions.cancel')}
                     okButtonProps={{ danger: listed }}
                     onConfirm={() => toggleListed(v)}
                   >
-                    <Tooltip title={listed ? 'Yayından kaldır' : 'Yayına al'}>
+                    <Tooltip title={listed ? t('adminVenues:businesses.listing.unlist') : t('adminVenues:businesses.listing.list')}>
                       <Button
                         size="small"
                         type="text"
@@ -998,7 +1111,7 @@ export default function Businesses() {
         ),
     },
     {
-      title: 'Üyelik',
+      title: t('adminVenues:businesses.table.membership'),
       key: 'membership',
       sorter: (a, b) => new Date(a.membershipUntil || '9999-12-31') - new Date(b.membershipUntil || '9999-12-31'),
       render: (_, o) => {
@@ -1007,23 +1120,25 @@ export default function Businesses() {
           <Space direction="vertical" size={2}>
             <span className={`mb-chip ${info.cls}`}>{info.label}</span>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {o.membershipUntil ? `Bitiş: ${formatDate(o.membershipUntil)}` : 'Süresiz'}
+              {o.membershipUntil
+                ? t('adminVenues:businesses.membership.until', { date: formatDate(o.membershipUntil) })
+                : t('adminVenues:businesses.membership.unlimited')}
             </Text>
           </Space>
         );
       },
     },
     {
-      title: 'İşlemler',
+      title: t('adminVenues:businesses.table.actions'),
       key: 'actions',
       align: 'right',
       render: (_, o) => (
         <Space size={4} wrap style={{ justifyContent: 'flex-end' }}>
           <Button size="small" icon={<EditOutlined />} onClick={() => openMembership(o)}>
-            Üyeliği düzenle
+            {t('adminVenues:businesses.table.editMembership')}
           </Button>
           <Button size="small" icon={<LinkOutlined />} onClick={() => setAssignOwner(o)}>
-            Tesis bağla
+            {t('adminVenues:businesses.table.assignVenue')}
           </Button>
         </Space>
       ),
@@ -1031,25 +1146,25 @@ export default function Businesses() {
   ];
 
   const statCards = [
-    { title: 'Toplam işletme', value: stats.total, icon: <ShopOutlined />, color: colors.info },
-    { title: 'Aktif üyelik', value: stats.active, icon: <ThunderboltOutlined />, color: colors.pitch },
-    { title: '30 gün içinde dolacak', value: stats.soon, icon: <CalendarOutlined />, color: colors.gold },
-    { title: 'Askıda', value: stats.suspended, icon: <PauseCircleOutlined />, color: colors.danger },
+    { key: 'total', title: t('adminVenues:businesses.stats.total'), value: stats.total, icon: <ShopOutlined />, color: colors.info },
+    { key: 'active', title: t('adminVenues:businesses.stats.active'), value: stats.active, icon: <ThunderboltOutlined />, color: colors.pitch },
+    { key: 'soon', title: t('adminVenues:businesses.stats.soon'), value: stats.soon, icon: <CalendarOutlined />, color: colors.gold },
+    { key: 'suspended', title: t('adminVenues:businesses.stats.suspended'), value: stats.suspended, icon: <PauseCircleOutlined />, color: colors.danger },
   ];
 
   return (
     <>
       <PageHeader
-        title="İşletmeler"
-        subtitle="Anlaşmalı halı sahalar ve üyelikleri"
+        title={t('adminVenues:businesses.title')}
+        subtitle={t('adminVenues:businesses.subtitle')}
         icon={<ShopOutlined />}
         extra={
           <Space>
             <Button icon={<ReloadOutlined />} onClick={load} loading={loading}>
-              Yenile
+              {t('common:actions.refresh')}
             </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={openWizard}>
-              Yeni işletme
+              {t('adminVenues:businesses.newBusiness')}
             </Button>
           </Space>
         }
@@ -1057,8 +1172,8 @@ export default function Businesses() {
 
       <Row gutter={[16, 16]} className="mb-biz-stats" style={{ marginBottom: 16 }}>
         {statCards.map((s) => (
-          <Col xs={12} xl={6} key={s.title}>
-            <Card bordered={false} loading={loading}>
+          <Col xs={12} xl={6} key={s.key}>
+            <Card bordered={false} loading={loading} className="mb-admin-stat-card">
               <Statistic
                 title={s.title}
                 value={s.value}
@@ -1070,11 +1185,17 @@ export default function Businesses() {
       </Row>
 
       <Card bordered={false}>
-        <Space wrap size={12} style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+        <Space
+          wrap
+          size={12}
+          className="mb-admin-toolbar"
+          style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}
+        >
           <Input
+            className="mb-admin-filter"
             allowClear
             prefix={<SearchOutlined />}
-            placeholder="İşletme, kullanıcı adı veya tesis ara"
+            placeholder={t('adminVenues:businesses.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: 300 }}
@@ -1082,11 +1203,11 @@ export default function Businesses() {
           <Space size={16} wrap>
             <Space size={6}>
               <span className="mb-biz-dot is-visible" />
-              <Text type="secondary">Oyunculara görünüyor</Text>
+              <Text type="secondary">{t('adminVenues:businesses.visibleToPlayers')}</Text>
             </Space>
             <Space size={6}>
               <span className="mb-biz-dot" />
-              <Text type="secondary">Görünmüyor</Text>
+              <Text type="secondary">{t('adminVenues:businesses.notVisible')}</Text>
             </Space>
           </Space>
         </Space>
@@ -1103,13 +1224,13 @@ export default function Businesses() {
           })}
           dataSource={data}
           loading={loading}
-          scroll={{ x: 1100 }}
+          scroll={{ x: isPhone ? 'max-content' : 1100 }}
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
           locale={{
             emptyText: (
-              <EmptyState description="Henüz anlaşmalı işletme yok">
+              <EmptyState description={t('adminVenues:businesses.empty')}>
                 <Button type="primary" icon={<PlusOutlined />} onClick={openWizard}>
-                  Yeni işletme
+                  {t('adminVenues:businesses.newBusiness')}
                 </Button>
               </EmptyState>
             ),
@@ -1123,23 +1244,31 @@ export default function Businesses() {
 
       <Modal
         open={Boolean(membershipOwner)}
-        title={membershipOwner ? `Üyeliği düzenle · ${ownerName(membershipOwner)}` : 'Üyeliği düzenle'}
-        okText="Kaydet"
-        cancelText="Vazgeç"
+        title={
+          membershipOwner
+            ? t('adminVenues:businesses.membershipModal.titleWithName', { name: ownerName(membershipOwner) })
+            : t('adminVenues:businesses.membershipModal.title')
+        }
+        okText={t('common:actions.save')}
+        cancelText={t('common:actions.cancel')}
         confirmLoading={saving}
         onOk={saveMembership}
         onCancel={() => setMembershipOwner(null)}
         destroyOnClose
       >
         <Form form={membershipForm} layout="vertical" preserve={false}>
-          <Form.Item name="until" label="Üyelik bitişi" extra="Boş bırakılırsa üyelik süresiz olur.">
+          <Form.Item
+            name="until"
+            label={t('adminVenues:businesses.membershipModal.until')}
+            extra={t('adminVenues:businesses.membershipModal.untilExtra')}
+          >
             <DatePicker format="DD.MM.YYYY" style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
             name="suspended"
-            label="Askıya al"
+            label={t('adminVenues:businesses.membershipModal.suspend')}
             valuePropName="checked"
-            extra="Askıdaki işletme giriş yapabilir ama paneli salt okunur olur ve tesisleri oyunculara görünmez."
+            extra={t('adminVenues:businesses.membershipModal.suspendExtra')}
           >
             <Switch />
           </Form.Item>
@@ -1148,9 +1277,13 @@ export default function Businesses() {
 
       <Modal
         open={Boolean(assignOwner)}
-        title={assignOwner ? `Tesis bağla · ${ownerName(assignOwner)}` : 'Tesis bağla'}
-        okText="Bağla"
-        cancelText="Vazgeç"
+        title={
+          assignOwner
+            ? t('adminVenues:businesses.assignModal.titleWithName', { name: ownerName(assignOwner) })
+            : t('adminVenues:businesses.assignModal.title')
+        }
+        okText={t('adminVenues:businesses.assignModal.ok')}
+        cancelText={t('common:actions.cancel')}
         confirmLoading={saving}
         onOk={saveAssign}
         onCancel={() => {
@@ -1160,15 +1293,14 @@ export default function Businesses() {
         destroyOnClose
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
-          <Text type="secondary">
-            Sadece işletmesi olmayan tesisler listelenir (ör. OpenStreetMap'ten içe aktarılanlar). Tesisin oyunculara
-            görünmesi için fotoğraf ve aktif saha da gerekir.
-          </Text>
+          <Text type="secondary">{t('adminVenues:businesses.assignModal.hint')}</Text>
           <Select
             showSearch
             allowClear
             style={{ width: '100%' }}
-            placeholder={freeStadiums.length ? 'Tesis seçin' : 'Bağlanabilecek tesis yok'}
+            placeholder={
+              freeStadiums.length ? t('adminVenues:businesses.assignModal.selectPlaceholder') : t('adminVenues:businesses.assignModal.noAssignable')
+            }
             optionFilterProp="label"
             value={assignStadiumId}
             onChange={setAssignStadiumId}
@@ -1176,10 +1308,10 @@ export default function Businesses() {
               value: s.stadiumId,
               label: [s.stadiumName, s.district, s.city].filter((x) => x && Number.isNaN(Number(x))).join(' · ') || s.stadiumName,
             }))}
-            notFoundContent={<EmptyState description="İşletmesi olmayan tesis yok" />}
+            notFoundContent={<EmptyState description={t('adminVenues:businesses.assignModal.noFreeVenues')} />}
           />
           {freeStadiums.length === 0 && !loading && (
-            <Alert type="info" showIcon icon={<PictureOutlined />} message="Yeni tesis için “Yeni işletme” sihirbazını ya da “Aday Tesis Bul” ekranını kullanın." />
+            <Alert type="info" showIcon icon={<PictureOutlined />} message={t('adminVenues:businesses.assignModal.newVenueHint')} />
           )}
         </Space>
       </Modal>

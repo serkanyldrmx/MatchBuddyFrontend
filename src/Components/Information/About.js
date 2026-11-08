@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Button, Card, Col, Descriptions, Row, Space, Statistic, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Descriptions, Grid, Row, Space, Statistic, Typography } from 'antd';
 import {
   EnvironmentOutlined,
   GithubOutlined,
@@ -9,21 +9,23 @@ import {
   PhoneOutlined,
   YoutubeOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../ui';
 import SerkanYildirim from './SerkanYildirim.jpg';
 import Logo from '../../images/mutch_buddy_Logo.png';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Metin anahtarları render anında t() ile çevrilir
 const TEAM = [
-  { name: 'Serkan Yıldırım', role: 'Kurucu & Geliştirici, UI/UX Tasarımcı, Backend Geliştirici', photo: SerkanYildirim },
-  { name: 'Diğer Üye', role: 'Frontend Geliştirici', photo: SerkanYildirim },
+  { id: 'serkan', name: 'Serkan Yıldırım', roleKey: 'info:about.team.roles.founder', photo: SerkanYildirim },
+  { id: 'other', nameKey: 'info:about.team.otherMember', roleKey: 'info:about.team.roles.frontend', photo: SerkanYildirim },
 ];
 
 const STATS = [
-  { title: 'Kayıtlı Kullanıcı', value: '10,000+' },
-  { title: 'Organize Edilen Maç', value: '5,000+' },
-  { title: 'Takım', value: '1,000+' },
+  { titleKey: 'info:about.stats.users', value: '10,000+' },
+  { titleKey: 'info:about.stats.matches', value: '5,000+' },
+  { titleKey: 'info:about.stats.teams', value: '1,000+' },
 ];
 
 const SOCIAL = [
@@ -32,9 +34,12 @@ const SOCIAL = [
   { href: 'https://www.youtube.com/', icon: <YoutubeOutlined />, label: 'YouTube' },
 ];
 
-const About = () => (
+const About = () => {
+  const isPhone = Grid.useBreakpoint().md === false;
+  const { t } = useTranslation();
+  return (
   <>
-    <PageHeader title="Hakkında" subtitle="MatchBuddy ve ekibi hakkında" icon={<InfoCircleOutlined />} />
+    <PageHeader title={t('info:about.title')} subtitle={t('info:about.subtitle')} icon={<InfoCircleOutlined />} />
     <Row gutter={[16, 16]}>
       <Col xs={24}>
         <Card bordered={false}>
@@ -44,41 +49,38 @@ const About = () => (
               <Title level={3} style={{ margin: 0 }}>
                 MatchBuddy
               </Title>
-              <Text type="secondary">Halı saha arkadaşını bul, eğlenceye katıl!</Text>
+              <Text type="secondary">{t('info:about.tagline')}</Text>
             </div>
           </Space>
         </Card>
       </Col>
 
       <Col xs={24} md={12}>
-        <Card bordered={false} title="Biz Kimiz?" style={{ height: '100%' }}>
+        <Card bordered={false} title={t('info:about.whoWeAre.title')} style={{ height: '100%' }}>
           <Paragraph style={{ margin: 0 }}>
-            MatchBuddy, halı saha maçı yapmak isteyen ancak takım arkadaşlarını bulmakta zorlanan kişiler için
-            oluşturulmuş bir sosyal platformdur. Amacımız, insanların hem spor yapmasını hem de sosyalleşmesini
-            desteklemektir.
+            {t('info:about.whoWeAre.text')}
           </Paragraph>
         </Card>
       </Col>
       <Col xs={24} md={12}>
-        <Card bordered={false} title="Misyonumuz" style={{ height: '100%' }}>
+        <Card bordered={false} title={t('info:about.mission.title')} style={{ height: '100%' }}>
           <Paragraph style={{ margin: 0 }}>
-            Takım ruhunu desteklemek, spor yapmayı teşvik etmek ve insanları bir araya getirerek unutulmaz anılar
-            yaratmak. Halı saha maçlarını daha eğlenceli ve erişilebilir hale getiriyoruz.
+            {t('info:about.mission.text')}
           </Paragraph>
         </Card>
       </Col>
 
       <Col xs={24} lg={14}>
-        <Card bordered={false} title="Ekibimiz" style={{ height: '100%' }}>
+        <Card bordered={false} title={t('info:about.team.title')} style={{ height: '100%' }}>
           <Row gutter={[16, 16]}>
             {TEAM.map((m) => (
-              <Col xs={24} sm={12} key={m.name}>
+              <Col xs={24} sm={12} key={m.id}>
                 <Space align="start" size={14}>
                   <Avatar src={m.photo} size={64} />
                   <div>
-                    <Text strong>{m.name}</Text>
+                    <Text strong>{m.nameKey ? t(m.nameKey) : m.name}</Text>
                     <br />
-                    <Text type="secondary">{m.role}</Text>
+                    <Text type="secondary">{t(m.roleKey)}</Text>
                   </div>
                 </Space>
               </Col>
@@ -87,11 +89,15 @@ const About = () => (
         </Card>
       </Col>
       <Col xs={24} lg={10}>
-        <Card bordered={false} title="İstatistikler" style={{ height: '100%' }}>
+        <Card bordered={false} title={t('info:about.stats.title')} style={{ height: '100%' }}>
           <Row gutter={16}>
             {STATS.map((s) => (
-              <Col span={8} key={s.title}>
-                <Statistic title={s.title} value={s.value} />
+              <Col span={8} key={s.titleKey}>
+                <Statistic
+                  title={t(s.titleKey)}
+                  value={s.value}
+                  valueStyle={isPhone ? { fontSize: 20 } : undefined}
+                />
               </Col>
             ))}
           </Row>
@@ -99,7 +105,7 @@ const About = () => (
       </Col>
 
       <Col xs={24}>
-        <Card bordered={false} title="Bize Ulaşın">
+        <Card bordered={false} title={t('info:about.contact.title')}>
           <Descriptions column={{ xs: 1, md: 3 }} size="small">
             <Descriptions.Item label={<PhoneOutlined />}>
               <a href="tel:+905455218249">+90 545 521 82 49</a>
@@ -108,11 +114,11 @@ const About = () => (
               <a href="mailto:bmserkanyildirim@matchbuddy.com">bmserkanyildirim@matchbuddy.com</a>
             </Descriptions.Item>
             <Descriptions.Item label={<EnvironmentOutlined />}>
-              Coşandere Cd. No:3 Bosna Hersek, 42250 Selçuklu/Konya
+              {t('info:about.contact.address')}
             </Descriptions.Item>
           </Descriptions>
           <Paragraph type="secondary" style={{ marginTop: 12 }}>
-            İlişkin güncel haberler için bizi sosyal medya hesaplarımızdan takip edin.
+            {t('info:about.contact.followUs')}
           </Paragraph>
           <Space wrap>
             {SOCIAL.map((s) => (
@@ -125,9 +131,10 @@ const About = () => (
       </Col>
     </Row>
     <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 24, marginBottom: 0 }}>
-      &copy; 2024 MatchBuddy. Tüm hakları saklıdır.
+      {t('info:copyright')}
     </Paragraph>
   </>
-);
+  );
+};
 
 export default About;

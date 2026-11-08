@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { App, Button, Card, Skeleton } from 'antd';
 import { CalendarOutlined, CheckOutlined, CloseOutlined, EnvironmentOutlined, MailOutlined, TeamOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { Trans, useTranslation } from 'react-i18next';
 import { emit, INVITES_CHANGED, invitesApi } from '../../api/social';
 import { PARTICIPANT_STATUS } from '../../api/matches';
 import { CapacityRing, EmptyState, PageHeader, PlayerAvatar } from '../../ui';
@@ -12,8 +13,9 @@ import './Invites.css';
 
 function InviteCard({ invite, kind, busy, onRespond }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const m = invite.match;
-  const t = invite.team;
+  const team = invite.team;
   const date = m ? dayjs(m.matchDate) : null;
   const expired = m ? isPast(m.matchDate) || m.isActive === 3 : false;
 
@@ -28,7 +30,7 @@ function InviteCard({ invite, kind, busy, onRespond }) {
             <span className="mb-invite-card__time">{date.format('HH:mm')}</span>
           </>
         ) : (
-          <span className="mb-invite-card__logo">{(t?.teamName || '?').charAt(0).toUpperCase()}</span>
+          <span className="mb-invite-card__logo">{(team?.teamName || '?').charAt(0).toUpperCase()}</span>
         )}
       </div>
 
@@ -36,47 +38,50 @@ function InviteCard({ invite, kind, busy, onRespond }) {
         <div className="mb-invite-card__who">
           <PlayerAvatar player={invite.inviter} size={28} />
           <span>
-            <PlayerLink player={invite.inviter} /> seni{' '}
             {m ? (
-              <>
-                <Link to={`/match-details/${m.matchId}`} className="mb-player-link">
-                  <strong>{m.matchName}</strong>
-                </Link>{' '}
-                maçına
-              </>
+              <Trans
+                i18nKey="invites:card.invitedToMatch"
+                values={{ match: m.matchName }}
+                components={{
+                  inviter: <PlayerLink player={invite.inviter} />,
+                  link: <Link to={`/match-details/${m.matchId}`} className="mb-player-link" />,
+                  b: <strong />,
+                }}
+              />
             ) : (
-              <>
-                <strong>{t?.teamName}</strong> takımına
-              </>
-            )}{' '}
-            davet etti
+              <Trans
+                i18nKey="invites:card.invitedToTeam"
+                values={{ team: team?.teamName }}
+                components={{ inviter: <PlayerLink player={invite.inviter} />, b: <strong /> }}
+              />
+            )}
           </span>
           <small>{fromNow(invite.createdAt)}</small>
         </div>
         <h3 className="mb-invite-card__title" onClick={() => m && navigate(`/match-details/${m.matchId}`)}>
-          {m ? m.matchName : t?.teamName}
+          {m ? m.matchName : team?.teamName}
         </h3>
         <div className="mb-invite-card__meta">
           {m ? (
             <>
-              <span><EnvironmentOutlined /> {m.stadiumName || 'Halı saha'}</span>
+              <span><EnvironmentOutlined /> {m.stadiumName || t('invites:card.defaultVenue')}</span>
               <span><CalendarOutlined /> {date.format('DD MMMM dddd, HH:mm')}</span>
             </>
           ) : (
-            <span><TeamOutlined /> {t?.memberCount ?? 0} oyuncu</span>
+            <span><TeamOutlined /> {t('invites:card.members', { count: team?.memberCount ?? 0 })}</span>
           )}
         </div>
-        {expired && <span className="mb-chip is-done" style={{ marginTop: 8 }}>Bu maç artık oynanmıyor</span>}
+        {expired && <span className="mb-chip is-done" style={{ marginTop: 8 }}>{t('invites:card.expired')}</span>}
       </div>
 
       <div className="mb-invite-card__side">
         {m && <CapacityRing going={m.goingCount} capacity={m.capacity} size={44} />}
         <div className="mb-invite-card__actions">
           <Button icon={<CloseOutlined />} loading={busy === 'no'} disabled={!!busy} onClick={() => onRespond(false)}>
-            Reddet
+            {t('common:actions.reject')}
           </Button>
           <Button type="primary" icon={<CheckOutlined />} loading={busy === 'yes'} disabled={!!busy || expired} onClick={() => onRespond(true)}>
-            Kabul et
+            {t('invites:card.accept')}
           </Button>
         </div>
       </div>
@@ -86,6 +91,7 @@ function InviteCard({ invite, kind, busy, onRespond }) {
 
 export default function Invites() {
   const { message, notification } = App.useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState({ matchInvites: [], teamInvites: [] });
   const [loading, setLoading] = useState(true);
@@ -96,11 +102,11 @@ export default function Invites() {
       const res = await invitesApi.my();
       setData({ matchInvites: res?.matchInvites || [], teamInvites: res?.teamInvites || [] });
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Davetler yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('invites:page.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [message]);
+  }, [message, t]);
 
   useEffect(() => {
     load();
@@ -116,7 +122,7 @@ export default function Invites() {
       const listKey = kind === 'match' ? 'matchInvites' : 'teamInvites';
       setData((d) => ({ ...d, [listKey]: d[listKey].filter((i) => i.inviteId !== invite.inviteId) }));
       if (!accept) {
-        message.info('Davet reddedildi.');
+        message.info(t('invites:respond.rejected'));
       } else if (kind === 'match') {
         const waitlist = res?.status === PARTICIPANT_STATUS.WAITLIST;
         const matchId = invite.match.matchId;
@@ -124,8 +130,9 @@ export default function Invites() {
         // Bildirim kutusu Router dışında çizildiği için Link yerine navigate kullanılır
         notification[waitlist ? 'warning' : 'success']({
           key: nKey,
-          message: waitlist ? 'Yedek listesindesin' : 'Kadrodasın!',
-          description: res?.message || (waitlist ? 'Maç dolu, yedek listesine eklendin.' : 'Maça katıldın.'),
+          message: waitlist ? t('invites:respond.waitlistTitle') : t('invites:respond.squadTitle'),
+          description:
+            res?.message || (waitlist ? t('invites:respond.waitlistText') : t('invites:respond.squadText')),
           btn: (
             <Button
               type="primary"
@@ -135,16 +142,16 @@ export default function Invites() {
                 navigate(`/match-details/${matchId}`);
               }}
             >
-              Maça git
+              {t('invites:respond.goToMatch')}
             </Button>
           ),
           placement: 'bottomRight',
         });
       } else {
-        message.success(res?.message || `${invite.team?.teamName} takımına katıldın.`);
+        message.success(res?.message || t('invites:respond.joinedTeam', { team: invite.team?.teamName }));
       }
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Davete yanıt verilemedi.'));
+      message.error(apiErrorMessage(e, t('invites:respond.failed')));
     } finally {
       setBusy((b) => {
         const n = { ...b };
@@ -192,20 +199,24 @@ export default function Invites() {
   return (
     <>
       <PageHeader
-        eyebrow="Kapıda bekleyenler"
-        title="Davetler"
+        eyebrow={t('invites:page.eyebrow')}
+        title={t('invites:page.title')}
         icon={<MailOutlined />}
         subtitle={
-          loading ? 'Davetlerin yükleniyor…' : total ? `${total} davet cevabını bekliyor.` : 'Şu an bekleyen davetin yok.'
+          loading
+            ? t('invites:page.loading')
+            : total
+              ? t('invites:page.pending', { count: total })
+              : t('invites:page.none')
         }
         extra={
           <Button icon={<CalendarOutlined />} onClick={() => navigate('/calendar')}>
-            Takvimim
+            {t('invites:page.myCalendar')}
           </Button>
         }
       />
-      {section('match', 'Maç davetleri', null, data.matchInvites, 'Bekleyen maç davetin yok. Arkadaşların seni çağırınca burada görünecek.')}
-      {section('team', 'Takım davetleri', null, data.teamInvites, 'Bekleyen takım davetin yok.')}
+      {section('match', t('invites:page.matchInvites'), null, data.matchInvites, t('invites:page.noMatchInvites'))}
+      {section('team', t('invites:page.teamInvites'), null, data.teamInvites, t('invites:page.noTeamInvites'))}
     </>
   );
 }

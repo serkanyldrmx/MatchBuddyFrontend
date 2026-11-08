@@ -1,13 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Alert, App, Card, Col, Form, Input, InputNumber, Popconfirm, Row, Skeleton, Switch, Typography, Upload } from 'antd';
-import { CameraOutlined, DeleteOutlined, HomeOutlined, SaveOutlined, StarFilled, StarOutlined, UploadOutlined } from '@ant-design/icons';
+import { Alert, App, Card, Col, Form, Input, InputNumber, Popconfirm, Row, Switch, Typography, Upload } from 'antd';
+import { CameraOutlined, DeleteOutlined, HomeOutlined, PictureOutlined, SaveOutlined, StarFilled, StarOutlined, UploadOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { AMENITIES, ownerApi } from '../api/venues';
 import { useOwnerVenue } from '../layout/VenueLayout';
-import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage, fileUrl } from '../utils/format';
+import { EmptyState, PageHeader, PageLoader } from '../ui';
+import ImageCrop from '../ui/ImageCrop';
+import { apiErrorMessage, formErrorMessage, isErrorCode, mediaUrl } from '../utils/format';
+import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../utils/image';
+import { usePublicParams } from '../api/parameters';
 import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
 import { WriteButton, notifyOwnerChanged } from './shared';
 
@@ -28,6 +32,8 @@ const AMENITY_FIELD = {
   bibs: 'providesBibs',
   ball: 'providesBall',
 };
+// Sunucu alan hatası (Venue/Update alanı) → form alanı
+const FIELD_ALIASES = Object.fromEntries(Object.entries(AMENITY_FIELD).map(([k, field]) => [field, ['amenities', k]]));
 
 const parseLocation = (s) => {
   if (!s) return null;
@@ -57,6 +63,7 @@ function Recenter({ center }) {
 
 /** Tesis bilgileri, olanaklar ve fotoğraflar */
 export default function OwnerVenue() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const { venueId, venue, membershipActive } = useOwnerVenue();
   const [form] = Form.useForm();
@@ -68,6 +75,13 @@ export default function OwnerVenue() {
   const [initial, setInitial] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(null);
+  const [batch, setBatch] = useState(null); // toplu yükleme ilerlemesi { done, total }
+  const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
+  // Sunucu parametreleri: tesis başına en fazla fotoğraf, yükleme boyutu, en yüksek ücret
+  const params = usePublicParams();
+  const MAX_PHOTOS = params.get('venue.maxPhotos');
+  const maxMb = params.get('media.maxUploadMb');
+  const maxPrice = params.get('venue.maxPrice');
 
   const location = Form.useWatch('location', form);
   const cleatOn = Form.useWatch(['amenities', 'cleatRental'], form);
@@ -126,7 +140,7 @@ export default function OwnerVenue() {
     try {
       v = await form.validateFields();
     } catch {
-      message.warning('Lütfen zorunlu alanları doldurun.');
+      message.warning(t('facility:venue.fillRequired'));
       return;
     }
     const am = v.amenities || {};
@@ -149,26 +163,37 @@ export default function OwnerVenue() {
     setSaving(true);
     try {
       await ownerApi.updateVenue(payload);
-      message.success('Tesis bilgileriniz kaydedildi.');
+      message.success(t('facility:venue.saved'));
       notifyOwnerChanged();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Bilgiler kaydedilemedi.'));
+      message.error(formErrorMessage(form, e, t('facility:venue.saveFailed'), { aliases: FIELD_ALIASES }));
     } finally {
       setSaving(false);
     }
   };
 
-  const beforeUpload = (file) => {
-    const okType = ['image/jpeg', 'image/png'].includes(file.type);
-    if (!okType) {
-      message.error('Sadece JPG veya PNG yükleyebilirsiniz.');
+  // Kırpmadan önce tür/boyut kontrolü; uygun değilse kırpma penceresi açılmaz
+  const beforeCrop = (file) => {
+    const err = imageError(file);
+    if (!err) return true;
+    message.error(err);
+    rejectedRef.current = file;
+    return false;
+  };
+
+  // Kırpılmış dosyayı tarayıcıda küçült; dönen dosya customRequest'e gider
+  const beforeUpload = async (file) => {
+    if (file === rejectedRef.current) {
+      rejectedRef.current = null;
       return Upload.LIST_IGNORE;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      message.error('Fotoğraf en fazla 5 MB olabilir.');
+    const prepared = await prepareImage(file);
+    const sizeErr = preparedImageError(prepared);
+    if (sizeErr) {
+      message.error(sizeErr);
       return Upload.LIST_IGNORE;
     }
-    return true;
+    return prepared;
   };
 
   const upload = async ({ file, onSuccess, onError }) => {
@@ -179,11 +204,11 @@ export default function OwnerVenue() {
         const real = list.filter((p) => p.photoId != null);
         return [...real, { photoId: res.photoId, url: res.url, isCover: real.length === 0 }];
       });
-      message.success('Fotoğraf yüklendi.');
+      message.success(t('facility:venue.photoUploaded'));
       notifyOwnerChanged();
       onSuccess?.(res);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Fotoğraf yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('common:image.uploadFailed')));
       onError?.(e);
     } finally {
       setUploading(false);
@@ -195,10 +220,10 @@ export default function OwnerVenue() {
     try {
       await ownerApi.setCover(p.photoId);
       setPhotos((list) => list.map((x) => ({ ...x, isCover: x.photoId === p.photoId })));
-      message.success('Kapak fotoğrafı güncellendi.');
+      message.success(t('facility:venue.coverUpdated'));
       notifyOwnerChanged();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Kapak güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('facility:venue.coverUpdateFailed')));
     } finally {
       setPhotoBusy(null);
     }
@@ -213,10 +238,10 @@ export default function OwnerVenue() {
         if (p.isCover && rest.length && !rest.some((x) => x.isCover)) rest[0] = { ...rest[0], isCover: true };
         return rest;
       });
-      message.success('Fotoğraf silindi.');
+      message.success(t('facility:venue.photoDeleted'));
       notifyOwnerChanged();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Fotoğraf silinemedi.'));
+      message.error(apiErrorMessage(e, t('facility:venue.photoDeleteFailed')));
     } finally {
       setPhotoBusy(null);
     }
@@ -224,16 +249,68 @@ export default function OwnerVenue() {
 
   const realPhotos = photos.filter((p) => p.photoId != null);
 
+  // Toplu yükleme: antd her dosya için beforeUpload çağırır; listenin son dosyasında hepsini birlikte işle
+  const beforeBatch = (file, fileList) => {
+    if (fileList[fileList.length - 1]?.uid === file.uid) uploadBatch(fileList);
+    return Upload.LIST_IGNORE;
+  };
+
+  const uploadBatch = async (files) => {
+    const room = MAX_PHOTOS - realPhotos.length;
+    if (room <= 0) {
+      message.error(t('facility:venue.maxPhotos', { max: MAX_PHOTOS }));
+      return;
+    }
+    const valid = [];
+    const failed = [];
+    files.forEach((f) => {
+      const err = imageError(f);
+      if (err) failed.push(`${f.name}: ${err}`);
+      else valid.push(f);
+    });
+    const queue = valid.slice(0, room);
+    const skipped = valid.length - queue.length;
+
+    let done = 0;
+    let processed = 0;
+    setBatch({ done: 0, total: queue.length });
+    for (const f of queue) {
+      try {
+        const prepared = await prepareImage(f);
+        const res = await ownerApi.uploadPhoto(venueId, prepared);
+        done += 1;
+        setPhotos((list) => {
+          const real = list.filter((p) => p.photoId != null);
+          return [...real, { photoId: res.photoId, url: res.url, isCover: real.length === 0 }];
+        });
+      } catch (e) {
+        failed.push(`${f.name}: ${apiErrorMessage(e, t('facility:venue.uploadFailedShort'))}`);
+        // İstek sınırı (429) ya da fotoğraf sınırı aşıldıysa kalanları deneme
+        if (isErrorCode(e, 'COMMON_RATE_LIMITED', 'OWNER_PHOTO_LIMIT_REACHED', 'VENUE_PHOTO_LIMIT_EXCEEDED') || e?.response?.status === 429) break;
+      }
+      processed += 1;
+      setBatch({ done: processed, total: queue.length });
+    }
+    setBatch(null);
+
+    if (done) {
+      message.success(t('facility:venue.batchUploaded', { count: done }));
+      notifyOwnerChanged();
+    }
+    if (skipped) message.warning(t('facility:venue.batchSkipped', { count: skipped, max: MAX_PHOTOS }));
+    if (failed.length) message.error({ content: failed.slice(0, 4).join(' · ') + (failed.length > 4 ? ` (+${failed.length - 4})` : ''), duration: 6 });
+  };
+
   return (
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Tesis Bilgileri"
+        title={t('facility:venue.title')}
         icon={<HomeOutlined />}
-        subtitle="Oyuncuların tesis sayfanızda göreceği bilgiler."
+        subtitle={t('facility:venue.subtitle')}
         extra={
           <WriteButton type="primary" icon={<SaveOutlined />} onClick={save} loading={saving} disabled={loading || hidden}>
-            Kaydet
+            {t('common:actions.save')}
           </WriteButton>
         }
       />
@@ -243,32 +320,34 @@ export default function OwnerVenue() {
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
-          message="Tesis bilgileri yüklenemedi"
-          description="Kayıtlı bilgilerinizin üzerine yazılmaması için kaydetme kapatıldı. Lütfen sayfayı yenileyin; sorun sürerse Match Buddy ile iletişime geçin."
+          message={t('facility:venue.loadFailedTitle')}
+          description={t('facility:venue.loadFailedDescription')}
         />
       )}
 
       {loading ? (
-        <Card bordered={false}>
-          <Skeleton active paragraph={{ rows: 12 }} />
-        </Card>
+        <PageLoader caption={t('facility:venue.loading')} />
       ) : (
         <Form key={venueId} form={form} layout="vertical" requiredMark="optional" disabled={!membershipActive} initialValues={initial || undefined}>
           <Row gutter={[16, 16]}>
             <Col xs={24} xl={14}>
-              <Card bordered={false} title="Genel">
-                <Form.Item name="name" label="Tesis adı" rules={[{ required: true, whitespace: true, message: 'Tesis adı gerekli.' }]}>
+              <Card bordered={false} title={t('facility:venue.general')}>
+                <Form.Item
+                  name="name"
+                  label={t('facility:venue.name')}
+                  rules={[{ required: true, whitespace: true, message: t('facility:venue.nameRequired') }]}
+                >
                   <Input maxLength={100} />
                 </Form.Item>
-                <Form.Item name="description" label="Açıklama">
-                  <Input.TextArea rows={4} maxLength={1000} showCount placeholder="Tesisinizi oyunculara kısaca tanıtın." />
+                <Form.Item name="description" label={t('facility:venue.description')}>
+                  <Input.TextArea rows={4} maxLength={1000} showCount placeholder={t('facility:venue.descriptionPlaceholder')} />
                 </Form.Item>
-                <Form.Item name="phone" label="Telefon">
-                  <Input maxLength={30} placeholder="0 (5xx) xxx xx xx" />
+                <Form.Item name="phone" label={t('facility:venue.phone')}>
+                  <Input maxLength={30} placeholder={t('facility:venue.phonePlaceholder')} />
                 </Form.Item>
               </Card>
 
-              <Card bordered={false} title="Olanaklar" style={{ marginTop: 16 }}>
+              <Card bordered={false} title={t('facility:venue.amenities')} style={{ marginTop: 16 }}>
                 <div className="mb-owner-amenities">
                   {AMENITIES.map((a) => (
                     <div key={a.key} className="mb-owner-amenity">
@@ -283,15 +362,23 @@ export default function OwnerVenue() {
                   <Row gutter={16} style={{ marginTop: 16 }}>
                     {cleatOn && (
                       <Col xs={24} sm={12}>
-                        <Form.Item name="cleatRentalPrice" label="Krampon kiralama ücreti (çift)" rules={[{ required: true, message: 'Ücret girin.' }]}>
-                          <InputNumber min={0} step={10} addonAfter="₺" style={{ width: '100%' }} />
+                        <Form.Item
+                          name="cleatRentalPrice"
+                          label={t('facility:venue.cleatRentalPrice')}
+                          rules={[{ required: true, message: t('facility:venue.feeRequired') }]}
+                        >
+                          <InputNumber min={0} max={maxPrice} step={10} addonAfter="₺" style={{ width: '100%' }} />
                         </Form.Item>
                       </Col>
                     )}
                     {cameraOn && (
                       <Col xs={24} sm={12}>
-                        <Form.Item name="cameraPrice" label="Maç kaydı ücreti" rules={[{ required: true, message: 'Ücret girin.' }]}>
-                          <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
+                        <Form.Item
+                          name="cameraPrice"
+                          label={t('facility:venue.cameraPrice')}
+                          rules={[{ required: true, message: t('facility:venue.feeRequired') }]}
+                        >
+                          <InputNumber min={0} max={maxPrice} step={50} addonAfter="₺" style={{ width: '100%' }} />
                         </Form.Item>
                       </Col>
                     )}
@@ -299,42 +386,49 @@ export default function OwnerVenue() {
                 )}
               </Card>
 
-              <Card bordered={false} title="İptal politikası" style={{ marginTop: 16 }}>
+              <Card bordered={false} title={t('facility:venue.cancellationPolicy')} style={{ marginTop: 16 }}>
                 <Form.Item name="cancellationPolicy" noStyle>
                   <Input.TextArea
                     rows={3}
                     maxLength={500}
                     showCount
-                    placeholder="Örn. Maç saatinden 24 saat öncesine kadar ücretsiz iptal edilebilir."
+                    placeholder={t('facility:venue.cancellationPolicyPlaceholder')}
                   />
                 </Form.Item>
               </Card>
             </Col>
 
             <Col xs={24} xl={10}>
-              <Card bordered={false} title="Adres ve konum">
-                <Form.Item name="address" label="Açık adres" rules={[{ required: true, whitespace: true, message: 'Adres gerekli.' }]}>
+              <Card bordered={false} title={t('facility:venue.addressAndLocation')}>
+                <Form.Item
+                  name="address"
+                  label={t('facility:venue.address')}
+                  rules={[{ required: true, whitespace: true, message: t('facility:venue.addressRequired') }]}
+                >
                   <Input.TextArea rows={2} maxLength={300} />
                 </Form.Item>
                 <Row gutter={12}>
                   <Col span={12}>
-                    <Form.Item name="city" label="İl">
+                    <Form.Item name="city" label={t('facility:venue.city')}>
                       <Input maxLength={60} />
                     </Form.Item>
                   </Col>
                   <Col span={12}>
-                    <Form.Item name="district" label="İlçe">
+                    <Form.Item name="district" label={t('facility:venue.district')}>
                       <Input maxLength={60} />
                     </Form.Item>
                   </Col>
                 </Row>
                 <Form.Item
                   name="location"
-                  label="Harita konumu"
-                  extra="Haritada tesisinizin girişine tıklayarak konumu işaretleyin."
+                  label={t('facility:venue.mapLocation')}
+                  extra={t('facility:venue.mapLocationExtra')}
                   rules={[
-                    { required: true, message: 'Lütfen haritadan konum seçin.' },
-                    { validator: (_, v) => (!v || parseLocation(v) ? Promise.resolve() : Promise.reject(new Error('Konum "enlem, boylam" biçiminde olmalı.'))) },
+                    { required: true, message: t('facility:venue.locationRequired') },
+                    {
+                      validator: (_, v) =>
+                        !v || parseLocation(v) ? Promise.resolve() : Promise.reject(new Error(t('facility:venue.locationInvalid'))),
+                    },
                   ]}
                 >
                   <Input placeholder="41.000000, 29.000000" />
@@ -358,41 +452,84 @@ export default function OwnerVenue() {
 
               <Card
                 bordered={false}
-                title="Fotoğraflar"
+                title={t('facility:venue.photos')}
                 style={{ marginTop: 16 }}
                 extra={
-                  <Upload accept="image/jpeg,image/png" showUploadList={false} beforeUpload={beforeUpload} customRequest={upload} disabled={!membershipActive}>
-                    <WriteButton icon={<UploadOutlined />} loading={uploading} size="small" tooltip="JPG veya PNG, en fazla 5 MB">
-                      Fotoğraf ekle
-                    </WriteButton>
-                  </Upload>
+                  <div className="mb-owner-photo-tools">
+                    <Text type="secondary" className="mb-owner-photo-count">
+                      {batch
+                        ? t('facility:venue.batchProgress', { done: batch.done, total: batch.total })
+                        : `${realPhotos.length}/${MAX_PHOTOS}`}
+                    </Text>
+                    <Upload
+                      accept={ACCEPTED_IMAGE_ACCEPT}
+                      multiple
+                      showUploadList={false}
+                      beforeUpload={beforeBatch}
+                      disabled={!membershipActive || !!batch || uploading}
+                    >
+                      <WriteButton
+                        icon={<PictureOutlined />}
+                        loading={!!batch}
+                        size="small"
+                        tooltip={t('facility:venue.batchUploadTooltip', { max: MAX_PHOTOS })}
+                      >
+                        {t('facility:venue.batchUpload')}
+                      </WriteButton>
+                    </Upload>
+                    <ImageCrop variant="venue" beforeCrop={beforeCrop}>
+                      <Upload accept={ACCEPTED_IMAGE_ACCEPT} showUploadList={false} beforeUpload={beforeUpload} customRequest={upload} disabled={!membershipActive || !!batch}>
+                        <WriteButton
+                          icon={<UploadOutlined />}
+                          loading={uploading}
+                          size="small"
+                          tooltip={t('facility:venue.addPhotoTooltip', { maxMb })}
+                        >
+                          {t('facility:venue.addPhoto')}
+                        </WriteButton>
+                      </Upload>
+                    </ImageCrop>
+                  </div>
                 }
               >
                 {photos.length === 0 ? (
-                  <EmptyState description="Henüz fotoğraf yok. Tesisinizin görünmesi için en az bir fotoğraf ekleyin." />
+                  <EmptyState description={t('facility:venue.noPhotos')} />
                 ) : (
                   <div className="mb-owner-photos">
                     {photos.map((p, i) => (
                       <div key={p.photoId ?? `c-${i}`} className={`mb-owner-photo${p.isCover ? ' is-cover' : ''}`}>
-                        <img src={fileUrl(p.url)} alt="Tesis fotoğrafı" loading="lazy" />
+                        <img src={mediaUrl(p.url, 'md')} alt={t('facility:venue.photoAlt')} loading="lazy" decoding="async" />
                         {p.isCover && (
                           <span className="mb-owner-photo__badge">
-                            <StarFilled /> Kapak
+                            <StarFilled /> {t('facility:venue.cover')}
                           </span>
                         )}
                         {p.photoId != null && (
                           <div className="mb-owner-photo__actions">
                             {!p.isCover && (
                               <WriteButton size="small" icon={<StarOutlined />} onClick={() => setCover(p)} loading={photoBusy === p.photoId}>
-                                Kapak yap
+                                {t('facility:venue.makeCover')}
                               </WriteButton>
                             )}
                             {realPhotos.length > 1 ? (
-                              <Popconfirm title="Fotoğraf silinsin mi?" okText="Sil" cancelText="Vazgeç" okButtonProps={{ danger: true }} onConfirm={() => removePhoto(p)}>
-                                <WriteButton size="small" danger icon={<DeleteOutlined />} aria-label="Sil" />
+                              <Popconfirm
+                                title={t('facility:venue.deletePhotoConfirm')}
+                                okText={t('common:actions.delete')}
+                                cancelText={t('common:actions.cancel')}
+                                okButtonProps={{ danger: true }}
+                                onConfirm={() => removePhoto(p)}
+                              >
+                                <WriteButton size="small" danger icon={<DeleteOutlined />} aria-label={t('common:actions.delete')} />
                               </Popconfirm>
                             ) : (
-                              <WriteButton size="small" danger icon={<DeleteOutlined />} disabled tooltip="Son fotoğraf silinemez; önce yeni bir fotoğraf ekleyin." aria-label="Sil" />
+                              <WriteButton
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled
+                                tooltip={t('facility:venue.lastPhotoTooltip')}
+                                aria-label={t('common:actions.delete')}
+                              />
                             )}
                           </div>
                         )}
@@ -401,7 +538,7 @@ export default function OwnerVenue() {
                   </div>
                 )}
                 <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 10 }}>
-                  <CameraOutlined /> İlk yüklenen fotoğraf otomatik olarak kapak olur. Kapak, listede ve tesis sayfasında en önde gösterilir.
+                  <CameraOutlined /> {t('facility:venue.coverHint')}
                 </Text>
               </Card>
             </Col>

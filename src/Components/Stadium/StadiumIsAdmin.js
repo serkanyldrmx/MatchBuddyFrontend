@@ -5,8 +5,9 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Alert, App, Button, Card, Col, Form, Input, Row, Select, Space, TimePicker, Typography } from 'antd';
+import { Alert, App, Button, Card, Col, Form, Grid, Input, Row, Select, Space, TimePicker, Typography } from 'antd';
 import { AimOutlined, PlusCircleOutlined, SaveOutlined } from '@ant-design/icons';
+import { Trans, useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { PageHeader } from '../../ui';
 import { apiErrorMessage } from '../../utils/format';
@@ -50,8 +51,10 @@ const formatCoords = (pos) => (pos ? `${Number(pos[0]).toFixed(6)}, ${Number(pos
 
 /** Admin: yeni halı saha ekleme */
 function StadiumIsAdmin() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isPhone = Grid.useBreakpoint().md === false;
   const [form] = Form.useForm();
   const [userPosition, setUserPosition] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
@@ -78,9 +81,9 @@ function StadiumIsAdmin() {
     axios
       .get('https://api.turkiyeapi.dev/v1/provinces')
       .then((r) => setCities(r.data?.data || []))
-      .catch(() => message.error('İl listesi alınamadı.'))
+      .catch(() => message.error(t('venues:stadium.add.citiesError')))
       .finally(() => setCitiesLoading(false));
-  }, [message]);
+  }, [message, t]);
 
   const districts = cities.find((c) => c.name === cityName)?.districts || [];
 
@@ -101,10 +104,10 @@ function StadiumIsAdmin() {
         pickPosition(pos);
         setView({ center: pos, zoom: 15 });
       } else {
-        message.warning('Konum bulunamadı.');
+        message.warning(t('venues:stadium.add.locationNotFound'));
       }
     } catch (e) {
-      message.error('Konum araması yapılamadı.');
+      message.error(t('venues:stadium.add.searchError'));
     } finally {
       setSearching(false);
     }
@@ -112,7 +115,7 @@ function StadiumIsAdmin() {
 
   const handleSubmit = async (values) => {
     if (!selectedPosition) {
-      message.warning('Lütfen haritadan konum seçin.');
+      message.warning(t('venues:stadium.add.pickLocationWarning'));
       return;
     }
     const payload = {
@@ -129,15 +132,15 @@ function StadiumIsAdmin() {
     try {
       const r = await api.post('/api/Stadium/SaveStadium', payload);
       if (r.data && r.data.success === false) {
-        message.error(r.data.message || 'Halı saha kaydedilemedi.');
+        message.error(r.data.message || t('venues:stadium.add.saveError'));
         return;
       }
-      message.success('Halı saha başarıyla kaydedildi.');
+      message.success(t('venues:stadium.add.saved'));
       form.resetFields();
       setSelectedPosition(null);
       navigate('/adminPanel/stadiums');
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Halı saha kaydedilemedi.'));
+      message.error(apiErrorMessage(e, t('venues:stadium.add.saveError')));
     } finally {
       setSaving(false);
     }
@@ -146,26 +149,22 @@ function StadiumIsAdmin() {
   return (
     <>
       <PageHeader
-        title="Halı Saha Ekle"
-        subtitle="Yeni bir halı saha kaydı oluşturun ve harita üzerinde konumunu belirleyin"
+        title={t('venues:stadium.add.title')}
+        subtitle={t('venues:stadium.add.subtitle')}
         icon={<PlusCircleOutlined />}
       />
       <Alert
         type="warning"
         showIcon
         style={{ marginBottom: 16 }}
-        message="Bu ekranla eklenen tesisin işletmesi olmaz ve oyunculara görünmez."
+        message={t('venues:stadium.add.warning')}
         description={
-          <>
-            Anlaşmalı bir tesis eklemek için işletme hesabı, fotoğraflar ve konumu tek adımda oluşturan{' '}
-            <Link to="/adminPanel/businesses?new=1">Yeni işletme</Link> sihirbazını kullanmanızı öneririz. Burada eklenen tesis
-            daha sonra İşletmeler ekranından bir işletmeye bağlanabilir.
-          </>
+          <Trans i18nKey="venues:stadium.add.warningDescription" components={{ link: <Link to="/adminPanel/businesses?new=1" /> }} />
         }
       />
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={10}>
-          <Card bordered={false} title="Halı saha bilgileri">
+          <Card bordered={false} title={t('venues:stadium.add.formTitle')}>
             <Form
               form={form}
               layout="vertical"
@@ -178,29 +177,29 @@ function StadiumIsAdmin() {
             >
               <Form.Item
                 name="stadiumName"
-                label="Halı saha adı"
-                rules={[{ required: true, whitespace: true, message: 'Halı saha adını girin' }]}
+                label={t('venues:stadium.add.name')}
+                rules={[{ required: true, whitespace: true, message: t('venues:stadium.add.nameRequired') }]}
               >
-                <Input placeholder="Örn. Yıldız Halı Saha" maxLength={100} />
+                <Input placeholder={t('venues:stadium.add.namePlaceholder')} maxLength={100} />
               </Form.Item>
               <Row gutter={16}>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="city" label="İl" rules={[{ required: true, message: 'İl seçin' }]}>
+                  <Form.Item name="city" label={t('venues:stadium.add.city')} rules={[{ required: true, message: t('venues:stadium.add.cityRequired') }]}>
                     <Select
                       showSearch
                       loading={citiesLoading}
-                      placeholder="İl seçin"
+                      placeholder={t('venues:stadium.add.cityRequired')}
                       optionFilterProp="label"
                       options={cities.map((c) => ({ value: c.name, label: c.name }))}
                     />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="district" label="İlçe" rules={[{ required: true, message: 'İlçe seçin' }]}>
+                  <Form.Item name="district" label={t('venues:stadium.add.district')} rules={[{ required: true, message: t('venues:stadium.add.districtRequired') }]}>
                     <Select
                       showSearch
                       disabled={!cityName}
-                      placeholder={cityName ? 'İlçe seçin' : 'Önce il seçin'}
+                      placeholder={cityName ? t('venues:stadium.add.districtRequired') : t('venues:stadium.add.cityFirst')}
                       optionFilterProp="label"
                       options={districts.map((d) => ({ value: d.name, label: d.name }))}
                     />
@@ -209,17 +208,17 @@ function StadiumIsAdmin() {
               </Row>
               <Form.Item
                 name="address"
-                label="Açık adres"
-                rules={[{ required: true, whitespace: true, message: 'Açık adresi girin' }]}
+                label={t('venues:stadium.add.address')}
+                rules={[{ required: true, whitespace: true, message: t('venues:stadium.add.addressRequired') }]}
               >
-                <Input.TextArea rows={2} placeholder="Mahalle, cadde, no" maxLength={250} />
+                <Input.TextArea rows={2} placeholder={t('venues:stadium.add.addressPlaceholder')} maxLength={250} />
               </Form.Item>
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
                     name="openingTime"
-                    label="Açılış saati"
-                    rules={[{ required: true, message: 'Açılış saatini seçin' }]}
+                    label={t('venues:stadium.add.openingTime')}
+                    rules={[{ required: true, message: t('venues:stadium.add.openingTimeRequired') }]}
                   >
                     <TimePicker format="HH:mm" minuteStep={30} style={{ width: '100%' }} />
                   </Form.Item>
@@ -227,8 +226,8 @@ function StadiumIsAdmin() {
                 <Col span={12}>
                   <Form.Item
                     name="closingTime"
-                    label="Kapanış saati"
-                    rules={[{ required: true, message: 'Kapanış saatini seçin' }]}
+                    label={t('venues:stadium.add.closingTime')}
+                    rules={[{ required: true, message: t('venues:stadium.add.closingTimeRequired') }]}
                   >
                     <TimePicker format="HH:mm" minuteStep={30} style={{ width: '100%' }} />
                   </Form.Item>
@@ -236,36 +235,36 @@ function StadiumIsAdmin() {
               </Row>
               <Form.Item
                 name="description"
-                label="Açıklama"
-                rules={[{ required: true, whitespace: true, message: 'Açıklama girin' }]}
+                label={t('venues:stadium.add.description')}
+                rules={[{ required: true, whitespace: true, message: t('venues:stadium.add.descriptionRequired') }]}
               >
-                <Input.TextArea rows={3} placeholder="Saha özellikleri, otopark, duş vb." maxLength={500} showCount />
+                <Input.TextArea rows={3} placeholder={t('venues:stadium.add.descriptionPlaceholder')} maxLength={500} showCount />
               </Form.Item>
               <Form.Item
                 name="location"
-                label="Konum"
-                extra="Haritaya tıklayarak konum seçin"
-                rules={[{ required: true, message: 'Haritadan konum seçin' }]}
+                label={t('venues:stadium.add.location')}
+                extra={isPhone ? t('venues:stadium.add.locationExtraPhone') : t('venues:stadium.add.locationExtra')}
+                rules={[{ required: true, message: t('venues:stadium.add.locationRequired') }]}
               >
-                <Input readOnly prefix={<AimOutlined />} placeholder="Konum seçilmedi" />
+                <Input readOnly prefix={<AimOutlined />} placeholder={t('venues:stadium.add.locationPlaceholder')} />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Space>
+                <Space wrap className="mb-stadium-form-actions">
                   <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={saving}>
-                    Halı sahayı kaydet
+                    {t('venues:stadium.add.save')}
                   </Button>
-                  <Button onClick={() => navigate('/adminPanel/stadiums')}>Vazgeç</Button>
+                  <Button onClick={() => navigate('/adminPanel/stadiums')}>{t('common:actions.cancel')}</Button>
                 </Space>
               </Form.Item>
             </Form>
           </Card>
         </Col>
         <Col xs={24} lg={14}>
-          <Card bordered={false} title="Konum seçimi">
+          <Card bordered={false} title={t('venues:stadium.add.mapTitle')}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Input.Search
-                placeholder="Adres veya yer ara (örn. Selçuklu, Konya)"
-                enterButton="Ara"
+                placeholder={t('venues:stadium.add.searchPlaceholder')}
+                enterButton={t('common:actions.search')}
                 allowClear
                 loading={searching}
                 onSearch={handleSearch}
@@ -279,17 +278,19 @@ function StadiumIsAdmin() {
                 <ClickPicker onPick={pickPosition} />
                 {userPosition && (
                   <Marker position={userPosition} icon={customIcon} opacity={0.6}>
-                    <Popup>Mevcut konumunuz</Popup>
+                    <Popup>{t('venues:stadium.add.yourLocation')}</Popup>
                   </Marker>
                 )}
                 {selectedPosition && (
                   <Marker position={selectedPosition} icon={customIcon}>
-                    <Popup>Seçilen konum</Popup>
+                    <Popup>{t('venues:stadium.add.selectedLocation')}</Popup>
                   </Marker>
                 )}
               </MapContainer>
               <Text type="secondary">
-                {selectedPosition ? `Seçilen konum: ${formatCoords(selectedPosition)}` : 'Henüz konum seçilmedi.'}
+                {selectedPosition
+                  ? t('venues:stadium.add.selectedLocationValue', { coords: formatCoords(selectedPosition) })
+                  : t('venues:stadium.add.noLocationYet')}
               </Text>
             </Space>
           </Card>

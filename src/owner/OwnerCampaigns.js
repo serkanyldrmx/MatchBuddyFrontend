@@ -2,10 +2,13 @@ import React, { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Alert, App, Button, Card, Checkbox, Col, DatePicker, Form, Input, InputNumber, Modal, Radio, Row, Select, Skeleton, Space, Switch, Tooltip, Typography } from 'antd';
 import { CalendarOutlined, ClockCircleOutlined, DeleteOutlined, EditOutlined, GiftOutlined, PlusOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { DAYS_SHORT, daysToMask, formatPrice, maskToDays, ownerApi } from '../api/venues';
+import i18n from '../i18n';
 import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader } from '../ui';
-import { apiErrorMessage, formatDate } from '../utils/format';
+import { apiErrorMessage, formErrorMessage, formatDate } from '../utils/format';
+import { usePublicParam } from '../api/parameters';
 import { INACTIVE_TIP, WriteButton, asList, hourLabel, hourRange, notifyOwnerChanged, useOwnerData, ymd } from './shared';
 
 const { Text } = Typography;
@@ -16,22 +19,23 @@ const HOUR_FROM = Array.from({ length: 24 }, (_, h) => ({ value: h, label: hourL
 const HOUR_TO = Array.from({ length: 24 }, (_, i) => ({ value: i + 1, label: i + 1 === 24 ? '24:00' : hourLabel(i + 1) }));
 
 const daysLabel = (mask) => {
-  if (mask === 127) return 'Her gün';
-  if (mask === daysToMask(WEEKDAYS)) return 'Hafta içi';
-  if (mask === daysToMask(WEEKEND)) return 'Hafta sonu';
+  if (mask === 127) return i18n.t('facility:campaigns.everyDay');
+  if (mask === daysToMask(WEEKDAYS)) return i18n.t('facility:campaigns.weekdays');
+  if (mask === daysToMask(WEEKEND)) return i18n.t('facility:campaigns.weekend');
   return maskToDays(mask).join(', ');
 };
 
 const campaignState = (c) => {
   const today = dayjs().startOf('day');
-  if (dayjs(c.endDate).endOf('day').isBefore(today)) return { key: 'expired', label: 'Süresi doldu' };
-  if (!c.isActive) return { key: 'paused', label: 'Duraklatıldı' };
-  if (dayjs(c.startDate).isAfter(dayjs(), 'day')) return { key: 'soon', label: 'Yakında' };
-  return { key: 'live', label: 'Yayında' };
+  if (dayjs(c.endDate).endOf('day').isBefore(today)) return { key: 'expired', label: i18n.t('facility:campaigns.state.expired') };
+  if (!c.isActive) return { key: 'paused', label: i18n.t('facility:campaigns.state.paused') };
+  if (dayjs(c.startDate).isAfter(dayjs(), 'day')) return { key: 'soon', label: i18n.t('facility:campaigns.state.soon') };
+  return { key: 'live', label: i18n.t('facility:campaigns.state.live') };
 };
 
 /** Kampanyalar */
 export default function OwnerCampaigns() {
+  const { t } = useTranslation();
   const { message, modal } = App.useApp();
   const { venue, venueId, membershipActive } = useOwnerVenue();
   const { data, loading, error, reload, setData } = useOwnerData(async (id) => {
@@ -42,6 +46,7 @@ export default function OwnerCampaigns() {
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(null);
   const [form] = Form.useForm();
+  const maxPrice = usePublicParam('venue.maxPrice');
   const kind = Form.useWatch('kind', form);
 
   const pitches = useMemo(() => data?.pitches || [], [data]);
@@ -49,7 +54,10 @@ export default function OwnerCampaigns() {
     const order = { live: 0, soon: 1, paused: 2, expired: 3 };
     return [...(data?.campaigns || [])].sort((a, b) => order[campaignState(a).key] - order[campaignState(b).key] || dayjs(a.startDate) - dayjs(b.startDate));
   }, [data]);
-  const pitchName = (id) => (id == null ? 'Tüm sahalar' : pitches.find((p) => p.pitchId === id)?.name || `Saha #${id}`);
+  const pitchName = (id) =>
+    id == null
+      ? t('facility:campaigns.allPitches')
+      : pitches.find((p) => p.pitchId === id)?.name || t('facility:campaigns.pitchFallback', { id });
 
   const toPayload = (c, patch = {}) => ({
     campaignId: c.campaignId,
@@ -123,12 +131,16 @@ export default function OwnerCampaigns() {
           isActive: v.isActive,
         })
       );
-      message.success(editing.campaignId ? 'Kampanya güncellendi.' : 'Kampanya oluşturuldu.');
+      message.success(editing.campaignId ? t('facility:campaigns.updated') : t('facility:campaigns.created'));
       setEditing(null);
       notifyOwnerChanged();
       reload(true);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Kampanya kaydedilemedi.'));
+      message.error(
+        formErrorMessage(form, e, t('facility:campaigns.saveFailed'), {
+          aliases: { daysMask: 'days', startDate: 'range', endDate: 'range' },
+        })
+      );
     } finally {
       setSaving(false);
     }
@@ -139,10 +151,10 @@ export default function OwnerCampaigns() {
     try {
       await ownerApi.saveCampaign(toPayload(c, { isActive }));
       setData((d) => ({ ...d, campaigns: d.campaigns.map((x) => (x.campaignId === c.campaignId ? { ...x, isActive } : x)) }));
-      message.success(isActive ? 'Kampanya yayına alındı.' : 'Kampanya duraklatıldı.');
+      message.success(isActive ? t('facility:campaigns.published') : t('facility:campaigns.paused'));
       notifyOwnerChanged();
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Kampanya güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('facility:campaigns.updateFailed')));
     } finally {
       setToggling(null);
     }
@@ -150,19 +162,19 @@ export default function OwnerCampaigns() {
 
   const remove = (c) =>
     modal.confirm({
-      title: `"${c.title}" silinsin mi?`,
-      content: 'Kampanya oyunculara artık gösterilmez. Daha önce yapılmış rezervasyonların fiyatları değişmez.',
-      okText: 'Sil',
+      title: t('facility:campaigns.deleteConfirmTitle', { title: c.title }),
+      content: t('facility:campaigns.deleteConfirmContent'),
+      okText: t('common:actions.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Vazgeç',
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
         try {
           await ownerApi.deleteCampaign(c.campaignId);
-          message.success('Kampanya silindi.');
+          message.success(t('facility:campaigns.deleted'));
           notifyOwnerChanged();
           reload(true);
         } catch (e) {
-          message.error(apiErrorMessage(e, 'Kampanya silinemedi.'));
+          message.error(apiErrorMessage(e, t('facility:campaigns.deleteFailed')));
         }
       },
     });
@@ -171,12 +183,12 @@ export default function OwnerCampaigns() {
     <>
       <PageHeader
         eyebrow={venue?.name}
-        title="Kampanyalar"
+        title={t('facility:campaigns.title')}
         icon={<GiftOutlined />}
-        subtitle="Sakin saatlerinizi indirimlerle doldurun; kampanyalar oyunculara tesis sayfanızda öne çıkar."
+        subtitle={t('facility:campaigns.subtitle')}
         extra={
           <WriteButton type="primary" icon={<PlusOutlined />} onClick={() => openEditor(null)}>
-            Kampanya oluştur
+            {t('facility:campaigns.create')}
           </WriteButton>
         }
       />
@@ -194,9 +206,9 @@ export default function OwnerCampaigns() {
         </Row>
       ) : campaigns.length === 0 ? (
         <Card bordered={false}>
-          <EmptyState description="Henüz kampanyanız yok. Örneğin hafta içi öğle saatlerine %25 indirim tanımlayabilirsiniz.">
+          <EmptyState description={t('facility:campaigns.empty')}>
             <WriteButton type="primary" icon={<PlusOutlined />} onClick={() => openEditor(null)}>
-              İlk kampanyanızı oluşturun
+              {t('facility:campaigns.createFirst')}
             </WriteButton>
           </EmptyState>
         </Card>
@@ -209,7 +221,11 @@ export default function OwnerCampaigns() {
                 <div className={`mb-owner-promo is-${st.key}`}>
                   <div className="mb-owner-promo__top">
                     <span className={`mb-owner-promo__state is-${st.key}`}>{st.label}</span>
-                    <Tooltip title={membershipActive ? (c.isActive ? 'Duraklat' : 'Yayına al') : INACTIVE_TIP}>
+                    <Tooltip
+                      title={
+                        membershipActive ? (c.isActive ? t('facility:campaigns.pause') : t('facility:campaigns.publish')) : INACTIVE_TIP
+                      }
+                    >
                       <Switch
                         size="small"
                         checked={c.isActive}
@@ -222,13 +238,13 @@ export default function OwnerCampaigns() {
                   <div className="mb-owner-promo__value">
                     {c.discountPercent != null ? (
                       <>
-                        <span className="mb-owner-promo__big">%{c.discountPercent}</span>
-                        <span className="mb-owner-promo__unit">indirim</span>
+                        <span className="mb-owner-promo__big">{t('facility:campaigns.percentValue', { value: c.discountPercent })}</span>
+                        <span className="mb-owner-promo__unit">{t('facility:campaigns.discountUnit')}</span>
                       </>
                     ) : (
                       <>
                         <span className="mb-owner-promo__big">{formatPrice(c.fixedPrice)}</span>
-                        <span className="mb-owner-promo__unit">sabit saatlik</span>
+                        <span className="mb-owner-promo__unit">{t('facility:campaigns.fixedHourlyUnit')}</span>
                       </>
                     )}
                   </div>
@@ -246,10 +262,10 @@ export default function OwnerCampaigns() {
                   </div>
                   <div className="mb-owner-promo__actions">
                     <WriteButton size="small" icon={<EditOutlined />} onClick={() => openEditor(c)}>
-                      Düzenle
+                      {t('common:actions.edit')}
                     </WriteButton>
                     <WriteButton size="small" type="text" danger icon={<DeleteOutlined />} onClick={() => remove(c)}>
-                      Sil
+                      {t('common:actions.delete')}
                     </WriteButton>
                   </div>
                 </div>
@@ -261,9 +277,9 @@ export default function OwnerCampaigns() {
 
       <Modal
         open={Boolean(editing)}
-        title={editing?.campaignId ? 'Kampanyayı düzenle' : 'Yeni kampanya'}
-        okText="Kaydet"
-        cancelText="Vazgeç"
+        title={editing?.campaignId ? t('facility:campaigns.editTitle') : t('facility:campaigns.newTitle')}
+        okText={t('common:actions.save')}
+        cancelText={t('common:actions.cancel')}
         confirmLoading={saving}
         onOk={save}
         onCancel={() => setEditing(null)}
@@ -271,78 +287,102 @@ export default function OwnerCampaigns() {
         forceRender
       >
         <Form form={form} layout="vertical" requiredMark={false}>
-          <Form.Item name="title" label="Başlık" rules={[{ required: true, whitespace: true, message: 'Başlık gerekli.' }]}>
-            <Input maxLength={80} placeholder="Örn. Hafta İçi Öğle İndirimi" />
+          <Form.Item
+            name="title"
+            label={t('facility:campaigns.form.title')}
+            rules={[{ required: true, whitespace: true, message: t('facility:campaigns.form.titleRequired') }]}
+          >
+            <Input maxLength={80} placeholder={t('facility:campaigns.form.titlePlaceholder')} />
           </Form.Item>
-          <Form.Item name="description" label="Açıklama">
-            <Input.TextArea rows={2} maxLength={300} showCount placeholder="Oyunculara gösterilecek kısa açıklama" />
+          <Form.Item name="description" label={t('facility:campaigns.form.description')}>
+            <Input.TextArea rows={2} maxLength={300} showCount placeholder={t('facility:campaigns.form.descriptionPlaceholder')} />
           </Form.Item>
-          <Form.Item name="kind" label="Kampanya tipi">
+          <Form.Item name="kind" label={t('facility:campaigns.form.kind')}>
             <Radio.Group optionType="button" buttonStyle="solid">
-              <Radio value="percent">Yüzde indirim</Radio>
-              <Radio value="fixed">Sabit fiyat</Radio>
+              <Radio value="percent">{t('facility:campaigns.form.kindPercent')}</Radio>
+              <Radio value="fixed">{t('facility:campaigns.form.kindFixed')}</Radio>
             </Radio.Group>
           </Form.Item>
           {kind === 'fixed' ? (
-            <Form.Item name="fixedPrice" label="Saatlik sabit fiyat" rules={[{ required: true, message: 'Fiyat girin.' }]}>
-              <InputNumber min={0} step={50} addonAfter="₺" style={{ width: '100%' }} />
+            <Form.Item
+              name="fixedPrice"
+              label={t('facility:campaigns.form.fixedPrice')}
+              rules={[{ required: true, message: t('facility:campaigns.form.priceRequired') }]}
+            >
+              <InputNumber min={0} max={maxPrice} step={50} addonAfter="₺" style={{ width: '100%' }} />
             </Form.Item>
           ) : (
-            <Form.Item name="discountPercent" label="İndirim oranı" rules={[{ required: true, message: 'Oran girin.' }]}>
-              <InputNumber min={1} max={90} addonBefore="%" style={{ width: '100%' }} />
+            <Form.Item
+              name="discountPercent"
+              label={t('facility:campaigns.form.discountPercent')}
+              rules={[{ required: true, message: t('facility:campaigns.form.rateRequired') }]}
+            >
+              {/* Üst sınır (venue.maxDiscountPercent) herkese açık değil: sunucu doğrular, hata alanın altında gösterilir */}
+              <InputNumber min={1} max={100} addonBefore="%" style={{ width: '100%' }} />
             </Form.Item>
           )}
-          <Form.Item name="range" label="Geçerlilik tarihleri" rules={[{ required: true, message: 'Tarih aralığı seçin.' }]}>
+          <Form.Item
+            name="range"
+            label={t('facility:campaigns.form.range')}
+            rules={[{ required: true, message: t('facility:campaigns.form.rangeRequired') }]}
+          >
             <DatePicker.RangePicker format="DD.MM.YYYY" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item label="Günler" required>
+          <Form.Item label={t('facility:campaigns.form.days')} required>
             <Space size={6} style={{ marginBottom: 8 }} wrap>
               <Button size="small" onClick={() => form.setFieldsValue({ days: WEEKDAYS })}>
-                Hafta içi
+                {t('facility:campaigns.weekdays')}
               </Button>
               <Button size="small" onClick={() => form.setFieldsValue({ days: WEEKEND })}>
-                Hafta sonu
+                {t('facility:campaigns.weekend')}
               </Button>
               <Button size="small" onClick={() => form.setFieldsValue({ days: ALL_DAYS })}>
-                Her gün
+                {t('facility:campaigns.everyDay')}
               </Button>
             </Space>
-            <Form.Item name="days" noStyle rules={[{ required: true, type: 'array', min: 1, message: 'En az bir gün seçin.' }]}>
+            <Form.Item name="days" noStyle rules={[{ required: true, type: 'array', min: 1, message: t('facility:campaigns.form.daysRequired') }]}>
               <Checkbox.Group options={DAYS_SHORT.map((label, value) => ({ label, value }))} />
             </Form.Item>
           </Form.Item>
           <Row gutter={12}>
-            <Col span={8}>
-              <Form.Item name="fromHour" label="Başlangıç" rules={[{ required: true, message: 'Seçin.' }]}>
+            <Col xs={12} sm={8}>
+              <Form.Item name="fromHour" label={t('facility:campaigns.form.from')} rules={[{ required: true, message: t('validation:select') }]}>
                 <Select options={HOUR_FROM} />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col xs={12} sm={8}>
               <Form.Item
                 name="toHour"
-                label="Bitiş"
+                label={t('facility:campaigns.form.to')}
                 dependencies={['fromHour']}
                 rules={[
-                  { required: true, message: 'Seçin.' },
+                  { required: true, message: t('validation:select') },
                   ({ getFieldValue }) => ({
-                    validator: (_, v) => (v == null || v > getFieldValue('fromHour') ? Promise.resolve() : Promise.reject(new Error('Bitiş saati hatalı.'))),
+                    validator: (_, v) =>
+                      v == null || v > getFieldValue('fromHour')
+                        ? Promise.resolve()
+                        : Promise.reject(new Error(t('facility:campaigns.form.toInvalid'))),
                   }),
                 ]}
               >
                 <Select options={HOUR_TO} />
               </Form.Item>
             </Col>
-            <Col span={8}>
-              <Form.Item name="pitchId" label="Saha">
-                <Select allowClear placeholder="Tüm sahalar" options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))} />
+            <Col xs={24} sm={8}>
+              <Form.Item name="pitchId" label={t('common:pitch')}>
+                <Select
+                  allowClear
+                  placeholder={t('facility:campaigns.allPitches')}
+                  options={pitches.map((p) => ({ value: p.pitchId, label: p.name }))}
+                />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item name="isActive" valuePropName="checked" style={{ marginBottom: 0 }}>
-            <Switch checkedChildren="Yayında" unCheckedChildren="Taslak" />
+            <Switch checkedChildren={t('facility:campaigns.state.live')} unCheckedChildren={t('facility:campaigns.form.draft')} />
           </Form.Item>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Aynı saate birden fazla kampanya uyarsa oyuncu için en uygun fiyat uygulanır.
+            {t('facility:campaigns.form.overlapHint')}
           </Text>
         </Form>
       </Modal>

@@ -1,0 +1,199 @@
+/* =========================================================
+   Futbol topu yükleme animasyonu
+   Kutunun tamamı 1em × 1em: boyut font-size ile verilir.
+   antd Spin içinde .ant-spin-dot font-size'ı (theme.js → Spin.dotSize*) kutuyu belirler.
+   ========================================================= */
+.mb-ball {
+  position: relative;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  font-size: 54px;
+  line-height: 0;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.mb-ball--sm {
+  font-size: 26px;
+}
+.mb-ball--md {
+  font-size: 54px;
+}
+.mb-ball--lg {
+  font-size: 96px;
+}
+
+.mb-ball__shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 0.015em;
+  width: 0.6em;
+  height: 0.09em;
+  margin-left: -0.3em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--mb-primary-rgb, 198, 244, 50), 0.5), rgba(var(--mb-primary-rgb, 198, 244, 50), 0.12) 60%, transparent);
+  animation: mb-ball-shadow 0.9s infinite;
+}
+
+.mb-ball__hop {
+  position: absolute;
+  top: 0;
+  left: 0.14em;
+  width: 0.72em;
+  height: 0.72em;
+  animation: mb-ball-hop 0.9s infinite;
+}
+
+.mb-ball__squash {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+  animation: mb-ball-squash 0.9s infinite;
+}
+
+.mb-ball__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: mb-ball-spin 1.8s linear infinite;
+  filter: drop-shadow(0 0 0.06em rgba(var(--mb-primary-rgb, 198, 244, 50), 0.35));
+}
+
+/* Topun dış halkası: koyu temada kireç yeşili, açık temada zeminde seçilsin diye daha koyu yeşil */
+.mb-ball__ring {
+  stroke: var(--mb-ball-ring, #c6f432);
+}
+
+[data-theme='light'] .mb-ball__ring {
+  --mb-ball-ring: #5d8f12;
+}
+
+[data-theme='light'] .mb-ball__svg {
+  filter: drop-shadow(0 0.02em 0.05em rgba(22, 38, 26, 0.25));
+}
+
+/* Koyu "stadyum" panellerinde koyu temadaki görünüm */
+[data-theme='light'] .mb-pitch-bg .mb-ball__ring,
+[data-theme='light'] .mb-dark-island .mb-ball__ring {
+  --mb-ball-ring: #c6f432;
+}
+
+@keyframes mb-ball-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.5);
+  }
+  50% {
+    transform: translateY(0.215em);
+    animation-timing-function: cubic-bezier(0.1, 0.5, 0.55, 1);
+  }
+}
+
+@keyframes mb-ball-squash {
+  0%,
+  40% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.16, 0.8);
+  }
+  60% {
+    transform: scale(0.94, 1.06);
+  }
+  72%,
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes mb-ball-shadow {
+  0%,
+  100% {
+    transform: scaleX(0.5);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scaleX(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes mb-ball-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mb-ball-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-ball__hop,
+  .mb-ball__squash,
+  .mb-ball__svg {
+    animation: none;
+  }
+  .mb-ball__hop {
+    top: 0.2em;
+    animation: mb-ball-pulse 1.6s ease-in-out infinite;
+  }
+  .mb-ball__shadow {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* Başlıklı kullanım */
+.mb-ball-loader {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.mb-ball-loader__caption {
+  font-family: var(--mb-display, 'Barlow Condensed', sans-serif);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--mb-text-2, rgba(var(--mb-text-rgb), 0.62));
+  line-height: 1.2;
+}
+
+.mb-page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 32px 16px;
+}
+
+/* ---------------------------------------------------------
+   antd Spin uyumu: gösterge kutusu dotSize kadar (theme.js),
+   böylece antd'nin ortalama hesapları (margin: -dotSize/2) doğru kalır.
+   --------------------------------------------------------- */
+.ant-spin .ant-spin-dot.mb-ball {
+  width: 1em;
+  height: 1em;
+  line-height: 0;
+}
+
+/* Spin tip metni topun altında, ortalı */
+.ant-spin .ant-spin-text {
+  font-family: var(--mb-display, 'Barlow Condensed', sans-serif);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}

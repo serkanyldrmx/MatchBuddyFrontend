@@ -1,0 +1,224 @@
+/* Yönetici: sistem parametreleri */
+.mb-params__note {
+  margin-bottom: 16px;
+}
+
+.mb-params__toolbar {
+  margin-bottom: 16px;
+}
+
+.mb-params__search {
+  width: 320px;
+  max-width: 100%;
+}
+
+.mb-params__groups.ant-collapse {
+  background: transparent;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mb-params__groups > .ant-collapse-item {
+  background: var(--mb-surface);
+  border: 1px solid var(--mb-border);
+  border-radius: var(--mb-radius) !important;
+  box-shadow: var(--mb-shadow-sm);
+  overflow: hidden;
+}
+
+.mb-params__groups > .ant-collapse-item > .ant-collapse-content {
+  background: transparent;
+  border-top: 1px solid var(--mb-border);
+}
+
+.mb-params__groups > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0;
+}
+
+.mb-params__group-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mb-params__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-param-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px) auto;
+  gap: 12px 20px;
+  align-items: start;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--mb-border);
+  transition: background 0.15s ease;
+}
+
+.mb-param-row:last-child {
+  border-bottom: 0;
+}
+
+.mb-param-row.is-dirty {
+  background: rgba(var(--mb-gold-rgb), 0.06);
+}
+
+.mb-param-row__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mb-param-row__title .ant-tag {
+  margin-inline-end: 0;
+}
+
+.mb-param-row__key {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mb-text);
+  word-break: break-all;
+}
+
+.mb-param-row__type {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.mb-param-row__desc {
+  margin: 6px 0 0;
+  color: var(--mb-text-2);
+  font-size: 13px;
+}
+
+.mb-param-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--mb-text-3);
+}
+
+.mb-param-row__meta strong {
+  color: var(--mb-text-2);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.mb-param-row__editor {
+  min-width: 0;
+}
+
+.mb-param-row__editor .ant-input-number,
+.mb-param-row__editor .ant-input,
+.mb-param-editor__number {
+  width: 100%;
+}
+
+.mb-param-editor__json {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.mb-param-row__error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--mb-danger);
+}
+
+.mb-param-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Onay penceresi ve geçmiş: eski → yeni */
+.mb-param-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mb-param-confirm code,
+.mb-param-history__title code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-param-history__title {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mb-param-confirm__diff {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.mb-param-confirm__diff .is-old,
+.mb-param-confirm__diff .is-new {
+  padding: 2px 8px;
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+.mb-param-confirm__diff .is-old {
+  background: rgba(var(--mb-danger-rgb), 0.1);
+  color: var(--mb-danger);
+  text-decoration: line-through;
+}
+
+.mb-param-confirm__diff .is-new {
+  background: rgba(var(--mb-pitch-rgb), 0.12);
+  color: var(--mb-pitch-ink);
+}
+
+.mb-param-history__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 6px;
+}
+
+/* Tablet: işlemler editörün altına */
+@media (max-width: 1100px) {
+  .mb-param-row {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  }
+  .mb-param-row__actions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Telefon: satırlar alt alta */
+@media (max-width: 767px) {
+  .mb-params__search {
+    width: 100%;
+  }
+  .mb-param-row {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+  .mb-param-row__actions {
+    justify-content: stretch;
+  }
+  .mb-param-row__actions > .ant-btn-primary {
+    flex: 1 1 auto;
+  }
+}

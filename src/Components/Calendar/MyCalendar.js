@@ -3,21 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { App, Button, Calendar, Card, Col, Row, Segmented, Skeleton } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, LeftOutlined, MailOutlined, RightOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { calendarApi, INVITES_CHANGED } from '../../api/social';
 import { EmptyState, PageHeader } from '../../ui';
 import { apiErrorMessage, isPast } from '../../utils/format';
 import './MyCalendar.css';
 
+// labelKey: çeviri anahtarı (render anında t() ile çözülür)
 const KIND = {
-  going: { label: 'Katılıyorsun', className: 'is-going' },
-  waitlist: { label: 'Yedek', className: 'is-waitlist' },
-  invited: { label: 'Davet', className: 'is-invited' },
+  going: { labelKey: 'calendar:kind.going', className: 'is-going' },
+  waitlist: { labelKey: 'calendar:kind.waitlist', className: 'is-waitlist' },
+  invited: { labelKey: 'calendar:kind.invited', className: 'is-invited' },
 };
 
-const dayLabel = (d) => {
+const dayLabel = (d, t) => {
   const today = dayjs().startOf('day');
-  if (d.isSame(today, 'day')) return 'Bugün';
-  if (d.isSame(today.add(1, 'day'), 'day')) return 'Yarın';
+  if (d.isSame(today, 'day')) return t('calendar:today');
+  if (d.isSame(today.add(1, 'day'), 'day')) return t('calendar:tomorrow');
   return d.format('dddd D MMM');
 };
 
@@ -26,6 +28,7 @@ const hasScore = (m) => m.homeScore != null && m.awayScore != null;
 /** Bilet tarzı tek satır */
 function CalendarRow({ item }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const k = KIND[item.kind] || KIND.going;
   const date = dayjs(item.matchDate);
   const past = isPast(item.matchDate);
@@ -49,15 +52,17 @@ function CalendarRow({ item }) {
       <div className="mb-cal-row__body">
         <strong>{item.matchName}</strong>
         <span>
-          <EnvironmentOutlined /> {item.stadiumName || 'Halı saha'}
-          {item.capacity ? ` · ${item.goingCount}/${item.capacity} oyuncu` : ''}
+          <EnvironmentOutlined /> {item.stadiumName || t('calendar:defaultVenue')}
+          {item.capacity
+            ? ` · ${t('calendar:occupancy', { count: item.capacity, going: item.goingCount, capacity: item.capacity })}`
+            : ''}
         </span>
       </div>
       <div className="mb-cal-row__side">
         {past ? (
-          <span className="mb-chip is-done">{hasScore(item) ? 'Bitti' : 'Oynandı'}</span>
+          <span className="mb-chip is-done">{hasScore(item) ? t('calendar:finished') : t('calendar:played')}</span>
         ) : (
-          <span className={`mb-cal-chip ${k.className}`}>{k.label}</span>
+          <span className={`mb-cal-chip ${k.className}`}>{t(k.labelKey)}</span>
         )}
         {item.kind === 'invited' && !past && (
           <Button
@@ -69,7 +74,7 @@ function CalendarRow({ item }) {
               navigate('/invites');
             }}
           >
-            Yanıtla
+            {t('calendar:respond')}
           </Button>
         )}
       </div>
@@ -79,6 +84,7 @@ function CalendarRow({ item }) {
 
 function Agenda({ items, loading }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const groups = useMemo(() => {
     const map = new Map();
     items
@@ -102,9 +108,9 @@ function Agenda({ items, loading }) {
   if (!groups.length) {
     return (
       <Card>
-        <EmptyState description="Önümüzdeki 60 günde maçın yok. Fikstüre göz at, bir maça yazıl.">
+        <EmptyState description={t('calendar:agenda.empty', { days: 60 })}>
           <Button type="primary" onClick={() => navigate('/home')}>
-            Maç bul
+            {t('calendar:agenda.findMatch')}
           </Button>
         </EmptyState>
       </Card>
@@ -118,8 +124,8 @@ function Agenda({ items, loading }) {
         return (
           <section key={key} className="mb-agenda__day">
             <header className={`mb-agenda__head ${isToday ? 'is-today' : ''}`}>
-              <span className="mb-agenda__label">{dayLabel(d)}</span>
-              <span className="mb-agenda__count">{list.length} maç</span>
+              <span className="mb-agenda__label">{dayLabel(d, t)}</span>
+              <span className="mb-agenda__count">{t('calendar:agenda.matchCount', { count: list.length })}</span>
             </header>
             <div className="mb-agenda__rows">
               {list.map((m) => (
@@ -134,6 +140,7 @@ function Agenda({ items, loading }) {
 }
 
 function MonthView({ items, loading, month, onMonthChange }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(() => dayjs());
 
   const byDay = useMemo(() => {
@@ -180,12 +187,12 @@ function MonthView({ items, loading, month, onMonthChange }) {
 
   const headerRender = () => (
     <div className="mb-cal-header">
-      <Button type="text" icon={<LeftOutlined />} onClick={() => goMonth(month.subtract(1, 'month'))} aria-label="Önceki ay" />
+      <Button type="text" icon={<LeftOutlined />} onClick={() => goMonth(month.subtract(1, 'month'))} aria-label={t('calendar:month.prev')} />
       <h3>{month.format('MMMM YYYY')}</h3>
-      <Button type="text" icon={<RightOutlined />} onClick={() => goMonth(month.add(1, 'month'))} aria-label="Sonraki ay" />
+      <Button type="text" icon={<RightOutlined />} onClick={() => goMonth(month.add(1, 'month'))} aria-label={t('calendar:month.next')} />
       {!month.isSame(dayjs(), 'month') && (
         <Button size="small" onClick={() => goMonth(dayjs())}>
-          Bugün
+          {t('calendar:today')}
         </Button>
       )}
     </div>
@@ -209,9 +216,9 @@ function MonthView({ items, loading, month, onMonthChange }) {
       </Col>
       <Col xs={24} xl={8}>
         <div className="mb-cal-side">
-          <Card title={dayLabel(selected)}>
+          <Card title={dayLabel(selected, t)}>
             {dayItems.length === 0 ? (
-              <EmptyState description="Bu gün maçın yok" />
+              <EmptyState description={t('calendar:month.noMatchesOnDay')} />
             ) : (
               <div className="mb-agenda__rows">
                 {dayItems.map((m) => (
@@ -220,15 +227,15 @@ function MonthView({ items, loading, month, onMonthChange }) {
               </div>
             )}
           </Card>
-          <Card title={`${month.format('MMMM')} özeti`}>
+          <Card title={t('calendar:month.summary', { month: month.format('MMMM') })}>
             <div className="mb-cal-summary">
               <div>
                 <strong>{upcomingCount}</strong>
-                <span>Yaklaşan</span>
+                <span>{t('calendar:month.upcoming')}</span>
               </div>
               <div>
                 <strong>{results.length}</strong>
-                <span>Oynanan</span>
+                <span>{t('calendar:month.playedCount')}</span>
               </div>
             </div>
             {results.length > 0 && (
@@ -243,10 +250,10 @@ function MonthView({ items, loading, month, onMonthChange }) {
             )}
           </Card>
           <div className="mb-cal-legend">
-            <span className="is-going"><i /> Katılıyorsun</span>
-            <span className="is-waitlist"><i /> Yedek</span>
-            <span className="is-invited"><i /> Davet</span>
-            <span className="is-past"><i /> Oynandı</span>
+            <span className="is-going"><i /> {t('calendar:kind.going')}</span>
+            <span className="is-waitlist"><i /> {t('calendar:kind.waitlist')}</span>
+            <span className="is-invited"><i /> {t('calendar:kind.invited')}</span>
+            <span className="is-past"><i /> {t('calendar:played')}</span>
           </div>
         </div>
       </Col>
@@ -256,6 +263,7 @@ function MonthView({ items, loading, month, onMonthChange }) {
 
 export default function MyCalendar() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [view, setView] = useState('agenda');
   const [month, setMonth] = useState(() => dayjs().startOf('month'));
   const [items, setItems] = useState([]);
@@ -277,11 +285,11 @@ export default function MyCalendar() {
       const data = await calendarApi.my(from.toISOString(), to.toISOString());
       setItems(data || []);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Takvim yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('calendar:loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [view, month, message]);
+  }, [view, month, message, t]);
 
   useEffect(() => {
     load();
@@ -294,17 +302,17 @@ export default function MyCalendar() {
   return (
     <>
       <PageHeader
-        eyebrow="Fikstürüm"
-        title="Takvimim"
+        eyebrow={t('calendar:page.eyebrow')}
+        title={t('calendar:page.title')}
         icon={<CalendarOutlined />}
-        subtitle="Katıldığın, yedekte beklediğin ve davet edildiğin maçlar tek yerde."
+        subtitle={t('calendar:page.subtitle')}
         extra={
           <Segmented
             value={view}
             onChange={setView}
             options={[
-              { label: 'Ajanda', value: 'agenda', icon: <UnorderedListOutlined /> },
-              { label: 'Ay', value: 'month', icon: <CalendarOutlined /> },
+              { label: t('calendar:page.viewAgenda'), value: 'agenda', icon: <UnorderedListOutlined /> },
+              { label: t('calendar:page.viewMonth'), value: 'month', icon: <CalendarOutlined /> },
             ]}
           />
         }

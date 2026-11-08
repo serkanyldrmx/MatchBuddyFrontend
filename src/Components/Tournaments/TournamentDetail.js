@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { App, Avatar, Button, Dropdown, Result, Select, Skeleton, Table, Tabs, Tooltip } from 'antd';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
@@ -26,6 +27,7 @@ import './Tournaments.css';
 
 /* ---------------- Fikstür satırı ---------------- */
 function FixtureRow({ f, myTeamIds, canManage, ongoing, onResult, onDate }) {
+  const { t } = useTranslation();
   const played = f.status === FIXTURE_STATUS.PLAYED;
   const bye = f.status === FIXTURE_STATUS.BYE;
   const w = f.winnerTeamId;
@@ -41,14 +43,14 @@ function FixtureRow({ f, myTeamIds, canManage, ongoing, onResult, onDate }) {
         } ${team ? '' : 'is-empty'}`}
       >
         {isWinner && cls === 'is-away' && <CrownFilled className="mb-fx-row__crown" />}
-        <strong>{team ? team.teamName : bye ? 'Bay' : 'Belli değil'}</strong>
+        <strong>{team ? team.teamName : bye ? t('tournaments:bracket.bye') : t('tournaments:teamTbd')}</strong>
         {isWinner && cls === 'is-home' && <CrownFilled className="mb-fx-row__crown" />}
       </div>
     );
   };
 
   let center;
-  if (bye) center = <span className="mb-fx-row__bye">Bay geçti</span>;
+  if (bye) center = <span className="mb-fx-row__bye">{t('tournaments:bracket.byePassed')}</span>;
   else if (played)
     center = (
       <span className="mb-fx-row__score">
@@ -64,8 +66,8 @@ function FixtureRow({ f, myTeamIds, canManage, ongoing, onResult, onDate }) {
   return (
     <div className={`mb-fx-row ${played ? 'is-played' : ''} ${bye ? 'is-bye' : ''}`}>
       <div className="mb-fx-row__date">
-        <CalendarOutlined /> {f.matchDate ? formatDate(f.matchDate) : 'Tarih belirlenmedi'}
-        {played && w && f.homeScore === f.awayScore && <span className="mb-fx-row__pen">Penaltılarla</span>}
+        <CalendarOutlined /> {f.matchDate ? formatDate(f.matchDate) : t('tournaments:fixtures.noDate')}
+        {played && w && f.homeScore === f.awayScore && <span className="mb-fx-row__pen">{t('tournaments:fixtures.onPenalties')}</span>}
       </div>
       <div className="mb-fx-row__board">
         {side(f.homeTeam, 'is-home')}
@@ -74,13 +76,13 @@ function FixtureRow({ f, myTeamIds, canManage, ongoing, onResult, onDate }) {
       </div>
       {showActions && (
         <div className="mb-fx-row__actions">
-          <Tooltip title={bothKnown ? '' : 'İki takım da belli olunca sonuç girebilirsin'}>
+          <Tooltip title={bothKnown ? '' : t('tournaments:fixtures.resultNeedsTeams')}>
             <Button size="small" type={played ? 'default' : 'primary'} disabled={!bothKnown} onClick={() => onResult(f)}>
-              {played ? 'Sonucu düzelt' : 'Sonuç gir'}
+              {played ? t('tournaments:fixtures.editResult') : t('tournaments:result.title')}
             </Button>
           </Tooltip>
           <Button size="small" type="text" icon={<EditOutlined />} onClick={() => onDate(f)}>
-            Tarihi değiştir
+            {t('tournaments:date.title')}
           </Button>
         </div>
       )}
@@ -88,25 +90,26 @@ function FixtureRow({ f, myTeamIds, canManage, ongoing, onResult, onDate }) {
   );
 }
 
-function FixturesTab({ t, myTeamIds, onResult, onDate }) {
+function FixturesTab({ tour, myTeamIds, onResult, onDate }) {
+  const { t } = useTranslation();
   const rounds = useMemo(() => {
     const map = new Map();
-    [...(t.fixtures || [])]
+    [...(tour.fixtures || [])]
       .sort((a, b) => a.round - b.round || a.position - b.position)
       .forEach((f) => {
         if (!map.has(f.round)) map.set(f.round, []);
         map.get(f.round).push(f);
       });
     return [...map.entries()];
-  }, [t.fixtures]);
+  }, [tour.fixtures]);
 
   if (!rounds.length) {
     return (
       <EmptyState
         description={
-          t.status === TOURNAMENT_STATUS.REGISTRATION
-            ? 'Fikstür, turnuva başladığında otomatik oluşturulur.'
-            : 'Fikstür bulunamadı.'
+          tour.status === TOURNAMENT_STATUS.REGISTRATION
+            ? t('tournaments:fixtures.emptyBeforeStart')
+            : t('tournaments:fixtures.empty')
         }
       />
     );
@@ -119,8 +122,8 @@ function FixturesTab({ t, myTeamIds, onResult, onDate }) {
         return (
           <section key={round} className="mb-fx-round">
             <header className="mb-fx-round__head">
-              <h3>{roundName(t, round)}</h3>
-              {done && <span className="mb-chip is-done">Tamamlandı</span>}
+              <h3>{roundName(tour, round)}</h3>
+              {done && <span className="mb-chip is-done">{t('common:status.completed')}</span>}
             </header>
             <div className="mb-fx-round__list">
               {list.map((f) => (
@@ -128,8 +131,8 @@ function FixturesTab({ t, myTeamIds, onResult, onDate }) {
                   key={f.fixtureId}
                   f={f}
                   myTeamIds={myTeamIds}
-                  canManage={t.canManage}
-                  ongoing={t.status === TOURNAMENT_STATUS.ONGOING}
+                  canManage={tour.canManage}
+                  ongoing={tour.status === TOURNAMENT_STATUS.ONGOING}
                   onResult={onResult}
                   onDate={onDate}
                 />
@@ -143,9 +146,10 @@ function FixturesTab({ t, myTeamIds, onResult, onDate }) {
 }
 
 /* ---------------- Puan tablosu ---------------- */
-function StandingsTab({ t, myTeamIds }) {
-  const rows = (t.standings || []).map((s, i) => ({ ...s, rank: i + 1 }));
-  if (!rows.length) return <EmptyState description="Puan tablosu, turnuva başlayınca oluşur." />;
+function StandingsTab({ tour, myTeamIds }) {
+  const { t } = useTranslation();
+  const rows = (tour.standings || []).map((s, i) => ({ ...s, rank: i + 1 }));
+  if (!rows.length) return <EmptyState description={t('tournaments:standings.empty')} />;
 
   const num = (key, title, extra = {}) => ({ title, dataIndex: key, key, align: 'center', width: 52, ...extra });
   const columns = [
@@ -158,23 +162,23 @@ function StandingsTab({ t, myTeamIds }) {
       render: (r) => <span className={`mb-st-rank ${r === 1 ? 'is-first' : ''}`}>{r === 1 ? <CrownFilled /> : r}</span>,
     },
     {
-      title: 'Takım',
+      title: t('tournaments:standings.team'),
       key: 'team',
       render: (_, s) => (
         <span className="mb-st-team">
           <strong>{s.team?.teamName}</strong>
-          {myTeamIds.has(s.team?.teamId) && <span className="mb-chip is-approved">Senin</span>}
+          {myTeamIds.has(s.team?.teamId) && <span className="mb-chip is-approved">{t('tournaments:standings.yours')}</span>}
         </span>
       ),
     },
-    num('played', 'O'),
-    num('won', 'G'),
-    num('drawn', 'B'),
-    num('lost', 'M'),
-    num('goalsFor', 'A', { responsive: ['sm'] }),
-    num('goalsAgainst', 'Y', { responsive: ['sm'] }),
-    num('goalDiff', 'AV', { render: (v) => (v > 0 ? `+${v}` : v) }),
-    num('points', 'P', { width: 60, render: (v) => <span className="mb-st-points">{v}</span> }),
+    num('played', t('tournaments:standings.cols.played')),
+    num('won', t('tournaments:standings.cols.won')),
+    num('drawn', t('tournaments:standings.cols.drawn')),
+    num('lost', t('tournaments:standings.cols.lost')),
+    num('goalsFor', t('tournaments:standings.cols.goalsFor'), { responsive: ['sm'] }),
+    num('goalsAgainst', t('tournaments:standings.cols.goalsAgainst'), { responsive: ['sm'] }),
+    num('goalDiff', t('tournaments:standings.cols.goalDiff'), { render: (v) => (v > 0 ? `+${v}` : v) }),
+    num('points', t('tournaments:standings.cols.points'), { width: 60, render: (v) => <span className="mb-st-points">{v}</span> }),
   ];
 
   return (
@@ -188,22 +192,23 @@ function StandingsTab({ t, myTeamIds }) {
         scroll={{ x: 520 }}
         rowClassName={(s) => `${s.rank === 1 ? 'mb-st-row-first' : ''} ${myTeamIds.has(s.team?.teamId) ? 'mb-st-row-mine' : ''}`}
       />
-      <p className="mb-tr-legend">O: oynanan · G: galibiyet · B: beraberlik · M: mağlubiyet · A: atılan · Y: yenilen · AV: averaj · P: puan</p>
+      <p className="mb-tr-legend">{t('tournaments:standings.legend')}</p>
     </div>
   );
 }
 
 /* ---------------- Takımlar ---------------- */
-function TeamsTab({ t, onWithdraw }) {
-  const teams = t.teams || [];
+function TeamsTab({ tour, onWithdraw }) {
+  const { t } = useTranslation();
+  const teams = tour.teams || [];
   if (!teams.length) {
-    return <EmptyState description="Henüz kayıtlı takım yok. İlk takım senin olsun!" />;
+    return <EmptyState description={t('tournaments:teams.empty')} />;
   }
-  const regOpen = t.status === TOURNAMENT_STATUS.REGISTRATION;
+  const regOpen = tour.status === TOURNAMENT_STATUS.REGISTRATION;
   return (
     <div className="mb-tm-grid">
       {teams.map((team) => {
-        const isWinner = t.winner?.teamId === team.teamId;
+        const isWinner = tour.winner?.teamId === team.teamId;
         return (
           <div key={team.teamId} className={`mb-tm-card ${team.isMine ? 'is-mine' : ''} ${isWinner ? 'is-winner' : ''}`}>
             <div className="mb-tm-card__head">
@@ -211,7 +216,7 @@ function TeamsTab({ t, onWithdraw }) {
               <div className="mb-tm-card__title">
                 <strong>{team.teamName}</strong>
                 <small>
-                  <TeamOutlined /> {team.memberCount ?? team.members?.length ?? 0} oyuncu
+                  <TeamOutlined /> {t('tournaments:teams.players', { count: team.memberCount ?? team.members?.length ?? 0 })}
                 </small>
               </div>
               {isWinner && <CrownFilled className="mb-tm-card__crown" />}
@@ -231,10 +236,10 @@ function TeamsTab({ t, onWithdraw }) {
               )}
             </div>
             <div className="mb-tm-card__footer">
-              {team.isMine ? <span className="mb-chip is-approved">Senin takımın</span> : <span />}
-              {regOpen && (team.isMine || t.canManage) && (
+              {team.isMine ? <span className="mb-chip is-approved">{t('tournaments:teams.yourTeam')}</span> : <span />}
+              {regOpen && (team.isMine || tour.canManage) && (
                 <Button size="small" type="text" danger icon={<LogoutOutlined />} onClick={() => onWithdraw(team)}>
-                  Kaydı çek
+                  {t('tournaments:teams.withdraw')}
                 </Button>
               )}
             </div>
@@ -246,27 +251,28 @@ function TeamsTab({ t, onWithdraw }) {
 }
 
 /* ---------------- Katılım alanı (hero) ---------------- */
-function JoinPanel({ t, onJoin, joining }) {
+function JoinPanel({ tour, onJoin, joining }) {
+  const { t } = useTranslation();
   const [teamId, setTeamId] = useState();
-  const eligible = useMemo(() => t.myEligibleTeams || [], [t.myEligibleTeams]);
-  const full = t.maxTeams && t.teamCount >= t.maxTeams;
+  const eligible = useMemo(() => tour.myEligibleTeams || [], [tour.myEligibleTeams]);
+  const full = tour.maxTeams && tour.teamCount >= tour.maxTeams;
 
   useEffect(() => {
     setTeamId(eligible.length === 1 ? eligible[0].teamId : undefined);
   }, [eligible]);
 
-  if (full) return <span className="mb-tr-hint">Kontenjan doldu, yeni takım alınmıyor.</span>;
+  if (full) return <span className="mb-tr-hint">{t('tournaments:join.full')}</span>;
 
   if (!eligible.length) {
-    if (t.myTeamIds?.length) return null;
+    if (tour.myTeamIds?.length) return null;
     return (
       <div className="mb-tr-join is-empty">
-        <span className="mb-tr-hint">Katılmak için bir takımın olmalı.</span>
+        <span className="mb-tr-hint">{t('tournaments:join.needTeam')}</span>
         <Link to="/create-team">
-          <Button icon={<UsergroupAddOutlined />}>Takım kur</Button>
+          <Button icon={<UsergroupAddOutlined />}>{t('tournaments:join.createTeam')}</Button>
         </Link>
         <Link to="/teamAICreate">
-          <Button icon={<RobotOutlined />}>AI ile dengeli takım kur</Button>
+          <Button icon={<RobotOutlined />}>{t('tournaments:join.createTeamAI')}</Button>
         </Link>
       </div>
     );
@@ -275,14 +281,14 @@ function JoinPanel({ t, onJoin, joining }) {
   return (
     <div className="mb-tr-join">
       <Select
-        placeholder="Takımını seç"
+        placeholder={t('tournaments:join.selectTeam')}
         value={teamId}
         onChange={setTeamId}
         style={{ minWidth: 200 }}
         options={eligible.map((x) => ({ value: x.teamId, label: x.teamName }))}
       />
       <Button type="primary" icon={<UsergroupAddOutlined />} disabled={!teamId} loading={joining} onClick={() => onJoin(teamId)}>
-        Takımımla katıl
+        {t('tournaments:join.join')}
       </Button>
     </div>
   );
@@ -293,8 +299,9 @@ export default function TournamentDetail() {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
+  const { t } = useTranslation();
 
-  const [t, setT] = useState(null);
+  const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [tab, setTab] = useState();
@@ -307,16 +314,16 @@ export default function TournamentDetail() {
       if (!silent) setLoading(true);
       try {
         const d = await tournamentsApi.detail(tournamentId);
-        setT(d);
+        setTour(d);
         setNotFound(!d);
       } catch (e) {
         if (e?.response?.status === 404) setNotFound(true);
-        else message.error(apiErrorMessage(e, 'Turnuva yüklenemedi.'));
+        else message.error(apiErrorMessage(e, t('tournaments:detail.loadError')));
       } finally {
         setLoading(false);
       }
     },
-    [tournamentId, message]
+    [tournamentId, message, t]
   );
 
   useEffect(() => {
@@ -325,11 +332,11 @@ export default function TournamentDetail() {
   }, [load]);
 
   const myTeamIds = useMemo(
-    () => new Set([...(t?.myTeamIds || []), ...(t?.teams || []).filter((x) => x.isMine).map((x) => x.teamId)]),
-    [t]
+    () => new Set([...(tour?.myTeamIds || []), ...(tour?.teams || []).filter((x) => x.isMine).map((x) => x.teamId)]),
+    [tour]
   );
 
-  if (loading && !t) {
+  if (loading && !tour) {
     return (
       <div className="mb-tr-page">
         <Skeleton.Node active style={{ width: '100%', height: 260, borderRadius: 24 }} />
@@ -338,28 +345,28 @@ export default function TournamentDetail() {
     );
   }
 
-  if (notFound || !t) {
+  if (notFound || !tour) {
     return (
       <Result
         status="404"
-        title="Turnuva bulunamadı"
-        subTitle="Silinmiş ya da hiç var olmamış olabilir."
+        title={t('tournaments:detail.notFound')}
+        subTitle={t('tournaments:detail.notFoundSub')}
         extra={
           <Button type="primary" onClick={() => navigate('/tournaments')}>
-            Turnuvalara dön
+            {t('tournaments:detail.backToList')}
           </Button>
         }
       />
     );
   }
 
-  const regOpen = t.status === TOURNAMENT_STATUS.REGISTRATION;
-  const finished = t.status === TOURNAMENT_STATUS.FINISHED;
-  const league = isLeague(t);
-  const knockout = isKnockout(t);
+  const regOpen = tour.status === TOURNAMENT_STATUS.REGISTRATION;
+  const finished = tour.status === TOURNAMENT_STATUS.FINISHED;
+  const league = isLeague(tour);
+  const knockout = isKnockout(tour);
   const defaultTab = regOpen ? 'teams' : 'fixtures';
   const activeTab = tab || defaultTab;
-  const myRegistered = (t.teams || []).filter((x) => x.isMine);
+  const myRegistered = (tour.teams || []).filter((x) => x.isMine);
   const minTeams = league ? 3 : 2;
 
   const run = async (fn, okText, errText) => {
@@ -379,7 +386,7 @@ export default function TournamentDetail() {
 
   const join = async (teamId) => {
     setJoining(true);
-    const ok = await run(() => tournamentsApi.registerTeam(t.tournamentId, teamId), 'Takımın turnuvaya kaydoldu!', 'Takım kaydedilemedi.');
+    const ok = await run(() => tournamentsApi.registerTeam(tour.tournamentId, teamId), t('tournaments:detail.joinSuccess'), t('tournaments:detail.joinError'));
     setJoining(false);
     if (ok) {
       setTab('teams');
@@ -389,41 +396,45 @@ export default function TournamentDetail() {
 
   const withdraw = (team) =>
     modal.confirm({
-      title: `${team.teamName} turnuvadan çekilsin mi?`,
-      content: 'Kayıt açık olduğu sürece tekrar katılabilirsin.',
-      okText: 'Kaydı çek',
+      title: t('tournaments:detail.withdrawConfirm.title', { name: team.teamName }),
+      content: t('tournaments:detail.withdrawConfirm.content'),
+      okText: t('tournaments:teams.withdraw'),
       okButtonProps: { danger: true },
-      cancelText: 'Vazgeç',
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
-        if (await run(() => tournamentsApi.withdrawTeam(t.tournamentId, team.teamId), 'Takım turnuvadan çekildi.', 'Takım çekilemedi.')) load(true);
+        if (await run(() => tournamentsApi.withdrawTeam(tour.tournamentId, team.teamId), t('tournaments:detail.withdrawSuccess'), t('tournaments:detail.withdrawError'))) load(true);
       },
     });
 
   const start = () =>
     modal.confirm({
-      title: 'Turnuvayı başlatalım mı?',
+      title: t('tournaments:detail.startConfirm.title'),
       width: 480,
       content: (
         <div className="mb-tr-confirm">
-          <p>Başlattığında:</p>
+          <p>{t('tournaments:detail.startConfirm.intro')}</p>
           <ul>
-            <li>Kayıtlar kapanır, yeni takım katılamaz.</li>
+            <li>{t('tournaments:detail.startConfirm.closed')}</li>
             {league ? (
-              <li>Herkesin herkesle bir kez oynadığı lig fikstürü oluşturulur; haftalar 7 gün arayla, başlangıç saatinde oynanır.</li>
+              <li>{t('tournaments:detail.startConfirm.league')}</li>
             ) : (
-              <li>Takımlar rastgele eşleşir ve eleme ağacı kurulur; eksik yerlerde takımlar bay geçer.</li>
+              <li>{t('tournaments:detail.startConfirm.knockout')}</li>
             )}
-            <li>Kayıtlı takımların tüm oyuncularına bildirim gider.</li>
+            <li>{t('tournaments:detail.startConfirm.notify')}</li>
           </ul>
           <p>
-            Şu an <strong>{t.teamCount}</strong> takım kayıtlı.
+            <Trans
+              i18nKey="tournaments:detail.startConfirm.registered"
+              count={tour.teamCount}
+              components={{ b: <strong /> }}
+            />
           </p>
         </div>
       ),
-      okText: 'Başlat',
-      cancelText: 'Vazgeç',
+      okText: t('tournaments:detail.startConfirm.ok'),
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
-        if (await run(() => tournamentsApi.start(t.tournamentId), 'Turnuva başladı, bol şans!', 'Turnuva başlatılamadı.')) {
+        if (await run(() => tournamentsApi.start(tour.tournamentId), t('tournaments:detail.startSuccess'), t('tournaments:detail.startError'))) {
           setTab('fixtures');
           load(true);
         }
@@ -432,13 +443,13 @@ export default function TournamentDetail() {
 
   const remove = () =>
     modal.confirm({
-      title: 'Turnuva silinsin mi?',
-      content: 'Bu işlem geri alınamaz; kayıtlı takımların kaydı da silinir.',
-      okText: 'Sil',
+      title: t('tournaments:detail.deleteConfirm.title'),
+      content: t('tournaments:detail.deleteConfirm.content'),
+      okText: t('common:actions.delete'),
       okButtonProps: { danger: true },
-      cancelText: 'Vazgeç',
+      cancelText: t('common:actions.cancel'),
       onOk: async () => {
-        if (await run(() => tournamentsApi.remove(t.tournamentId), 'Turnuva silindi.', 'Turnuva silinemedi.')) navigate('/tournaments');
+        if (await run(() => tournamentsApi.remove(tour.tournamentId), t('tournaments:detail.deleteSuccess'), t('tournaments:detail.deleteError'))) navigate('/tournaments');
       },
     });
 
@@ -446,7 +457,7 @@ export default function TournamentDetail() {
     regOpen && myRegistered.length > 0 ? (
       myRegistered.length === 1 ? (
         <Button danger icon={<LogoutOutlined />} onClick={() => withdraw(myRegistered[0])}>
-          Takımını çek
+          {t('tournaments:detail.withdrawTeam')}
         </Button>
       ) : (
         <Dropdown
@@ -455,7 +466,7 @@ export default function TournamentDetail() {
           }}
         >
           <Button danger icon={<LogoutOutlined />}>
-            Takımını çek
+            {t('tournaments:detail.withdrawTeam')}
           </Button>
         </Dropdown>
       )
@@ -464,30 +475,30 @@ export default function TournamentDetail() {
   const tabs = [
     {
       key: 'fixtures',
-      label: 'Fikstür',
+      label: t('tournaments:detail.tabs.fixtures'),
       children: (
-        <FixturesTab t={t} myTeamIds={myTeamIds} onResult={setResultFixture} onDate={setDateFixture} />
+        <FixturesTab tour={tour} myTeamIds={myTeamIds} onResult={setResultFixture} onDate={setDateFixture} />
       ),
     },
   ];
   if (league) {
-    tabs.push({ key: 'standings', label: 'Puan tablosu', children: <StandingsTab t={t} myTeamIds={myTeamIds} /> });
+    tabs.push({ key: 'standings', label: t('tournaments:detail.tabs.standings'), children: <StandingsTab tour={tour} myTeamIds={myTeamIds} /> });
   }
   if (knockout) {
     tabs.push({
       key: 'bracket',
-      label: 'Ağaç',
-      children: t.fixtures?.length ? (
-        <Bracket tournament={t} />
+      label: t('tournaments:detail.tabs.bracket'),
+      children: tour.fixtures?.length ? (
+        <Bracket tournament={tour} />
       ) : (
-        <EmptyState description="Eleme ağacı, turnuva başladığında kurulur." />
+        <EmptyState description={t('tournaments:detail.bracketEmpty')} />
       ),
     });
   }
   tabs.push({
     key: 'teams',
-    label: `Takımlar (${t.teams?.length ?? t.teamCount ?? 0})`,
-    children: <TeamsTab t={t} onWithdraw={withdraw} />,
+    label: t('tournaments:detail.tabs.teams', { count: tour.teams?.length ?? tour.teamCount ?? 0 }),
+    children: <TeamsTab tour={tour} onWithdraw={withdraw} />,
   });
 
   return (
@@ -495,60 +506,60 @@ export default function TournamentDetail() {
       <section className="mb-pitch-bg mb-tr-hero">
         <div className="mb-tr-hero__top">
           <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/tournaments')} className="mb-ghost-link">
-            Turnuvalar
+            {t('tournaments:list.title')}
           </Button>
           <div className="mb-tr-hero__chips">
-            <FormatChip format={t.format} />
-            <TournamentStatusChip status={t.status} />
+            <FormatChip format={tour.format} />
+            <TournamentStatusChip status={tour.status} />
           </div>
         </div>
 
-        <h1 className="mb-tr-hero__title">{t.name}</h1>
-        {t.description && <p className="mb-tr-hero__desc">{t.description}</p>}
+        <h1 className="mb-tr-hero__title">{tour.name}</h1>
+        {tour.description && <p className="mb-tr-hero__desc">{tour.description}</p>}
 
         <div className="mb-tr-hero__meta">
           <span>
-            <CalendarOutlined /> {formatDateTime(t.startDate)}
+            <CalendarOutlined /> {formatDateTime(tour.startDate)}
           </span>
           <span>
-            <EnvironmentOutlined /> {t.stadium?.stadiumName || 'Saha belirlenmedi'}
+            <EnvironmentOutlined /> {tour.stadium?.stadiumName || t('tournaments:card.noPitch')}
           </span>
           <span>
-            <TeamOutlined /> {t.teamCount ?? 0}/{t.maxTeams} takım
+            <TeamOutlined /> {t('tournaments:card.teamCount', { count: tour.teamCount ?? 0, max: tour.maxTeams })}
           </span>
-          {t.createdBy && (
+          {tour.createdBy && (
             <span className="mb-tr-hero__creator">
-              <PlayerAvatar player={t.createdBy} size={22} />
-              <PlayerLink player={t.createdBy}>{fullName(t.createdBy)}</PlayerLink>
+              <PlayerAvatar player={tour.createdBy} size={22} />
+              <PlayerLink player={tour.createdBy}>{fullName(tour.createdBy)}</PlayerLink>
             </span>
           )}
         </div>
 
-        {finished && t.winner && (
+        {finished && tour.winner && (
           <div className="mb-tr-champion">
             <CrownFilled className="mb-tr-champion__icon" />
             <div>
-              <span className="mb-tr-champion__label">Şampiyon</span>
-              <strong className="mb-tr-champion__name">{t.winner.teamName}</strong>
+              <span className="mb-tr-champion__label">{t('tournaments:card.champion')}</span>
+              <strong className="mb-tr-champion__name">{tour.winner.teamName}</strong>
             </div>
-            {myTeamIds.has(t.winner.teamId) && <span className="mb-chip is-pending">Tebrikler, kupa sizin!</span>}
+            {myTeamIds.has(tour.winner.teamId) && <span className="mb-chip is-pending">{t('tournaments:detail.congrats')}</span>}
           </div>
         )}
 
         {regOpen && (
           <div className="mb-tr-hero__actions">
-            <JoinPanel t={t} onJoin={join} joining={joining} />
+            <JoinPanel tour={tour} onJoin={join} joining={joining} />
             <div className="mb-tr-hero__actions-right">
               {withdrawButton}
-              {t.canManage && (
+              {tour.canManage && (
                 <>
-                  <Tooltip title={t.teamCount < minTeams ? `Başlatmak için en az ${minTeams} takım gerekli` : ''}>
-                    <Button type="primary" icon={<PlayCircleOutlined />} disabled={t.teamCount < minTeams} onClick={start}>
-                      Turnuvayı başlat
+                  <Tooltip title={tour.teamCount < minTeams ? t('tournaments:detail.minTeams', { count: minTeams }) : ''}>
+                    <Button type="primary" icon={<PlayCircleOutlined />} disabled={tour.teamCount < minTeams} onClick={start}>
+                      {t('tournaments:detail.start')}
                     </Button>
                   </Tooltip>
                   <Button danger type="text" icon={<DeleteOutlined />} onClick={remove}>
-                    Sil
+                    {t('common:actions.delete')}
                   </Button>
                 </>
               )}

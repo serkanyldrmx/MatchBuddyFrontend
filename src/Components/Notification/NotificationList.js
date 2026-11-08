@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { App, Badge, Button, Card, List, Segmented, Skeleton, Typography } from 'antd';
 import { BellOutlined, CheckOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { NOTIFICATIONS_CHANGED } from '../../layout/NotificationBell';
 import { NOTIFICATION_TYPES } from '../../layout/notificationTypes';
@@ -12,6 +13,7 @@ const { Text } = Typography;
 
 const NotificationList = () => {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -24,11 +26,11 @@ const NotificationList = () => {
         (res.data || []).sort((a, b) => new Date(b.notification?.createdAt) - new Date(a.notification?.createdAt))
       );
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Bildirimler yüklenemedi.'));
+      message.error(apiErrorMessage(e, t('notifications:list.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [message]);
+  }, [message, t]);
 
   useEffect(() => {
     load();
@@ -40,7 +42,7 @@ const NotificationList = () => {
       setItems((list) => list.map((n) => (ids.includes(n.playerNotificationId) ? { ...n, isRead: true } : n)));
       window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED));
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Bildirim güncellenemedi.'));
+      message.error(apiErrorMessage(e, t('notifications:list.updateFailed')));
     }
   };
 
@@ -50,12 +52,12 @@ const NotificationList = () => {
   return (
     <>
       <PageHeader
-        title="Bildirimler"
-        subtitle="Maç onayları, yeni maçlar ve halı saha duyuruları."
+        title={t('notifications:list.title')}
+        subtitle={t('notifications:list.subtitle')}
         icon={<BellOutlined />}
         extra={
           <Button icon={<CheckOutlined />} disabled={!unread.length} onClick={() => markRead(unread.map((n) => n.playerNotificationId))}>
-            Tümünü okundu işaretle
+            {t('notifications:list.markAllRead')}
           </Button>
         }
       />
@@ -65,14 +67,14 @@ const NotificationList = () => {
           value={filter}
           onChange={setFilter}
           options={[
-            { label: `Tümü (${items.length})`, value: 'all' },
-            { label: `Okunmamış (${unread.length})`, value: 'unread' },
+            { label: t('notifications:list.filterAll', { count: items.length }), value: 'all' },
+            { label: t('notifications:list.filterUnread', { count: unread.length }), value: 'unread' },
           ]}
         />
         {loading ? (
           <Skeleton active avatar paragraph={{ rows: 4 }} />
         ) : visible.length === 0 ? (
-          <EmptyState description={filter === 'unread' ? 'Okunmamış bildiriminiz yok' : 'Henüz bildiriminiz yok'} />
+          <EmptyState description={filter === 'unread' ? t('notifications:list.emptyUnread') : t('notifications:list.empty')} />
         ) : (
           <List
             dataSource={visible}
@@ -86,7 +88,7 @@ const NotificationList = () => {
                       ? []
                       : [
                           <Button key="read" size="small" type="link" onClick={() => markRead([n.playerNotificationId])}>
-                            Okundu
+                            {t('notifications:list.markRead')}
                           </Button>,
                         ]
                   }

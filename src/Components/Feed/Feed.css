@@ -44,7 +44,7 @@
 
 .mb-activity.is-scored {
   --accent: var(--mb-pitch);
-  --accent-soft: rgba(34, 197, 94, 0.14);
+  --accent-soft: rgba(var(--mb-pitch-rgb), 0.14);
 }
 
 .mb-activity.is-mvp,
@@ -56,18 +56,18 @@
 .mb-activity.is-team,
 .mb-activity.is-follow {
   --accent: var(--mb-info);
-  --accent-soft: rgba(56, 189, 248, 0.14);
+  --accent-soft: rgba(var(--mb-info-rgb), 0.14);
 }
 
 .mb-activity.is-mvp {
-  border-color: rgba(251, 191, 36, 0.35);
+  border-color: rgba(var(--mb-gold-rgb), 0.35);
   background:
-    radial-gradient(600px 160px at 100% 0%, rgba(251, 191, 36, 0.16), transparent 70%),
+    radial-gradient(600px 160px at 100% 0%, rgba(var(--mb-gold-rgb), 0.16), transparent 70%),
     var(--mb-surface);
 }
 
 .mb-activity.is-trophy {
-  border-color: rgba(251, 191, 36, 0.35);
+  border-color: rgba(var(--mb-gold-rgb), 0.35);
 }
 
 .mb-activity__rail {
@@ -144,7 +144,7 @@
 .mb-mini-fixture:hover,
 .mb-mini-fixture:focus-visible {
   outline: none;
-  border-color: rgba(198, 244, 50, 0.35);
+  border-color: rgba(var(--mb-primary-rgb), 0.35);
 }
 
 .mb-mini-fixture__when {
@@ -221,8 +221,8 @@
   gap: 14px;
   padding: 12px 16px;
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.16), transparent);
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: linear-gradient(90deg, rgba(var(--mb-pitch-rgb), 0.16), transparent);
+  border: 1px solid rgba(var(--mb-pitch-rgb), 0.25);
 }
 
 .mb-activity__ball {
@@ -266,8 +266,8 @@
   gap: 18px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.03));
-  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: linear-gradient(135deg, rgba(var(--mb-gold-rgb), 0.2), rgba(var(--mb-gold-rgb), 0.03));
+  border: 1px solid rgba(var(--mb-gold-rgb), 0.4);
 }
 
 .mb-activity__mvp-avatar {
@@ -276,7 +276,7 @@
 
 .mb-activity__mvp-avatar .mb-avatar.ant-avatar {
   border-color: var(--mb-gold);
-  box-shadow: 0 0 22px rgba(251, 191, 36, 0.45);
+  box-shadow: 0 0 22px rgba(var(--mb-gold-rgb), 0.45);
 }
 
 .mb-activity__crown {
@@ -335,7 +335,7 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(56, 189, 248, 0.14);
+  background: rgba(var(--mb-info-rgb), 0.14);
   color: var(--mb-info);
   font-family: var(--mb-display);
   font-size: 22px;
@@ -386,14 +386,14 @@
   gap: 16px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.02));
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: linear-gradient(135deg, rgba(var(--mb-gold-rgb), 0.18), rgba(var(--mb-gold-rgb), 0.02));
+  border: 1px solid rgba(var(--mb-gold-rgb), 0.35);
 }
 
 .mb-activity__trophy > .anticon {
   font-size: 40px;
   color: var(--mb-gold);
-  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.5));
+  filter: drop-shadow(0 0 12px rgba(var(--mb-gold-rgb), 0.5));
 }
 
 .mb-activity__trophy div {
@@ -527,5 +527,12 @@
   .mb-mini-fixture > .ant-btn,
   .mb-mini-fixture > .mb-chip {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .mb-mini-fixture {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 10px;
   }
 }

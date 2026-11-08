@@ -1,8 +1,10 @@
 import './App.css';
+import './mobile.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { App as AntApp, ConfigProvider } from 'antd';
-import trTR from 'antd/locale/tr_TR';
-import { appTheme } from './theme/theme';
+import { App as AntApp } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { antdLocaleFor } from './i18n';
+import { ThemeProvider } from './theme/ThemeContext';
 import { MessagesProvider } from './messaging/MessagesContext';
 import AppLayout from './layout/AppLayout';
 import AdminLayout from './layout/AdminLayout';
@@ -17,14 +19,19 @@ import OwnerPitches from './owner/OwnerPitches';
 import OwnerPricing from './owner/OwnerPricing';
 import OwnerCampaigns from './owner/OwnerCampaigns';
 import OwnerReviews from './owner/OwnerReviews';
+import OwnerFinance from './owner/OwnerFinance';
 import Venues from './Components/Venues/Venues';
 import VenueDetail from './Components/Venues/VenueDetail';
 import CreateMatch from './Components/Venues/CreateMatch';
 import AdminBusinesses from './admin/Businesses';
 import AdminOsm from './admin/OsmCandidates';
+import AdminParameters from './admin/Parameters';
+import OwnerSettings from './owner/OwnerSettings';
 
 import UserLogin from './Components/UserLogin/UserLogin';
 import RegisterForm from './Components/UserLogin/Register';
+import ForgotPassword from './Components/UserLogin/ForgotPassword';
+import Terms from './Components/Information/Terms';
 
 import Home from './Components/Home/Home';
 import MatchDetails from './Components/Home/MatchDetails';
@@ -54,19 +61,21 @@ import AdminMatches from './admin/AdminMatches';
 import Stadium from './Components/Stadium/Stadium';
 import StadiumIsAdmin from './Components/Stadium/StadiumIsAdmin';
 
-// Giriş ve kayıt ekranları kendi açık tasarımlarını kullanır; uygulamanın koyu teması buraya uygulanmaz
-const LightTheme = ({ children }) => <ConfigProvider theme={{ inherit: false }}>{children}</ConfigProvider>;
-
 function App() {
+  // Dil değişince antd bileşen metinleri (DatePicker, Table vb.) de güncellenir
+  const { i18n } = useTranslation();
+  // ThemeProvider: açık/koyu tema + telefon (md altı) kontrol boyları → antd ConfigProvider
   return (
-    <ConfigProvider theme={appTheme} locale={trTR}>
+    <ThemeProvider locale={antdLocaleFor(i18n.language)}>
       <AntApp>
         <BrowserRouter>
           <MessagesProvider>
             <Routes>
               {/* Giriş / kayıt */}
-              <Route path="/" element={<LightTheme><UserLogin /></LightTheme>} />
-              <Route path="/register" element={<LightTheme><RegisterForm /></LightTheme>} />
+              <Route path="/" element={<UserLogin />} />
+              <Route path="/register" element={<RegisterForm />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/terms" element={<Terms />} />
 
               {/* Oyuncu ekranları: ortak AppLayout içinde */}
               <Route element={<PrivateRoute role={ROLE.PLAYER} />}>
@@ -116,6 +125,7 @@ function App() {
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="businesses" element={<AdminBusinesses />} />
                   <Route path="osm" element={<AdminOsm />} />
+                  <Route path="parameters" element={<AdminParameters />} />
                 </Route>
                 <Route path="/stadiumIsAdmin" element={<Navigate to="/adminPanel/stadiums/new" replace />} />
               </Route>
@@ -131,6 +141,8 @@ function App() {
                   <Route path="pricing" element={<OwnerPricing />} />
                   <Route path="campaigns" element={<OwnerCampaigns />} />
                   <Route path="reviews" element={<OwnerReviews />} />
+                  <Route path="finance" element={<OwnerFinance />} />
+                  <Route path="settings" element={<OwnerSettings />} />
                 </Route>
               </Route>
 
@@ -139,7 +151,7 @@ function App() {
           </MessagesProvider>
         </BrowserRouter>
       </AntApp>
-    </ConfigProvider>
+    </ThemeProvider>
   );
 }
 

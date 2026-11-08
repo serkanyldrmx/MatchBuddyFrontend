@@ -16,7 +16,7 @@
   height: 44px;
   min-width: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--mb-primary), #8fd11c);
+  background: linear-gradient(135deg, var(--mb-primary-fill), #8fd11c);
   color: var(--mb-primary-ink);
   font-family: var(--mb-display);
   font-style: italic;
@@ -36,4 +36,37 @@
 
 .mb-team-tile__member {
   font-size: 13px;
+}
+
+/* ---------- Telefon ---------- */
+@media (max-width: 767px) {
+  /* Araç çubuğu: sekme şeridi ve arama alt alta, tam genişlik */
+  .mb-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .mb-toolbar > .ant-segmented {
+    align-self: flex-start;
+  }
+  .mb-toolbar > .ant-input-affix-wrapper {
+    width: 100% !important;
+  }
+
+  .mb-team-tile__member {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mb-team-tile__actions {
+    flex-wrap: wrap;
+  }
+  .mb-team-tile__actions > .ant-btn {
+    flex: 1 1 140px;
+  }
+  .mb-team-tile__head .ant-btn-icon-only {
+    width: 44px;
+    height: 44px;
+  }
 }

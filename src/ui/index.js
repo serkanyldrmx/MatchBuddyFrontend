@@ -1,7 +1,13 @@
 import React from 'react';
 import { Avatar, Empty, Progress, Typography } from 'antd';
-import { fileUrl, initials } from '../utils/format';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
+import { initials, mediaUrl } from '../utils/format';
+import { useThemeMode } from '../theme/ThemeContext';
 import './common.css';
+
+export { default as BallLoader, PageLoader } from './BallLoader';
+export { default as ReliabilityBadge } from './ReliabilityBadge';
 
 const { Title, Text } = Typography;
 
@@ -25,9 +31,9 @@ export function PageHeader({ title, subtitle, extra, icon, eyebrow }) {
   );
 }
 
-/** Oyuncu avatarı: resim varsa resim, yoksa baş harfler */
+/** Oyuncu avatarı: resim varsa resim, yoksa baş harfler (küçük avatarlarda sm, ≥ 96 px'te md boyu) */
 export function PlayerAvatar({ player, size = 40, ...rest }) {
-  const src = fileUrl(player?.profilePictureUrl);
+  const src = mediaUrl(player?.profilePictureUrl, typeof size === 'number' && size >= 96 ? 'md' : 'sm');
   return (
     <Avatar size={size} src={src} className="mb-avatar" {...rest}>
       {!src && initials(player)}
@@ -36,22 +42,33 @@ export function PlayerAvatar({ player, size = 40, ...rest }) {
 }
 
 // Maç durumları (Match.IsActive): 1 = onay bekliyor, 2 = onaylandı, 3 = reddedildi
+const matchStatus = (key, className, color) => ({
+  className,
+  color,
+  get label() {
+    return i18n.t(key);
+  },
+});
 export const MATCH_STATUS = {
-  1: { label: 'Onay bekliyor', className: 'is-pending', color: 'gold' },
-  2: { label: 'Onaylandı', className: 'is-approved', color: 'green' },
-  3: { label: 'Reddedildi', className: 'is-rejected', color: 'red' },
+  1: matchStatus('common:status.pending', 'is-pending', 'gold'),
+  2: matchStatus('common:status.approved', 'is-approved', 'green'),
+  3: matchStatus('common:status.rejected', 'is-rejected', 'red'),
 };
 
 export function MatchStatusTag({ status, past }) {
-  if (past && status !== 3) return <span className="mb-chip is-done">Tamamlandı</span>;
-  const s = MATCH_STATUS[status] || { label: 'Bilinmiyor', className: 'is-done' };
+  const { t } = useTranslation();
+  if (past && status !== 3) return <span className="mb-chip is-done">{t('common:status.completed')}</span>;
+  const s = MATCH_STATUS[status] || { label: t('common:status.unknown'), className: 'is-done' };
   return <span className={`mb-chip ${s.className}`}>{s.label}</span>;
 }
 
 /** Kadro doluluk halkası: 7/10 */
-export function CapacityRing({ going = 0, capacity = 0, size = 46, label = 'oyuncu' }) {
+export function CapacityRing({ going = 0, capacity = 0, size = 46, label }) {
+  const { t } = useTranslation();
   const pct = capacity ? Math.min(Math.round((going / capacity) * 100), 100) : 0;
   const full = capacity && going >= capacity;
+  // Halka SVG nitelikleriyle (stroke=) çizilir: CSS değişkeni çözülmez, temanın somut rengi verilir
+  const { palette } = useThemeMode();
   return (
     <div className="mb-capacity">
       <Progress
@@ -60,14 +77,14 @@ export function CapacityRing({ going = 0, capacity = 0, size = 46, label = 'oyun
         percent={pct}
         showInfo={false}
         strokeWidth={10}
-        strokeColor={full ? '#fbbf24' : '#c6f432'}
+        strokeColor={full ? palette.gold : palette.primary}
         trailColor="rgba(148,163,184,0.16)"
       />
       <div className="mb-capacity__text">
         <strong>
           {going}/{capacity}
         </strong>
-        <span>{full ? 'Kadro dolu' : label}</span>
+        <span>{full ? t('common:capacity.full') : label ?? t('common:capacity.players')}</span>
       </div>
     </div>
   );
@@ -85,10 +102,11 @@ export function Stat({ value, label, accent }) {
   );
 }
 
-export function EmptyState({ description = 'Kayıt bulunamadı', children }) {
+export function EmptyState({ description, children }) {
+  const { t } = useTranslation();
   return (
     <div className="mb-empty">
-      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={description}>
+      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={description ?? t('common:noRecords')}>
         {children}
       </Empty>
     </div>

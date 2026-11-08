@@ -6,3 +6,24 @@
 .mb-notif-row.is-unread {
   background: var(--mb-primary-soft);
 }
+
+/* ---------- Telefon ---------- */
+@media (max-width: 767px) {
+  .mb-notif-row.ant-list-item {
+    padding: 12px 10px;
+  }
+  .mb-notif-row .ant-list-item-meta-title {
+    overflow-wrap: anywhere;
+  }
+  /* "Okundu" aksiyonu: metne daha çok yer kalsın, rahat dokunulsun */
+  .mb-notif-row .ant-list-item-action {
+    margin-inline-start: 8px;
+  }
+  .mb-notif-row .ant-list-item-action > li {
+    padding: 0;
+  }
+  .mb-notif-row .ant-list-item-action .ant-btn {
+    height: 40px;
+    padding-inline: 12px;
+  }
+}

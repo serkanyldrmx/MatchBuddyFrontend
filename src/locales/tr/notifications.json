@@ -1,0 +1,28 @@
+{
+  "types": {
+    "message": "Mesaj",
+    "matchJoin": "Maça katılım",
+    "matchApproved": "Maç onayı",
+    "matchRejected": "Maç reddi",
+    "newVenue": "Yeni halı saha",
+    "newMatch": "Yeni maç",
+    "matchReminder": "Maç hatırlatma",
+    "addedToSquad": "Kadroya girdin",
+    "matchResult": "Maç sonucu",
+    "default": "Bildirim"
+  },
+  "list": {
+    "title": "Bildirimler",
+    "subtitle": "Maç onayları, yeni maçlar ve halı saha duyuruları.",
+    "loadFailed": "Bildirimler yüklenemedi.",
+    "updateFailed": "Bildirim güncellenemedi.",
+    "markAllRead": "Tümünü okundu işaretle",
+    "markRead": "Okundu",
+    "filterAll_one": "Tümü ({{count}})",
+    "filterAll_other": "Tümü ({{count}})",
+    "filterUnread_one": "Okunmamış ({{count}})",
+    "filterUnread_other": "Okunmamış ({{count}})",
+    "emptyUnread": "Okunmamış bildiriminiz yok",
+    "empty": "Henüz bildiriminiz yok"
+  }
+}

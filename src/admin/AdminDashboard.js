@@ -11,25 +11,28 @@ import {
   ShopOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/config';
 import { adminVenuesApi } from '../api/venues';
 import { colors } from '../theme/theme';
 import { EmptyState, MatchStatusTag, MetaItem, PageHeader } from '../ui';
 import { formatDate, formatDateTime, formatTime, fromNow, getCurrentUser, isPast } from '../utils/format';
 import useAdminData, { venueLabel } from './useAdminData';
+import './AdminResponsive.css';
 
 const { Text } = Typography;
 
-function greeting() {
+function greeting(t) {
   const h = new Date().getHours();
-  if (h < 6) return 'İyi geceler';
-  if (h < 12) return 'Günaydın';
-  if (h < 18) return 'İyi günler';
-  return 'İyi akşamlar';
+  if (h < 6) return t('admin:dashboard.greeting.night');
+  if (h < 12) return t('admin:dashboard.greeting.morning');
+  if (h < 18) return t('admin:dashboard.greeting.day');
+  return t('admin:dashboard.greeting.evening');
 }
 
 /** Admin genel bakış ekranı */
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = getCurrentUser();
   const { matches, stadiumNames, loading } = useAdminData();
@@ -77,37 +80,60 @@ export default function AdminDashboard() {
   const breakdown = useMemo(() => {
     const total = matches.length || 1;
     const rows = [
-      { key: 'pending', label: 'Onay bekleyen', count: pending.length, color: colors.gold },
+      { key: 'pending', label: t('admin:dashboard.breakdown.pending'), count: pending.length, color: colors.gold },
       {
         key: 'approved',
-        label: 'Onaylı (yaklaşan)',
+        label: t('admin:dashboard.breakdown.approved'),
         count: matches.filter((m) => m.isActive === 2 && !isPast(m.matchDate)).length,
         color: colors.pitch,
       },
       {
         key: 'done',
-        label: 'Tamamlanan',
+        label: t('admin:dashboard.breakdown.done'),
         count: matches.filter((m) => m.isActive !== 3 && isPast(m.matchDate)).length,
         color: colors.textSecondary,
       },
-      { key: 'rejected', label: 'Reddedilen', count: matches.filter((m) => m.isActive === 3).length, color: colors.danger },
+      {
+        key: 'rejected',
+        label: t('admin:dashboard.breakdown.rejected'),
+        count: matches.filter((m) => m.isActive === 3).length,
+        color: colors.danger,
+      },
     ];
     return rows.map((r) => ({ ...r, percent: Math.round((r.count / total) * 100) }));
-  }, [matches, pending]);
+  }, [matches, pending, t]);
 
   const stats = [
-    { title: 'Toplam maç', value: matches.length, icon: <CalendarOutlined />, color: colors.primary },
-    { title: 'İşletme onayı bekleyen', value: pending.length, icon: <ScheduleOutlined />, color: colors.gold },
-    { title: 'Anlaşmalı tesis', value: ownerStats.partnerVenues, icon: <EnvironmentOutlined />, color: colors.info, async: true },
-    { title: 'Aktif işletme', value: ownerStats.activeOwners, icon: <ShopOutlined />, color: colors.primary, async: true },
-    { title: 'Oyuncu sayısı', value: playerCount ?? '-', icon: <TeamOutlined />, color: colors.pitch, async: true },
+    { title: t('admin:dashboard.stats.totalMatches'), value: matches.length, icon: <CalendarOutlined />, color: colors.primary },
+    { title: t('admin:dashboard.stats.pendingApproval'), value: pending.length, icon: <ScheduleOutlined />, color: colors.gold },
+    {
+      title: t('admin:dashboard.stats.partnerVenues'),
+      value: ownerStats.partnerVenues,
+      icon: <EnvironmentOutlined />,
+      color: colors.info,
+      async: true,
+    },
+    {
+      title: t('admin:dashboard.stats.activeOwners'),
+      value: ownerStats.activeOwners,
+      icon: <ShopOutlined />,
+      color: colors.primary,
+      async: true,
+    },
+    {
+      title: t('admin:dashboard.stats.playerCount'),
+      value: playerCount ?? '-',
+      icon: <TeamOutlined />,
+      color: colors.pitch,
+      async: true,
+    },
   ];
 
   const pendingColumns = [
-    { title: 'Maç', dataIndex: 'matchName', render: (v) => <Text strong>{v}</Text> },
-    { title: 'Tesis · Saha', key: 'venue', render: (_, m) => venueLabel(m, stadiumNames) || '-' },
+    { title: t('admin:shared.columns.match'), dataIndex: 'matchName', render: (v) => <Text strong>{v}</Text> },
+    { title: t('admin:shared.columns.venuePitch'), key: 'venue', render: (_, m) => venueLabel(m, stadiumNames) || '-' },
     {
-      title: 'Tarih',
+      title: t('admin:shared.columns.date'),
       dataIndex: 'matchDate',
       render: (d) => (
         <span>
@@ -115,21 +141,25 @@ export default function AdminDashboard() {
         </span>
       ),
     },
-    { title: 'Durum', dataIndex: 'isActive', render: (s) => <MatchStatusTag status={s} /> },
+    { title: t('admin:shared.columns.status'), dataIndex: 'isActive', render: (s) => <MatchStatusTag status={s} /> },
   ];
 
   return (
     <>
       <PageHeader
-        title="Genel Bakış"
-        subtitle={`${greeting()}${user?.playerName ? `, ${user.playerName}` : ''}. Sistemin güncel durumu aşağıda.`}
+        title={t('admin:dashboard.title')}
+        subtitle={
+          user?.playerName
+            ? t('admin:dashboard.subtitleWithName', { greeting: greeting(t), name: user.playerName })
+            : t('admin:dashboard.subtitle', { greeting: greeting(t) })
+        }
         icon={<AppstoreOutlined />}
       />
 
       <Row gutter={[16, 16]}>
-        {stats.map((s) => (
-          <Col xs={24} sm={12} lg={8} xl={{ flex: '20%' }} key={s.title}>
-            <Card bordered={false} loading={loading && !s.async}>
+        {stats.map((s, i) => (
+          <Col xs={i === stats.length - 1 ? 24 : 12} sm={12} lg={8} xl={{ flex: '20%' }} key={s.title}>
+            <Card bordered={false} loading={loading && !s.async} className="mb-admin-stat-card">
               <Statistic
                 title={s.title}
                 value={s.value}
@@ -142,10 +172,11 @@ export default function AdminDashboard() {
         <Col xs={24} xl={16}>
           <Card
             bordered={false}
-            title="İşletme onayı bekleyen rezervasyonlar"
+            className="mb-admin-card-wrap"
+            title={t('admin:dashboard.pendingTitle')}
             extra={
               <Button type="link" onClick={() => navigate('/adminPanel/reservations')}>
-                Tümünü gör <RightOutlined />
+                {t('admin:dashboard.seeAll')} <RightOutlined />
               </Button>
             }
           >
@@ -161,15 +192,15 @@ export default function AdminDashboard() {
                 onClick: () => navigate('/adminPanel/reservations'),
                 style: { cursor: 'pointer' },
               })}
-              locale={{ emptyText: <EmptyState description="Onay bekleyen rezervasyon yok" /> }}
+              locale={{ emptyText: <EmptyState description={t('admin:dashboard.pendingEmpty')} /> }}
             />
           </Card>
         </Col>
 
         <Col xs={24} xl={8}>
-          <Card bordered={false} title="Maç durum dağılımı" loading={loading}>
+          <Card bordered={false} title={t('admin:dashboard.breakdownTitle')} loading={loading}>
             {matches.length === 0 ? (
-              <EmptyState description="Henüz maç yok" />
+              <EmptyState description={t('admin:dashboard.noMatches')} />
             ) : (
               <Space direction="vertical" size={14} style={{ width: '100%' }}>
                 {breakdown.map((b) => (
@@ -189,17 +220,17 @@ export default function AdminDashboard() {
         <Col xs={24}>
           <Card
             bordered={false}
-            title="Yaklaşan onaylı maçlar"
+            title={t('admin:dashboard.upcomingTitle')}
             extra={
               <Button type="link" onClick={() => navigate('/adminPanel/matches')}>
-                Tüm maçlar <RightOutlined />
+                {t('admin:dashboard.allMatches')} <RightOutlined />
               </Button>
             }
           >
             <List
               loading={loading}
               dataSource={upcomingApproved}
-              locale={{ emptyText: <EmptyState description="Yaklaşan onaylı maç yok" /> }}
+              locale={{ emptyText: <EmptyState description={t('admin:dashboard.upcomingEmpty')} /> }}
               renderItem={(m) => (
                 <List.Item key={m.matchId} extra={<MatchStatusTag status={m.isActive} />}>
                   <List.Item.Meta
@@ -210,7 +241,7 @@ export default function AdminDashboard() {
                           {formatDateTime(m.matchDate)} ({fromNow(m.matchDate)})
                         </MetaItem>
                         <MetaItem icon={<EnvironmentOutlined />}>{venueLabel(m, stadiumNames) || '-'}</MetaItem>
-                        <MetaItem icon={<TeamOutlined />}>{m.userCount ?? 0} oyuncu</MetaItem>
+                        <MetaItem icon={<TeamOutlined />}>{t('admin:shared.playerCount', { count: m.userCount ?? 0 })}</MetaItem>
                       </Space>
                     }
                   />

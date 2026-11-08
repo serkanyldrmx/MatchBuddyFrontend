@@ -12,6 +12,7 @@ import {
   Card,
   Col,
   Form,
+  Grid,
   Input,
   Modal,
   Progress,
@@ -30,8 +31,9 @@ import {
   ReloadOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
+import { Trans, useTranslation } from 'react-i18next';
 import { adminVenuesApi } from '../api/venues';
-import { colors } from '../theme/theme';
+import { useThemeMode } from '../theme/ThemeContext';
 import { EmptyState, PageHeader } from '../ui';
 import { apiErrorMessage } from '../utils/format';
 import './OsmCandidates.css';
@@ -77,7 +79,10 @@ const websiteHref = (w) => (/^https?:\/\//i.test(w) ? w : `https://${w}`);
 
 /** Admin: OpenStreetMap'ten aday halı saha bulma ve içe aktarma */
 export default function OsmCandidates() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
+  const isPhone = Grid.useBreakpoint().md === false;
+  const { palette } = useThemeMode();
   const [importForm] = Form.useForm();
   const [provinces, setProvinces] = useState([]);
   const [city, setCity] = useState('');
@@ -95,6 +100,7 @@ export default function OsmCandidates() {
   const [importing, setImporting] = useState(null); // aday
   const [saving, setSaving] = useState(false);
   const listRef = useRef(null);
+  const mapCardRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -106,8 +112,8 @@ export default function OsmCandidates() {
   useEffect(() => {
     if (!loading) return undefined;
     setElapsed(0);
-    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(timer);
   }, [loading]);
 
   const onBounds = useCallback((b, z) => {
@@ -124,18 +130,17 @@ export default function OsmCandidates() {
       const list = await adminVenuesApi.osmCandidates(params);
       const items = (Array.isArray(list) ? list : []).filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lon));
       setResults(items);
-      setFitToken((t) => t + 1);
+      setFitToken((n) => n + 1);
       if (items.length && items.every((c) => c.alreadyExists)) setFilter('all');
     } catch (e) {
       const status = e?.response?.status;
       if (status === 502 || status === 504 || e?.code === 'ECONNABORTED') {
         setError({
-          message:
-            'OpenStreetMap (Overpass) servisi şu anda yanıt vermedi ya da sorgu zaman aşımına uğradı. Birkaç saniye sonra tekrar deneyin veya daha küçük bir alan seçin.',
+          message: t('adminVenues:osm.overpassTimeout'),
           retryable: true,
         });
       } else {
-        setError({ message: apiErrorMessage(e, 'Aday tesisler alınamadı.'), retryable: true });
+        setError({ message: apiErrorMessage(e, t('adminVenues:osm.loadFailed')), retryable: true });
       }
     } finally {
       setLoading(false);
@@ -145,16 +150,16 @@ export default function OsmCandidates() {
   const searchCity = () => {
     const c = city.trim();
     if (!c) {
-      message.warning('Bir şehir yazın veya seçin.');
+      message.warning(t('adminVenues:osm.enterCity'));
       return;
     }
-    run({ city: c }, `${c} şehrinde`);
+    run({ city: c }, t('adminVenues:osm.inCity', { city: c }));
   };
 
   const searchArea = () => {
     if (!bounds) return;
     if (zoom < MIN_AREA_ZOOM) {
-      message.warning('Alan çok büyük. Lütfen haritayı biraz yakınlaştırın (ilçe ölçeği).');
+      message.warning(t('adminVenues:osm.areaTooLarge'));
       return;
     }
     run(
@@ -164,7 +169,7 @@ export default function OsmCandidates() {
         north: bounds.getNorth().toFixed(6),
         east: bounds.getEast().toFixed(6),
       },
-      'Haritadaki alanda'
+      t('adminVenues:osm.inArea')
     );
   };
 
@@ -184,8 +189,11 @@ export default function OsmCandidates() {
 
   const select = (c, fly) => {
     setSelectedId(c.osmId);
-    if (fly) setFlyTarget({ lat: c.lat, lon: c.lon, t: Date.now() });
-    else {
+    if (fly) {
+      setFlyTarget({ lat: c.lat, lon: c.lon, t: Date.now() });
+      // Telefonda harita listenin altında kalır; seçilen sahayı görmek için haritaya kaydır
+      if (isPhone) mapCardRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } else {
       const el = listRef.current?.querySelector(`[data-osm="${c.osmId}"]`);
       el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -220,25 +228,26 @@ export default function OsmCandidates() {
       setResults((list) =>
         (list || []).map((c) => (c.osmId === importing.osmId ? { ...c, alreadyExists: true, imported: true, name: v.name.trim() } : c))
       );
-      message.success('Tesis içe aktarıldı. Bir işletme atanana kadar oyunculara görünmez.');
+      message.success(t('adminVenues:osm.importSuccess'));
       setImporting(null);
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Tesis içe aktarılamadı.'));
+      message.error(apiErrorMessage(e, t('adminVenues:osm.importFailed')));
     } finally {
       setSaving(false);
     }
   };
 
+  // Leaflet işaret renkleri SVG niteliğidir (CSS değişkeni çalışmaz): aktif temanın somut renkleri
   const markerColor = (c) => {
-    if (c.osmId === selectedId) return colors.gold;
-    return c.alreadyExists ? colors.textSecondary : colors.primary;
+    if (c.osmId === selectedId) return palette.gold;
+    return c.alreadyExists ? palette.textSecondary : palette.primary;
   };
 
   return (
     <>
       <PageHeader
-        title="Aday Tesis Bul"
-        subtitle="OpenStreetMap'teki halı sahaları bulun, satış adayı olarak içe aktarın"
+        title={t('adminVenues:osm.title')}
+        subtitle={t('adminVenues:osm.subtitle')}
         icon={<GlobalOutlined />}
       />
 
@@ -246,13 +255,13 @@ export default function OsmCandidates() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        message="Veriler © OpenStreetMap katkıcılarına aittir."
-        description="Kayıtların kalitesi değişkendir: isim, adres veya telefon eksik ya da eski olabilir. Bu listeyi doğrudan yayın için değil, satış ekibi için aday (lead) listesi olarak kullanın. İçe aktarılan tesisler, bir işletme atanıp fotoğraf ve saha eklenene kadar oyunculara görünmez."
+        message={t('adminVenues:osm.attribution')}
+        description={t('adminVenues:osm.disclaimer')}
       />
 
       <Card bordered={false} style={{ marginBottom: 16 }}>
-        <Space wrap size={12} style={{ width: '100%', justifyContent: 'space-between' }}>
-          <Space.Compact style={{ minWidth: 280 }}>
+        <Space wrap size={12} className="mb-osm-toolbar" style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Space.Compact className="mb-osm-city" style={{ minWidth: 280 }}>
             <AutoComplete
               value={city}
               onChange={setCity}
@@ -262,18 +271,18 @@ export default function OsmCandidates() {
               style={{ width: 240 }}
               disabled={loading}
             >
-              <Input placeholder="Şehir (örn. İzmir)" prefix={<EnvironmentOutlined />} onPressEnter={searchCity} allowClear />
+              <Input placeholder={t('adminVenues:osm.cityPlaceholder')} prefix={<EnvironmentOutlined />} onPressEnter={searchCity} allowClear />
             </AutoComplete>
             <Button type="primary" icon={<SearchOutlined />} onClick={searchCity} loading={loading && Boolean(lastQuery?.params?.city)}>
-              Şehirde ara
+              {t('adminVenues:osm.searchCity')}
             </Button>
           </Space.Compact>
-          <Space wrap>
+          <Space wrap className="mb-osm-area">
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {zoom < MIN_AREA_ZOOM ? 'Alan araması için haritayı yakınlaştırın' : 'Haritadaki görünür alan aranır'}
+              {zoom < MIN_AREA_ZOOM ? t('adminVenues:osm.zoomInForArea') : t('adminVenues:osm.visibleAreaSearched')}
             </Text>
             <Button icon={<BorderOutlined />} onClick={searchArea} disabled={!bounds} loading={loading && !lastQuery?.params?.city}>
-              Haritadaki alanı ara
+              {t('adminVenues:osm.searchArea')}
             </Button>
           </Space>
         </Space>
@@ -284,12 +293,12 @@ export default function OsmCandidates() {
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
-          message="Arama tamamlanamadı"
+          message={t('adminVenues:osm.searchFailedTitle')}
           description={error.message}
           action={
             error.retryable && (
               <Button size="small" icon={<ReloadOutlined />} onClick={retry} disabled={loading}>
-                Tekrar dene
+                {t('common:actions.retry')}
               </Button>
             )
           }
@@ -301,7 +310,9 @@ export default function OsmCandidates() {
           <Card
             bordered={false}
             styles={{ body: { padding: 0 } }}
-            title={results ? `${lastQuery?.label || ''} ${counts.all} saha bulundu` : 'Sonuçlar'}
+            title={
+              results ? t('adminVenues:osm.foundTitle', { label: lastQuery?.label || '', count: counts.all }) : t('adminVenues:osm.results')
+            }
           >
             {results && !loading && (
               <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--mb-border)' }}>
@@ -310,9 +321,9 @@ export default function OsmCandidates() {
                   value={filter}
                   onChange={setFilter}
                   options={[
-                    { label: `Yeni (${counts.new})`, value: 'new' },
-                    { label: `Sistemde (${counts.existing})`, value: 'existing' },
-                    { label: `Tümü (${counts.all})`, value: 'all' },
+                    { label: t('adminVenues:osm.filter.new', { count: counts.new }), value: 'new' },
+                    { label: t('adminVenues:osm.filter.existing', { count: counts.existing }), value: 'existing' },
+                    { label: t('adminVenues:osm.filter.all', { count: counts.all }), value: 'all' },
                   ]}
                 />
               </div>
@@ -324,22 +335,22 @@ export default function OsmCandidates() {
                     type="circle"
                     size={72}
                     percent={Math.min(Math.round((elapsed / EXPECTED_SECONDS) * 100), 99)}
-                    format={() => `${elapsed} sn`}
-                    strokeColor={colors.primary}
+                    format={() => t('adminVenues:osm.seconds', { count: elapsed })}
+                    strokeColor={palette.primary}
                   />
                   <div style={{ marginTop: 12 }}>
-                    <Text>OpenStreetMap sorgulanıyor…</Text>
+                    <Text>{t('adminVenues:osm.querying')}</Text>
                     <br />
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                      Bu işlem {EXPECTED_SECONDS} saniyeye kadar sürebilir.
-                      {elapsed > EXPECTED_SECONDS ? ' Neredeyse bitti, lütfen bekleyin.' : ''}
+                      {t('adminVenues:osm.mayTake', { seconds: EXPECTED_SECONDS })}
+                      {elapsed > EXPECTED_SECONDS ? t('adminVenues:osm.almostDone') : ''}
                     </Text>
                   </div>
                 </div>
               ) : !results ? (
-                <EmptyState description="Bir şehir arayın veya haritada bir alan seçip “Haritadaki alanı ara”ya tıklayın" />
+                <EmptyState description={t('adminVenues:osm.emptyInitial')} />
               ) : visible.length === 0 ? (
-                <EmptyState description={filter === 'new' ? 'Sistemde olmayan aday bulunamadı' : 'Sonuç yok'} />
+                <EmptyState description={filter === 'new' ? t('adminVenues:osm.noNewCandidates') : t('adminVenues:osm.noResults')} />
               ) : (
                 visible.map((c) => (
                   <div
@@ -353,10 +364,10 @@ export default function OsmCandidates() {
                   >
                     <div className="mb-osm-item__head">
                       <Space direction="vertical" size={4}>
-                        <span className={`mb-osm-item__title${c.name ? '' : ' is-unnamed'}`}>{c.name || 'İsimsiz saha'}</span>
+                        <span className={`mb-osm-item__title${c.name ? '' : ' is-unnamed'}`}>{c.name || t('adminVenues:osm.unnamed')}</span>
                         {c.alreadyExists && (
                           <span className={`mb-chip ${c.imported ? 'is-approved' : 'is-done'}`}>
-                            {c.imported ? 'İçe aktarıldı' : 'Zaten sistemde'}
+                            {c.imported ? t('adminVenues:osm.imported') : t('adminVenues:osm.alreadyExists')}
                           </span>
                         )}
                       </Space>
@@ -370,7 +381,7 @@ export default function OsmCandidates() {
                             openImport(c);
                           }}
                         >
-                          İçe aktar
+                          {t('adminVenues:osm.import')}
                         </Button>
                       )}
                     </div>
@@ -411,7 +422,7 @@ export default function OsmCandidates() {
           </Card>
         </Col>
         <Col xs={24} lg={14}>
-          <Card bordered={false} styles={{ body: { padding: 8 } }}>
+          <Card bordered={false} styles={{ body: { padding: 8 } }} ref={mapCardRef}>
             <MapContainer center={DEFAULT_CENTER} zoom={6} className="mb-osm-map">
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -429,7 +440,7 @@ export default function OsmCandidates() {
                   eventHandlers={{ click: () => select(c, false) }}
                 >
                   <Popup>
-                    <strong>{c.name || 'İsimsiz saha'}</strong>
+                    <strong>{c.name || t('adminVenues:osm.unnamed')}</strong>
                     {c.address && (
                       <>
                         <br />
@@ -439,7 +450,7 @@ export default function OsmCandidates() {
                     {c.alreadyExists && (
                       <>
                         <br />
-                        <em>Zaten sistemde</em>
+                        <em>{t('adminVenues:osm.alreadyExists')}</em>
                       </>
                     )}
                   </Popup>
@@ -452,9 +463,9 @@ export default function OsmCandidates() {
 
       <Modal
         open={Boolean(importing)}
-        title="Aday tesisi içe aktar"
-        okText="İçe aktar"
-        cancelText="Vazgeç"
+        title={t('adminVenues:osm.importModal.title')}
+        okText={t('adminVenues:osm.import')}
+        cancelText={t('common:actions.cancel')}
         confirmLoading={saving}
         onOk={doImport}
         onCancel={() => setImporting(null)}
@@ -464,39 +475,44 @@ export default function OsmCandidates() {
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
-          message="İçe aktarılan tesis, bir işletme atanana kadar oyunculara görünmez."
+          message={t('adminVenues:osm.importModal.warning')}
           description={
-            <>
-              Tesisi bir işletmeye bağlamak için <Link to="/adminPanel/businesses">İşletmeler</Link> ekranındaki “Tesis bağla”
-              işlemini kullanın.
-            </>
+            <Trans i18nKey="adminVenues:osm.importModal.assignHint" components={{ link: <Link to="/adminPanel/businesses" /> }} />
           }
         />
         <Form form={importForm} layout="vertical" requiredMark="optional" preserve={false}>
-          <Form.Item name="name" label="Tesis adı" rules={[{ required: true, whitespace: true, message: 'Tesis adını girin' }]}>
-            <Input maxLength={100} placeholder="Örn. Yıldız Halı Saha" />
+          <Form.Item
+            name="name"
+            label={t('adminVenues:osm.importModal.name')}
+            rules={[{ required: true, whitespace: true, message: t('adminVenues:osm.importModal.nameRequired') }]}
+          >
+            <Input maxLength={100} placeholder={t('adminVenues:osm.importModal.namePlaceholder')} />
           </Form.Item>
-          <Form.Item name="address" label="Adres">
+          <Form.Item name="address" label={t('adminVenues:osm.importModal.address')}>
             <Input.TextArea rows={2} maxLength={250} />
           </Form.Item>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="city" label="İl">
+              <Form.Item name="city" label={t('adminVenues:osm.importModal.city')}>
                 <AutoComplete options={provinces.map((p) => ({ value: p }))} filterOption={(input, o) => o.value.toLocaleLowerCase('tr').includes(input.toLocaleLowerCase('tr'))} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="district" label="İlçe">
+              <Form.Item name="district" label={t('adminVenues:osm.importModal.district')}>
                 <Input maxLength={60} />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="phone" label="Telefon">
+          <Form.Item name="phone" label={t('adminVenues:osm.importModal.phone')}>
             <Input maxLength={30} />
           </Form.Item>
           {importing && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Konum: {importing.lat.toFixed(6)}, {importing.lon.toFixed(6)} · OSM #{importing.osmId}
+              {t('adminVenues:osm.importModal.location', {
+                lat: importing.lat.toFixed(6),
+                lon: importing.lon.toFixed(6),
+                osmId: importing.osmId,
+              })}
             </Text>
           )}
         </Form>

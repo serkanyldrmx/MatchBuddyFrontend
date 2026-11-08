@@ -1,0 +1,84 @@
+{
+  "appName": "Match Buddy",
+  "actions": {
+    "save": "Kaydet",
+    "cancel": "Vazgeç",
+    "cancelAlt": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "close": "Kapat",
+    "ok": "Tamam",
+    "yes": "Evet",
+    "no": "Hayır",
+    "back": "Geri",
+    "add": "Ekle",
+    "update": "Güncelle",
+    "confirm": "Onayla",
+    "reject": "Reddet",
+    "send": "Gönder",
+    "search": "Ara",
+    "refresh": "Yenile",
+    "continue": "Devam",
+    "detail": "Detay",
+    "select": "Seç",
+    "reset": "Sıfırla",
+    "retry": "Tekrar dene"
+  },
+  "status": {
+    "loading": "Yükleniyor…",
+    "loadingShort": "Yükleniyor",
+    "saved": "Kaydedildi.",
+    "pending": "Onay bekliyor",
+    "approved": "Onaylandı",
+    "rejected": "Reddedildi",
+    "completed": "Tamamlandı",
+    "unknown": "Bilinmiyor"
+  },
+  "all": "Tümü",
+  "unknownPerson": "Bilinmeyen",
+  "deletedUser": "Silinmiş Kullanıcı",
+  "noRecords": "Kayıt bulunamadı",
+  "notSpecified": "Belirtilmemiş",
+  "pitch": "Saha",
+  "indoor": "Kapalı",
+  "outdoor": "Açık",
+  "other": "Diğer",
+  "capacity": {
+    "players": "oyuncu",
+    "full": "Kadro dolu"
+  },
+  "imageCrop": {
+    "title": "Fotoğrafı düzenle",
+    "reset": "Sıfırla",
+    "ok": "Tamam",
+    "cancel": "Vazgeç"
+  },
+  "image": {
+    "invalidType": "Sadece JPG, PNG veya WebP yükleyebilirsiniz.",
+    "tooLarge": "Fotoğraf en fazla {{maxMb}} MB olabilir.",
+    "uploadFailed": "Fotoğraf yüklenemedi."
+  },
+  "formats": {
+    "date": "DD MMMM YYYY",
+    "time": "HH:mm",
+    "dateTime": "DD MMM YYYY, HH:mm"
+  },
+  "currency": "{{value}} ₺",
+  "theme": {
+    "label": "Tema",
+    "system": "Sistem",
+    "light": "Açık",
+    "dark": "Koyu"
+  },
+  "languageName": "Türkçe",
+  "reliability": {
+    "level": {
+      "new": "Yeni oyuncu",
+      "good": "Güvenilir",
+      "medium": "Orta",
+      "risky": "Riskli"
+    },
+    "tip": "Güvenilirlik: {{score}}/100 · {{label}} · {{count}} maç",
+    "tipNew": "Yeni oyuncu: henüz {{count}} maç tamamladı"
+  }
+}

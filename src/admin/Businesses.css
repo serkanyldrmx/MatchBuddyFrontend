@@ -39,7 +39,7 @@
 
 .mb-biz-dot.is-visible {
   background: var(--mb-pitch);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--mb-pitch-rgb), 0.18);
 }
 
 .mb-biz-venue.is-unlisted .mb-biz-venue__name {
@@ -97,7 +97,7 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  background: var(--mb-primary);
+  background: var(--mb-primary-fill);
   color: var(--mb-primary-ink);
 }
 
@@ -139,4 +139,54 @@
 
 .mb-biz-credentials .ant-descriptions-item-content {
   font-family: 'JetBrains Mono', Consolas, monospace;
+}
+
+/* ---------------- Telefon ---------------- */
+@media (max-width: 767px) {
+  /* Sihirbaz adımları: yatay kalsın, yalnızca aktif adımın başlığı görünsün */
+  .mb-biz-wizard .ant-steps {
+    margin-bottom: 16px;
+  }
+  .mb-biz-wizard .ant-steps-item:not(.ant-steps-item-active) .ant-steps-item-title {
+    display: none;
+  }
+  .mb-biz-wizard .ant-steps-item:not(.ant-steps-item-active) {
+    flex: 0 0 auto;
+  }
+  .mb-biz-wizard .ant-steps-item-active .ant-steps-item-title {
+    white-space: nowrap;
+  }
+
+  /* Konum arama + "Adresten bul": arama kutusu kalan alanı doldursun */
+  .mb-biz-wizard .ant-space-compact > .ant-input-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .mb-biz-map {
+    height: 280px;
+  }
+
+  .mb-biz-photos {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+  .mb-biz-photo__actions {
+    padding: 6px;
+  }
+
+  /* Oluşturuldu ekranı */
+  .mb-biz-wizard .ant-result {
+    padding: 8px 0;
+  }
+  .mb-biz-wizard .ant-result-extra {
+    margin-top: 16px;
+  }
+  .mb-biz-credentials .ant-descriptions-item-content {
+    word-break: break-all;
+  }
+
+  .mb-biz-venue__name {
+    max-width: 160px;
+  }
 }

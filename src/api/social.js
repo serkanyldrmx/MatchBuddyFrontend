@@ -1,16 +1,24 @@
 import { api } from './config';
+import i18n from '../i18n';
 
 // Sosyal paket uç noktaları — sözleşme: MatchBuddy/docs/social-api.md
 
 export const MESSAGE_PERMISSION = { EVERYONE: 0, MUTUALS: 1, MUTUALS_AND_TEAMMATES: 2 };
 export const PROFILE_VISIBILITY = { EVERYONE: 0, FOLLOWERS: 1, ONLY_ME: 2 };
-export const REPORT_REASONS = [
-  { value: 'spam', label: 'Spam / reklam' },
-  { value: 'hakaret', label: 'Hakaret veya taciz' },
-  { value: 'sahte-hesap', label: 'Sahte hesap' },
-  { value: 'maca-gelmeme', label: 'Sürekli maça gelmiyor' },
-  { value: 'diger', label: 'Diğer' },
-];
+const REPORT_REASON_KEYS = {
+  spam: 'spam',
+  hakaret: 'harassment',
+  'sahte-hesap': 'fakeAccount',
+  'maca-gelmeme': 'noShow',
+  diger: 'other',
+};
+/** { value, label } — value sunucuya gider, label erişildiği anda çevrilir */
+export const REPORT_REASONS = Object.entries(REPORT_REASON_KEYS).map(([value, key]) => ({
+  value,
+  get label() {
+    return i18n.t(`social:reportReasons.${key}`);
+  },
+}));
 export const ACTIVITY = {
   MATCH_CREATED: 1,
   JOINED_MATCH: 2,

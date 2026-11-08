@@ -7,6 +7,7 @@ import {
   TeamOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../ui';
 import aboutImage from '../../images/top.png';
 import mackolikIcon from '../../images/Mackolik.png';
@@ -16,16 +17,17 @@ import varSistemi from '../../images/varSistemi.png';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Metin anahtarları render anında t() ile çevrilir
 const ADVANTAGES = [
-  'Kolay rezervasyon yönetimi',
-  'Ekipler arasında hızlı iletişim',
-  'Güvenilir saha bilgisi ve fiyatlandırma',
+  'info:aboutPage.advantages.booking',
+  'info:aboutPage.advantages.communication',
+  'info:aboutPage.advantages.reliable',
 ];
 
 const FEATURES = [
-  { icon: <ThunderboltOutlined />, title: 'Hızlı Rezervasyon', text: 'Halı saha rezervasyonlarınızı birkaç tıkla yapabilirsiniz.' },
-  { icon: <TeamOutlined />, title: 'Takım Yönetimi', text: 'Takım arkadaşlarınızı kolayca ekleyin ve organize olun.' },
-  { icon: <SafetyCertificateOutlined />, title: 'Güvenilir Bilgi', text: 'Halı saha bilgilerine ve kullanıcı yorumlarına anında erişin.' },
+  { icon: <ThunderboltOutlined />, titleKey: 'info:aboutPage.features.fastBooking.title', textKey: 'info:aboutPage.features.fastBooking.text' },
+  { icon: <TeamOutlined />, titleKey: 'info:aboutPage.features.teamManagement.title', textKey: 'info:aboutPage.features.teamManagement.text' },
+  { icon: <SafetyCertificateOutlined />, titleKey: 'info:aboutPage.features.reliableInfo.title', textKey: 'info:aboutPage.features.reliableInfo.text' },
 ];
 
 const LINKS = [
@@ -36,11 +38,12 @@ const LINKS = [
 ];
 
 function AboutPage() {
+  const { t } = useTranslation();
   return (
     <>
       <PageHeader
-        title="Hakkımızda"
-        subtitle="Match Buddy, spor severlerin halı saha rezervasyonlarını kolaylaştırmak ve ekipler arasında iletişim kurmalarını sağlamak için tasarlanmış bir platformdur."
+        title={t('info:aboutPage.title')}
+        subtitle={t('info:aboutPage.subtitle')}
         icon={<InfoCircleOutlined />}
       />
       <Row gutter={[16, 16]}>
@@ -51,12 +54,11 @@ function AboutPage() {
                 <Image src={aboutImage} alt="Match Buddy" preview={false} style={{ maxHeight: 220, objectFit: 'contain' }} />
               </Col>
               <Col xs={24} md={15}>
-                <Title level={4}>Amacımız</Title>
+                <Title level={4}>{t('info:aboutPage.purposeTitle')}</Title>
                 <Paragraph>
-                  Sporun birleştirici gücüne inanıyoruz. Kullanıcılarımızın daha kolay maç organize edebilmeleri,
-                  ekiplerini oluşturabilmeleri ve eğlenceli bir deneyim yaşamaları için buradayız.
+                  {t('info:aboutPage.purposeText')}
                 </Paragraph>
-                <Title level={4}>Avantajlarımız</Title>
+                <Title level={4}>{t('info:aboutPage.advantagesTitle')}</Title>
                 <List
                   split={false}
                   dataSource={ADVANTAGES}
@@ -64,7 +66,7 @@ function AboutPage() {
                     <List.Item style={{ padding: '4px 0' }}>
                       <Space>
                         <CheckCircleOutlined style={{ color: 'var(--mb-pitch)' }} />
-                        <Text>{a}</Text>
+                        <Text>{t(a)}</Text>
                       </Space>
                     </List.Item>
                   )}
@@ -75,21 +77,21 @@ function AboutPage() {
         </Col>
 
         {FEATURES.map((f) => (
-          <Col xs={24} md={8} key={f.title}>
+          <Col xs={24} md={8} key={f.titleKey}>
             <Card bordered={false} style={{ height: '100%' }}>
               <Space direction="vertical" size={8}>
                 <span className="mb-page-header__icon">{f.icon}</span>
                 <Text strong style={{ fontSize: 16 }}>
-                  {f.title}
+                  {t(f.titleKey)}
                 </Text>
-                <Text type="secondary">{f.text}</Text>
+                <Text type="secondary">{t(f.textKey)}</Text>
               </Space>
             </Card>
           </Col>
         ))}
 
         <Col xs={24}>
-          <Card bordered={false} title="Diğer Maç Siteleri">
+          <Card bordered={false} title={t('info:aboutPage.otherSites')}>
             <Space wrap size={12}>
               {LINKS.map((l) => (
                 <Button

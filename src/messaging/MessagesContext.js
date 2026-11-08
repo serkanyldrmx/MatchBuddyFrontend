@@ -7,8 +7,9 @@ import MessagesDrawer from './MessagesDrawer';
  *   openMessages()                         -> konuşma listesini açar
  *   openMessages({ type: 'user', data })   -> doğrudan bir oyuncuyla konuşmayı açar
  *   openMessages({ type: 'group', data })  -> doğrudan bir grup konuşmasını açar
+ *   isOpen                                 -> panel açık mı (mobil alt menüyü gizlemek için)
  */
-const MessagesContext = createContext({ openMessages: () => {}, closeMessages: () => {} });
+const MessagesContext = createContext({ openMessages: () => {}, closeMessages: () => {}, isOpen: false });
 
 export function MessagesProvider({ children }) {
   const [open, setOpen] = useState(false);
@@ -23,7 +24,7 @@ export function MessagesProvider({ children }) {
     setOpen(false);
   }, []);
 
-  const value = useMemo(() => ({ openMessages, closeMessages }), [openMessages, closeMessages]);
+  const value = useMemo(() => ({ openMessages, closeMessages, isOpen: open }), [openMessages, closeMessages, open]);
 
   return (
     <MessagesContext.Provider value={value}>

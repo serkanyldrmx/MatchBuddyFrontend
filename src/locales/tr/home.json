@@ -1,0 +1,113 @@
+{
+  "filters": {
+    "upcoming": "Yaklaşan",
+    "open": "Kadrosu eksik",
+    "opponent": "Rakip arayanlar",
+    "mine": "Maçlarım",
+    "friends": "Arkadaşlarım",
+    "results": "Sonuçlar"
+  },
+  "countdown": {
+    "days": "gün",
+    "hours": "saat",
+    "minutes": "dk"
+  },
+  "loadFailed": "Maçlar yüklenemedi.",
+  "ai": {
+    "failed": "Sıralama başarısız oldu.",
+    "sorted": "Maçlar sana göre sıralandı.",
+    "sortButton": "Bana göre sırala",
+    "banner": "Liste senin geçmişine, arkadaşlarına ve maç saatine göre sıralandı.",
+    "reset": "Varsayılana dön",
+    "sorting": "Maçlar sana göre sıralanıyor…",
+    "noSuggestions": "Şu an sana uygun, yeri olan yaklaşan maç bulunamadı.",
+    "reasons": {
+      "friends_one": "Tanıdığın {{count}} oyuncu bu maçta.",
+      "friends_other": "Tanıdığın {{count}} oyuncu bu maçta.",
+      "lastSpots_one": "Son {{count}} yer kaldı, kaçırma!",
+      "lastSpots_other": "Son {{count}} yer kaldı, kaçırma!",
+      "venue_one": "{{venue}} sana tanıdık, burada {{count}} maç oynadın.",
+      "venue_other": "{{venue}} sana tanıdık, burada {{count}} maç oynadın.",
+      "soon": "Maç çok yakında, hemen yerini kap!",
+      "level": "Bu maçta senin seviyende oyuncular var.",
+      "popular_one": "Popüler maç: {{count}} kişi katılıyor.",
+      "popular_other": "Popüler maç: {{count}} kişi katılıyor.",
+      "open_one": "{{count}} boş yer var.",
+      "open_other": "{{count}} boş yer var."
+    }
+  },
+  "hero": {
+    "thisWeek_one": "Bu hafta {{count}} maç oynanıyor",
+    "thisWeek_other": "Bu hafta {{count}} maç oynanıyor",
+    "title": "Sahaya çık,<br/><em>kadroyu tamamla.</em>",
+    "openSpots_one": "Şu an {{count}} oyunculuk boş yer var. ",
+    "openSpots_other": "Şu an {{count}} oyunculuk boş yer var. ",
+    "text": "Maçını kur, takımını topla, maçın yıldızı sen ol.",
+    "createMatch": "Maç oluştur",
+    "seeOpen": "Eksik kadroları gör"
+  },
+  "next": {
+    "label": "Sıradaki maçın",
+    "waitlisted": "Yedek listesindesin",
+    "matchCenter": "Maç merkezi",
+    "emptyTitle": "Henüz bir maça yazılmadın",
+    "emptyText": "Aşağıdan kadrosu eksik bir maç bul ya da kendi maçını kur.",
+    "findMatch": "Maç bul",
+    "cantMake": "Gelemiyorum"
+  },
+  "deals": {
+    "title": "Kampanyalı tesisler",
+    "allVenues": "Tüm tesisler",
+    "badge": "Kampanya",
+    "fromPrice": "{{price}}<s>'den /saat</s>"
+  },
+  "invites": {
+    "banner_one": "<b>{{count}} davetin var</b> · Arkadaşların seni sahaya çağırıyor",
+    "banner_other": "<b>{{count}} davetin var</b> · Arkadaşların seni sahaya çağırıyor",
+    "go": "Davetlere bak"
+  },
+  "feed": {
+    "title": "Fikstür",
+    "searchPlaceholder": "Maç veya saha ara",
+    "venuePlaceholder": "Tüm halı sahalar",
+    "emptyFriends": "Takip ettiklerinin katıldığı bir maç yok. Daha çok oyuncu takip et!",
+    "empty": "Bu filtrede maç yok",
+    "discoverPlayers": "Oyuncu keşfet"
+  },
+  "leaders": {
+    "title": "Haftanın yıldızları",
+    "empty": "Puanlanan maç oynandıkça burası dolacak",
+    "matches_one": "{{count}} maç",
+    "matches_other": "{{count}} maç",
+    "goals_one": "{{count}} gol",
+    "goals_other": "{{count}} gol"
+  },
+  "promo": {
+    "aiTeamTitle": "Dengeli takım kur",
+    "aiTeamText": "Yapay zeka oyuncuları puanlarına göre iki denk takıma bölsün.",
+    "venuesTitle": "Anlaşmalı halı sahalar",
+    "venuesText": "Boş saatleri gör, fiyatları karşılaştır, sahanı ayırt."
+  },
+  "guestModal": {
+    "updated": "Misafir oyuncu güncellendi.",
+    "added": "{{name}} kadroya eklendi.",
+    "updateFailed": "Misafir oyuncu güncellenemedi.",
+    "addFailed": "Misafir oyuncu eklenemedi.",
+    "free_one": "{{count}} boş yer",
+    "free_other": "{{count}} boş yer",
+    "full": "Dolu",
+    "titleEdit": "Misafir oyuncuyu düzenle",
+    "titleAdd": "İsimle oyuncu ekle",
+    "okAdd": "Kadroya ekle",
+    "hint": "Uygulamada hesabı olmayan arkadaşını isimle kadroya yaz. Misafirler kadroda yer tutar ama MVP oylamasına ve puanlamaya katılmaz.",
+    "nameLabel": "İsim",
+    "nameRequired": "İsim yaz.",
+    "nameLength": "İsim 2–60 karakter olmalı.",
+    "namePlaceholder": "Ör. Ahmet Yılmaz",
+    "noteLabel": "Not / açıklama",
+    "noteMax": "En fazla {{count}} karakter.",
+    "notePlaceholder": "Ör. kaleci, Ahmet'in arkadaşı",
+    "sideLabel": "Takım",
+    "sideRequired": "Bir takım seç."
+  }
+}

@@ -2,7 +2,7 @@
 .mb-match-hero {
   padding: 22px 32px 26px;
   border-radius: 24px;
-  border: 1px solid rgba(198, 244, 50, 0.16);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.16);
   margin-bottom: 20px;
 }
 
@@ -14,7 +14,7 @@
 }
 
 .mb-ghost-link.ant-btn {
-  color: rgba(232, 238, 246, 0.8);
+  color: rgba(var(--mb-text-rgb), 0.8);
   padding-left: 0;
 }
 
@@ -37,7 +37,7 @@
 
 .mb-match-hero__meta {
   text-align: center;
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
   font-size: 13px;
 }
 
@@ -104,7 +104,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   letter-spacing: 2px;
-  box-shadow: inset 0 0 24px rgba(198, 244, 50, 0.08);
+  box-shadow: inset 0 0 24px rgba(var(--mb-primary-rgb), 0.08);
 }
 
 .mb-scoreboard__score i {
@@ -122,7 +122,7 @@
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(232, 238, 246, 0.75);
+  color: rgba(var(--mb-text-rgb), 0.75);
 }
 
 .mb-match-hero__bottom {
@@ -166,79 +166,220 @@
 }
 
 /* ---------- Saha ---------- */
-.mb-pitch__labels {
+.mb-pitch {
+  container-type: inline-size;
+}
+
+.mb-pitch__head,
+.mb-pitch__foot {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mb-pitch__head {
+  margin-bottom: 10px;
+}
+
+.mb-pitch__foot {
+  display: none;
+  margin-top: 10px;
+}
+
+.mb-pitch__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
-.mb-pitch__labels .is-home { color: var(--mb-home); }
-.mb-pitch__labels .is-away { color: var(--mb-away); }
+.mb-pitch__team i {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.mb-pitch__team.is-home { color: var(--mb-home); }
+.mb-pitch__team.is-away { color: var(--mb-away); }
+
+.mb-pitch__team-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mb-pitch__team-count {
+  flex-shrink: 0;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.mb-pitch__add.ant-btn {
+  border-radius: 999px;
+  font-weight: 600;
+}
 
 .mb-pitch__field {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 420px;
+  aspect-ratio: 105 / 68;
   border-radius: 18px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.12);
   background:
-    repeating-linear-gradient(90deg, #13502c 0 9.09%, #0f4526 9.09% 18.18%);
-  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.45);
+    radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.08), transparent 62%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 8.333%, transparent 8.333% 16.666%),
+    linear-gradient(180deg, rgba(var(--mb-pitch-rgb), 0.22), rgba(var(--mb-pitch-rgb), 0.1)),
+    var(--mb-pitch-dark);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
 }
 
-.mb-pitch__lines {
+/* Takım yarılarına hafif renk + kenar gölgesi */
+.mb-pitch__turf {
   position: absolute;
-  inset: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.28);
-  border-radius: 6px;
+  inset: 0;
   pointer-events: none;
-  background:
-    /* orta çizgi */
-    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.28) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
-    /* orta yuvarlak */
-    radial-gradient(circle at 50% 50%, transparent 0 62px, rgba(255, 255, 255, 0.28) 63px 65px, transparent 66px),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 0 4px, transparent 5px);
+  background: linear-gradient(90deg, rgba(var(--mb-primary-rgb), 0.08), transparent 32% 68%, rgba(var(--mb-info-rgb), 0.08));
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55);
 }
 
-.mb-pitch__lines::before,
-.mb-pitch__lines::after {
-  /* ceza sahaları */
-  content: '';
+.mb-pitch__marks {
   position: absolute;
-  top: 28%;
-  bottom: 28%;
-  width: 12%;
-  border: 2px solid rgba(255, 255, 255, 0.28);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.34);
+  stroke-width: 1.6;
 }
 
-.mb-pitch__lines::before {
-  left: -2px;
-  border-left: none;
+.mb-pitch__marks * {
+  vector-effect: non-scaling-stroke;
 }
 
-.mb-pitch__lines::after {
-  right: -2px;
-  border-right: none;
+.mb-pitch__marks .is-spot {
+  fill: rgba(255, 255, 255, 0.55);
+  stroke: none;
 }
 
-.mb-pitch__half {
-  position: relative;
+.mb-pitch__marks .is-goal {
+  fill: rgba(255, 255, 255, 0.16);
+  stroke: rgba(255, 255, 255, 0.7);
+}
+
+.mb-pitch__marks.is-vertical {
+  display: none;
+}
+
+/* Diziliş rozeti */
+.mb-pitch__formation {
+  position: absolute;
+  bottom: 6px;
   z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: center;
-  gap: 14px 10px;
-  padding: 36px 28px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: rgba(5, 8, 14, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--mb-display);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+.mb-pitch__formation small {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mb-pitch__formation.is-home {
+  left: 14px;
+  border-left: 3px solid var(--mb-home);
+}
+
+.mb-pitch__formation.is-away {
+  right: 14px;
+  border-right: 3px solid var(--mb-away);
+}
+
+/* ---------- Saha üzerindeki yerler ---------- */
+.mb-pslot {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  transition:
+    left 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    top 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mb-pslot > * {
+  animation: mb-pslot-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 28ms);
+}
+
+.mb-pslot:hover,
+.mb-pslot:focus-within {
+  z-index: 6;
+}
+
+.mb-pslot.is-home {
+  --team: var(--mb-home);
+  --team-glow: rgba(var(--mb-primary-rgb), 0.4);
+  --team-soft: rgba(var(--mb-primary-rgb), 0.16);
+}
+
+.mb-pslot.is-away {
+  --team: var(--mb-away);
+  --team-glow: rgba(var(--mb-info-rgb), 0.4);
+  --team-soft: rgba(var(--mb-info-rgb), 0.16);
+}
+
+@keyframes mb-pslot-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-pslot {
+    transition: none;
+  }
+  .mb-pslot > * {
+    animation: none;
+  }
+}
+
+.mb-pslot__hit {
+  display: inline-block;
 }
 
 .mb-token-btn {
+  display: block;
   border: 0;
   background: transparent;
   padding: 0;
@@ -251,13 +392,22 @@
   cursor: default;
 }
 
+.mb-token-btn:focus-visible {
+  outline: none;
+}
+
+.mb-token-btn:focus-visible .mb-token__avatar {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 5px;
+}
+
 .mb-token {
-  width: 78px;
+  width: 86px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  transition: transform 0.15s;
+  gap: 6px;
+  transition: transform 0.18s ease;
 }
 
 .mb-token-btn:not(:disabled):hover .mb-token {
@@ -266,39 +416,102 @@
 
 .mb-token__avatar {
   position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.mb-pitch__half.is-home .mb-token__avatar .ant-avatar {
-  box-shadow: 0 0 0 3px var(--mb-home);
+.mb-token__avatar .ant-avatar {
+  box-shadow:
+    0 0 0 3px var(--team),
+    0 0 16px var(--team-glow),
+    0 8px 18px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.18s ease;
 }
 
-.mb-pitch__half.is-away .mb-token__avatar .ant-avatar {
-  box-shadow: 0 0 0 3px var(--mb-away);
+.mb-token-btn:not(:disabled):hover .mb-token__avatar .ant-avatar {
+  box-shadow:
+    0 0 0 3px var(--team),
+    0 0 26px var(--team-glow),
+    0 10px 22px rgba(0, 0, 0, 0.55);
 }
 
-.mb-token.is-me .mb-token__name {
-  background: var(--mb-primary);
+.mb-token.is-me .mb-token__avatar .ant-avatar {
+  box-shadow:
+    0 0 0 3px var(--team),
+    0 0 0 6px rgba(255, 255, 255, 0.22),
+    0 0 22px var(--team-glow),
+    0 8px 18px rgba(0, 0, 0, 0.5);
+}
+
+/* Mevki rozeti (KL / DF / OS / FV) */
+.mb-token__pos {
+  position: absolute;
+  left: -9px;
+  bottom: -3px;
+  min-width: 22px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  background: var(--team);
   color: var(--mb-primary-ink);
+  font-family: var(--mb-display);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.4px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.mb-pslot.is-line-0 .mb-token__pos {
+  background: var(--mb-gold);
+}
+
+/* İsim + puan şeridi */
+.mb-token__label {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgba(5, 8, 14, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  color: var(--mb-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
 }
 
 .mb-token__name {
-  max-width: 78px;
-  padding: 1px 8px;
-  border-radius: 6px;
-  background: rgba(5, 8, 14, 0.78);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  min-width: 0;
+  padding: 0 7px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .mb-token__score {
+  flex-shrink: 0;
+  padding: 0 5px;
+  background: var(--team);
+  color: var(--mb-primary-ink);
   font-family: var(--mb-display);
   font-size: 13px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.75);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.mb-token.is-me .mb-token__label {
+  background: var(--mb-primary-fill);
+  color: var(--mb-primary-ink);
+  border-color: transparent;
+}
+
+.mb-token.is-me .mb-token__score {
+  background: var(--mb-primary-ink);
+  color: var(--mb-primary);
 }
 
 .mb-token__check {
@@ -306,14 +519,14 @@
   right: -3px;
   bottom: -2px;
   color: var(--mb-pitch);
-  background: #05080e;
+  background: var(--mb-bg);
   border-radius: 50%;
   font-size: 16px;
 }
 
 .mb-token__crown {
   position: absolute;
-  top: -12px;
+  top: -13px;
   left: 50%;
   transform: translateX(-50%);
   color: var(--mb-gold);
@@ -323,19 +536,20 @@
 
 .mb-token__goals {
   position: absolute;
-  left: -4px;
-  top: -4px;
+  left: -6px;
+  top: -5px;
   min-width: 20px;
   height: 20px;
   padding: 0 5px;
   border-radius: 10px;
-  background: #fff;
-  color: #05080e;
+  background: var(--mb-text);
+  color: var(--mb-bg);
   font-size: 11px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
 .mb-token__goals::before {
@@ -344,47 +558,455 @@
   margin-right: 2px;
 }
 
-.mb-token.is-empty .mb-token__avatar {
-  width: 52px;
-  height: 52px;
+/* Misafir */
+.mb-token__guest {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(5, 8, 14, 0.25);
+  border: 2px solid var(--mb-surface);
+  outline: 2px dashed var(--team);
+  outline-offset: 1px;
+  background:
+    repeating-linear-gradient(135deg, rgba(var(--mb-slate-rgb), 0.24) 0 4px, rgba(var(--mb-slate-rgb), 0.08) 4px 8px),
+    var(--mb-surface-3);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+  color: var(--mb-text);
+  font-family: var(--mb-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
-.mb-token.is-empty .mb-token__name {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+.mb-token__tag {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--mb-surface);
+  border: 1px solid var(--mb-border-strong);
+  color: var(--mb-text-2);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mb-token.is-guest .mb-token__label {
+  background: rgba(5, 8, 14, 0.72);
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mb-token.is-guest .mb-token__name {
+  font-style: italic;
+}
+
+.mb-guest-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 240px;
+}
+
+.mb-guest-tip small {
+  opacity: 0.7;
+}
+
+/* Boş yer */
+.mb-token.is-empty .mb-token__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(255, 255, 255, 0.36);
+  background: rgba(5, 8, 14, 0.3);
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.mb-token__role {
+  font-family: var(--mb-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: rgba(255, 255, 255, 0.5);
+  transition: opacity 0.18s;
 }
 
 .mb-token__plus {
-  font-size: 22px;
-  color: rgba(255, 255, 255, 0.75);
+  position: absolute;
+  font-size: 18px;
+  color: var(--team);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.18s, transform 0.18s;
 }
 
-.mb-token-btn:not(:disabled):hover .mb-token.is-empty .mb-token__avatar {
-  border-color: var(--mb-primary);
-  background: rgba(198, 244, 50, 0.15);
+.mb-token.is-empty .mb-token__label {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
+.mb-token-btn:disabled .mb-token.is-empty {
+  opacity: 0.7;
+}
+
+.mb-token-btn:not(:disabled):hover .mb-token.is-empty .mb-token__avatar,
+.mb-token-btn.ant-dropdown-open .mb-token.is-empty .mb-token__avatar {
+  border-color: var(--team);
+  background: var(--team-soft);
+}
+
+.mb-token-btn:not(:disabled):hover .mb-token__role,
+.mb-token-btn.ant-dropdown-open .mb-token__role {
+  opacity: 0;
+}
+
+.mb-token-btn:not(:disabled):hover .mb-token__plus,
+.mb-token-btn.ant-dropdown-open .mb-token__plus {
+  opacity: 1;
+  transform: none;
+}
+
+.mb-token-btn:not(:disabled):hover .mb-token.is-empty .mb-token__label {
+  color: var(--team);
+}
+
+/* Misafir menüsü (Popover) */
+.mb-pitch-menu-pop .ant-popover-inner {
+  padding: 10px;
+}
+
+.mb-pitch-menu__title {
+  display: block;
+  padding: 0 4px;
+}
+
+.mb-pitch-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 190px;
+  max-width: 260px;
+}
+
+.mb-pitch-menu__note {
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--mb-surface-2);
+  color: var(--mb-text-2);
+  font-size: 12px;
+}
+
+.mb-pitch-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mb-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mb-pitch-menu button:hover {
+  background: var(--mb-surface-3);
+}
+
+.mb-pitch-menu button.is-danger {
+  color: var(--mb-danger);
+}
+
+/* Dar saha (tablet / yan menü açıkken) */
+@container (max-width: 760px) {
+  .mb-token {
+    width: 74px;
+  }
+  .mb-token__label {
+    font-size: 11px;
+  }
+  .mb-pitch__formation {
+    font-size: 13px;
+  }
+}
+
+/* ---------- Mobil: dikey saha ---------- */
 @media (max-width: 720px) {
-  .mb-pitch__field {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-    background: repeating-linear-gradient(180deg, #13502c 0 12.5%, #0f4526 12.5% 25%);
-  }
-  .mb-pitch__lines {
-    background:
-      linear-gradient(180deg, transparent calc(50% - 1px), rgba(255, 255, 255, 0.28) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
-      radial-gradient(circle at 50% 50%, transparent 0 48px, rgba(255, 255, 255, 0.28) 49px 51px, transparent 52px);
-  }
-  .mb-pitch__lines::before,
-  .mb-pitch__lines::after {
+  .mb-pitch__head-away {
     display: none;
   }
+  .mb-pitch__foot {
+    display: flex;
+  }
+  .mb-pitch__field {
+    aspect-ratio: 68 / 112;
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.08), transparent 62%),
+      repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 6.25%, transparent 6.25% 12.5%),
+      linear-gradient(90deg, rgba(var(--mb-pitch-rgb), 0.22), rgba(var(--mb-pitch-rgb), 0.1)),
+      var(--mb-pitch-dark);
+  }
+  .mb-pitch__field.is-deep {
+    aspect-ratio: 68 / 136;
+  }
+  .mb-pitch__turf {
+    background: linear-gradient(180deg, rgba(var(--mb-primary-rgb), 0.08), transparent 32% 68%, rgba(var(--mb-info-rgb), 0.08));
+  }
+  .mb-pitch__marks.is-horizontal {
+    display: none;
+  }
+  .mb-pitch__marks.is-vertical {
+    display: block;
+  }
+  .mb-pitch__formation {
+    font-size: 12px;
+    padding: 4px 7px;
+  }
+  .mb-pitch__formation.is-home {
+    top: 6px;
+    bottom: auto;
+    left: 8px;
+  }
+  .mb-pitch__formation.is-away {
+    left: 8px;
+    right: auto;
+    bottom: 6px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--mb-away);
+  }
+  .mb-pslot {
+    left: var(--y);
+    top: var(--x);
+  }
+  .mb-token {
+    width: 70px;
+    gap: 4px;
+  }
+  .mb-token__avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .mb-token__label {
+    font-size: 11px;
+    line-height: 16px;
+  }
+  .mb-token__name {
+    padding: 0 5px;
+  }
+  .mb-token__score {
+    font-size: 11px;
+    padding: 0 4px;
+  }
+  .mb-token__pos {
+    left: -8px;
+    font-size: 9px;
+    min-width: 19px;
+    padding: 2px 3px;
+  }
+  .mb-token__guest {
+    font-size: 15px;
+  }
+  .mb-token__tag {
+    top: -9px;
+    font-size: 8px;
+    padding: 1px 5px;
+  }
+  .mb-token__role {
+    font-size: 12px;
+  }
+  .mb-token__check {
+    font-size: 14px;
+  }
+  .mb-token__crown {
+    font-size: 15px;
+    top: -11px;
+  }
+  .mb-token__goals {
+    min-width: 17px;
+    height: 17px;
+    font-size: 10px;
+  }
+}
+
+/* ---------- Misafir modalı ---------- */
+.mb-guest-modal__hint {
+  margin: 0 0 16px;
+  color: var(--mb-text-2);
+  font-size: 13px;
+}
+
+.mb-guest-sides.ant-radio-group {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.mb-guest-sides .ant-radio-button-wrapper {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.3;
+  border-radius: 12px !important;
+  border: 1px solid var(--mb-border-strong);
+  border-inline-start-width: 1px;
+  background: var(--mb-surface-2);
+}
+
+.mb-guest-sides .ant-radio-button-wrapper::before {
+  display: none;
+}
+
+.mb-guest-side__inner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.mb-guest-side__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--mb-home);
+}
+
+.mb-guest-side.is-away .mb-guest-side__dot {
+  background: var(--mb-away);
+}
+
+.mb-guest-side__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  color: var(--mb-text);
+}
+
+.mb-guest-side__inner small {
+  grid-column: 2;
+  color: var(--mb-text-2);
+  font-size: 12px;
+}
+
+.mb-guest-side.is-home.ant-radio-button-wrapper-checked {
+  border-color: var(--mb-home);
+  background: rgba(var(--mb-primary-rgb), 0.1);
+  box-shadow: 0 0 0 1px var(--mb-home);
+}
+
+.mb-guest-side.is-away.ant-radio-button-wrapper-checked {
+  border-color: var(--mb-away);
+  background: rgba(var(--mb-info-rgb), 0.1);
+  box-shadow: 0 0 0 1px var(--mb-away);
+}
+
+.mb-guest-side.ant-radio-button-wrapper-disabled {
+  opacity: 0.55;
+}
+
+/* ---------- Misafir oyuncular listesi ---------- */
+.mb-guest-card.ant-card {
+  margin-top: 16px;
+}
+
+.mb-guest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mb-guest-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mb-guest-list__avatar,
+.mb-legend__guest {
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(135deg, rgba(var(--mb-slate-rgb), 0.24) 0 4px, rgba(var(--mb-slate-rgb), 0.08) 4px 8px),
+    var(--mb-surface-3);
+  outline: 1.5px dashed var(--mb-text-2);
+  outline-offset: 1px;
+}
+
+.mb-guest-list__avatar {
+  width: 30px;
+  height: 30px;
+  font-family: var(--mb-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mb-text);
+}
+
+.mb-guest-list__avatar.is-home { outline-color: var(--mb-home); }
+.mb-guest-list__avatar.is-away { outline-color: var(--mb-away); }
+
+.mb-guest-list__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.mb-guest-list__text strong {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-guest-list__text small {
+  font-size: 12px;
+  color: var(--mb-text-2);
+  overflow-wrap: anywhere;
+}
+
+.mb-guest-list__actions {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.mb-legend__guest {
+  width: 14px;
+  height: 14px;
+}
+
+.mb-legend__pos {
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--mb-gold-fill);
+  color: var(--mb-primary-ink);
+  font-family: var(--mb-display);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 /* ---------- Yedekler / lejant ---------- */
@@ -516,7 +1138,7 @@
 }
 
 .mb-mvp-card.is-leader {
-  box-shadow: 0 0 0 1px var(--mb-gold), 0 8px 24px rgba(251, 191, 36, 0.18);
+  box-shadow: 0 0 0 1px var(--mb-gold), 0 8px 24px rgba(var(--mb-gold-rgb), 0.18);
 }
 
 .mb-mvp-card__crown {
@@ -550,7 +1172,7 @@
 
 /* ---------- Tekrar oynamak ister misin? ---------- */
 .mb-replay-card.ant-card {
-  border-color: rgba(198, 244, 50, 0.25) !important;
+  border-color: rgba(var(--mb-primary-rgb), 0.25) !important;
   background: linear-gradient(135deg, var(--mb-primary-soft), transparent 60%), var(--mb-surface);
 }
 
@@ -695,7 +1317,7 @@
   padding: 12px 14px;
   border-radius: 12px;
   background: var(--mb-primary-soft);
-  border: 1px solid rgba(198, 244, 50, 0.3);
+  border: 1px solid rgba(var(--mb-primary-rgb), 0.3);
 }
 
 .mb-booking__per span {
@@ -736,7 +1358,7 @@
 
 /* ---------- Tesis değerlendirme ---------- */
 .mb-venue-review-card {
-  border-color: rgba(251, 191, 36, 0.35) !important;
+  border-color: rgba(var(--mb-gold-rgb), 0.35) !important;
 }
 
 .mb-venue-review {
@@ -778,4 +1400,135 @@
 .mb-venue-review__rate.ant-rate {
   font-size: 26px;
   color: var(--mb-gold);
+}
+
+/* =========================================================
+   Telefon
+   ========================================================= */
+@media (max-width: 575px) {
+  .mb-match-hero {
+    padding: 14px 14px 18px;
+    border-radius: 18px;
+  }
+  .mb-match-hero__top {
+    flex-wrap: wrap;
+  }
+  .mb-match-hero__chips {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .mb-match-hero__title {
+    font-size: 30px;
+    overflow-wrap: anywhere;
+  }
+  /* Skor tabelası: saat/skor üstte, takımlar altta yan yana — hiçbir şey kırpılmasın */
+  .mb-scoreboard {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'center center'
+      'home away';
+    gap: 10px 8px;
+    margin: 18px auto 16px;
+  }
+  .mb-scoreboard__center {
+    grid-area: center;
+  }
+  .mb-scoreboard__team.is-home {
+    grid-area: home;
+  }
+  .mb-scoreboard__team.is-away {
+    grid-area: away;
+  }
+  .mb-scoreboard__team {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+  .mb-scoreboard__team strong {
+    font-size: 17px;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mb-scoreboard__team span {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .mb-scoreboard__score,
+  .mb-scoreboard__time {
+    font-size: 48px;
+    padding: 8px 18px;
+  }
+  .mb-scoreboard__team.is-seeking {
+    align-items: stretch;
+  }
+  .mb-scoreboard__claim.ant-btn {
+    width: 100%;
+    height: auto;
+    min-height: 36px;
+    padding: 4px 8px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+  .mb-match-hero__bottom {
+    gap: 12px;
+  }
+  .mb-match-hero__actions {
+    width: 100%;
+  }
+  .mb-match-hero__actions > * {
+    flex: 1 1 auto;
+  }
+  .mb-match-hero__actions .ant-btn {
+    width: 100%;
+  }
+  .mb-match-tabs .ant-tabs-tab {
+    font-size: 15px;
+  }
+  .mb-match-tabs > .ant-tabs-nav .ant-tabs-tab + .ant-tabs-tab {
+    margin-left: 18px;
+  }
+  .mb-result-form__side .ant-input-number {
+    width: 84px;
+  }
+  .mb-replay-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Çok dar telefonlar: saha üzerindeki oyuncu kartları biraz daha küçük */
+@media (max-width: 400px) {
+  .mb-token {
+    width: 62px;
+  }
+  .mb-token__avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .mb-token__label {
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 767px) {
+  .mb-pitch-menu button {
+    min-height: 44px;
+  }
+}
+
+/* ---------- Açık tema: saha koyu "stadyum" paneli olarak kalır, gölgesi yumuşar ---------- */
+[data-theme='light'] .mb-pitch__field {
+  border-color: rgba(15, 61, 34, 0.3);
+  box-shadow: 0 18px 40px rgba(15, 61, 34, 0.22);
+}
+
+/* Güvenilirlik rozeti (yalnızca kurucu görür) */
+.mb-token__rel {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.mb-token__rel .mb-rel {
+  background: rgba(5, 8, 14, 0.86);
 }

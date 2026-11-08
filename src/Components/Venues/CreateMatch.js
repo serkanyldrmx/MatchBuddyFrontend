@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, App, Button, Card, Col, Input, InputNumber, Radio, Result, Row, Segmented, Select, Skeleton, Spin, Steps, Switch } from 'antd';
+import { Alert, App, Button, Card, Col, Grid, Input, InputNumber, Radio, Result, Row, Segmented, Select, Skeleton, Spin, Steps, Switch } from 'antd';
 import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
@@ -17,31 +17,45 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { matchesApi } from '../../api/matches';
 import { formatPrice, SURFACE, venuesApi } from '../../api/venues';
 import { PageHeader } from '../../ui';
-import { apiErrorMessage, fileUrl, getCurrentUser } from '../../utils/format';
+import { apiErrorMessage, errorCode, fieldErrorsOf, getCurrentUser, mediaUrl } from '../../utils/format';
+import { bookingUserCountRange, getParam, usePublicParams } from '../../api/parameters';
 import SlotPicker, { DateStrip } from './SlotPicker';
 import { AMENITY_ICONS, VenueRating } from './Venues';
 import './CreateMatch.css';
 
-const DURATIONS = [
-  { value: 60, label: '60 dk' },
-  { value: 90, label: '90 dk' },
-  { value: 120, label: '120 dk' },
+// Sunucu hata kodları → sihirbazda dönülecek adım
+// Seçilen saat artık kullanılamıyor: saat seçimi sıfırlanır
+const SLOT_GONE_CODES = ['VENUE_SLOT_TAKEN', 'MATCH_TIME_CONFLICT', 'VENUE_PAST_SLOT', 'VENUE_CLOSED_AT_TIME', 'RESERVATION_PITCH_UNAVAILABLE', 'OWNER_BLOCK_CLOSED_CONFLICT'];
+// Saat / süre / tesis kuralı hataları: 1. adıma dönülür (seçim korunur)
+const SLOT_STEP_CODES = [
+  'VENUE_BOOKING_TOO_SOON',
+  'VENUE_BOOKING_TOO_FAR_AHEAD',
+  'VENUE_INVALID_START_MINUTE',
+  'VENUE_INVALID_DURATION',
+  'VENUE_DURATION_OUT_OF_RANGE',
+  'VENUE_CHOOSE_SLOT',
+  'VENUE_PITCH_REQUIRED',
+  'RESERVATION_VENUE_CLOSED',
 ];
+// Kadro adımındaki alanlar (errors sözlüğü anahtarları, küçük harf)
+const SQUAD_FIELDS = ['matchname', 'description', 'usercount', 'hometeamid', 'awayteamid', 'lookingforopponent'];
 
 const toApiDate = (d) => dayjs(d).format('YYYY-MM-DDTHH:mm:ss');
 const numParam = (v) => (v && Number.isFinite(Number(v)) ? Number(v) : undefined);
 
 /** Sağdaki rezervasyon fişi */
 function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, cameraRequested, userCount }) {
+  const { t } = useTranslation();
   if (!venue || !pitch || !start) {
     return (
       <div className="mb-receipt is-empty">
-        <h3 className="mb-receipt__title">Rezervasyon özeti</h3>
-        <p className="mb-hint">Tesis, saha ve saat seçince ücret burada hesaplanacak.</p>
+        <h3 className="mb-receipt__title">{t('venues:createMatch.receipt.title')}</h3>
+        <p className="mb-hint">{t('venues:createMatch.receipt.emptyHint')}</p>
       </div>
     );
   }
@@ -50,13 +64,13 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
   return (
     <Spin spinning={quoting}>
       <div className="mb-receipt">
-        <h3 className="mb-receipt__title">Rezervasyon özeti</h3>
+        <h3 className="mb-receipt__title">{t('venues:createMatch.receipt.title')}</h3>
         <div className="mb-receipt__venue">
-          {venue.coverPhotoUrl && <img src={fileUrl(venue.coverPhotoUrl)} alt="" />}
+          {venue.coverPhotoUrl && <img src={mediaUrl(venue.coverPhotoUrl, 'sm')} alt="" loading="lazy" decoding="async" />}
           <div>
             <strong>{venue.name}</strong>
             <span>
-              {pitch.name} · {SURFACE[pitch.surface] || 'Saha'} · {pitch.isIndoor ? 'Kapalı' : 'Açık'}
+              {pitch.name} · {SURFACE[pitch.surface] || t('common:pitch')} · {pitch.isIndoor ? t('common:indoor') : t('common:outdoor')}
             </span>
           </div>
         </div>
@@ -65,7 +79,7 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
             <CalendarOutlined /> {s.format('DD MMMM dddd')}
           </span>
           <span>
-            <ClockCircleOutlined /> {s.format('HH:mm')}–{e.format('HH:mm')} · {duration} dk
+            <ClockCircleOutlined /> {s.format('HH:mm')}–{e.format('HH:mm')} · {t('venues:createMatch.minutes', { count: duration })}
           </span>
         </div>
 
@@ -73,7 +87,7 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
           {(quote?.lines || []).map((l) => (
             <div key={l.label} className="mb-receipt__line">
               <span>
-                Saha {l.label}
+                {t('venues:createMatch.receipt.pitchLine', { label: l.label })}
                 {l.campaignTitle && (
                   <em className="mb-receipt__deal">
                     <FireOutlined /> {l.campaignTitle}
@@ -87,13 +101,13 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
           ))}
           {cleatCount > 0 && venue.prices?.cleatRentalPrice != null && (
             <div className="mb-receipt__line">
-              <span>Krampon × {cleatCount}</span>
+              <span>{t('venues:createMatch.receipt.cleats', { count: cleatCount })}</span>
               <span>{formatPrice(cleatCount * venue.prices.cleatRentalPrice)}</span>
             </div>
           )}
           {cameraRequested && venue.prices?.cameraPrice != null && (
             <div className="mb-receipt__line">
-              <span>Maç kaydı (kamera)</span>
+              <span>{t('venues:amenities.camera')}</span>
               <span>{formatPrice(venue.prices.cameraPrice)}</span>
             </div>
           )}
@@ -102,27 +116,30 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
         {quote && quote.available !== false ? (
           <>
             <div className="mb-receipt__sub">
-              <span>Saha</span>
+              <span>{t('common:pitch')}</span>
               <span>{formatPrice(quote.pitchTotal)}</span>
             </div>
             {quote.extrasTotal > 0 && (
               <div className="mb-receipt__sub">
-                <span>Ekstralar</span>
+                <span>{t('venues:createMatch.receipt.extras')}</span>
                 <span>{formatPrice(quote.extrasTotal)}</span>
               </div>
             )}
             <div className="mb-receipt__total">
-              <span>Toplam</span>
+              <span>{t('venues:createMatch.receipt.total')}</span>
               <strong>{formatPrice(quote.total)}</strong>
             </div>
             <div className="mb-receipt__per">
-              <span>Kişi başı</span>
+              <span>{t('venues:createMatch.receipt.perPlayer')}</span>
               <strong>{formatPrice(quote.perPlayer)}</strong>
-              <small>{userCount} oyuncuya bölünür</small>
+              <small>{t('venues:createMatch.receipt.splitAmong', { count: userCount })}</small>
             </div>
+            {quote.cleatTotal > 0 && quote.cleatPrice != null && (
+              <p className="mb-hint">{t('venues:createMatch.receipt.cleatOnlyRenter', { price: formatPrice(quote.cleatPrice) })}</p>
+            )}
           </>
         ) : quote?.available === false ? (
-          <Alert type="error" showIcon message={quote.reason || 'Bu saat müsait değil.'} />
+          <Alert type="error" showIcon message={quote.reason || t('venues:createMatch.receipt.unavailable')} />
         ) : null}
 
         {venue.cancellationPolicy && (
@@ -130,13 +147,16 @@ function Receipt({ venue, pitch, start, duration, quote, quoting, cleatCount, ca
             <InfoCircleOutlined /> <span>{venue.cancellationPolicy}</span>
           </div>
         )}
-        <p className="mb-receipt__note">Ödeme sahada yapılır. Rezervasyon işletme onayından sonra kesinleşir.</p>
+        <p className="mb-receipt__note">{t('venues:createMatch.receipt.note')}</p>
       </div>
     </Spin>
   );
 }
 
 export default function CreateMatch() {
+  const { t } = useTranslation();
+  // Telefonda adımlar yatay ve başlıklar ikonların altında kalsın (antd varsayılanı dikeye geçer)
+  const isPhone = Grid.useBreakpoint().md === false;
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { message } = App.useApp();
@@ -170,6 +190,8 @@ export default function CreateMatch() {
   // Ekstralar
   const [cleatCount, setCleatCount] = useState(0);
   const [cameraRequested, setCameraRequested] = useState(false);
+  const [minReliability, setMinReliability] = useState(0); // 0 = sınır yok
+  const [repeatWeekly, setRepeatWeekly] = useState(false); // her hafta aynı gün ve saatte
 
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
@@ -181,13 +203,13 @@ export default function CreateMatch() {
     venuesApi
       .list()
       .then((r) => setVenues(r || []))
-      .catch((e) => message.error(apiErrorMessage(e, 'Tesisler yüklenemedi.')))
+      .catch((e) => message.error(apiErrorMessage(e, t('venues:shared.venuesLoadError'))))
       .finally(() => setVenuesLoading(false));
     api
       .get('/api/Team/GetTeamList')
       .then((r) => setTeams(r.data || []))
       .catch(() => {});
-  }, [message]);
+  }, [message, t]);
 
   useEffect(() => {
     if (!stadiumId) {
@@ -199,22 +221,30 @@ export default function CreateMatch() {
     venuesApi
       .detail(stadiumId)
       .then((d) => alive && setVenue(d))
-      .catch((e) => alive && message.error(apiErrorMessage(e, 'Tesis yüklenemedi.')))
+      .catch((e) => alive && message.error(apiErrorMessage(e, t('venues:shared.venueLoadError'))))
       .finally(() => alive && setVenueLoading(false));
     return () => {
       alive = false;
     };
-  }, [stadiumId, message]);
+  }, [stadiumId, message, t]);
 
   const pitch = useMemo(() => venue?.pitches?.find((p) => p.pitchId === slot?.pitchId) || null, [venue, slot?.pitchId]);
+  // Kişi sayısı aralığı ve süreler sunucu parametrelerinden (GET /api/Parameters/Public) gelir
+  const publicParams = usePublicParams();
   const perSide = pitch?.playersPerSide || 7;
-  const maxPlayers = perSide * 2 + 4;
+  const { min: minPlayers, max: maxPlayers } = bookingUserCountRange(perSide, publicParams.get);
   const players = userCount || perSide * 2;
+  const durations = publicParams.get('venue.allowedDurations');
 
   // Saha değişince oyuncu sayısını sahaya göre ayarla
   useEffect(() => {
-    if (pitch) setUserCount((c) => (c && c >= 8 && c <= pitch.playersPerSide * 2 + 4 ? c : pitch.playersPerSide * 2));
-  }, [pitch]);
+    if (pitch) setUserCount((c) => (c && c >= minPlayers && c <= maxPlayers ? c : pitch.playersPerSide * 2));
+  }, [pitch, minPlayers, maxPlayers]);
+
+  // İzin verilen süreler değişirse (parametreler yüklendi) geçersiz seçimi ilk seçeneğe çek
+  useEffect(() => {
+    if (durations.length && !durations.includes(duration)) setDuration(durations[0]);
+  }, [durations, duration]);
 
   // Tesiste olmayan ekstraları sıfırla
   useEffect(() => {
@@ -232,23 +262,27 @@ export default function CreateMatch() {
     }
     let alive = true;
     setQuoting(true);
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       venuesApi
         .quote({ pitchId: slot.pitchId, start: slot.start, durationMinutes: duration, userCount: players, cleatCount: cleatCount || 0, cameraRequested })
         .then((q) => alive && setQuote(q))
-        .catch((e) => alive && setQuote({ available: false, reason: apiErrorMessage(e, 'Ücret hesaplanamadı.') }))
+        .catch((e) => alive && setQuote({ available: false, reason: apiErrorMessage(e, t('venues:createMatch.quoteError')) }))
         .finally(() => alive && setQuoting(false));
     }, 350);
     return () => {
       alive = false;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
-  }, [slot?.pitchId, slot?.start, duration, players, cleatCount, cameraRequested]);
+  }, [slot?.pitchId, slot?.start, duration, players, cleatCount, cameraRequested, t]);
 
   /* ---------- Takımlar ---------- */
-  const myTeams = useMemo(() => teams.filter((t) => (t.playerId || []).includes(myId)), [teams, myId]);
-  const otherTeams = useMemo(() => teams.filter((t) => !(t.playerId || []).includes(myId)), [teams, myId]);
-  const teamOption = (t) => ({ value: t.teamId, label: `${t.teamName} · ${(t.playerId || []).length} oyuncu` });
+  const myTeams = useMemo(() => teams.filter((tm) => (tm.playerId || []).includes(myId)), [teams, myId]);
+  const otherTeams = useMemo(() => teams.filter((tm) => !(tm.playerId || []).includes(myId)), [teams, myId]);
+  const teamOption = (tm) => ({
+    value: tm.teamId,
+    label: t('venues:createMatch.teamOption', { name: tm.teamName, count: (tm.playerId || []).length }),
+  });
+  const durationOptions = durations.map((d) => ({ value: d, label: t('venues:createMatch.minutes', { count: d }) }));
 
   /* ---------- Aksiyonlar ---------- */
   const changeVenue = (id) => {
@@ -264,11 +298,11 @@ export default function CreateMatch() {
 
   const step1Ok = !!(venue && pitch && slot && quote && quote.available !== false && !quoting);
   const step2Error = !matchName.trim()
-    ? 'Maçına bir isim ver.'
+    ? t('venues:createMatch.errors.nameRequired')
     : matchType === 'team' && !homeTeamId
-      ? 'Takımını seç.'
+      ? t('venues:createMatch.errors.teamRequired')
       : matchType === 'team' && opponentMode === 'invite' && !awayTeamId
-        ? 'Davet edeceğin rakip takımı seç.'
+        ? t('venues:createMatch.errors.opponentRequired')
         : null;
 
   const next = () => {
@@ -276,7 +310,8 @@ export default function CreateMatch() {
       if (!step1Ok) return;
       if (!matchName.trim() && slot) {
         const s = dayjs(slot.start);
-        setMatchName(`${s.format('dddd')} ${s.hour() >= 17 ? 'akşam' : s.hour() >= 12 ? 'öğlen' : 'sabah'} maçı`);
+        const part = s.hour() >= 17 ? 'evening' : s.hour() >= 12 ? 'noon' : 'morning';
+        setMatchName(t(`venues:createMatch.autoName.${part}`, { day: s.format('dddd') }));
       }
     }
     if (step === 1 && step2Error) {
@@ -305,6 +340,8 @@ export default function CreateMatch() {
       homeTeamId: matchType === 'team' ? homeTeamId : null,
       awayTeamId: matchType === 'team' && opponentMode === 'invite' ? awayTeamId : null,
       lookingForOpponent: matchType === 'team' && opponentMode === 'looking',
+      minReliability: minReliability || null,
+      repeatWeekly,
     };
     try {
       const res = await venuesApi.createMatch(body);
@@ -322,10 +359,19 @@ export default function CreateMatch() {
       }
       setDone({ matchId, message: res?.message });
     } catch (e) {
-      message.error(apiErrorMessage(e, 'Rezervasyon oluşturulamadı.'));
-      if (e?.response?.status === 400 && /dolu/i.test(apiErrorMessage(e, ''))) {
+      message.error(apiErrorMessage(e, t('venues:createMatch.errors.createFailed')));
+      // Mesaj metnine değil, hata koduna göre ilgili adıma dön
+      const code = errorCode(e);
+      if (SLOT_GONE_CODES.includes(code)) {
         setStep(0);
         setSlot(null);
+      } else if (SLOT_STEP_CODES.includes(code)) {
+        setStep(0);
+      } else if (
+        /^(MATCH_NAME_|TEAM_|RESERVATION_(HOME|AWAY|SAME|OPPONENT|NOT_HOME))/.test(code || '') ||
+        Object.keys(fieldErrorsOf(e) || {}).some((k) => SQUAD_FIELDS.includes(k.toLowerCase()))
+      ) {
+        setStep(1);
       }
     } finally {
       setSubmitting(false);
@@ -339,26 +385,26 @@ export default function CreateMatch() {
       <Card className="mb-cm-done">
         <Result
           status="success"
-          title="Rezervasyon talebin gönderildi!"
+          title={t('venues:createMatch.done.title')}
           subTitle={
             <>
               {venue?.name} · {pitch?.name} · {s.format('DD MMMM dddd, HH:mm')}
               <br />
-              İşletme onayladığında bildirim alacaksın. {matchType === 'team' && 'Takım arkadaşlarına davet gönderildi.'}
+              {t('venues:createMatch.done.notify')} {matchType === 'team' && t('venues:createMatch.done.teamInvited')}
             </>
           }
           extra={[
             done.matchId ? (
               <Button key="go" type="primary" size="large" icon={<ArrowRightOutlined />} onClick={() => navigate(`/match-details/${done.matchId}`)}>
-                Maç merkezine git
+                {t('venues:createMatch.done.goToMatch')}
               </Button>
             ) : (
               <Button key="home" type="primary" size="large" onClick={() => navigate('/home')}>
-                Fikstüre dön
+                {t('venues:createMatch.done.backHome')}
               </Button>
             ),
             <Button key="cal" size="large" icon={<CalendarOutlined />} onClick={() => navigate('/calendar')}>
-              Takvimim
+              {t('venues:createMatch.done.myCalendar')}
             </Button>,
           ]}
         />
@@ -369,7 +415,7 @@ export default function CreateMatch() {
   /* ---------- Adımlar ---------- */
   const venueSummary = venue && (
     <div className="mb-cm-venue">
-      {venue.coverPhotoUrl && <img src={fileUrl(venue.coverPhotoUrl)} alt="" />}
+      {venue.coverPhotoUrl && <img src={mediaUrl(venue.coverPhotoUrl, 'sm')} alt="" loading="lazy" decoding="async" />}
       <div className="mb-cm-venue__text">
         <strong>{venue.name}</strong>
         <span>
@@ -378,7 +424,7 @@ export default function CreateMatch() {
         <VenueRating rating={venue.rating} count={venue.reviewCount} compact />
       </div>
       <Button type="link" onClick={() => navigate(`/venues/${venue.stadiumId}`)}>
-        Tesisi incele
+        {t('venues:createMatch.viewVenue')}
       </Button>
     </div>
   );
@@ -386,12 +432,12 @@ export default function CreateMatch() {
   const stepSlot = (
     <>
       <div className="mb-cm-field">
-        <label>Tesis</label>
+        <label>{t('venues:createMatch.slot.venue')}</label>
         <Select
           showSearch
           size="large"
           loading={venuesLoading}
-          placeholder="Anlaşmalı bir tesis seç"
+          placeholder={t('venues:createMatch.slot.venuePlaceholder')}
           value={stadiumId}
           onChange={changeVenue}
           optionFilterProp="label"
@@ -406,27 +452,32 @@ export default function CreateMatch() {
         <>
           {venueSummary}
           <div className="mb-cm-field">
-            <label>Gün</label>
+            <label>{t('venues:createMatch.slot.day')}</label>
             <DateStrip value={date} onChange={changeDate} />
           </div>
           <div className="mb-cm-field">
-            <label>Saha ve saat</label>
+            <label>{t('venues:createMatch.slot.pitchAndTime')}</label>
             <SlotPicker stadiumId={venue.stadiumId} date={date} pitches={venue.pitches || []} selected={slot} onSelect={pickSlot} />
           </div>
           <div className="mb-cm-field">
-            <label>Süre</label>
-            <Segmented size="large" options={DURATIONS} value={duration} onChange={setDuration} />
-            {duration > 60 && <p className="mb-hint">Uzun maçlarda sonraki saat(ler)in de boş olması gerekir; bunu senin için kontrol ediyoruz.</p>}
+            <label>{t('venues:createMatch.slot.duration')}</label>
+            <Segmented size="large" options={durationOptions} value={duration} onChange={setDuration} />
+            {duration > 60 && <p className="mb-hint">{t('venues:createMatch.slot.longMatchHint')}</p>}
           </div>
           {slot && quote?.available === false && !quoting && (
-            <Alert type="error" showIcon message={quote.reason || 'Seçtiğin süre için saha müsait değil.'} description="Süreyi kısalt ya da başka bir saat seç." />
+            <Alert
+              type="error"
+              showIcon
+              message={quote.reason || t('venues:createMatch.slot.unavailable')}
+              description={t('venues:createMatch.slot.unavailableHint')}
+            />
           )}
         </>
       ) : (
         <div className="mb-cm-pick-hint">
           <EnvironmentOutlined />
-          <p>Maç kurmak için önce anlaşmalı bir tesis seç.</p>
-          <Button onClick={() => navigate('/venues')}>Tesislere göz at</Button>
+          <p>{t('venues:createMatch.slot.pickVenueHint')}</p>
+          <Button onClick={() => navigate('/venues')}>{t('venues:createMatch.slot.browseVenues')}</Button>
         </div>
       )}
     </>
@@ -437,37 +488,76 @@ export default function CreateMatch() {
       <Row gutter={16}>
         <Col xs={24} md={16}>
           <div className="mb-cm-field">
-            <label>Maç adı</label>
-            <Input size="large" maxLength={80} value={matchName} onChange={(e) => setMatchName(e.target.value)} placeholder="Örn. Perşembe akşam maçı" />
+            <label>{t('venues:createMatch.squad.matchName')}</label>
+            <Input
+              size="large"
+              maxLength={80}
+              value={matchName}
+              onChange={(e) => setMatchName(e.target.value)}
+              placeholder={t('venues:createMatch.squad.matchNamePlaceholder')}
+            />
           </div>
         </Col>
         <Col xs={24} md={8}>
           <div className="mb-cm-field">
-            <label>Oyuncu sayısı</label>
-            <InputNumber size="large" min={8} max={maxPlayers} value={players} onChange={(v) => setUserCount(v)} style={{ width: '100%' }} addonAfter="kişi" />
-            <p className="mb-hint">
-              {perSide}+{perSide} saha · en fazla {maxPlayers}
-            </p>
+            <label>{t('venues:createMatch.squad.playerCount')}</label>
+            <InputNumber
+              size="large"
+              min={minPlayers}
+              max={maxPlayers}
+              value={players}
+              onChange={(v) => setUserCount(v)}
+              style={{ width: '100%' }}
+              addonAfter={t('venues:createMatch.squad.personUnit')}
+            />
+            <p className="mb-hint">{t('venues:createMatch.squad.pitchSizeHint', { perSide, max: maxPlayers })}</p>
           </div>
         </Col>
       </Row>
       <div className="mb-cm-field">
-        <label>Açıklama</label>
-        <Input.TextArea rows={3} maxLength={500} showCount value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Seviye, forma rengi, buluşma noktası…" />
+        <label>{t('venues:createMatch.squad.description')}</label>
+        <Input.TextArea
+          rows={3}
+          maxLength={500}
+          showCount
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t('venues:createMatch.squad.descriptionPlaceholder')}
+        />
+      </div>
+      <div className="mb-cm-field">
+        <label>{t('venues:createMatch.squad.minReliability')}</label>
+        <Segmented
+          value={minReliability}
+          onChange={setMinReliability}
+          options={[
+            { value: 0, label: t('venues:createMatch.squad.minReliabilityNone') },
+            { value: Number(getParam('reliability.levelMedium')) || 70, label: t('venues:createMatch.squad.minReliabilityMedium', { score: Number(getParam('reliability.levelMedium')) || 70 }) },
+            { value: Number(getParam('reliability.levelGood')) || 90, label: t('venues:createMatch.squad.minReliabilityGood', { score: Number(getParam('reliability.levelGood')) || 90 }) },
+          ]}
+        />
+        <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.minReliabilityHint')}</p>
+      </div>
+
+      <div className="mb-cm-field mb-cm-repeat">
+        <label>
+          <Switch checked={repeatWeekly} onChange={setRepeatWeekly} size="small" /> {t('venues:createMatch.squad.repeatWeekly')}
+        </label>
+        <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.repeatWeeklyHint')}</p>
       </div>
 
       <div className="mb-cm-field">
-        <label>Maç türü</label>
+        <label>{t('venues:createMatch.squad.matchType')}</label>
         <Radio.Group value={matchType} onChange={(e) => setMatchType(e.target.value)} className="mb-cm-types">
           <Radio.Button value="open" className="mb-cm-type">
             <GlobalOutlined />
-            <strong>Açık maç</strong>
-            <span>Herkes katılabilir, kadroyu birlikte tamamlarsınız.</span>
+            <strong>{t('venues:createMatch.squad.openMatch')}</strong>
+            <span>{t('venues:createMatch.squad.openMatchDesc')}</span>
           </Radio.Button>
           <Radio.Button value="team" className="mb-cm-type">
             <TeamOutlined />
-            <strong>Takımımla</strong>
-            <span>Kendi takımınla sahaya çık, rakibini davet et ya da ara.</span>
+            <strong>{t('venues:createMatch.squad.withTeam')}</strong>
+            <span>{t('venues:createMatch.squad.withTeamDesc')}</span>
           </Radio.Button>
         </Radio.Group>
       </div>
@@ -475,33 +565,33 @@ export default function CreateMatch() {
       {matchType === 'team' && (
         <div className="mb-cm-team">
           <div className="mb-cm-field">
-            <label>Takımın</label>
+            <label>{t('venues:createMatch.squad.yourTeam')}</label>
             {myTeams.length ? (
-              <Select size="large" placeholder="Takımını seç" value={homeTeamId} onChange={setHomeTeamId} options={myTeams.map(teamOption)} style={{ width: '100%' }} />
+              <Select size="large" placeholder={t('venues:createMatch.squad.yourTeamPlaceholder')} value={homeTeamId} onChange={setHomeTeamId} options={myTeams.map(teamOption)} style={{ width: '100%' }} />
             ) : (
               <Alert
                 type="warning"
                 showIcon
-                message="Henüz bir takımın yok."
+                message={t('venues:createMatch.squad.noTeam')}
                 action={
                   <Button size="small" onClick={() => navigate('/create-team')}>
-                    Takım kur
+                    {t('venues:createMatch.squad.createTeam')}
                   </Button>
                 }
               />
             )}
             <p className="mb-hint">
-              <InfoCircleOutlined /> Takımındaki herkese otomatik davet gider; kabul edenler ev sahibi tarafına yerleşir.
+              <InfoCircleOutlined /> {t('venues:createMatch.squad.teamInviteHint')}
             </p>
           </div>
           <div className="mb-cm-field">
-            <label>Rakip</label>
+            <label>{t('venues:createMatch.squad.opponent')}</label>
             <Segmented
               value={opponentMode}
               onChange={setOpponentMode}
               options={[
-                { value: 'looking', label: 'Rakip aranıyor' },
-                { value: 'invite', label: 'Rakip takım davet et' },
+                { value: 'looking', label: t('venues:createMatch.squad.lookingForOpponent') },
+                { value: 'invite', label: t('venues:createMatch.squad.inviteOpponent') },
               ]}
             />
             {opponentMode === 'invite' ? (
@@ -510,16 +600,16 @@ export default function CreateMatch() {
                   showSearch
                   optionFilterProp="label"
                   size="large"
-                  placeholder="Rakip takımı seç"
+                  placeholder={t('venues:createMatch.squad.opponentPlaceholder')}
                   value={awayTeamId}
                   onChange={setAwayTeamId}
-                  options={otherTeams.filter((t) => t.teamId !== homeTeamId).map(teamOption)}
+                  options={otherTeams.filter((tm) => tm.teamId !== homeTeamId).map(teamOption)}
                   style={{ width: '100%', marginTop: 10 }}
                 />
-                <p className="mb-hint">Rakip takımın üyelerine de davet gider, deplasman tarafına yerleşirler.</p>
+                <p className="mb-hint">{t('venues:createMatch.squad.inviteOpponentHint')}</p>
               </>
             ) : (
-              <p className="mb-hint">Maçın "Rakip aranıyor" olarak listelenir; bir takım rakip olarak katılabilir.</p>
+              <p className="mb-hint">{t('venues:createMatch.squad.lookingHint')}</p>
             )}
           </div>
         </div>
@@ -534,7 +624,7 @@ export default function CreateMatch() {
       {!hasCleat && !hasCamera ? (
         <div className="mb-cm-pick-hint">
           <CheckOutlined />
-          <p>Bu tesiste ek hizmet yok. Özeti kontrol edip rezervasyonunu gönderebilirsin.</p>
+          <p>{t('venues:createMatch.extras.none')}</p>
         </div>
       ) : (
         <div className="mb-cm-extras">
@@ -542,18 +632,25 @@ export default function CreateMatch() {
             <div className="mb-cm-extra">
               <span className="mb-cm-extra__icon">{AMENITY_ICONS.cleatRental}</span>
               <div className="mb-cm-extra__text">
-                <strong>Krampon kiralama</strong>
-                <span>{formatPrice(venue.prices?.cleatRentalPrice)} / çift</span>
+                <strong>{t('venues:amenities.cleatRental')}</strong>
+                <span>{t('venues:createMatch.extras.perPair', { price: formatPrice(venue.prices?.cleatRentalPrice) })}</span>
               </div>
-              <InputNumber min={0} max={players} value={cleatCount} onChange={(v) => setCleatCount(v || 0)} addonAfter="çift" style={{ width: 140 }} />
+              <InputNumber
+                min={0}
+                max={players}
+                value={cleatCount}
+                onChange={(v) => setCleatCount(v || 0)}
+                addonAfter={t('venues:createMatch.extras.pairUnit')}
+                style={{ width: 140, maxWidth: '100%' }}
+              />
             </div>
           )}
           {hasCamera && (
             <div className="mb-cm-extra">
               <span className="mb-cm-extra__icon">{AMENITY_ICONS.camera}</span>
               <div className="mb-cm-extra__text">
-                <strong>Maç kaydı (kamera)</strong>
-                <span>{formatPrice(venue.prices?.cameraPrice)} · maç sonrası videoyu al</span>
+                <strong>{t('venues:amenities.camera')}</strong>
+                <span>{t('venues:createMatch.extras.cameraDesc', { price: formatPrice(venue.prices?.cameraPrice) })}</span>
               </div>
               <Switch checked={cameraRequested} onChange={setCameraRequested} />
             </div>
@@ -561,28 +658,32 @@ export default function CreateMatch() {
         </div>
       )}
       <div className="mb-cm-review">
-        <h4>Maç</h4>
+        <h4>{t('venues:createMatch.review.title')}</h4>
         <div>
-          <span>Ad</span>
+          <span>{t('venues:createMatch.review.name')}</span>
           <strong>{matchName || '-'}</strong>
         </div>
         <div>
-          <span>Kadro</span>
-          <strong>{players} oyuncu</strong>
+          <span>{t('venues:createMatch.review.squad')}</span>
+          <strong>{t('venues:createMatch.review.players', { count: players })}</strong>
         </div>
         <div>
-          <span>Tür</span>
+          <span>{t('venues:createMatch.review.type')}</span>
           <strong>
             {matchType === 'open'
-              ? 'Açık maç'
-              : `${myTeams.find((t) => t.teamId === homeTeamId)?.teamName || 'Takımın'} vs ${
-                  opponentMode === 'invite' ? otherTeams.find((t) => t.teamId === awayTeamId)?.teamName || '?' : 'Rakip aranıyor'
-                }`}
+              ? t('venues:createMatch.squad.openMatch')
+              : t('venues:createMatch.review.versus', {
+                  home: myTeams.find((tm) => tm.teamId === homeTeamId)?.teamName || t('venues:createMatch.squad.yourTeam'),
+                  away:
+                    opponentMode === 'invite'
+                      ? otherTeams.find((tm) => tm.teamId === awayTeamId)?.teamName || '?'
+                      : t('venues:createMatch.squad.lookingForOpponent'),
+                })}
           </strong>
         </div>
         {pitch && (
           <div>
-            <span>Saha</span>
+            <span>{t('common:pitch')}</span>
             <strong>
               {pitch.isIndoor ? <HomeOutlined /> : <SunOutlined />} {pitch.name} · {SURFACE[pitch.surface] || ''}
             </strong>
@@ -596,13 +697,24 @@ export default function CreateMatch() {
 
   return (
     <>
-      <PageHeader eyebrow="Rezervasyon" title="Maç Kur" subtitle="Sahanı seç, kadronu kur, kişi başı ücreti anında gör." />
+      <PageHeader
+        eyebrow={t('venues:createMatch.header.eyebrow')}
+        title={t('venues:createMatch.header.title')}
+        subtitle={t('venues:createMatch.header.subtitle')}
+      />
 
       <Steps
         current={step}
         className="mb-cm-steps"
+        responsive={false}
+        labelPlacement={isPhone ? 'vertical' : undefined}
+        size={isPhone ? 'small' : undefined}
         onChange={(s) => (s < step || (s === 1 && step1Ok) || (s === 2 && step1Ok && !step2Error) ? setStep(s) : null)}
-        items={[{ title: 'Saha & saat' }, { title: 'Kadro & takım' }, { title: 'Ekstralar & özet' }]}
+        items={[
+          { title: t('venues:createMatch.steps.slot') },
+          { title: t('venues:createMatch.steps.squad') },
+          { title: t('venues:createMatch.steps.extras') },
+        ]}
       />
 
       <Row gutter={[24, 24]}>
@@ -612,18 +724,18 @@ export default function CreateMatch() {
             <div className="mb-cm-nav">
               {step > 0 ? (
                 <Button size="large" icon={<ArrowLeftOutlined />} onClick={() => setStep((s) => s - 1)}>
-                  Geri
+                  {t('common:actions.back')}
                 </Button>
               ) : (
                 <span />
               )}
               {step < 2 ? (
                 <Button type="primary" size="large" onClick={next} disabled={step === 0 && !step1Ok}>
-                  Devam <ArrowRightOutlined />
+                  {t('common:actions.continue')} <ArrowRightOutlined />
                 </Button>
               ) : (
                 <Button type="primary" size="large" icon={<CheckOutlined />} loading={submitting} disabled={!step1Ok} onClick={submit}>
-                  Rezervasyon talebi gönder
+                  {t('venues:createMatch.submit')}
                 </Button>
               )}
             </div>

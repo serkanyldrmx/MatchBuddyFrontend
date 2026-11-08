@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Drawer, Dropdown, Grid, Layout, Menu, Tooltip, Typography } from 'antd';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   CalendarOutlined,
   EditOutlined,
@@ -21,11 +22,13 @@ import {
   UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { logout } from '../api/config';
+import { usePlayerPreferencesSync } from '../api/playerSettings';
 import { useMessages } from '../messaging/MessagesContext';
 import { PlayerAvatar } from '../ui';
 import { fullName, getCurrentUser } from '../utils/format';
 import NotificationBell from './NotificationBell';
 import InvitesButton from './InvitesButton';
+import { themeMenuItem } from '../theme/ThemeSwitch';
 import Logo from '../images/mutch_buddy_Logo.png';
 import './layout.css';
 
@@ -33,16 +36,17 @@ const { Sider, Header, Content } = Layout;
 const { Text } = Typography;
 export const USER_CHANGED = 'mb:user-changed';
 
+// labelKey: render anında t() ile çevrilir
 const MENU = [
-  { key: '/home', icon: <HomeOutlined />, label: 'Maçlar' },
-  { key: '/feed', icon: <ThunderboltOutlined />, label: 'Akış' },
-  { key: '/calendar', icon: <CalendarOutlined />, label: 'Takvimim' },
-  { key: '/friends', icon: <UserOutlined />, label: 'Arkadaşlar' },
-  { key: '/team', icon: <TeamOutlined />, label: 'Takımlar' },
-  { key: '/tournaments', icon: <FlagOutlined />, label: 'Turnuvalar' },
-  { key: '/leaderboard', icon: <TrophyOutlined />, label: 'Sıralama' },
-  { key: '/venues', icon: <EnvironmentOutlined />, label: 'Halı Sahalar' },
-  { key: '/teamAICreate', icon: <RobotOutlined />, label: 'AI Takım Kur' },
+  { key: '/home', icon: <HomeOutlined />, labelKey: 'layout:nav.matches' },
+  { key: '/feed', icon: <ThunderboltOutlined />, labelKey: 'layout:nav.feed' },
+  { key: '/calendar', icon: <CalendarOutlined />, labelKey: 'layout:nav.calendar' },
+  { key: '/friends', icon: <UserOutlined />, labelKey: 'layout:nav.friends' },
+  { key: '/team', icon: <TeamOutlined />, labelKey: 'layout:nav.teams' },
+  { key: '/tournaments', icon: <FlagOutlined />, labelKey: 'layout:nav.tournaments' },
+  { key: '/leaderboard', icon: <TrophyOutlined />, labelKey: 'layout:nav.leaderboard' },
+  { key: '/venues', icon: <EnvironmentOutlined />, labelKey: 'layout:nav.venues' },
+  { key: '/teamAICreate', icon: <RobotOutlined />, labelKey: 'layout:nav.aiTeam' },
 ];
 
 // Detay sayfaları hangi menü öğesine ait?
@@ -54,6 +58,63 @@ const activeKey = (path) => {
   const p = path.toLowerCase();
   return MENU.find((m) => p === m.key.toLowerCase() || p.startsWith(`${m.key.toLowerCase()}/`))?.key;
 };
+
+/** Uygulama kabukları açıkken body'ye sınıf ekler: telefon için global kurallar (mobile.css) giriş ekranlarına dokunmaz */
+export function useAppBodyClass() {
+  useEffect(() => {
+    document.body.classList.add('mb-app');
+    return () => document.body.classList.remove('mb-app');
+  }, []);
+}
+
+/** Telefonda alt sekme çubuğu: Maçlar · Akış · (+) Maç oluştur · Mesajlar · Profil */
+const TAB_PATHS = {
+  home: ['/home', '/match-details'],
+  feed: ['/feed'],
+  profile: ['/user', '/userupdate'],
+};
+const tabActive = (path, key) => TAB_PATHS[key].some((p) => path === p || path.startsWith(`${p}/`));
+
+function BottomTabBar({ hidden }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { openMessages, isOpen } = useMessages();
+  const { t } = useTranslation();
+  const path = location.pathname.toLowerCase();
+  const tab = (key, to, icon, label) => (
+    <button
+      type="button"
+      className={`mb-tabbar__item ${tabActive(path, key) ? 'is-active' : ''}`}
+      aria-current={tabActive(path, key) ? 'page' : undefined}
+      onClick={() => navigate(to)}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+  return (
+    <nav className={`mb-tabbar ${hidden ? 'is-hidden' : ''}`} aria-label={t('layout:tabbar.ariaLabel')}>
+      {tab('home', '/home', <HomeOutlined />, t('layout:tabbar.matches'))}
+      {tab('feed', '/feed', <ThunderboltOutlined />, t('layout:tabbar.feed'))}
+      <button
+        type="button"
+        className={`mb-tabbar__create ${path.startsWith('/matches/new') ? 'is-active' : ''}`}
+        onClick={() => navigate('/matches/new')}
+        aria-label={t('layout:tabbar.createAria')}
+      >
+        <span className="mb-tabbar__plus">
+          <PlusOutlined />
+        </span>
+        <span>{t('layout:tabbar.create')}</span>
+      </button>
+      <button type="button" className={`mb-tabbar__item ${isOpen ? 'is-active' : ''}`} onClick={() => openMessages()}>
+        <MessageOutlined />
+        <span>{t('layout:tabbar.messages')}</span>
+      </button>
+      {tab('profile', '/user', <UserOutlined />, t('layout:tabbar.profile'))}
+    </nav>
+  );
+}
 
 export function useCurrentUser() {
   const [user, setUser] = useState(getCurrentUser);
@@ -69,28 +130,41 @@ export function useCurrentUser() {
   return user;
 }
 
-export function Brand({ to = '/home', badge }) {
+/**
+ * Logo + MATCHBUDDY yazısı. variant="header": telefon/tablet üst barında kompakt sürüm;
+ * markOnly: sadece logo kutusu (yer dar olduğunda, ör. işletme panelinde tesis adının yanında)
+ */
+export function Brand({ to = '/home', badge, variant, markOnly }) {
+  const header = variant === 'header';
+  const { t } = useTranslation();
   return (
-    <Link to={to} className="mb-brand">
+    <Link
+      to={to}
+      className={`mb-brand${header ? ' mb-brand--header' : ''}${markOnly ? ' mb-brand--mark-only' : ''}`}
+      aria-label={header ? t('layout:brand.homeAria') : undefined}
+    >
       <span className="mb-brand__mark">
         <img src={Logo} alt="" />
       </span>
-      <span className="mb-brand__name">
-        Match<em>Buddy</em>
-      </span>
-      {badge && <span className="mb-brand__badge">{badge}</span>}
+      {!markOnly && (
+        <span className="mb-brand__name">
+          Match<em>Buddy</em>
+        </span>
+      )}
+      {badge && !header && <span className="mb-brand__badge">{badge}</span>}
     </Link>
   );
 }
 
 function SiderCta() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return (
     <div className="mb-sider-cta mb-pitch-bg">
-      <h4>Kadro eksik mi?</h4>
-      <p>Maçını kur, oyuncular katılsın.</p>
+      <h4>{t('layout:siderCta.title')}</h4>
+      <p>{t('layout:siderCta.text')}</p>
       <Button type="primary" block icon={<PlusOutlined />} onClick={() => navigate('/matches/new')}>
-        Maç oluştur
+        {t('layout:siderCta.button')}
       </Button>
     </div>
   );
@@ -102,9 +176,15 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.lg;
+  // Alt sekme çubuğu sadece telefonlarda (< 768 px)
+  const isPhone = screens.md === false;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
-  const { openMessages } = useMessages();
+  const { openMessages, isOpen: messagesOpen } = useMessages();
+  const { t } = useTranslation();
+  useAppBodyClass();
+  // Sunucudaki tema/dil tercihini uygula, tema değişikliklerini PlayerSettings'e kaydet
+  usePlayerPreferencesSync();
 
   // Eski /chat bağlantısı: mesaj panelini aç
   useEffect(() => {
@@ -121,23 +201,25 @@ export default function AppLayout() {
       theme="dark"
       mode="inline"
       selectedKeys={[activeKey(location.pathname)]}
-      items={MENU}
+      items={MENU.map(({ labelKey, ...m }) => ({ ...m, label: t(labelKey) }))}
       onClick={({ key }) => navigate(key)}
     />
   );
 
   const userMenu = {
     items: [
-      { key: 'profile', icon: <UserOutlined />, label: 'Profilim', onClick: () => navigate('/user') },
-      { key: 'edit', icon: <EditOutlined />, label: 'Profili düzenle', onClick: () => navigate('/userUpdate') },
-      { key: 'invites', icon: <InboxOutlined />, label: 'Davetler', onClick: () => navigate('/invites') },
-      { key: 'team', icon: <UsergroupAddOutlined />, label: 'Takımlarım', onClick: () => navigate('/team') },
-      { key: 'settings', icon: <SettingOutlined />, label: 'Ayarlar', onClick: () => navigate('/settings') },
+      { key: 'profile', icon: <UserOutlined />, label: t('layout:userMenu.profile'), onClick: () => navigate('/user') },
+      { key: 'edit', icon: <EditOutlined />, label: t('layout:userMenu.editProfile'), onClick: () => navigate('/userUpdate') },
+      { key: 'invites', icon: <InboxOutlined />, label: t('layout:userMenu.invites'), onClick: () => navigate('/invites') },
+      { key: 'team', icon: <UsergroupAddOutlined />, label: t('layout:userMenu.myTeams'), onClick: () => navigate('/team') },
+      { key: 'settings', icon: <SettingOutlined />, label: t('layout:userMenu.settings'), onClick: () => navigate('/settings') },
+      { type: 'divider' },
+      themeMenuItem(),
       { type: 'divider' },
       {
         key: 'logout',
         icon: <LogoutOutlined />,
-        label: 'Çıkış yap',
+        label: t('layout:userMenu.logout'),
         danger: true,
         onClick: () => {
           logout();
@@ -148,7 +230,7 @@ export default function AppLayout() {
   };
 
   return (
-    <Layout className="mb-shell">
+    <Layout className={`mb-shell ${isPhone ? 'has-tabbar' : ''}`}>
       {!isMobile && (
         <Sider width={240} className="mb-sider">
           <Brand />
@@ -163,7 +245,8 @@ export default function AppLayout() {
           onClose={() => setMobileNavOpen(false)}
           width={260}
           closable={false}
-          styles={{ body: { padding: 0, background: '#05080e' } }}
+          rootClassName="mb-nav-drawer"
+          styles={{ body: { padding: 0, background: 'var(--mb-sider-bg)' } }}
         >
           <Brand />
           {menu}
@@ -174,22 +257,31 @@ export default function AppLayout() {
         <Header className="mb-header">
           <div className="mb-header__left">
             {isMobile ? (
-              <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label="Menü" />
+              <>
+                <Button className="mb-icon-btn" icon={<MenuOutlined />} onClick={() => setMobileNavOpen(true)} aria-label={t('layout:header.menuAria')} />
+                <Brand variant="header" />
+              </>
             ) : (
               <span className="mb-header__greeting">
-                Hoş geldin, <strong>{user?.playerName}</strong> · Bugün sahada mısın?
+                <Trans
+                  i18nKey="layout:header.greeting"
+                  values={{ name: user?.playerName ?? '' }}
+                  components={{ strong: <strong /> }}
+                />
               </span>
             )}
           </div>
           <div className="mb-header__right">
-            <Tooltip title="Mesajlar">
-              <Button
-                className="mb-icon-btn"
-                icon={<MessageOutlined />}
-                onClick={() => openMessages()}
-                aria-label="Mesajlar"
-              />
-            </Tooltip>
+            {!isPhone && (
+              <Tooltip title={t('layout:header.messages')}>
+                <Button
+                  className="mb-icon-btn"
+                  icon={<MessageOutlined />}
+                  onClick={() => openMessages()}
+                  aria-label={t('layout:header.messages')}
+                />
+              </Tooltip>
+            )}
             <InvitesButton />
             <NotificationBell />
             <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
@@ -211,6 +303,7 @@ export default function AppLayout() {
           </div>
         </Content>
       </Layout>
+      {isPhone && <BottomTabBar hidden={messagesOpen || mobileNavOpen} />}
     </Layout>
   );
 }

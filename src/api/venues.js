@@ -1,30 +1,59 @@
 import { api } from './config';
+import i18n, { intlLocale, localizedList, localizedMap } from '../i18n';
 
 // Anlaşmalı tesisler / işletme / rezervasyon — sözleşme: MatchBuddy/docs/venues-api.md
 
-export const SURFACE = { 1: 'Suni çim', 2: 'Doğal çim', 3: 'Parke', 4: 'Diğer' };
-export const DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-export const DAYS_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+export const SURFACE = localizedMap({
+  1: 'venues:surface.artificialTurf',
+  2: 'venues:surface.naturalGrass',
+  3: 'venues:surface.parquet',
+  4: 'venues:surface.other',
+});
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+export const DAYS = localizedList(DAY_KEYS.map((d) => `venues:days.${d}`));
+export const DAYS_SHORT = localizedList(DAY_KEYS.map((d) => `venues:daysShort.${d}`));
 /** DaysMask: bit 0 = Pazartesi … bit 6 = Pazar */
 export const maskToDays = (mask) => DAYS_SHORT.filter((_, i) => mask & (1 << i));
 export const daysToMask = (indexes) => indexes.reduce((m, i) => m | (1 << i), 0);
 /** dayjs().day(): 0 = Pazar → sözleşme indeksine (0 = Pazartesi) çevir */
 export const contractDayIndex = (d) => (d.day() + 6) % 7;
 
-export const AMENITIES = [
-  { key: 'camera', label: 'Maç kaydı (kamera)' },
-  { key: 'cleatRental', label: 'Krampon kiralama' },
-  { key: 'shower', label: 'Duş' },
-  { key: 'lockerRoom', label: 'Soyunma odası' },
-  { key: 'parking', label: 'Otopark' },
-  { key: 'cafe', label: 'Kafeterya' },
-  { key: 'shuttle', label: 'Servis' },
-  { key: 'bibs', label: 'Yelek' },
-  { key: 'ball', label: 'Top' },
-];
+/** SlotBlocks.Kind */
+export const BLOCK_KIND = { CLOSED: 0, MANUAL_BOOKING: 1 };
+
+// Gider kategorileri: değerler sunucuda olduğu gibi saklanır (Türkçe değer = kayıt anahtarı); ekranda expenseCategoryLabel ile çevrilir
+const EXPENSE_CATEGORY_KEYS = {
+  Personel: 'staff',
+  Kira: 'rent',
+  Elektrik: 'electricity',
+  Su: 'water',
+  'Doğalgaz': 'naturalGas',
+  'Bakım-onarım': 'maintenance',
+  Malzeme: 'supplies',
+  Vergi: 'tax',
+  Reklam: 'advertising',
+  'Diğer': 'other',
+};
+export const EXPENSE_CATEGORIES = Object.keys(EXPENSE_CATEGORY_KEYS);
+/** Gider kategorisinin (sunucu değeri) ekran metni */
+export const expenseCategoryLabel = (category) =>
+  EXPENSE_CATEGORY_KEYS[category]
+    ? i18n.t(`finance:expenseCategories.${EXPENSE_CATEGORY_KEYS[category]}`)
+    : category;
+
+const AMENITY_KEYS = ['camera', 'cleatRental', 'shower', 'lockerRoom', 'parking', 'cafe', 'shuttle', 'bibs', 'ball'];
+/** { key, label } — label erişildiği anda çevrilir */
+export const AMENITIES = AMENITY_KEYS.map((key) => ({
+  key,
+  get label() {
+    return i18n.t(`venues:amenities.${key}`);
+  },
+}));
 
 export const formatPrice = (v) =>
-  v == null ? '-' : `${Number(v).toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ₺`;
+  v == null
+    ? '-'
+    : i18n.t('common:currency', { value: Number(v).toLocaleString(intlLocale(), { maximumFractionDigits: 2 }) });
 
 const data = (r) => r.data;
 
@@ -69,9 +98,24 @@ export const ownerApi = {
   deleteCampaign: (campaignId) => api.post('/api/Owner/Campaigns/Delete', { campaignId }).then(data),
   blocks: (stadiumId, from, to) => api.get('/api/Owner/Blocks', { params: { stadiumId, from, to } }).then(data),
   saveBlock: (payload) => api.post('/api/Owner/Blocks/Save', payload).then(data),
-  deleteBlock: (slotBlockId) => api.post('/api/Owner/Blocks/Delete', { slotBlockId }).then(data),
+  deleteBlock: (slotBlockId, allFollowing = false) => api.post('/api/Owner/Blocks/Delete', { slotBlockId, allFollowing }).then(data),
+  /** Boş saat fırsatı (MatchBuddy/docs/venue-growth-api.md) */
+  slotDealAudience: (stadiumId) => api.get('/api/Owner/SlotDeal/Audience', { params: { stadiumId } }).then(data),
+  slotDeal: (payload) => api.post('/api/Owner/SlotDeal', payload).then(data),
+  /** Önceki telefon müşterileri: [{ name, phone, bookings, lastAt, lastPrice, lastTitle }] */
+  customers: (stadiumId, q) => api.get('/api/Owner/Customers', { params: { stadiumId, q: q || undefined } }).then(data),
+  setBlockPaid: (slotBlockId, isPaid) => api.post('/api/Owner/Blocks/SetPaid', { slotBlockId, isPaid }).then(data),
+  quote: (pitchId, start, durationMinutes) => api.post('/api/Owner/Quote', { pitchId, start, durationMinutes }).then(data),
+  expenses: (stadiumId, from, to) => api.get('/api/Owner/Expenses', { params: { stadiumId, from, to } }).then(data),
+  saveExpense: (payload) => api.post('/api/Owner/Expenses/Save', payload).then(data),
+  deleteExpense: (expenseId) => api.post('/api/Owner/Expenses/Delete', { expenseId }).then(data),
+  finance: (stadiumId, year, month) => api.get('/api/Owner/Finance', { params: { stadiumId, year, month } }).then(data),
   reviews: (stadiumId) => api.get('/api/Owner/Reviews', { params: { stadiumId } }).then(data),
   reply: (reviewId, reply) => api.post('/api/Owner/Reviews/Reply', { reviewId, reply }).then(data),
+  /** Tesis ayarları (platform-api.md §5): { stadiumId, minBookingNoticeHours, freeCancellationHours, maxAdvanceBookingDays, effective, defaults, updatedAt } — null = sistem varsayılanı */
+  settings: (stadiumId) => api.get('/api/Owner/Settings', { params: { stadiumId } }).then(data),
+  /** Tam değiştirme: gönderilmeyen / null alanlar sistem varsayılanına döner */
+  saveSettings: (stadiumId, settings) => api.put('/api/Owner/Settings', { stadiumId, ...settings }, { params: { stadiumId } }).then(data),
 };
 
 /* ---------- Admin ---------- */

@@ -1,0 +1,58 @@
+{
+  "card": {
+    "invitedToMatch": "<inviter/> seni <link><b>{{match}}</b></link> maçına davet etti",
+    "invitedToTeam": "<inviter/> seni <b>{{team}}</b> takımına davet etti",
+    "defaultVenue": "Halı saha",
+    "members_one": "{{count}} oyuncu",
+    "members_other": "{{count}} oyuncu",
+    "expired": "Bu maç artık oynanmıyor",
+    "accept": "Kabul et"
+  },
+  "page": {
+    "eyebrow": "Kapıda bekleyenler",
+    "title": "Davetler",
+    "loading": "Davetlerin yükleniyor…",
+    "pending_one": "{{count}} davet cevabını bekliyor.",
+    "pending_other": "{{count}} davet cevabını bekliyor.",
+    "none": "Şu an bekleyen davetin yok.",
+    "myCalendar": "Takvimim",
+    "matchInvites": "Maç davetleri",
+    "teamInvites": "Takım davetleri",
+    "noMatchInvites": "Bekleyen maç davetin yok. Arkadaşların seni çağırınca burada görünecek.",
+    "noTeamInvites": "Bekleyen takım davetin yok.",
+    "loadFailed": "Davetler yüklenemedi."
+  },
+  "respond": {
+    "rejected": "Davet reddedildi.",
+    "waitlistTitle": "Yedek listesindesin",
+    "squadTitle": "Kadrodasın!",
+    "waitlistText": "Maç dolu, yedek listesine eklendin.",
+    "squadText": "Maça katıldın.",
+    "goToMatch": "Maça git",
+    "joinedTeam": "{{team}} takımına katıldın.",
+    "failed": "Davete yanıt verilemedi."
+  },
+  "modal": {
+    "loadFailed": "Takip listen yüklenemedi.",
+    "sent_one": "{{count}} kişiye davet gönderildi.",
+    "sent_other": "{{count}} kişiye davet gönderildi.",
+    "noneSent": "Yeni davet gönderilmedi.",
+    "skippedTeam_one": "{{count}} kişi zaten takımda ya da davetli olduğu için atlandı.",
+    "skippedTeam_other": "{{count}} kişi zaten takımda ya da davetli olduğu için atlandı.",
+    "skippedMatch_one": "{{count}} kişi zaten kadroda ya da davetli olduğu için atlandı.",
+    "skippedMatch_other": "{{count}} kişi zaten kadroda ya da davetli olduğu için atlandı.",
+    "sendFailed": "Davet gönderilemedi.",
+    "titleTeam": "Takıma davet et",
+    "titleMatch": "Maça davet et",
+    "inviteCount_one": "{{count}} kişiyi davet et",
+    "inviteCount_other": "{{count}} kişiyi davet et",
+    "invite": "Davet et",
+    "noFollowing": "Henüz kimseyi takip etmiyorsun",
+    "discoverPlayers": "Oyuncu keşfet",
+    "searchPlaceholder": "İsim ya da kullanıcı adı ara",
+    "noResults": "Aramana uyan kimse yok.",
+    "matchesTogether_one": "{{count}} maç birlikte",
+    "matchesTogether_other": "{{count}} maç birlikte",
+    "friend": "Arkadaş"
+  }
+}

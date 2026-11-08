@@ -1,0 +1,37 @@
+{
+  "kind": {
+    "going": "Katılıyorsun",
+    "waitlist": "Yedek",
+    "invited": "Davet"
+  },
+  "today": "Bugün",
+  "tomorrow": "Yarın",
+  "defaultVenue": "Halı saha",
+  "occupancy_one": "{{going}}/{{capacity}} oyuncu",
+  "occupancy_other": "{{going}}/{{capacity}} oyuncu",
+  "finished": "Bitti",
+  "played": "Oynandı",
+  "respond": "Yanıtla",
+  "loadFailed": "Takvim yüklenemedi.",
+  "agenda": {
+    "empty": "Önümüzdeki {{days}} günde maçın yok. Fikstüre göz at, bir maça yazıl.",
+    "findMatch": "Maç bul",
+    "matchCount_one": "{{count}} maç",
+    "matchCount_other": "{{count}} maç"
+  },
+  "month": {
+    "prev": "Önceki ay",
+    "next": "Sonraki ay",
+    "noMatchesOnDay": "Bu gün maçın yok",
+    "summary": "{{month}} özeti",
+    "upcoming": "Yaklaşan",
+    "playedCount": "Oynanan"
+  },
+  "page": {
+    "eyebrow": "Fikstürüm",
+    "title": "Takvimim",
+    "subtitle": "Katıldığın, yedekte beklediğin ve davet edildiğin maçlar tek yerde.",
+    "viewAgenda": "Ajanda",
+    "viewMonth": "Ay"
+  }
+}
