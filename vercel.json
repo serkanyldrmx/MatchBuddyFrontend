@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://grateful-looked-mrs-become.trycloudflare.com/api/:path*" },
+    { "source": "/hubs/:path*", "destination": "https://grateful-looked-mrs-become.trycloudflare.com/hubs/:path*" },
+    { "source": "/media/:path*", "destination": "https://grateful-looked-mrs-become.trycloudflare.com/media/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}
