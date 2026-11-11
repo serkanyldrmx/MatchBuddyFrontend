@@ -1,0 +1,22 @@
+{
+  "kind": {
+    "clear": "Açık",
+    "partly": "Parçalı bulutlu",
+    "cloudy": "Kapalı",
+    "fog": "Sisli",
+    "drizzle": "Çiseleme",
+    "rain": "Yağmurlu",
+    "snow": "Karlı",
+    "storm": "Fırtınalı",
+    "unknown": "Hava durumu"
+  },
+  "feelsLike": "Hissedilen {{value}}°",
+  "rainChance": "Yağış ihtimali %{{value}}",
+  "wind": "Rüzgâr {{value}} km/s",
+  "approximate": "İlçe geneli tahmini",
+  "source": "Kaynak: Open-Meteo",
+  "atKickoff": "Maç saati ({{time}}) tahmini",
+  "wetHint": "Yağmur bekleniyor: yedek forma ve kuru ayakkabı getirin, gerekirse kapalı sahaya geçmeyi konuşun.",
+  "hotHint": "Sıcak bir maç: bol su getirin, molaları uzun tutun.",
+  "coldHint": "Hava soğuk: ısınmayı uzun tutun, kat kat giyinin."
+}

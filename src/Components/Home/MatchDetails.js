@@ -59,6 +59,9 @@ import MatchComments from '../Post/MatchComments';
 import InviteModal from '../Invites/InviteModal';
 import FollowButton, { PlayerLink } from '../Social/FollowButton';
 import GuestModal from './GuestModal';
+import ExternalVenueCard from './ExternalVenueCard';
+import WeatherBadge from '../../ui/WeatherBadge';
+import ShareMatchButton from './ShareMatchButton';
 import LeaveMatchModal from './LeaveMatchModal';
 import { NoShowCard, SubstituteCard, WithdrawalsCard } from './ReliabilityPanels';
 import { roleShort, ROLE_LABELS } from './formations';
@@ -684,7 +687,8 @@ function MatchDetails() {
 
         <h1 className="mb-match-hero__title">{d.matchName}</h1>
         <div className="mb-match-hero__meta">
-          <EnvironmentOutlined /> {d.venue ? `${d.venue.name} · ${d.venue.pitchName}` : d.stadium?.stadiumName} · {date.format('DD MMMM YYYY, dddd')}
+          <EnvironmentOutlined /> {d.venue ? [d.venue.name, d.venue.pitchName].filter(Boolean).join(' · ') : d.stadium?.stadiumName} ·{' '}
+          {date.format('DD MMMM YYYY, dddd')}
           {d.createdBy && (
             <>
               {' · '}
@@ -754,6 +758,7 @@ function MatchDetails() {
                 {t('match:details.actions.invite')}
               </Button>
             )}
+            {!closed && <ShareMatchButton matchId={d.matchId} className="mb-ghost-btn" />}
             {primaryAction}
           </div>
         </div>
@@ -778,7 +783,7 @@ function MatchDetails() {
           message={t('match:details.alerts.rejected')}
           description={d.rejectReason ? t('match:details.alerts.rejectReason', { reason: d.rejectReason }) : undefined}
           action={
-            d.venue && (
+            d.venue && !d.venue.isExternal && (
               <Button size="small" onClick={() => navigate(`/venues/${d.venue.stadiumId}`)}>
                 {t('match:details.actions.otherSlot')}
               </Button>
@@ -786,6 +791,10 @@ function MatchDetails() {
           }
         />
       )}
+
+      <div className="mb-match-weather">
+        <WeatherBadge matchId={d.matchId} matchDate={d.matchDate} closed={closed} compact={false} />
+      </div>
 
       <Tabs
         activeKey={tab}
@@ -944,7 +953,11 @@ function MatchDetails() {
               <Row gutter={[20, 20]}>
                 {d.venue && (
                   <Col xs={24} lg={10}>
-                    <ReservationCard d={d} onMessageOwner={messageOwner} />
+                    {d.venue.isExternal ? (
+                      <ExternalVenueCard d={d} canEdit={!!d.canManage && !closed} reload={load} />
+                    ) : (
+                      <ReservationCard d={d} onMessageOwner={messageOwner} />
+                    )}
                   </Col>
                 )}
                 <Col xs={24} lg={d.venue ? 14 : 24}>
@@ -960,9 +973,11 @@ function MatchDetails() {
                   >
                 <Descriptions column={{ xs: 1, md: 2 }}>
                   <Descriptions.Item label={t('match:details.info.venue')}>{d.venue?.name || d.stadium?.stadiumName}</Descriptions.Item>
-                  <Descriptions.Item label={t('match:details.info.hours')}>
-                    {d.stadium?.openingTime?.slice(0, 5)} – {d.stadium?.closingTime?.slice(0, 5)}
-                  </Descriptions.Item>
+                  {d.stadium?.openingTime && d.stadium?.closingTime && (
+                    <Descriptions.Item label={t('match:details.info.hours')}>
+                      {d.stadium.openingTime.slice(0, 5)} – {d.stadium.closingTime.slice(0, 5)}
+                    </Descriptions.Item>
+                  )}
                   <Descriptions.Item label={t('match:details.info.address')} span={2}>{d.stadium?.address || '-'}</Descriptions.Item>
                   <Descriptions.Item label={t('match:details.info.capacity')}>{t('match:players', { count: d.capacity })}</Descriptions.Item>
                   <Descriptions.Item label={t('match:details.info.date')}>{date.format('DD MMMM YYYY, HH:mm')}</Descriptions.Item>

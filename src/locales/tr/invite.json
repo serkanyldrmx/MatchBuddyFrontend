@@ -1,0 +1,21 @@
+{
+  "eyebrow": "{{name}} seni maça çağırıyor",
+  "someone": "Bir arkadaşın",
+  "perPlayer": "Kişi başı {{price}}",
+  "squad": "Kadro {{going}}/{{capacity}}",
+  "missing_one": "{{count}} kişi eksik",
+  "missing_other": "{{count}} kişi eksik",
+  "join": "Kadroya katıl",
+  "joinWaitlist": "Yedek listesine yazıl",
+  "registerAndJoin": "Kayıt ol ve katıl",
+  "loginAndJoin": "Hesabım var, giriş yap",
+  "authHint": "Kayıt ücretsiz. Giriş yaptıktan sonra seni otomatik olarak kadroya ekleriz.",
+  "joined": "Kadroya katıldın!",
+  "joinFailed": "Kadroya katılınamadı.",
+  "past": "Bu maç oynandı.",
+  "closed": "Bu maç iptal edildi.",
+  "playersOnly": "Maçlara yalnızca oyuncu hesapları katılabilir.",
+  "notFound": "Davet linki geçersiz ya da maç silinmiş.",
+  "notFoundTitle": "Maç bulunamadı",
+  "openApp": "MatchBuddy'yi aç"
+}

@@ -29,6 +29,12 @@ export default function useLoginFlow() {
       navigate('/userUpdate', { replace: true });
       return;
     }
+    // Davet linkinden gelindiyse giriş sonrası davete dön (orada otomatik katılınır)
+    const pendingInvite = localStorage.getItem('mb.pendingInvite');
+    if (pendingInvite && roleOf(player) === ROLE.PLAYER) {
+      navigate(`/davet/${pendingInvite}`, { replace: true });
+      return;
+    }
     navigate(homePathFor(player), { replace: true });
   }, [navigate, t]);
 

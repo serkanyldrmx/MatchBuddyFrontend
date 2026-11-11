@@ -16,6 +16,7 @@ import {
   WarningOutlined,
   ShopOutlined,
   GlobalOutlined,
+  PhoneOutlined,
 } from '@ant-design/icons';
 import { api, logout } from '../api/config';
 import { PlayerAvatar } from '../ui';
@@ -76,6 +77,7 @@ export default function AdminLayout() {
     { key: `${BASE}/reports`, icon: <WarningOutlined />, label: t('layout:admin.menu.reports') },
     { key: `${BASE}/businesses`, icon: <ShopOutlined />, label: t('layout:admin.menu.businesses') },
     { key: `${BASE}/osm`, icon: <GlobalOutlined />, label: t('layout:admin.menu.osm') },
+    { key: `${BASE}/leads`, icon: <PhoneOutlined />, label: t('layout:admin.menu.leads') },
     { key: `${BASE}/parameters`, icon: <ControlOutlined />, label: t('layout:admin.menu.parameters') },
     {
       type: 'group',
@@ -96,7 +98,7 @@ export default function AdminLayout() {
   ];
 
   // En uzun eşleşen menü anahtarı seçili olur
-  const allKeys = [BASE, `${BASE}/reservations`, `${BASE}/matches`, `${BASE}/reports`, `${BASE}/businesses`, `${BASE}/osm`, `${BASE}/parameters`, `${BASE}/stadiums`, `${BASE}/stadiums/new`, `${BASE}/about`, `${BASE}/contact`];
+  const allKeys = [BASE, `${BASE}/reservations`, `${BASE}/matches`, `${BASE}/reports`, `${BASE}/businesses`, `${BASE}/osm`, `${BASE}/leads`, `${BASE}/parameters`, `${BASE}/stadiums`, `${BASE}/stadiums/new`, `${BASE}/about`, `${BASE}/contact`];
   const path = location.pathname.replace(/\/$/, '');
   const selected = allKeys
     .filter((k) => path.toLowerCase() === k.toLowerCase() || path.toLowerCase().startsWith(`${k.toLowerCase()}/`))

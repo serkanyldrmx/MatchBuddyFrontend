@@ -30,6 +30,7 @@ export const saveSession = (data) => {
   if (!data || !data.token) return;
   localStorage.setItem('token', data.token);
   if (data.player) localStorage.setItem('user', JSON.stringify(data.player));
+  window.dispatchEvent(new Event('mb:login')); // okunmamış mesaj rozeti tazelensin (messaging/MessagesContext.js)
 };
 
 const clearSession = () => {

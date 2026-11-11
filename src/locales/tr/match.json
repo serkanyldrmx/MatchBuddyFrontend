@@ -280,5 +280,39 @@
     "chip": "Her hafta",
     "stop": "Haftalık tekrarı durdur",
     "stopped": "Haftalık tekrar durduruldu."
+  },
+  "external": {
+    "title": "Saha",
+    "badge": "Telefonla ayarlandı",
+    "badgeHint": "Bu saha uygulamada üye değil; rezervasyonu maçın kurucusu yaptı.",
+    "call": "Sahayı ara",
+    "directions": "Yol tarifi",
+    "total": "Saha ücreti",
+    "perPlayer": "Kişi başı",
+    "noPrice": "Ücret belirtilmedi.",
+    "payOnSite": "Ödeme sahada yapılır.",
+    "edit": "Saati / ücreti düzenle",
+    "editTitle": "Maç bilgilerini düzenle",
+    "editHint": "Saat ya da saha değişirse kadrodaki oyunculara bildirim gider.",
+    "venueName": "Saha adı",
+    "phone": "Telefon",
+    "address": "Adres",
+    "date": "Gün",
+    "time": "Saat",
+    "duration": "Süre",
+    "price": "Toplam saha ücreti",
+    "saved": "Maç bilgileri güncellendi.",
+    "saveFailed": "Maç güncellenemedi.",
+    "minutes_one": "{{count}} dk",
+    "minutes_other": "{{count}} dk"
+  },
+  "share": {
+    "button": "Paylaş",
+    "whatsapp": "WhatsApp'ta paylaş",
+    "copy": "Linki kopyala",
+    "other": "Diğer uygulamalar",
+    "copied": "Davet linki kopyalandı.",
+    "title": "Maça davet",
+    "failed": "Davet linki oluşturulamadı."
   }
 }
