@@ -12,6 +12,8 @@ import {
   GlobalOutlined,
   HomeOutlined,
   InfoCircleOutlined,
+  PhoneOutlined,
+  SafetyCertificateOutlined,
   SearchOutlined,
   SunOutlined,
   TeamOutlined,
@@ -25,6 +27,7 @@ import { PageHeader } from '../../ui';
 import { apiErrorMessage, errorCode, fieldErrorsOf, getCurrentUser, mediaUrl } from '../../utils/format';
 import { bookingUserCountRange, getParam, usePublicParams } from '../../api/parameters';
 import SlotPicker, { DateStrip } from './SlotPicker';
+import ExternalVenueForm, { EMPTY_EXTERNAL, ExternalReceipt, externalStart } from './ExternalVenueForm';
 import { AMENITY_ICONS, VenueRating } from './Venues';
 import './CreateMatch.css';
 
@@ -42,6 +45,8 @@ const SLOT_STEP_CODES = [
   'VENUE_PITCH_REQUIRED',
   'RESERVATION_VENUE_CLOSED',
 ];
+// Harici saha hataları: 1. adıma dönülür
+const EXTERNAL_STEP_CODES = /^(EXTERNAL_|VENUE_INVALID_DURATION|VENUE_INVALID_LOCATION_FORMAT)/;
 // Kadro adımındaki alanlar (errors sözlüğü anahtarları, küçük harf)
 const SQUAD_FIELDS = ['matchname', 'description', 'usercount', 'hometeamid', 'awayteamid', 'lookingforopponent'];
 
@@ -166,6 +171,11 @@ export default function CreateMatch() {
   const initialStart = params.get('start') && dayjs(params.get('start')).isValid() ? dayjs(params.get('start')) : null;
 
   const [step, setStep] = useState(0);
+  // 'partner' = anlaşmalı tesiste rezervasyon, 'external' = telefonla ayarlanan başka bir saha
+  const [venueMode, setVenueMode] = useState(params.get('external') === '1' && !params.get('stadiumId') ? 'external' : 'partner');
+  const isExternal = venueMode === 'external';
+  const [ext, setExt] = useState(EMPTY_EXTERNAL);
+  const [savedVenues, setSavedVenues] = useState([]);
   const [venues, setVenues] = useState([]);
   const [venuesLoading, setVenuesLoading] = useState(true);
   const [stadiumId, setStadiumId] = useState(numParam(params.get('stadiumId')));
@@ -209,6 +219,10 @@ export default function CreateMatch() {
       .get('/api/Team/GetTeamList')
       .then((r) => setTeams(r.data || []))
       .catch(() => {});
+    matchesApi
+      .myExternalVenues()
+      .then(setSavedVenues)
+      .catch(() => {});
   }, [message, t]);
 
   useEffect(() => {
@@ -232,7 +246,11 @@ export default function CreateMatch() {
   // Kişi sayısı aralığı ve süreler sunucu parametrelerinden (GET /api/Parameters/Public) gelir
   const publicParams = usePublicParams();
   const perSide = pitch?.playersPerSide || 7;
-  const { min: minPlayers, max: maxPlayers } = bookingUserCountRange(perSide, publicParams.get);
+  // Harici sahada saha boyutu bilinmez: en büyük saha boyutuna göre üst sınır
+  const { min: minPlayers, max: maxPlayers } = bookingUserCountRange(
+    isExternal ? Number(publicParams.get('venue.playersPerSideMax')) || 11 : perSide,
+    publicParams.get
+  );
   const players = userCount || perSide * 2;
   const durations = publicParams.get('venue.allowedDurations');
 
@@ -296,7 +314,12 @@ export default function CreateMatch() {
   };
   const pickSlot = (s, p) => setSlot({ pitchId: p.pitchId, start: toApiDate(s.start) });
 
-  const step1Ok = !!(venue && pitch && slot && quote && quote.available !== false && !quoting);
+  const extStart = externalStart(ext);
+  const step1Ok = isExternal
+    ? !!(ext.name.trim().length >= 2 && extStart && extStart.isAfter(dayjs()))
+    : !!(venue && pitch && slot && quote && quote.available !== false && !quoting);
+  // Sihirbazın kullandığı başlangıç saati (otomatik ad, başarı ekranı)
+  const startAt = isExternal ? extStart : slot ? dayjs(slot.start) : null;
   const step2Error = !matchName.trim()
     ? t('venues:createMatch.errors.nameRequired')
     : matchType === 'team' && !homeTeamId
@@ -307,9 +330,12 @@ export default function CreateMatch() {
 
   const next = () => {
     if (step === 0) {
-      if (!step1Ok) return;
-      if (!matchName.trim() && slot) {
-        const s = dayjs(slot.start);
+      if (!step1Ok) {
+        if (isExternal) message.warning(ext.name.trim().length < 2 ? t('venues:external.nameRequired') : t('venues:external.whenRequired'));
+        return;
+      }
+      if (!matchName.trim() && startAt) {
+        const s = startAt;
         const part = s.hour() >= 17 ? 'evening' : s.hour() >= 12 ? 'noon' : 'morning';
         setMatchName(t(`venues:createMatch.autoName.${part}`, { day: s.format('dddd') }));
       }
@@ -328,6 +354,10 @@ export default function CreateMatch() {
       return;
     }
     setSubmitting(true);
+    if (isExternal) {
+      await submitExternal();
+      return;
+    }
     const body = {
       matchName: matchName.trim(),
       description: description.trim(),
@@ -378,19 +408,57 @@ export default function CreateMatch() {
     }
   };
 
+  async function submitExternal() {
+    const body = {
+      matchName: matchName.trim(),
+      description: description.trim(),
+      userCount: players,
+      matchDate: toApiDate(extStart),
+      durationMinutes: duration,
+      externalVenueId: ext.venueId || null,
+      venueName: ext.name.trim(),
+      address: ext.address.trim() || null,
+      city: ext.city.trim() || null,
+      district: ext.district.trim() || null,
+      phone: ext.phone.trim() || null,
+      location: ext.location || null,
+      totalPrice: ext.price || null,
+      homeTeamId: matchType === 'team' ? homeTeamId : null,
+      awayTeamId: matchType === 'team' && opponentMode === 'invite' ? awayTeamId : null,
+      lookingForOpponent: matchType === 'team' && opponentMode === 'looking',
+      minReliability: minReliability || null,
+    };
+    try {
+      const res = await matchesApi.createExternal(body);
+      setDone({ matchId: res?.matchId ?? null, message: res?.message });
+    } catch (e) {
+      message.error(apiErrorMessage(e, t('venues:createMatch.errors.createFailed')));
+      const code = errorCode(e) || '';
+      if (EXTERNAL_STEP_CODES.test(code)) setStep(0);
+      else if (
+        /^(MATCH_NAME_|TEAM_|RESERVATION_|VALIDATION_OUT_OF_RANGE)/.test(code) ||
+        Object.keys(fieldErrorsOf(e) || {}).some((k) => SQUAD_FIELDS.includes(k.toLowerCase()))
+      )
+        setStep(1);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   /* ---------- Başarı ekranı ---------- */
   if (done) {
-    const s = dayjs(slot.start);
+    const s = startAt || dayjs();
     return (
       <Card className="mb-cm-done">
         <Result
           status="success"
-          title={t('venues:createMatch.done.title')}
+          title={isExternal ? t('venues:external.doneTitle') : t('venues:createMatch.done.title')}
           subTitle={
             <>
-              {venue?.name} · {pitch?.name} · {s.format('DD MMMM dddd, HH:mm')}
+              {isExternal ? ext.name.trim() : `${venue?.name} · ${pitch?.name}`} · {s.format('DD MMMM dddd, HH:mm')}
               <br />
-              {t('venues:createMatch.done.notify')} {matchType === 'team' && t('venues:createMatch.done.teamInvited')}
+              {isExternal ? t('venues:external.doneNotify') : t('venues:createMatch.done.notify')}{' '}
+              {matchType === 'team' && t('venues:createMatch.done.teamInvited')}
             </>
           }
           extra={[
@@ -429,8 +497,46 @@ export default function CreateMatch() {
     </div>
   );
 
+  const switchMode = (mode) => {
+    setVenueMode(mode);
+    setStep(0);
+  };
+  const modeSwitch = (
+    <div className="mb-cm-mode" role="radiogroup" aria-label={t('venues:external.modeLabel')}>
+      <button type="button" role="radio" aria-checked={!isExternal} className={`mb-cm-mode__item${!isExternal ? ' is-active' : ''}`} onClick={() => switchMode('partner')}>
+        <SafetyCertificateOutlined />
+        <span>
+          <strong>{t('venues:external.modePartner')}</strong>
+          <small>{t('venues:external.modePartnerDesc')}</small>
+        </span>
+      </button>
+      <button type="button" role="radio" aria-checked={isExternal} className={`mb-cm-mode__item${isExternal ? ' is-active' : ''}`} onClick={() => switchMode('external')}>
+        <PhoneOutlined />
+        <span>
+          <strong>{t('venues:external.modeExternal')}</strong>
+          <small>{t('venues:external.modeExternalDesc')}</small>
+        </span>
+      </button>
+    </div>
+  );
+
+  const stepExternal = (
+    <>
+      {modeSwitch}
+      <ExternalVenueForm
+        value={ext}
+        onChange={setExt}
+        savedVenues={savedVenues}
+        durationOptions={durationOptions}
+        duration={duration}
+        onDurationChange={setDuration}
+      />
+    </>
+  );
+
   const stepSlot = (
     <>
+      {modeSwitch}
       <div className="mb-cm-field">
         <label>{t('venues:createMatch.slot.venue')}</label>
         <Select
@@ -477,7 +583,12 @@ export default function CreateMatch() {
         <div className="mb-cm-pick-hint">
           <EnvironmentOutlined />
           <p>{t('venues:createMatch.slot.pickVenueHint')}</p>
-          <Button onClick={() => navigate('/venues')}>{t('venues:createMatch.slot.browseVenues')}</Button>
+          <div className="mb-cm-pick-hint__actions">
+            <Button onClick={() => navigate('/venues')}>{t('venues:createMatch.slot.browseVenues')}</Button>
+            <Button type="dashed" icon={<PhoneOutlined />} onClick={() => switchMode('external')}>
+              {t('venues:external.switchHint')}
+            </Button>
+          </div>
         </div>
       )}
     </>
@@ -510,7 +621,7 @@ export default function CreateMatch() {
               style={{ width: '100%' }}
               addonAfter={t('venues:createMatch.squad.personUnit')}
             />
-            <p className="mb-hint">{t('venues:createMatch.squad.pitchSizeHint', { perSide, max: maxPlayers })}</p>
+            {!isExternal && <p className="mb-hint">{t('venues:createMatch.squad.pitchSizeHint', { perSide, max: maxPlayers })}</p>}
           </div>
         </Col>
       </Row>
@@ -539,12 +650,14 @@ export default function CreateMatch() {
         <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.minReliabilityHint')}</p>
       </div>
 
-      <div className="mb-cm-field mb-cm-repeat">
-        <label>
-          <Switch checked={repeatWeekly} onChange={setRepeatWeekly} size="small" /> {t('venues:createMatch.squad.repeatWeekly')}
-        </label>
-        <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.repeatWeeklyHint')}</p>
-      </div>
+      {!isExternal && (
+        <div className="mb-cm-field mb-cm-repeat">
+          <label>
+            <Switch checked={repeatWeekly} onChange={setRepeatWeekly} size="small" /> {t('venues:createMatch.squad.repeatWeekly')}
+          </label>
+          <p className="mb-hint"><InfoCircleOutlined /> {t('venues:createMatch.squad.repeatWeeklyHint')}</p>
+        </div>
+      )}
 
       <div className="mb-cm-field">
         <label>{t('venues:createMatch.squad.matchType')}</label>
@@ -617,11 +730,13 @@ export default function CreateMatch() {
     </>
   );
 
-  const hasCleat = venue?.amenities?.cleatRental;
-  const hasCamera = venue?.amenities?.camera;
+  const hasCleat = !isExternal && venue?.amenities?.cleatRental;
+  const hasCamera = !isExternal && venue?.amenities?.camera;
   const stepExtras = (
     <>
-      {!hasCleat && !hasCamera ? (
+      {isExternal ? (
+        <Alert type="success" showIcon icon={<PhoneOutlined />} message={t('venues:external.summaryInfo')} style={{ marginBottom: 16 }} />
+      ) : !hasCleat && !hasCamera ? (
         <div className="mb-cm-pick-hint">
           <CheckOutlined />
           <p>{t('venues:createMatch.extras.none')}</p>
@@ -681,7 +796,27 @@ export default function CreateMatch() {
                 })}
           </strong>
         </div>
-        {pitch && (
+        {isExternal && extStart && (
+          <>
+            <div>
+              <span>{t('venues:external.name')}</span>
+              <strong>{ext.name.trim()}</strong>
+            </div>
+            <div>
+              <span>{t('venues:external.when')}</span>
+              <strong>
+                {extStart.format('DD MMMM dddd, HH:mm')} · {t('venues:createMatch.minutes', { count: duration })}
+              </strong>
+            </div>
+            {ext.phone.trim() && (
+              <div>
+                <span>{t('venues:external.phone')}</span>
+                <strong>{ext.phone.trim()}</strong>
+              </div>
+            )}
+          </>
+        )}
+        {pitch && !isExternal && (
           <div>
             <span>{t('common:pitch')}</span>
             <strong>
@@ -693,14 +828,14 @@ export default function CreateMatch() {
     </>
   );
 
-  const contents = [stepSlot, stepSquad, stepExtras];
+  const contents = [isExternal ? stepExternal : stepSlot, stepSquad, stepExtras];
 
   return (
     <>
       <PageHeader
         eyebrow={t('venues:createMatch.header.eyebrow')}
         title={t('venues:createMatch.header.title')}
-        subtitle={t('venues:createMatch.header.subtitle')}
+        subtitle={isExternal ? t('venues:external.headerSubtitle') : t('venues:createMatch.header.subtitle')}
       />
 
       <Steps
@@ -711,9 +846,9 @@ export default function CreateMatch() {
         size={isPhone ? 'small' : undefined}
         onChange={(s) => (s < step || (s === 1 && step1Ok) || (s === 2 && step1Ok && !step2Error) ? setStep(s) : null)}
         items={[
-          { title: t('venues:createMatch.steps.slot') },
+          { title: isExternal ? t('venues:external.stepVenue') : t('venues:createMatch.steps.slot') },
           { title: t('venues:createMatch.steps.squad') },
-          { title: t('venues:createMatch.steps.extras') },
+          { title: isExternal ? t('venues:external.stepSummary') : t('venues:createMatch.steps.extras') },
         ]}
       />
 
@@ -730,12 +865,12 @@ export default function CreateMatch() {
                 <span />
               )}
               {step < 2 ? (
-                <Button type="primary" size="large" onClick={next} disabled={step === 0 && !step1Ok}>
+                <Button type="primary" size="large" onClick={next} disabled={step === 0 && !step1Ok && !isExternal}>
                   {t('common:actions.continue')} <ArrowRightOutlined />
                 </Button>
               ) : (
                 <Button type="primary" size="large" icon={<CheckOutlined />} loading={submitting} disabled={!step1Ok} onClick={submit}>
-                  {t('venues:createMatch.submit')}
+                  {isExternal ? t('venues:external.submit') : t('venues:createMatch.submit')}
                 </Button>
               )}
             </div>
@@ -743,6 +878,9 @@ export default function CreateMatch() {
         </Col>
         <Col xs={24} xl={8}>
           <div className="mb-cm-sticky">
+            {isExternal ? (
+              <ExternalReceipt value={ext} duration={duration} userCount={players} />
+            ) : (
             <Receipt
               venue={venue}
               pitch={pitch}
@@ -754,6 +892,7 @@ export default function CreateMatch() {
               cameraRequested={cameraRequested}
               userCount={players}
             />
+            )}
           </div>
         </Col>
       </Row>

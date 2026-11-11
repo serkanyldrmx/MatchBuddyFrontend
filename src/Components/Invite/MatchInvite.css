@@ -1,0 +1,134 @@
+/* Herkese açık davet sayfası (/davet/:code) */
+.mb-invite {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(var(--mb-primary-rgb), 0.16), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(var(--mb-pitch-rgb), 0.14), transparent 45%),
+    var(--mb-bg);
+  color: var(--mb-text);
+}
+
+.mb-invite--loading {
+  align-items: center;
+}
+
+.mb-invite__card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 24px;
+  border-radius: 24px;
+  background: var(--mb-surface);
+  border: 1px solid var(--mb-border-strong);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.mb-invite__logo {
+  height: 34px;
+  width: auto;
+  align-self: flex-start;
+}
+
+.mb-invite__eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--mb-primary);
+}
+
+.mb-invite__title {
+  margin: -8px 0 0;
+  font-family: var(--mb-display);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.mb-invite__teams {
+  font-size: 16px;
+}
+
+.mb-invite__teams i {
+  margin: 0 6px;
+  color: var(--mb-text-2);
+}
+
+.mb-invite__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--mb-surface-2);
+  font-size: 15px;
+}
+
+.mb-invite__facts .anticon {
+  margin-right: 6px;
+  color: var(--mb-primary);
+}
+
+.mb-invite__squad {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mb-invite__squad-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.mb-invite__squad-head b {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--mb-primary-ink);
+  background: var(--mb-primary-fill);
+}
+
+.mb-invite__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--mb-surface-3);
+  overflow: hidden;
+}
+
+.mb-invite__bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--mb-pitch), var(--mb-primary));
+}
+
+.mb-invite__auth {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mb-invite__auth p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--mb-text-2);
+}
+
+.mb-invite__closed {
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--mb-text-2);
+  background: var(--mb-surface-2);
+}

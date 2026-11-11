@@ -9,7 +9,7 @@
     "emptyChats": "Henüz sohbetin yok. Arkadaşlarınla burada yazışabilirsin.",
     "noContactFound": "Kişi bulunamadı",
     "noPlayerFound": "Oyuncu bulunamadı",
-    "tabPeople": "Kişiler",
+    "tabPeople": "Sohbetler",
     "tabGroups": "Gruplar",
     "searchPeople": "Kişi ya da oyuncu ara",
     "searchGroups": "Grup ara",
@@ -34,7 +34,21 @@
     "membersRequired": "En az bir üye seç.",
     "membersPlaceholder": "Takip ettiğin oyunculardan seç",
     "noFollowing": "Henüz kimseyi takip etmiyorsun",
-    "creatorNote": "Grubu oluşturan kişi otomatik olarak gruba eklenir."
+    "creatorNote": "Grubu oluşturan kişi otomatik olarak gruba eklenir.",
+    "memberCount_one": "{{count}} üye",
+    "memberCount_other": "{{count}} üye",
+    "notFound": "Grup bulunamadı",
+    "members": "Üyeler",
+    "you": "(sen)",
+    "creator": "Grubu kuran",
+    "remove": "Gruptan çıkar",
+    "removeConfirm": "{{name}} gruptan çıkarılsın mı?",
+    "memberRemoved": "Üye gruptan çıkarıldı.",
+    "addMembers": "Üye ekle",
+    "membersAdded": "Üyeler eklendi.",
+    "leave": "Gruptan ayrıl",
+    "leaveConfirm": "Gruptan ayrılmak istediğine emin misin? Mesajları artık göremezsin.",
+    "left": "Gruptan ayrıldın."
   },
   "chat": {
     "photo": "Fotoğraf",
@@ -53,7 +67,44 @@
     "addPhoto": "Fotoğraf ekle",
     "deniedPlaceholder": "Bu oyuncuya mesaj gönderemezsin",
     "captionPlaceholder": "Açıklama ekle (isteğe bağlı)…",
-    "inputPlaceholder": "Mesaj yaz… (Enter: gönder, Shift+Enter: yeni satır)",
-    "dropHere": "Fotoğrafı buraya bırak"
+    "inputPlaceholder": "Mesaj yaz…",
+    "dropHere": "Fotoğrafı buraya bırak",
+    "sent": "Gönderildi",
+    "seen": "Görüldü",
+    "seenAt": "Görüldü · {{time}}",
+    "newMessages": "Yeni mesajlar",
+    "jumpToLatest": "Son mesajlara git",
+    "deleted": "Bu mesaj silindi",
+    "you": "Sen",
+    "typing": "yazıyor…",
+    "typingNamed": "{{name}} yazıyor…"
+  },
+  "time": {
+    "today": "Bugün",
+    "yesterday": "Dün"
+  },
+  "starters": {
+    "hello": "Selam! 👋",
+    "match": "Bu hafta maç var mı?",
+    "free": "Perşembe akşamı boş musun?"
+  },
+  "actions": {
+    "menu": "Tepki ver / yanıtla",
+    "reply": "Yanıtla",
+    "delete": "Sil",
+    "copy": "Kopyala",
+    "copied": "Mesaj kopyalandı.",
+    "cancelReply": "Yanıtı iptal et",
+    "moreReactions": "Diğer tepkiler",
+    "reactionCount": "{{emoji}} tepkisi: {{count}}",
+    "reactFailed": "Tepki gönderilemedi.",
+    "deleteTitle": "Mesaj silinsin mi?",
+    "deleteContent": "Mesaj herkes için silinir; konuşmada \"Bu mesaj silindi\" yazar.",
+    "deleteFailed": "Mesaj silinemedi."
+  },
+  "emoji": {
+    "open": "Emoji ekle",
+    "match": "Maç",
+    "faces": "İfadeler"
   }
 }

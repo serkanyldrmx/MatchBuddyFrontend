@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Drawer, Dropdown, Grid, Layout, Menu, Tooltip, Typography } from 'antd';
+import { Badge, Button, Drawer, Dropdown, Grid, Layout, Menu, Tooltip, Typography } from 'antd';
 import { Trans, useTranslation } from 'react-i18next';
 import {
   CalendarOutlined,
@@ -78,7 +78,7 @@ const tabActive = (path, key) => TAB_PATHS[key].some((p) => path === p || path.s
 function BottomTabBar({ hidden }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { openMessages, isOpen } = useMessages();
+  const { openMessages, isOpen, unread } = useMessages();
   const { t } = useTranslation();
   const path = location.pathname.toLowerCase();
   const tab = (key, to, icon, label) => (
@@ -108,7 +108,9 @@ function BottomTabBar({ hidden }) {
         <span>{t('layout:tabbar.create')}</span>
       </button>
       <button type="button" className={`mb-tabbar__item ${isOpen ? 'is-active' : ''}`} onClick={() => openMessages()}>
-        <MessageOutlined />
+        <Badge count={unread} size="small" overflowCount={99} offset={[2, 0]}>
+          <MessageOutlined />
+        </Badge>
         <span>{t('layout:tabbar.messages')}</span>
       </button>
       {tab('profile', '/user', <UserOutlined />, t('layout:tabbar.profile'))}
@@ -180,7 +182,7 @@ export default function AppLayout() {
   const isPhone = screens.md === false;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
-  const { openMessages, isOpen: messagesOpen } = useMessages();
+  const { openMessages, isOpen: messagesOpen, unread } = useMessages();
   const { t } = useTranslation();
   useAppBodyClass();
   // Sunucudaki tema/dil tercihini uygula, tema değişikliklerini PlayerSettings'e kaydet
@@ -274,12 +276,14 @@ export default function AppLayout() {
           <div className="mb-header__right">
             {!isPhone && (
               <Tooltip title={t('layout:header.messages')}>
-                <Button
-                  className="mb-icon-btn"
-                  icon={<MessageOutlined />}
-                  onClick={() => openMessages()}
-                  aria-label={t('layout:header.messages')}
-                />
+                <Badge count={unread} size="small" overflowCount={99} offset={[-4, 4]}>
+                  <Button
+                    className="mb-icon-btn"
+                    icon={<MessageOutlined />}
+                    onClick={() => openMessages()}
+                    aria-label={t('layout:header.messages')}
+                  />
+                </Badge>
               </Tooltip>
             )}
             <InvitesButton />

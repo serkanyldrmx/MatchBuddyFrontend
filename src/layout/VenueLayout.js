@@ -48,7 +48,7 @@ export default function VenueLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = useCurrentUser();
   useAppBodyClass();
-  const { openMessages } = useMessages();
+  const { openMessages, unread } = useMessages();
   const { t } = useTranslation();
 
   const [info, setInfo] = useState(null);
@@ -198,7 +198,9 @@ export default function VenueLayout() {
             </div>
             <div className="mb-header__right">
               <Tooltip title={t('layout:header.messages')}>
-                <Button className="mb-icon-btn" icon={<MessageOutlined />} onClick={() => openMessages()} aria-label={t('layout:header.messages')} />
+                <Badge count={unread} size="small" overflowCount={99} offset={[-4, 4]}>
+                  <Button className="mb-icon-btn" icon={<MessageOutlined />} onClick={() => openMessages()} aria-label={t('layout:header.messages')} />
+                </Badge>
               </Tooltip>
               <NotificationBell />
               <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>

@@ -492,3 +492,184 @@
     padding: 16px;
   }
 }
+
+/* ---------- Saha türü: anlaşmalı tesis / başka bir saha (docs/external-venues-api.md) ---------- */
+.mb-cm-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.mb-cm-mode__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  color: var(--mb-text);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border-strong);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.mb-cm-mode__item:hover {
+  border-color: rgba(var(--mb-primary-rgb), 0.5);
+}
+
+.mb-cm-mode__item:focus-visible {
+  outline: 2px solid var(--mb-primary);
+  outline-offset: 2px;
+}
+
+.mb-cm-mode__item > .anticon {
+  margin-top: 2px;
+  font-size: 22px;
+  color: var(--mb-text-2);
+}
+
+.mb-cm-mode__item > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mb-cm-mode__item strong {
+  font-family: var(--mb-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mb-cm-mode__item small {
+  font-size: 12.5px;
+  color: var(--mb-text-2);
+}
+
+.mb-cm-mode__item.is-active {
+  border-color: var(--mb-primary);
+  background: var(--mb-primary-soft);
+  box-shadow: 0 0 0 1px var(--mb-primary) inset;
+}
+
+.mb-cm-mode__item.is-active > .anticon {
+  color: var(--mb-primary);
+}
+
+.mb-cm-pick-hint__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Harici saha formu */
+.mb-ext__intro {
+  margin-bottom: 18px;
+}
+
+.mb-ext__saved {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.mb-ext__saved-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+  max-width: 220px;
+  padding: 10px 14px;
+  text-align: left;
+  color: var(--mb-text);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border-strong);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.mb-ext__saved-item strong,
+.mb-ext__saved-item span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mb-ext__saved-item span {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-ext__saved-item.is-active {
+  border-color: var(--mb-primary);
+  background: var(--mb-primary-soft);
+}
+
+.mb-ext__loc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 40px;
+  padding: 0 6px 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--mb-border-strong);
+  background: var(--mb-surface-2);
+}
+
+.mb-ext__badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 20px;
+  color: var(--mb-info);
+  background: rgba(var(--mb-info-rgb), 0.12);
+}
+
+.mb-ext__badge-icon.is-large {
+  width: 64px;
+  height: 64px;
+  font-size: 26px;
+}
+
+.mb-ext__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mb-info);
+  background: rgba(var(--mb-info-rgb), 0.12);
+}
+
+.mb-booking__head.is-static {
+  cursor: default;
+}
+
+.mb-ext-card__place {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0 0;
+  color: var(--mb-text-2);
+  font-size: 13px;
+}
+
+@media (max-width: 575px) {
+  .mb-cm-mode {
+    grid-template-columns: 1fr;
+  }
+}

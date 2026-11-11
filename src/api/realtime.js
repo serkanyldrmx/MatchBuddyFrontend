@@ -12,7 +12,9 @@ import { API_BASE_URL, getToken, refreshSession } from './config';
 
 let connection = null;
 let starting = null;
-const handlers = { message: new Set(), matchComment: new Set(), notification: new Set() };
+// "messageRead" { kind: 'user', readerId, otherId } — karşı taraf konuşmayı okudu (görüldü işareti)
+// "typing" { kind: 'user' | 'group', senderId, groupId? } — karşı taraf yazıyor
+const handlers = { message: new Set(), messageRead: new Set(), typing: new Set(), matchComment: new Set(), notification: new Set() };
 const joinedMatches = new Map(); // matchId -> abone sayısı
 
 const build = () => {
@@ -79,6 +81,12 @@ export const onRealtime = (event, handler) => {
   startRealtime();
   return () => handlers[event]?.delete(handler);
 };
+
+/** Sunucudaki hub metodunu çağırır (ör. "Typing"); bağlantı yoksa sessizce vazgeçer. */
+export const invokeRealtime = (method, ...args) =>
+  startRealtime()
+    .then((conn) => conn?.invoke(method, ...args))
+    .catch(() => {});
 
 /** Maç sohbetine (soyunma odası) abone ol; dönen fonksiyon aboneliği bırakır. */
 export const joinMatchChannel = (matchId) => {

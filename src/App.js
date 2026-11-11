@@ -23,6 +23,8 @@ import OwnerFinance from './owner/OwnerFinance';
 import Venues from './Components/Venues/Venues';
 import VenueDetail from './Components/Venues/VenueDetail';
 import CreateMatch from './Components/Venues/CreateMatch';
+import MatchInvite from './Components/Invite/MatchInvite';
+import AdminExternalLeads from './admin/ExternalLeads';
 import AdminBusinesses from './admin/Businesses';
 import AdminOsm from './admin/OsmCandidates';
 import AdminParameters from './admin/Parameters';
@@ -76,6 +78,9 @@ function App() {
               <Route path="/register" element={<RegisterForm />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/terms" element={<Terms />} />
+              {/* Maç davet linki: giriş gerekmez (docs/engagement-api.md §3) */}
+              <Route path="/davet/:code" element={<MatchInvite />} />
+              <Route path="/m/:code" element={<MatchInvite />} />
 
               {/* Oyuncu ekranları: ortak AppLayout içinde */}
               <Route element={<PrivateRoute role={ROLE.PLAYER} />}>
@@ -125,6 +130,7 @@ function App() {
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="businesses" element={<AdminBusinesses />} />
                   <Route path="osm" element={<AdminOsm />} />
+                  <Route path="leads" element={<AdminExternalLeads />} />
                   <Route path="parameters" element={<AdminParameters />} />
                 </Route>
                 <Route path="/stadiumIsAdmin" element={<Navigate to="/adminPanel/stadiums/new" replace />} />

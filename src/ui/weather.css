@@ -1,0 +1,112 @@
+/* Maç saati hava durumu (docs/engagement-api.md §2) */
+.mb-weather-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  color: var(--mb-text);
+  background: rgba(var(--mb-info-rgb), 0.12);
+  border: 1px solid rgba(var(--mb-info-rgb), 0.25);
+}
+
+.mb-weather-chip b {
+  font-weight: 700;
+}
+
+.mb-weather-chip__icon {
+  font-size: 14px;
+}
+
+.mb-weather-chip__rain {
+  font-size: 11.5px;
+  color: var(--mb-info);
+  font-weight: 600;
+}
+
+.mb-weather-chip.is-wet {
+  background: rgba(var(--mb-info-rgb), 0.2);
+  border-color: rgba(var(--mb-info-rgb), 0.5);
+}
+
+.mb-weather-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+}
+
+.mb-weather-tip small {
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.mb-weather-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  color: var(--mb-text);
+  background: linear-gradient(135deg, rgba(var(--mb-info-rgb), 0.16), rgba(var(--mb-info-rgb), 0.04));
+  border: 1px solid rgba(var(--mb-info-rgb), 0.28);
+}
+
+.mb-weather-panel.is-wet {
+  background: linear-gradient(135deg, rgba(var(--mb-info-rgb), 0.28), rgba(var(--mb-info-rgb), 0.08));
+}
+
+.mb-weather-panel__icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.mb-weather-panel__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mb-weather-panel__temp {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mb-weather-panel__temp b {
+  font-family: var(--mb-display);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mb-weather-panel__temp span {
+  font-weight: 600;
+}
+
+.mb-weather-panel__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--mb-text-2);
+}
+
+.mb-weather-panel__hint {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mb-info);
+}
+
+.mb-weather-panel small {
+  font-size: 11.5px;
+  color: var(--mb-text-2);
+}
+
+.mb-match-weather:not(:empty) {
+  margin-bottom: 16px;
+}

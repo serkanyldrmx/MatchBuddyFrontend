@@ -1,5 +1,5 @@
 .mb-messages-drawer .ant-drawer-header {
-  padding: 12px 16px;
+  padding: 10px 14px;
 }
 
 .mb-center {
@@ -10,7 +10,7 @@
   min-height: 200px;
 }
 
-/* Liste */
+/* ================= Konuşma listesi ================= */
 .mb-chat-list {
   display: flex;
   flex-direction: column;
@@ -33,165 +33,20 @@
 .mb-chat-list__items {
   flex: 1;
   overflow-y: auto;
+  padding-bottom: 8px;
 }
 
-.mb-chat-item.ant-list-item {
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.mb-chat-item.ant-list-item:hover {
-  background: var(--mb-primary-soft);
-}
-
-.mb-chat-item .ant-list-item-meta {
+.mb-chat-tab {
+  display: inline-flex;
   align-items: center;
-}
-
-.mb-chat-item .ant-list-item-meta-content {
-  min-width: 0;
-}
-
-.mb-chat-item__title {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.mb-chat-item__time {
-  font-size: 12px;
-  font-weight: normal;
-  white-space: nowrap;
-}
-
-.mb-group-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: rgba(var(--mb-info-rgb), 0.14);
-  color: var(--mb-info);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.mb-group-avatar.small {
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
-}
-
-/* Konuşma başlığı */
-.mb-chat-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.mb-chat-header__text {
-  min-width: 0;
-  line-height: 1.25;
-}
-
-.mb-chat-header__name {
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mb-chat-header__sub {
-  font-size: 12px;
-  font-weight: normal;
-}
-
-/* Konuşma */
-.mb-chat {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: var(--mb-bg);
-}
-
-.mb-chat__messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
   gap: 6px;
 }
 
-.mb-chat__day {
-  text-align: center;
-  margin: 10px 0;
+.mb-chat-list__empty {
+  padding: 40px 16px;
 }
 
-.mb-chat__day span {
-  font-size: 12px;
-  color: var(--mb-text-2);
-  background: var(--mb-surface-3);
-  padding: 2px 10px;
-  border-radius: 999px;
-}
-
-.mb-bubble-row {
-  display: flex;
-}
-
-.mb-bubble-row.is-mine {
-  justify-content: flex-end;
-}
-
-.mb-bubble {
-  max-width: 78%;
-  background: var(--mb-surface);
-  border: 1px solid var(--mb-border);
-  border-radius: 14px 14px 14px 4px;
-  padding: 8px 12px;
-  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.04);
-}
-
-.mb-bubble.is-mine {
-  background: var(--mb-primary-fill);
-  border-color: var(--mb-primary-fill);
-  color: var(--mb-primary-ink);
-  border-radius: 14px 14px 4px 14px;
-}
-
-.mb-bubble__author {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--mb-primary);
-  margin-bottom: 2px;
-}
-
-.mb-bubble__text {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.mb-bubble__time {
-  font-size: 11px;
-  opacity: 0.65;
-  text-align: right;
-  margin-top: 2px;
-}
-
-.mb-chat__composer {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  padding: 12px 16px;
-  border-top: 1px solid var(--mb-border);
-  background: var(--mb-surface);
-}
-
-/* Kişi listesi bölümleri */
+/* Bölüm başlıkları */
 .mb-chat-section {
   position: sticky;
   top: 0;
@@ -206,30 +61,138 @@
   border-bottom: 1px solid var(--mb-border);
 }
 
+.mb-chat-section.is-flat {
+  position: static;
+  margin: 16px 0 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
 .mb-chat-section__loading {
   display: flex;
   justify-content: center;
   padding: 16px 0;
 }
 
-.mb-chat-list__empty {
-  padding: 40px 16px;
+/* Konuşma satırı */
+.mb-conv {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  color: var(--mb-text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.mb-chat-item__name {
+.mb-conv:hover,
+.mb-conv:focus-visible {
+  background: var(--mb-surface-hover);
+  outline: none;
+}
+
+.mb-conv__avatar {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.mb-conv.is-unread .mb-conv__avatar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mb-primary);
+  border: 2px solid var(--mb-surface);
+}
+
+.mb-conv__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 2px 0;
+}
+
+.mb-conv__top,
+.mb-conv__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mb-conv__name {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 }
 
-.mb-chat-item__fullname {
+.mb-conv__title {
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.mb-chat-item__badge {
+.mb-conv__time {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-conv__preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--mb-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-conv__count {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  color: var(--mb-primary-ink);
+  background: var(--mb-primary-fill);
+}
+
+.mb-conv.is-unread .mb-conv__title {
+  font-weight: 800;
+}
+
+.mb-conv.is-unread .mb-conv__time {
+  color: var(--mb-primary);
+  font-weight: 600;
+}
+
+.mb-conv.is-unread .mb-conv__preview {
+  color: var(--mb-text);
+  font-weight: 500;
+}
+
+.mb-conv__badge {
   flex-shrink: 0;
   padding: 0 6px;
   border-radius: 999px;
@@ -242,24 +205,407 @@
   background: var(--mb-primary-soft);
 }
 
+/* Grup avatarı */
+.mb-group-avatar {
+  border-radius: 50%;
+  background: rgba(var(--mb-info-rgb), 0.14);
+  color: var(--mb-info);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mb-group-stack {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.mb-group-stack > .ant-avatar {
+  position: absolute;
+  border: 2px solid var(--mb-surface);
+  box-sizing: content-box;
+}
+
+.mb-group-stack__back {
+  top: 0;
+  right: 0;
+}
+
+.mb-group-stack__front {
+  bottom: 0;
+  left: 0;
+}
+
+/* Kişi seçici seçeneği */
+.mb-person-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Gönderildi / görüldü işareti */
+.mb-ticks {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--mb-text-2);
+}
+
+.mb-ticks.is-read {
+  color: var(--mb-info);
+}
+
+/* ================= Konuşma başlığı ================= */
+.mb-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mb-chat-header__who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 4px 8px 4px 4px;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.mb-chat-header__who:hover {
+  background: var(--mb-surface-hover);
+}
+
+.mb-chat-header__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.mb-chat-header__name {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-chat-header__sub {
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ================= Konuşma ================= */
+.mb-chat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(var(--mb-primary-rgb), 0.04), transparent 45%),
+    var(--mb-bg);
+}
+
+.mb-chat__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-chat__day {
+  position: sticky;
+  top: 4px;
+  z-index: 2;
+  text-align: center;
+  margin: 12px 0 8px;
+}
+
+.mb-chat__day span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mb-text-2);
+  background: var(--mb-surface-3);
+  padding: 3px 12px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.mb-chat__unread-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  color: var(--mb-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mb-chat__unread-divider::before,
+.mb-chat__unread-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(var(--mb-primary-rgb), 0.4);
+}
+
+/* Boş konuşma */
+.mb-chat__empty {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 300px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.mb-chat__empty strong {
+  font-size: 16px;
+}
+
+.mb-chat__starters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.mb-chat__starter {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--mb-text);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border-strong);
+  cursor: pointer;
+}
+
+.mb-chat__starter:hover {
+  border-color: var(--mb-primary);
+  color: var(--mb-primary);
+}
+
+/* Balon satırı: ardışık mesajlar sıkı, blok arası boşluk */
+.mb-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.mb-bubble-row.is-first {
+  margin-top: 10px;
+}
+
+.mb-bubble-row.is-mine {
+  justify-content: flex-end;
+}
+
+.mb-bubble-row__avatar {
+  flex-shrink: 0;
+  width: 28px;
+  display: inline-flex;
+}
+
+.mb-bubble-row__avatar a {
+  display: inline-flex;
+}
+
+.mb-bubble {
+  position: relative;
+  max-width: 76%;
+  background: var(--mb-surface);
+  border: 1px solid var(--mb-border);
+  border-radius: 18px;
+  padding: 7px 12px 6px;
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.06);
+}
+
+/* Blok içindeki köşe: gelenlerde sol, gidenlerde sağ köşeler düzleşir */
+.mb-bubble-row:not(.is-mine):not(.is-first) .mb-bubble {
+  border-top-left-radius: 6px;
+}
+.mb-bubble-row:not(.is-mine):not(.is-last) .mb-bubble {
+  border-bottom-left-radius: 6px;
+}
+.mb-bubble-row:not(.is-mine).is-last .mb-bubble {
+  border-bottom-left-radius: 4px;
+}
+.mb-bubble-row.is-mine:not(.is-first) .mb-bubble {
+  border-top-right-radius: 6px;
+}
+.mb-bubble-row.is-mine:not(.is-last) .mb-bubble {
+  border-bottom-right-radius: 6px;
+}
+.mb-bubble-row.is-mine.is-last .mb-bubble {
+  border-bottom-right-radius: 4px;
+}
+
+.mb-bubble.is-mine {
+  background: var(--mb-primary-fill);
+  border-color: var(--mb-primary-fill);
+  color: var(--mb-primary-ink);
+}
+
+.mb-bubble__author {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mb-primary);
+  margin-bottom: 2px;
+}
+
+.mb-bubble__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.mb-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.mb-bubble.is-mine .mb-ticks {
+  color: rgba(11, 20, 5, 0.6);
+}
+
+.mb-bubble.is-mine .mb-ticks.is-read {
+  color: #0369a1;
+}
+
+.mb-chat__seen {
+  align-self: flex-end;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--mb-text-2);
+}
+
+/* En alta in */
+.mb-chat__jump {
+  position: absolute;
+  right: 16px;
+  bottom: 86px;
+  z-index: 4;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--mb-text);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border-strong);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.mb-chat__jump-count {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  color: var(--mb-primary-ink);
+  background: var(--mb-primary-fill);
+}
+
+/* Yazma alanı */
+.mb-chat__composer {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 10px 12px;
+  border-top: 1px solid var(--mb-border);
+  background: var(--mb-surface);
+}
+
+.mb-chat__input {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 20px;
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border-strong);
+  transition: border-color 0.15s;
+}
+
+.mb-chat__input:focus-within {
+  border-color: rgba(var(--mb-primary-rgb), 0.6);
+}
+
+.mb-chat__input .ant-input {
+  padding: 4px 6px;
+  resize: none;
+}
+
+.mb-chat__counter {
+  position: absolute;
+  right: 12px;
+  top: -18px;
+  font-size: 11px;
+  color: var(--mb-text-2);
+}
+
+.mb-chat__counter.is-over {
+  color: var(--mb-danger);
+  font-weight: 700;
+}
+
+.mb-chat__send.ant-btn,
+.mb-chat__photo-btn.ant-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
+.mb-chat__photo-btn.ant-btn {
+  color: var(--mb-text-2);
+}
+
+.mb-chat__photo-btn.ant-btn:not(:disabled):hover {
+  color: var(--mb-primary);
+}
+
 /* Mesaj izni yok uyarısı */
 .mb-chat__denied.ant-alert {
   border-top: 1px solid var(--mb-border);
 }
 
 /* ---------- Fotoğraflı mesajlar ---------- */
-.mb-chat {
-  position: relative;
-}
-
 .mb-bubble.has-image {
-  width: min(78%, 268px);
+  width: min(76%, 268px);
   padding: 4px 4px 6px;
 }
 
 .mb-bubble.has-image .mb-bubble__author,
 .mb-bubble.has-image .mb-bubble__text,
-.mb-bubble.has-image .mb-bubble__time {
+.mb-bubble.has-image .mb-bubble__meta {
   padding: 0 8px;
 }
 
@@ -273,7 +619,7 @@
 
 .mb-bubble .ant-image {
   display: block;
-  border-radius: 11px;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--mb-surface-3);
   cursor: zoom-in;
@@ -288,7 +634,7 @@
   object-fit: cover;
 }
 
-.mb-bubble.has-image .mb-bubble__time {
+.mb-bubble.has-image .mb-bubble__meta {
   margin-top: 4px;
 }
 
@@ -304,7 +650,7 @@
   align-items: center;
   gap: 10px;
   max-width: 100%;
-  padding: 6px 6px 6px 6px;
+  padding: 6px;
   border: 1px solid var(--mb-border-strong);
   border-radius: 12px;
   background: var(--mb-surface-2);
@@ -355,15 +701,6 @@
   border-top: 0;
 }
 
-.mb-chat__photo-btn.ant-btn {
-  flex-shrink: 0;
-  color: var(--mb-text-2);
-}
-
-.mb-chat__photo-btn.ant-btn:not(:disabled):hover {
-  color: var(--mb-primary);
-}
-
 /* Sürükle-bırak katmanı */
 .mb-chat__drop {
   position: absolute;
@@ -390,6 +727,76 @@
   font-size: 34px;
 }
 
+/* ================= Grup bilgisi ================= */
+.mb-group-info__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.mb-group-info__members {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.mb-group-member {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border-radius: 10px;
+}
+
+.mb-group-member:hover {
+  background: var(--mb-surface-hover);
+}
+
+.mb-group-member__link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+}
+
+.mb-group-member__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.mb-group-member__text strong,
+.mb-group-member__text .ant-typography {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-group-member__crown {
+  color: var(--mb-gold);
+}
+
+.mb-group-info__add {
+  display: flex;
+  gap: 8px;
+}
+
+.mb-group-info__add .ant-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.mb-group-info__leave.ant-btn {
+  margin-top: 20px;
+}
+
 /* ---------- Telefon: tam ekran panel, klavyenin üstünde kalan yazma alanı ---------- */
 @media (max-width: 767px) {
   .mb-messages-root .ant-drawer-content-wrapper {
@@ -403,7 +810,7 @@
     height: 100%;
   }
   .mb-messages-drawer .ant-drawer-header {
-    padding: calc(8px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+    padding: calc(8px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left));
   }
   .mb-messages-drawer .ant-drawer-header-title {
     min-width: 0;
@@ -423,20 +830,17 @@
     flex-shrink: 0;
   }
   .mb-chat__messages {
-    padding: 12px;
+    padding: 10px 10px 14px;
     overscroll-behavior: contain;
   }
   .mb-bubble {
-    max-width: 85%;
+    max-width: 82%;
   }
   .mb-bubble.has-image {
-    width: min(85%, 268px);
+    width: min(82%, 268px);
   }
   .mb-chat__composer {
-    padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-  }
-  .mb-chat__composer .ant-btn {
-    flex-shrink: 0;
+    padding: 8px max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
   }
   .mb-chat__attach {
     padding: 8px 12px 0;
@@ -444,10 +848,335 @@
   .mb-chat-list__toolbar {
     padding: 10px 12px;
   }
-  .mb-chat-item.ant-list-item {
-    padding: 12px;
+  .mb-conv {
+    padding: 10px 12px;
   }
   .mb-chat-list__items {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ================= Yanıt, tepki, silme, yazıyor (docs/engagement-api.md §1) ================= */
+.mb-bubble-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 76%;
+  min-width: 0;
+}
+
+.mb-bubble-row.is-mine .mb-bubble-wrap {
+  align-items: flex-end;
+}
+
+.mb-bubble-wrap > .mb-bubble {
+  max-width: 100%;
+}
+
+.mb-bubble-wrap > .mb-bubble.has-image {
+  width: min(100%, 268px);
+}
+
+/* Masaüstü: balonun yanında beliren tepki / işlem düğmesi */
+.mb-bubble-more {
+  position: absolute;
+  top: 50%;
+  right: -34px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 0;
+  color: var(--mb-text-2);
+  background: var(--mb-surface-2);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.mb-bubble-row.is-mine .mb-bubble-more {
+  right: auto;
+  left: -34px;
+}
+
+.mb-bubble-row.has-reactions .mb-bubble-more {
+  top: calc(50% - 12px);
+}
+
+.mb-bubble-row:hover .mb-bubble-more,
+.mb-bubble-more:focus-visible {
+  opacity: 1;
+}
+
+.mb-bubble-more:hover {
+  color: var(--mb-primary);
+}
+
+/* İşlem menüsü */
+.mb-msg-menu-pop .ant-popover-inner {
+  padding: 6px;
+  border-radius: 16px;
+}
+
+.mb-msg-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mb-msg-menu__reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 260px;
+}
+
+.mb-msg-menu__reactions button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.1s;
+}
+
+.mb-msg-menu__reactions button:hover {
+  transform: scale(1.2);
+  background: var(--mb-surface-hover);
+}
+
+.mb-msg-menu__reactions button.is-mine {
+  background: var(--mb-primary-soft);
+}
+
+.mb-msg-menu__more {
+  font-size: 18px !important;
+  font-weight: 700;
+  color: var(--mb-text-2);
+}
+
+.mb-msg-menu__actions {
+  display: flex;
+  gap: 2px;
+  border-top: 1px solid var(--mb-border);
+  padding-top: 4px;
+}
+
+/* Tepki çipleri */
+.mb-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: -6px;
+  padding: 0 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.mb-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--mb-text);
+  background: var(--mb-surface-2);
+  border: 1px solid var(--mb-border-strong);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.mb-reaction b {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mb-reaction.is-mine {
+  border-color: var(--mb-primary);
+  background: var(--mb-primary-soft);
+}
+
+/* Silinmiş mesaj */
+.mb-bubble.is-deleted {
+  background: transparent;
+  border-style: dashed;
+  color: var(--mb-text-2);
+  box-shadow: none;
+}
+
+.mb-bubble.is-mine.is-deleted {
+  border-color: var(--mb-border-strong);
+}
+
+.mb-bubble__text.is-deleted {
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Yanıt alıntısı */
+.mb-reply-quote {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin: 2px 0 6px;
+  padding: 5px 8px;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  border: 0;
+  border-left: 3px solid var(--mb-primary);
+  border-radius: 8px;
+  background: rgba(var(--mb-slate-rgb), 0.14);
+  cursor: pointer;
+}
+
+.mb-reply-quote.is-mine {
+  border-left-color: var(--mb-primary-ink);
+  background: rgba(11, 20, 5, 0.1);
+}
+
+.mb-reply-quote__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.mb-reply-quote__body strong {
+  font-size: 12px;
+}
+
+.mb-reply-quote__body span {
+  font-size: 12.5px;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mb-reply-quote.is-composer {
+  margin: 0;
+  cursor: default;
+  background: var(--mb-surface-2);
+}
+
+.mb-reply-quote__close {
+  align-self: center;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 4px;
+  color: var(--mb-text-2);
+  cursor: pointer;
+}
+
+.mb-chat__reply {
+  padding: 8px 12px 0;
+  background: var(--mb-surface);
+  border-top: 1px solid var(--mb-border);
+}
+
+.mb-chat__reply + .mb-chat__composer,
+.mb-chat__attach + .mb-chat__reply {
+  border-top: 0;
+}
+
+/* Alıntıdan gidilen mesajı vurgula */
+.mb-bubble-row.is-flash .mb-bubble {
+  animation: mb-flash 1.5s ease;
+}
+
+@keyframes mb-flash {
+  0%, 60% { box-shadow: 0 0 0 3px rgba(var(--mb-primary-rgb), 0.55); }
+  100% { box-shadow: none; }
+}
+
+/* Yazıyor… */
+.mb-typing-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.mb-typing-bubble__text {
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-typing-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.mb-typing-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mb-text-2);
+  animation: mb-typing 1.2s infinite ease-in-out;
+}
+
+.mb-typing-dots i:nth-child(2) { animation-delay: 0.15s; }
+.mb-typing-dots i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes mb-typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Emoji seçici */
+.mb-emoji-picker {
+  width: 280px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.mb-emoji-picker__title {
+  margin: 4px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+.mb-emoji-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.mb-emoji-picker__grid button {
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 20px;
+  background: none;
+  cursor: pointer;
+}
+
+.mb-emoji-picker__grid button:hover {
+  background: var(--mb-surface-hover);
+}
+
+@media (max-width: 767px) {
+  .mb-bubble-wrap {
+    max-width: 82%;
+  }
+  .mb-bubble,
+  .mb-bubble-row .mb-bubble-wrap > .mb-bubble {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 }

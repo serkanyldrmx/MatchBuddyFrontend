@@ -9,10 +9,12 @@ import {
   HeartFilled,
   HeartOutlined,
   HomeOutlined,
+  PhoneOutlined,
   SunOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
+import WeatherBadge from '../../ui/WeatherBadge';
 import { matchesApi, PARTICIPANT_STATUS } from '../../api/matches';
 import { formatPrice, SURFACE } from '../../api/venues';
 import { CapacityRing, MatchStatusTag, PlayerAvatar } from '../../ui';
@@ -137,7 +139,15 @@ export default function MatchCard({ match, onChanged }) {
           </div>
         )}
         <div className="mb-fixture__meta">
-          {venue ? (
+          {venue?.isExternal ? (
+            <span>
+              <Tooltip title={t('venues:external.badge')}>
+                <PhoneOutlined />
+              </Tooltip>{' '}
+              {venue.name}
+              {venue.district || venue.city ? ` · ${venue.district || venue.city}` : ''}
+            </span>
+          ) : venue ? (
             <span>
               <Tooltip title={`${SURFACE[venue.surface] || t('common:pitch')} · ${venue.isIndoor ? t('common:indoor') : t('common:outdoor')}`}>
                 {venue.isIndoor ? <HomeOutlined /> : <SunOutlined />}
@@ -149,6 +159,7 @@ export default function MatchCard({ match, onChanged }) {
             <span><EnvironmentOutlined /> {match.stadiumName || t('match:card.venueFallback')}</span>
           )}
           {!hasResult && <span><ClockCircleOutlined /> {date.format('dddd, HH:mm')}</span>}
+          {!hasResult && <WeatherBadge matchId={match.matchId} matchDate={match.matchDate} closed={closed} />}
         </div>
         <div className="mb-fixture__people">
           <Avatar.Group max={{ count: 5 }} size={28} className={friendsGoing ? 'mb-fixture__friends-avatars' : ''}>

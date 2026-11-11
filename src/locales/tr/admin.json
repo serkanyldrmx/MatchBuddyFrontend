@@ -212,5 +212,37 @@
       "Auth": "Oturum ve giriş",
       "Legal": "Yasal (KVKK)"
     }
+  },
+  "leads": {
+    "eyebrow": "Büyüme",
+    "title": "Satış Fırsatları",
+    "subtitle": "Oyuncuların telefonla ayarlayıp maç yaptığı, anlaşmamız olmayan sahalar. En çok maç yapılan önce: aranacak işletmeler.",
+    "search": "Saha, il ya da ilçe ara",
+    "empty": "Henüz harici sahada maç yapılmadı.",
+    "cols": {
+      "venue": "Saha",
+      "phone": "Telefon",
+      "matches": "Maç",
+      "players": "Oyuncu",
+      "addedBy": "Ekleyen",
+      "lastMatch": "Son maç"
+    },
+    "upcoming_one": "{{count}} yaklaşan",
+    "upcoming_other": "{{count}} yaklaşan",
+    "map": "Haritada aç",
+    "link": "Bağla",
+    "linkTitle": "{{name}} — tesise bağla",
+    "linkOk": "Bağla",
+    "linkHint": "Bu sahadaki {{count}} maç seçtiğin tesise taşınır ve saha listeden düşer.",
+    "modeCandidate": "Yeni aday tesis oluştur",
+    "modeExisting": "Mevcut tesise bağla",
+    "targetPlaceholder": "Tesis ara",
+    "pickTarget": "Bir tesis seç.",
+    "candidate": "aday",
+    "candidateHint": "Aday tesis, işletme hesabı verilene kadar oyunculara görünmez. İşletmeler ekranından hesap açabilirsin.",
+    "linked": "Saha bağlandı.",
+    "city": "İl",
+    "district": "İlçe",
+    "address": "Adres"
   }
 }
