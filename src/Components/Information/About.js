@@ -44,7 +44,7 @@ const About = () => {
       <Col xs={24}>
         <Card bordered={false}>
           <Space size={20} align="center" wrap>
-            <Avatar src={Logo} size={72} shape="square" style={{ background: '#fff' }} />
+            <Avatar src={Logo} size={72} shape="square" style={{ background: 'transparent', borderRadius: 16 }} />
             <div>
               <Title level={3} style={{ margin: 0 }}>
                 MatcBuddy
