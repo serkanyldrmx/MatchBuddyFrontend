@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from './config';
 
-// Maç saati hava durumu — sözleşme: MatchBuddy/docs/engagement-api.md §2
+// Maç saati hava durumu — sözleşme: MatcBuddy/docs/engagement-api.md §2
 // Ekrandaki maç kartları aynı anda ister; istekler 60 ms içinde tek çağrıda toplanır, sonuç 15 dk önbellekte kalır.
 
 const TTL_MS = 15 * 60 * 1000;

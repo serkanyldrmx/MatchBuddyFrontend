@@ -1,15 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Dropdown, Popconfirm, Popover, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   CheckCircleFilled,
+  CloseOutlined,
   CrownFilled,
   DeleteOutlined,
+  DragOutlined,
   EditOutlined,
   LoginOutlined,
   MessageOutlined,
   PlusOutlined,
+  SaveOutlined,
   SwapOutlined,
   UserAddOutlined,
   UserOutlined,
@@ -280,6 +283,71 @@ function EmptySlot({ role, side, manage, canJoin, onJoin, onAddGuest }) {
   );
 }
 
+/**
+ * Kayıtlı yeri (slot) olanları o yere, diğerlerini sırayla ilk boş yerlere yerleştirir.
+ * Geçersiz / çakışan slot değerleri otomatik yerleşime düşer.
+ */
+export function placeEntries(size, entries) {
+  const out = new Array(size).fill(null);
+  const rest = [];
+  entries.forEach((e) => {
+    const s = e.slot;
+    if (Number.isInteger(s) && s >= 0 && s < size && !out[s]) out[s] = e;
+    else rest.push(e);
+  });
+  let i = 0;
+  rest.forEach((e) => {
+    while (i < size && out[i]) i++;
+    if (i < size) out[i] = e;
+  });
+  return out;
+}
+
+/* ---------------- Düzenleme modundaki jeton (menüsüz, sürüklenebilir) ---------------- */
+function EditToken({ entry, role, me, avatarSize }) {
+  const { t } = useTranslation();
+  if (!entry) {
+    return (
+      <div className="mb-token is-empty">
+        <div className="mb-token__avatar">
+          <span className="mb-token__role">{roleShort(role)}</span>
+        </div>
+        <span className="mb-token__label">
+          <span className="mb-token__name">{t('match:pitch.emptySlot')}</span>
+        </span>
+      </div>
+    );
+  }
+  if (entry.kind === 'guest') {
+    const { g } = entry;
+    return (
+      <div className="mb-token is-guest">
+        <div className="mb-token__avatar">
+          <span className="mb-token__guest">{guestInitials(g.name)}</span>
+          <span className="mb-token__tag">{t('match:guest.tag')}</span>
+          <span className="mb-token__pos">{roleShort(role)}</span>
+        </div>
+        <span className="mb-token__label">
+          <span className="mb-token__name">{g.name}</span>
+        </span>
+      </div>
+    );
+  }
+  const { p } = entry;
+  const isMe = p.player.playerId === me?.playerId;
+  return (
+    <div className={`mb-token ${isMe ? 'is-me' : ''}`}>
+      <div className="mb-token__avatar">
+        <PlayerAvatar player={p.player} size={avatarSize} />
+        <span className="mb-token__pos">{roleShort(role)}</span>
+      </div>
+      <span className="mb-token__label">
+        <span className="mb-token__name">{isMe ? t('match:pitch.you') : p.player.playerName || p.player.userName}</span>
+      </span>
+    </div>
+  );
+}
+
 /* ---------------- Saha ---------------- */
 function Pitch({
   detail,
@@ -296,6 +364,7 @@ function Pitch({
   onEditGuest,
   onMoveGuest,
   onRemoveGuest,
+  onArrange,
 }) {
   const { t } = useTranslation();
   const compact = useCompactPitch();
@@ -303,24 +372,158 @@ function Pitch({
   const mvpId = detail.mvp?.player?.playerId;
   const avatarSize = compact ? 40 : 52;
 
-  const sides = useMemo(
+  // Diziliş düzenleme: { [side]: entry[] } taslağı; null = düzenleme kapalı
+  const [draft, setDraft] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const editing = !!draft && manage;
+
+  const placed = useMemo(
     () =>
       [SIDE.HOME, SIDE.AWAY].map((side) => {
         const roster = sideRoster(detail, side);
         const formation = buildFormation(Math.max(perSide, roster.count));
         const entries = [
-          ...roster.players.map((p) => ({ kind: 'player', key: `p${p.player.playerId}`, p })),
-          ...roster.guests.map((g) => ({ kind: 'guest', key: `g${g.guestId}`, g })),
+          ...roster.players.map((p) => ({ kind: 'player', key: `p${p.player.playerId}`, p, slot: p.slot })),
+          ...roster.guests.map((g) => ({ kind: 'guest', key: `g${g.guestId}`, g, slot: g.slot })),
         ];
-        const slots = formation.slots.map((slot, i) => {
-          const entry = entries[i];
-          const x = side === SIDE.AWAY ? 100 - slot.depth : slot.depth;
-          return { ...slot, x, y: slot.across, side, entry, key: entry ? entry.key : `e${side}-${slot.id}` };
-        });
-        return { side, key: sideKey(side), roster, formation, slots };
+        return { side, roster, formation, entries: placeEntries(formation.slots.length, entries) };
       }),
     [detail, perSide]
   );
+
+  // Kadro değişince (başkası katıldı vb.) açık taslak geçersiz olur
+  useEffect(() => setDraft(null), [placed]);
+
+  const sides = useMemo(
+    () =>
+      placed.map(({ side, roster, formation, entries }) => {
+        const layout = editing ? draft[side] : entries;
+        const slots = formation.slots.map((slot, i) => {
+          const entry = layout[i];
+          const x = side === SIDE.AWAY ? 100 - slot.depth : slot.depth;
+          return { ...slot, x, y: slot.across, side, entry, key: entry ? entry.key : `e${side}-${slot.id}` };
+        });
+        const count = editing ? layout.filter(Boolean).length : roster.count;
+        return { side, key: sideKey(side), roster: { ...roster, count }, formation, slots };
+      }),
+    [placed, editing, draft]
+  );
+
+  /* ---- Düzenleme: sürükle-bırak + dokun-değiştir ---- */
+  const slotEls = useRef(new Map());
+  const pressRef = useRef(null);
+  const [selected, setSelected] = useState(null); // { side, index }
+  const [dragging, setDragging] = useState(null); // { side, index, dx, dy, over }
+
+  const startEdit = () => {
+    setSelected(null);
+    setDraft(Object.fromEntries(placed.map((s) => [s.side, [...s.entries]])));
+  };
+  const cancelEdit = () => {
+    setSelected(null);
+    setDragging(null);
+    setDraft(null);
+  };
+
+  const sameSpot = (a, b) => !!a && !!b && a.side === b.side && a.index === b.index;
+
+  // İki yerin içeriğini değiştirir (boş yere taşımak da bir "değiştirme"dir)
+  const moveEntry = (from, to) => {
+    if (!from || !to || sameSpot(from, to)) return;
+    setDraft((cur) => {
+      const next = { ...cur, [from.side]: [...cur[from.side]] };
+      if (to.side !== from.side) next[to.side] = [...cur[to.side]];
+      const a = next[from.side][from.index];
+      next[from.side][from.index] = next[to.side][to.index] || null;
+      next[to.side][to.index] = a;
+      return next;
+    });
+  };
+
+  // İmlecin altındaki (ya da en yakın) yer
+  const spotAt = (x, y, exclude) => {
+    let best = null;
+    let bestDist = Infinity;
+    slotEls.current.forEach((el, id) => {
+      if (!el) return;
+      const [side, index] = id.split(':').map(Number);
+      if (exclude && exclude.side === side && exclude.index === index) return;
+      const r = el.getBoundingClientRect();
+      const d = Math.hypot(r.left + r.width / 2 - x, r.top + r.height / 2 - y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = { side, index, radius: Math.max(r.width, r.height) };
+      }
+    });
+    return best && bestDist <= best.radius ? { side: best.side, index: best.index } : null;
+  };
+
+  const onPointerDown = (e, spot, hasEntry) => {
+    if (saving || (e.button !== undefined && e.button !== 0)) return;
+    pressRef.current = { spot, hasEntry, x: e.clientX, y: e.clientY, moved: false, id: e.pointerId };
+    if (hasEntry) {
+      try {
+        e.currentTarget.setPointerCapture?.(e.pointerId);
+      } catch {
+        // İşaretçi zaten bırakılmışsa yakalama yapılamaz; sürükleme yine çalışır
+      }
+    }
+  };
+
+  const onPointerMove = (e) => {
+    const press = pressRef.current;
+    if (!press || !press.hasEntry || press.id !== e.pointerId) return;
+    const dx = e.clientX - press.x;
+    const dy = e.clientY - press.y;
+    if (!press.moved && Math.hypot(dx, dy) < 6) return;
+    press.moved = true;
+    setDragging({ ...press.spot, dx, dy, over: spotAt(e.clientX, e.clientY, press.spot) });
+  };
+
+  const onPointerUp = (e) => {
+    const press = pressRef.current;
+    pressRef.current = null;
+    if (!press || press.id !== e.pointerId) return;
+    if (press.moved) {
+      moveEntry(press.spot, spotAt(e.clientX, e.clientY, press.spot));
+      setDragging(null);
+      setSelected(null);
+      return;
+    }
+    tapSpot(press.spot, press.hasEntry);
+  };
+
+  const onPointerCancel = () => {
+    pressRef.current = null;
+    setDragging(null);
+  };
+
+  // Dokun-değiştir: önce bir oyuncu seç, sonra gideceği yere dokun
+  const tapSpot = (spot, hasEntry) => {
+    if (selected) {
+      if (!sameSpot(selected, spot)) moveEntry(selected, spot);
+      setSelected(null);
+    } else if (hasEntry) {
+      setSelected(spot);
+    }
+  };
+
+  const saveEdit = async () => {
+    const items = [];
+    [SIDE.HOME, SIDE.AWAY].forEach((side) =>
+      draft[side].forEach((entry, slot) => {
+        if (!entry) return;
+        items.push(entry.kind === 'player' ? { playerId: entry.p.player.playerId, side, slot } : { guestId: entry.g.guestId, side, slot });
+      })
+    );
+    setSaving(true);
+    try {
+      const ok = await onArrange(items);
+      if (ok !== false) cancelEdit();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const [home, away] = sides;
   const freeTotal = Math.max(perSide - home.roster.count, 0) + Math.max(perSide - away.roster.count, 0);
@@ -339,9 +542,51 @@ function Pitch({
 
   let order = 0;
   const tokens = sides.flatMap((s) =>
-    s.slots.map((slot) => {
+    s.slots.map((slot, index) => {
       const style = { '--x': `${slot.x}%`, '--y': `${slot.y}%`, '--i': order++ };
       const { entry } = slot;
+      const spot = { side: s.side, index };
+
+      if (editing) {
+        const isDragged = sameSpot(dragging, spot);
+        const classes = [
+          'mb-pslot',
+          `is-${s.key}`,
+          `is-line-${slot.line}`,
+          'is-editing',
+          isDragged ? 'is-dragging' : '',
+          sameSpot(selected, spot) ? 'is-selected' : '',
+          sameSpot(dragging?.over, spot) ? 'is-drop' : '',
+          selected && !sameSpot(selected, spot) ? 'is-target' : '',
+        ].join(' ');
+        const dragStyle = isDragged ? { ...style, '--dx': `${dragging.dx}px`, '--dy': `${dragging.dy}px` } : style;
+        const name = entry ? (entry.kind === 'player' ? fullName(entry.p.player) : entry.g.name) : t('match:pitch.emptySlot');
+        return (
+          <div
+            key={`edit-${s.side}-${slot.id}`}
+            ref={(el) => (el ? slotEls.current.set(`${s.side}:${index}`, el) : slotEls.current.delete(`${s.side}:${index}`))}
+            className={classes}
+            style={dragStyle}
+            role="button"
+            tabIndex={0}
+            aria-pressed={sameSpot(selected, spot)}
+            aria-label={`${ROLE_LABELS[slot.role]} · ${name}`}
+            onPointerDown={(e) => onPointerDown(e, spot, !!entry)}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                tapSpot(spot, !!entry);
+              } else if (e.key === 'Escape') setSelected(null);
+            }}
+          >
+            <EditToken entry={entry} role={slot.role} me={me} avatarSize={avatarSize} />
+          </div>
+        );
+      }
+
       let content;
       if (!entry) {
         content = (
@@ -373,19 +618,44 @@ function Pitch({
     })
   );
 
+  const canArrange = manage && !!onArrange && home.roster.count + away.roster.count > 0;
+
   return (
-    <div className="mb-pitch">
+    <div className={`mb-pitch ${editing ? 'is-editing' : ''}`}>
       <div className="mb-pitch__head">
         {teamLabel(home, homeLabel)}
-        {manage && (
-          <Tooltip title={freeTotal <= 0 ? t('match:pitch.noFreeSpots') : undefined}>
-            <Button size="small" icon={<UserAddOutlined />} className="mb-pitch__add" disabled={freeTotal <= 0} onClick={() => onAddGuest()}>
-              {t('match:guest.addByName')}
-            </Button>
-          </Tooltip>
+        {manage && !editing && (
+          <span className="mb-pitch__tools">
+            {canArrange && (
+              <Button size="small" icon={<DragOutlined />} className="mb-pitch__add" onClick={startEdit}>
+                {t('match:pitch.arrange')}
+              </Button>
+            )}
+            <Tooltip title={freeTotal <= 0 ? t('match:pitch.noFreeSpots') : undefined}>
+              <Button size="small" icon={<UserAddOutlined />} className="mb-pitch__add" disabled={freeTotal <= 0} onClick={() => onAddGuest()}>
+                {t('match:guest.addByName')}
+              </Button>
+            </Tooltip>
+          </span>
         )}
         <span className="mb-pitch__head-away">{teamLabel(away, awayLabel)}</span>
       </div>
+
+      {editing && (
+        <div className="mb-pitch__editbar" role="status">
+          <span className="mb-pitch__edithint">
+            <DragOutlined /> {selected ? t('match:pitch.arrangePickTarget') : t('match:pitch.arrangeHint')}
+          </span>
+          <span className="mb-pitch__editactions">
+            <Button size="small" icon={<CloseOutlined />} onClick={cancelEdit} disabled={saving}>
+              {t('common:actions.cancel')}
+            </Button>
+            <Button size="small" type="primary" icon={<SaveOutlined />} onClick={saveEdit} loading={saving}>
+              {t('match:pitch.arrangeSave')}
+            </Button>
+          </span>
+        </div>
+      )}
 
       <div className={`mb-pitch__field ${maxGaps >= 4 ? 'is-deep' : ''}`} style={{ '--mb-pitch-gaps': maxGaps }}>
         <div className="mb-pitch__turf" aria-hidden="true" />

@@ -13,7 +13,7 @@ import './OwnerSettings.css';
 const { Text } = Typography;
 
 /**
- * Tesis ayarları (VenueSettings) — sözleşme: MatchBuddy/docs/platform-api.md §5
+ * Tesis ayarları (VenueSettings) — sözleşme: MatcBuddy/docs/platform-api.md §5
  * Boş (null) alan = sistem varsayılanı (booking.* parametreleri).
  * unit: owner:settings.units.<unit> (saat / gün)
  */

@@ -12,7 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../ui';
 import SerkanYildirim from './SerkanYildirim.jpg';
-import Logo from '../../images/mutch_buddy_Logo.png';
+import Logo from '../../images/logo.png';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -47,7 +47,7 @@ const About = () => {
             <Avatar src={Logo} size={72} shape="square" style={{ background: '#fff' }} />
             <div>
               <Title level={3} style={{ margin: 0 }}>
-                MatchBuddy
+                MatcBuddy
               </Title>
               <Text type="secondary">{t('info:about.tagline')}</Text>
             </div>
@@ -111,7 +111,7 @@ const About = () => {
               <a href="tel:+905455218249">+90 545 521 82 49</a>
             </Descriptions.Item>
             <Descriptions.Item label={<MailOutlined />}>
-              <a href="mailto:bmserkanyildirim@matchbuddy.com">bmserkanyildirim@matchbuddy.com</a>
+              <a href="mailto:bmserkanyildirim@matcbuddy.com">bmserkanyildirim@matcbuddy.com</a>
             </Descriptions.Item>
             <Descriptions.Item label={<EnvironmentOutlined />}>
               {t('info:about.contact.address')}

@@ -228,6 +228,98 @@
   font-weight: 600;
 }
 
+.mb-pitch__tools {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- Diziliş düzenleme (sürükle-bırak / dokun-değiştir) ---------- */
+.mb-pitch__editbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px dashed rgba(var(--mb-primary-rgb), 0.55);
+  background: rgba(var(--mb-primary-rgb), 0.08);
+}
+
+.mb-pitch__edithint {
+  flex: 1 1 240px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mb-pitch__editactions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.mb-pitch.is-editing .mb-pitch__field {
+  touch-action: none;
+  outline: 2px dashed rgba(var(--mb-primary-rgb), 0.6);
+  outline-offset: 3px;
+}
+
+.mb-pslot.is-editing {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  border-radius: 14px;
+}
+
+.mb-pslot.is-editing:focus-visible {
+  outline: 2px solid var(--team);
+  outline-offset: 2px;
+}
+
+.mb-pslot.is-editing .mb-token__avatar {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.mb-pslot.is-editing:hover .mb-token__avatar,
+.mb-pslot.is-target .mb-token__avatar {
+  transform: scale(1.06);
+}
+
+.mb-pslot.is-target .mb-token__avatar {
+  filter: drop-shadow(0 0 6px var(--team-glow));
+}
+
+.mb-pslot.is-selected .mb-token__avatar,
+.mb-pslot.is-drop .mb-token__avatar {
+  transform: scale(1.14);
+  filter: drop-shadow(0 0 10px var(--team)) drop-shadow(0 0 2px #fff);
+}
+
+.mb-pslot.is-selected {
+  z-index: 7;
+  animation: mb-pslot-pick 1s ease-in-out infinite;
+}
+
+.mb-pslot.is-dragging {
+  z-index: 20;
+  cursor: grabbing;
+  transition: none;
+  transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(1.08);
+}
+
+.mb-pslot.is-dragging > * {
+  animation: none;
+  opacity: 0.92;
+}
+
+@keyframes mb-pslot-pick {
+  50% {
+    filter: brightness(1.15);
+  }
+}
+
 .mb-pitch__field {
   position: relative;
   aspect-ratio: 105 / 68;

@@ -1,5 +1,5 @@
-/* MatchBuddy service worker: telefona bildirim (Web Push) ve "ana ekrana ekle".
-   Önbellekleme yapmaz; uygulama her zaman ağdan güncel yüklenir. Bkz. src/pwa.js, MatchBuddy/docs/push-api.md */
+/* MatcBuddy service worker: telefona bildirim (Web Push) ve "ana ekrana ekle".
+   Önbellekleme yapmaz; uygulama her zaman ağdan güncel yüklenir. Bkz. src/pwa.js, MatcBuddy/docs/push-api.md */
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
@@ -13,7 +13,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data && event.data.text() };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || 'MatchBuddy', {
+    self.registration.showNotification(data.title || 'MatcBuddy', {
       body: data.body || '',
       icon: '/logo192.png',
       tag: data.tag,

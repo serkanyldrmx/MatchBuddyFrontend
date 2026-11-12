@@ -167,7 +167,7 @@
     "batchSkipped_one": "{{count}} fotoğraf eklenmedi: en fazla {{max}} fotoğraf olabilir.",
     "batchSkipped_other": "{{count}} fotoğraf eklenmedi: en fazla {{max}} fotoğraf olabilir.",
     "loadFailedTitle": "Tesis bilgileri yüklenemedi",
-    "loadFailedDescription": "Kayıtlı bilgilerinizin üzerine yazılmaması için kaydetme kapatıldı. Lütfen sayfayı yenileyin; sorun sürerse Match Buddy ile iletişime geçin.",
+    "loadFailedDescription": "Kayıtlı bilgilerinizin üzerine yazılmaması için kaydetme kapatıldı. Lütfen sayfayı yenileyin; sorun sürerse MatcBuddy ile iletişime geçin.",
     "loading": "Tesis bilgileri yükleniyor…",
     "general": "Genel",
     "name": "Tesis adı",

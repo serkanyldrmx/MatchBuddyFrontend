@@ -6,7 +6,7 @@ import i18n, { DEFAULT_LANG } from '../i18n';
 export const API_BASE_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:5033';
 
 /**
- * Oturum modeli (MatchBuddy/docs/auth-api.md):
+ * Oturum modeli (MatcBuddy/docs/auth-api.md):
  *  - Kısa ömürlü access token (JWT) localStorage'da ("token"); her istekte Authorization başlığına eklenir.
  *  - Refresh token HttpOnly çerezde (mb_rt) — JS göremez. 401 gelince /api/Auth/Refresh ile sessizce yenilenir,
  *    istek bir kez tekrarlanır. Yenileme de başarısızsa oturum kapanır.
@@ -21,7 +21,7 @@ export const authHeaders = () => {
 
 /**
  * İstek dili (Accept-Language): uygulamanın o anki i18n dili (PlayerSettings.language ile eşitlenir).
- * Sunucu mesajları (hata/başarı) bu dilde döner — bkz. MatchBuddy/docs/platform-api.md §2.
+ * Sunucu mesajları (hata/başarı) bu dilde döner — bkz. MatcBuddy/docs/platform-api.md §2.
  */
 export const requestLanguage = () => (i18n.resolvedLanguage || i18n.language || DEFAULT_LANG).split('-')[0];
 
@@ -54,8 +54,8 @@ const skipsRefresh = (url) => NO_REFRESH_PATHS.some((p) => (url || '').includes(
 // Oturum süresi doldu / token geçersiz: çıkış yap ve giriş sayfasına yönlendir
 const handleUnauthorized = () => {
   clearSession();
-  if (window.location.pathname !== '/') {
-    window.location.href = '/';
+  if (!['/', '/login'].includes(window.location.pathname)) {
+    window.location.href = '/login';
   }
 };
 

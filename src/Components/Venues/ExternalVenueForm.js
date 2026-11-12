@@ -43,7 +43,7 @@ export const mapsUrl = (venue) => {
 export const telUrl = (phone) => (phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null);
 
 /**
- * Harici (anlaşmasız) saha: oyuncu sahayı telefonla kendisi ayarlar (MatchBuddy/docs/external-venues-api.md).
+ * Harici (anlaşmasız) saha: oyuncu sahayı telefonla kendisi ayarlar (MatcBuddy/docs/external-venues-api.md).
  * Önceki harici sahalardan biri seçilebilir ya da yeni saha bilgisi girilir; ardından gün, saat, süre ve (isteğe bağlı) ücret.
  */
 export default function ExternalVenueForm({ value, onChange, savedVenues, durationOptions, duration, onDurationChange }) {

@@ -81,7 +81,7 @@
       "next": "İleri",
       "create": "İşletmeyi oluştur",
       "copyAll": "Tümünü kopyala",
-      "credentialsText": "MatchBuddy işletme paneli\nGiriş: {{url}}\nKullanıcı adı: {{userName}}\nGeçici şifre: {{password}}\nİlk girişte şifrenizi değiştirmenizi öneririz.",
+      "credentialsText": "MatcBuddy işletme paneli\nGiriş: {{url}}\nKullanıcı adı: {{userName}}\nGeçici şifre: {{password}}\nİlk girişte şifrenizi değiştirmenizi öneririz.",
       "steps": {
         "account": "İşletme hesabı",
         "venue": "Tesis",

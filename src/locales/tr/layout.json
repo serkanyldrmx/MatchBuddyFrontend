@@ -20,7 +20,7 @@
     "profile": "Profil"
   },
   "brand": {
-    "homeAria": "MatchBuddy ana sayfa"
+    "homeAria": "MatcBuddy ana sayfa"
   },
   "siderCta": {
     "title": "Kadro eksik mi?",
@@ -85,9 +85,9 @@
       "settings": "Ayarlar"
     },
     "membershipInactive": "Üyeliğiniz aktif değil",
-    "membershipInactiveDesc": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız. Yenilemek için Match Buddy ile iletişime geçin.",
-    "membershipInactiveDescUntil": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız (bitiş: {{date}}). Yenilemek için Match Buddy ile iletişime geçin.",
+    "membershipInactiveDesc": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız. Yenilemek için MatcBuddy ile iletişime geçin.",
+    "membershipInactiveDescUntil": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız (bitiş: {{date}}). Yenilemek için MatcBuddy ile iletişime geçin.",
     "loading": "İşletme paneli yükleniyor…",
-    "noVenue": "Hesabınıza bağlı bir tesis bulunmuyor. Match Buddy ile iletişime geçin."
+    "noVenue": "Hesabınıza bağlı bir tesis bulunmuyor. MatcBuddy ile iletişime geçin."
   }
 }

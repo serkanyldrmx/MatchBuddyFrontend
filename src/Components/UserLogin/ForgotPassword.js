@@ -53,7 +53,7 @@ export default function ForgotPassword() {
     try {
       const res = await authApi.resetPassword(identifier, values.code.trim(), values.password);
       message.success(res?.message || t('auth:forgot.done'));
-      navigate('/', { replace: true });
+      navigate('/login', { replace: true });
     } catch (err) {
       const { unmatched } = applyFieldErrors(resetForm, err, { aliases: { newPassword: 'password' } });
       message.error(unmatched[0] || apiErrorMessage(err));
@@ -149,7 +149,7 @@ export default function ForgotPassword() {
         </Form>
       )}
       <p className="mb-auth__switch">
-        <Link to="/" className="mb-auth__link">{t('auth:forgot.backToLogin')}</Link>
+        <Link to="/login" className="mb-auth__link">{t('auth:forgot.backToLogin')}</Link>
       </p>
     </AuthShell>
   );

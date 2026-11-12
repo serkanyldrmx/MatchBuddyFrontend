@@ -29,7 +29,7 @@ import { fullName, getCurrentUser } from '../utils/format';
 import NotificationBell from './NotificationBell';
 import InvitesButton from './InvitesButton';
 import { themeMenuItem } from '../theme/ThemeSwitch';
-import Logo from '../images/mutch_buddy_Logo.png';
+import Logo from '../images/logo.png';
 import './layout.css';
 
 const { Sider, Header, Content } = Layout;
@@ -133,7 +133,7 @@ export function useCurrentUser() {
 }
 
 /**
- * Logo + MATCHBUDDY yazısı. variant="header": telefon/tablet üst barında kompakt sürüm;
+ * Logo + MATCBUDDY yazısı. variant="header": telefon/tablet üst barında kompakt sürüm;
  * markOnly: sadece logo kutusu (yer dar olduğunda, ör. işletme panelinde tesis adının yanında)
  */
 export function Brand({ to = '/home', badge, variant, markOnly }) {
@@ -150,7 +150,7 @@ export function Brand({ to = '/home', badge, variant, markOnly }) {
       </span>
       {!markOnly && (
         <span className="mb-brand__name">
-          Match<em>Buddy</em>
+          Matc<em>Buddy</em>
         </span>
       )}
       {badge && !header && <span className="mb-brand__badge">{badge}</span>}

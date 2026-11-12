@@ -6,7 +6,7 @@ import { matchesApi } from '../../api/matches';
 import { apiErrorMessage } from '../../utils/format';
 
 /**
- * Maçı WhatsApp'ta / başka uygulamada paylaş (MatchBuddy/docs/engagement-api.md §3).
+ * Maçı WhatsApp'ta / başka uygulamada paylaş (MatcBuddy/docs/engagement-api.md §3).
  * Link ilk tıklamada oluşur; önizleme kartında maçın adı, saati, sahası ve eksik kişi sayısı görünür.
  */
 export default function ShareMatchButton({ matchId, className, size = 'large' }) {

@@ -1,6 +1,6 @@
 import { api } from './config';
 
-/** Kimlik doğrulama uç noktaları — sözleşme: MatchBuddy/docs/auth-api.md */
+/** Kimlik doğrulama uç noktaları — sözleşme: MatcBuddy/docs/auth-api.md */
 export const authApi = {
   login: (userName, password, rememberMe = true) =>
     api.post('/api/Auth/Login', { userName, password, rememberMe }).then((r) => r.data),

@@ -1,0 +1,707 @@
+{
+  "nav": {
+    "story": "Nasıl çalışır",
+    "features": "Özellikler",
+    "try": "Dene",
+    "venues": "İşletmeler",
+    "faq": "SSS",
+    "login": "Giriş yap",
+    "register": "Üye ol",
+    "menu": "Menü",
+    "messaging": "Mesajlaşma",
+    "business": "İşletmeler",
+    "openApp": "Uygulamaya git"
+  },
+  "hero": {
+    "eyebrow": "Halı saha maçın artık tek uygulamada",
+    "titleTop": "Maçını kur.",
+    "rotate": [
+      "Kadronu tamamla.",
+      "Sahanı ayırt.",
+      "Yıldızı seç.",
+      "Yedeğini bul."
+    ],
+    "text": "WhatsApp grubunda kaybolan mesajlar, son gün eksik kalan kadro, defterdeki rezervasyon… MatcBuddy maçı kurmayı, kadroyu doldurmayı ve sahayı ayırtmayı tek yerde toplar.",
+    "primary": "Ücretsiz üye ol",
+    "secondary": "Nasıl çalıştığını gör",
+    "trust": [
+      "Oyuncular için ücretsiz",
+      "Telefon ve bilgisayarda",
+      "Kurulum gerektirmez"
+    ]
+  },
+  "audience": {
+    "player": {
+      "title": "Oyuncular",
+      "text": "Yakındaki eksik kadroları bul, tek dokunuşla katıl, maç sonu puanını al.",
+      "link": "Oyuncu akışı"
+    },
+    "organizer": {
+      "title": "Maç kurucular",
+      "text": "Sahayı ayırt, kadroyu kur, yedek bul, takımları dengele.",
+      "link": "Dizilişi dene"
+    },
+    "venue": {
+      "title": "Halı sahalar",
+      "text": "Takvim, talepler, boş saat ilanları ve gelir-gider tek panelde.",
+      "link": "İşletme paneli"
+    }
+  },
+  "stats": [
+    {
+      "value": 0,
+      "prefix": "",
+      "suffix": " ₺",
+      "label": "oyuncu için ücret"
+    },
+    {
+      "value": 24,
+      "prefix": "",
+      "suffix": " sa",
+      "label": "öncesine kadar cezasız iptal"
+    },
+    {
+      "value": 2,
+      "prefix": "+",
+      "suffix": "",
+      "label": "her oynanan maçta güven puanı"
+    },
+    {
+      "value": 1,
+      "prefix": "",
+      "suffix": " dokunuş",
+      "label": "ile dengeli takımlar"
+    }
+  ],
+  "marquee": [
+    "Kadro sahada",
+    "Yedek bul",
+    "Güvenilirlik puanı",
+    "Saha rezervasyonu",
+    "Kişi başı ücret",
+    "MVP oylaması",
+    "Turnuva ve lig",
+    "Soyunma odası sohbeti",
+    "Hava durumu",
+    "Davet linki",
+    "Anlık bildirim",
+    "Takım dengeleme"
+  ],
+  "story": {
+    "eyebrow": "Bir maçın hayatı",
+    "title": "Grubu açtığın andan <em>son düdüğe</em> kadar",
+    "steps": [
+      {
+        "tag": "01 · Kur",
+        "title": "Sahanı seç, saatini ayırt",
+        "text": "Anlaşmalı tesisler, boş saatler ve kampanyalar karşında. Saati seçtiğin an toplam ve kişi başı tutar görünür.",
+        "points": [
+          "Dolu saatler kapalı görünür",
+          "Son dakika fırsatları öne çıkar",
+          "Krampon ve kamera ekstraları"
+        ]
+      },
+      {
+        "tag": "02 · Onay",
+        "title": "İşletme talebini onaylar",
+        "text": "Talep işletme paneline düşer. İşletme, kurucunun güvenilirlik puanını görerek onaylar.",
+        "points": [
+          "Onay bildirimi telefona gelir",
+          "Haftalık sabit maç desteği",
+          "Harici sahalar da eklenebilir"
+        ]
+      },
+      {
+        "tag": "03 · Kadro",
+        "title": "Kadro dolar, yedekler sıraya girer",
+        "text": "Arkadaşlarını davet et, linki gruba at. Yer kalmazsa yedek listesi oluşur; biri çekilince sıradaki otomatik kadroya geçer.",
+        "points": [
+          "Tek tıkla davet linki",
+          "Misafir oyuncu ekleme",
+          "Yedek bul: seçtiklerine anlık bildirim"
+        ]
+      },
+      {
+        "tag": "04 · Maç günü",
+        "title": "Hatırlatma, onay ve dengeli takımlar",
+        "text": "Maç günü hatırlatma gelir, herkes \"geliyorum\" der. Takımlar oyuncuların gücüne göre tek dokunuşla dengelenir.",
+        "points": [
+          "Maç saatinin hava durumu",
+          "Sahada sürükle-bırak diziliş",
+          "Soyunma odası sohbeti"
+        ]
+      },
+      {
+        "tag": "05 · Maç sonu",
+        "title": "Skor, MVP ve puanlar",
+        "text": "Skor girilir, maçın oyuncusu oylanır, takım arkadaşları puanlanır, tesis değerlendirilir. Sıralama güncellenir.",
+        "points": [
+          "Gol ve asist istatistikleri",
+          "Haftalık sıralama",
+          "Takip ettiklerinin akışı"
+        ]
+      }
+    ]
+  },
+  "bento": {
+    "eyebrow": "Özellikler",
+    "title": "Sahaya çıkmadan <em>her şey hazır</em>",
+    "items": {
+      "pitch": {
+        "title": "Kadro sahada",
+        "text": "Oyuncular mevkileriyle sahada dizilir. Kurucu dizilişi sürükle-bırak ile kurar."
+      },
+      "reliability": {
+        "title": "Güvenilirlik puanı",
+        "text": "Sözünde duran öne çıkar. Gerçek mazeret kabul edilirse puan geri gelir."
+      },
+      "waitlist": {
+        "title": "Yedek listesi",
+        "text": "Biri çekildiğinde sıradaki oyuncu otomatik kadroya girer ve haber alır."
+      },
+      "chat": {
+        "title": "Soyunma odası",
+        "text": "Her maçın kendi sohbeti. Birebir ve grup mesajları anında."
+      },
+      "ai": {
+        "title": "Dengeli takımlar",
+        "text": "Puanlara göre iki dengeli takım, tek dokunuşla."
+      },
+      "tournament": {
+        "title": "Turnuva ve lig",
+        "text": "Fikstür, puan tablosu ve eleme ağacı."
+      },
+      "weather": {
+        "title": "Hava durumu",
+        "text": "Maç saatinin havası maç kartında."
+      },
+      "mvp": {
+        "title": "MVP ve sıralama",
+        "text": "Her maçtan sonra oyla, sıralamada yüksel."
+      }
+    }
+  },
+  "try": {
+    "eyebrow": "Kendin dene",
+    "title": "Üye olmadan <em>bir tur at</em>",
+    "text": "Aşağıdakiler uygulamadaki gerçek kurallarla çalışır.",
+    "tabs": {
+      "lineup": "Dizilişi kur",
+      "split": "Kişi başı hesapla",
+      "reliability": "Güvenilirlik puanı"
+    }
+  },
+  "lineup": {
+    "title": "Oyuncuları sürükle, dizilişi seç",
+    "text": "Maç sayfasında kurucu bunu gerçek kadroyla yapar; herkes kendi yerini görür.",
+    "formation": "Diziliş",
+    "shuffle": "Takımları dengele",
+    "reset": "Sıfırla",
+    "home": "Kartallar",
+    "away": "Moda Spor",
+    "power": "Takım gücü",
+    "hint": "İpucu: oyuncuyu tutup sahada istediğin yere bırak."
+  },
+  "split": {
+    "title": "Saha ücreti kime ne kadar düşer?",
+    "text": "Uygulama aynı formülle hesaplar: saha + kamera kişilere bölünür, krampon yalnızca kiralayana yazılır.",
+    "hourly": "Saatlik saha ücreti",
+    "duration": "Süre",
+    "minutes": "{{count}} dk",
+    "players": "Oyuncu sayısı",
+    "camera": "Maç kaydı (kamera)",
+    "cleats": "Krampon kiralayan",
+    "cleatPrice": "Krampon ücreti (çift)",
+    "perPlayer": "Kişi başı",
+    "renter": "Krampon kiralayan öder",
+    "total": "Toplam",
+    "pitchTotal": "Saha",
+    "extras": "Ekstralar",
+    "note": "Fiyatlar örnektir; gerçek tutarlar tesisin fiyat listesinden ve kampanyalardan gelir."
+  },
+  "rel": {
+    "title": "Son dakika iptalin bir bedeli var",
+    "text": "Her oyuncu 100 puanla başlar. Olayları dene, puanın nasıl değiştiğini gör.",
+    "score": "Güvenilirlik",
+    "levels": {
+      "good": "Güvenilir",
+      "medium": "Orta",
+      "risky": "Riskli"
+    },
+    "events": {
+      "attend": "Maça geldi",
+      "late": "24 saatten az kala iptal",
+      "veryLate": "3 saatten az kala iptal",
+      "noShow": "Gelmedi",
+      "excuse": "Mazeret kabul edildi",
+      "reset": "Baştan başla"
+    },
+    "logEmpty": "Henüz olay yok. Bir düğmeye bas.",
+    "rule": "24 saatten önce iptal cezasızdır. Kurucular en düşük puan sınırı koyabilir; yeni oyuncular ilk 3 maçta bu sınıra takılmaz."
+  },
+  "compare": {
+    "eyebrow": "Karşılaştırma",
+    "title": "WhatsApp grubu <em>mı, MatcBuddy mi?</em>",
+    "colGroup": "WhatsApp grubu",
+    "colApp": "MatcBuddy",
+    "rows": [
+      {
+        "label": "Kim geliyor, kim yedek?",
+        "group": "Mesajları kaydırıp say",
+        "app": "Sahada canlı kadro + yedek sırası"
+      },
+      {
+        "label": "Son dakika iptal",
+        "group": "Bedeli yok",
+        "app": "Güvenilirlik puanı + mazeret akışı"
+      },
+      {
+        "label": "Eksik oyuncu",
+        "group": "Tek tek ara",
+        "app": "Yedek bul: seçtiklerine anlık bildirim"
+      },
+      {
+        "label": "Saha rezervasyonu",
+        "group": "Telefonla, mesai saatinde",
+        "app": "Boş saati gör, uygulamadan ayırt"
+      },
+      {
+        "label": "Kişi başı ücret",
+        "group": "Hesap makinesi",
+        "app": "Otomatik, krampon ayrı"
+      },
+      {
+        "label": "Takımlar",
+        "group": "Tartışma",
+        "app": "Puanlara göre tek dokunuşla denge"
+      },
+      {
+        "label": "Maç sonu",
+        "group": "Unutulur",
+        "app": "Skor, MVP, puan, sıralama"
+      }
+    ]
+  },
+  "venues": {
+    "eyebrow": "İşletmeler için",
+    "title": "Boş saat <em>kalmasın</em>",
+    "text": "Uygulamadan gelen talepler, telefonla aldığın rezervasyonlar ve haftalık sabit maçlar aynı takvimde. Boş saat kaldıysa tek tuşla yakındaki oyunculara duyur.",
+    "points": [
+      {
+        "title": "Tek takvim",
+        "text": "Uygulama, telefon ve sabit maçlar bir arada"
+      },
+      {
+        "title": "Son dakika fırsatı",
+        "text": "Boş saate indirim, yakındaki oyunculara bildirim"
+      },
+      {
+        "title": "Kurucuyu tanı",
+        "text": "Onaylamadan önce güvenilirlik puanını gör"
+      },
+      {
+        "title": "Gelir ve gider",
+        "text": "Ödeme durumu, giderler ve doluluk raporu"
+      }
+    ],
+    "cta": "İşletme girişi",
+    "dash": {
+      "title": "Yeşil Vadi Spor · Bu hafta",
+      "kpi": {
+        "occupancy": "Doluluk",
+        "revenue": "Gelir",
+        "pending": "Bekleyen talep"
+      },
+      "legend": {
+        "app": "Uygulama",
+        "phone": "Telefon",
+        "weekly": "Sabit maç",
+        "deal": "Fırsat"
+      },
+      "days": [
+        "Pzt",
+        "Sal",
+        "Çar",
+        "Per",
+        "Cum",
+        "Cmt",
+        "Paz"
+      ],
+      "toast": "Salı 15:00 için fırsat ilanı 48 oyuncuya gönderildi",
+      "sample": "Örnek görünüm"
+    }
+  },
+  "install": {
+    "eyebrow": "Kurulum",
+    "title": "Uygulama mağazası <em>gerekmez</em>",
+    "text": "MatcBuddy telefonda ana ekrana eklenir, uygulama gibi açılır ve bildirim gönderir.",
+    "android": {
+      "title": "Android",
+      "steps": [
+        "Siteyi Chrome'da aç",
+        "Sağ üstteki ⋮ menüsüne dokun",
+        "\"Ana ekrana ekle\" seç"
+      ]
+    },
+    "ios": {
+      "title": "iPhone",
+      "steps": [
+        "Siteyi Safari'de aç",
+        "Paylaş düğmesine dokun",
+        "\"Ana Ekrana Ekle\" seç"
+      ]
+    }
+  },
+  "faq": {
+    "eyebrow": "Sık sorulanlar",
+    "title": "Aklındaki <em>sorular</em>",
+    "items": [
+      {
+        "q": "Ödeme uygulamadan mı yapılıyor?",
+        "a": "Hayır. Uygulama fiyatı, kişi başı tutarı ve krampon gibi ekstraları gösterir; ödeme sahada yapılır. İşletme ödeme alındığını panelden işaretler."
+      },
+      {
+        "q": "Krampon ücreti herkese mi bölünüyor?",
+        "a": "Hayır. Kişi başı tutar saha ve kamera ücretinden hesaplanır; krampon kiralayan kendi ücretini ayrıca öder."
+      },
+      {
+        "q": "Acil durumda iptal edersem puanım düşer mi?",
+        "a": "Önce düşer, ama mazeretini (sağlık, vefat, acil durum…) seçersen kurucuya gider. Kurucu kabul ederse puanın aynen geri gelir."
+      },
+      {
+        "q": "Yeni oyuncular puan sınırı olan maçlara katılabilir mi?",
+        "a": "Evet. İlk 3 maçı tamamlayana kadar yeni oyuncular puan sınırına takılmaz; davetle gelenler de takılmaz."
+      },
+      {
+        "q": "Arkadaşım uygulamayı kullanmıyorsa?",
+        "a": "Kurucu onu isimle misafir oyuncu olarak kadroya ekleyebilir. Misafirler kapasiteye sayılır ama sıralamaya girmez."
+      },
+      {
+        "q": "İşletme hesabı nasıl açılır?",
+        "a": "Yönetim ekibi işletme hesabını ve tesisi açar. İşletme fotoğraf, saha ve fiyatlarını girince tesis oyunculara görünür."
+      },
+      {
+        "q": "Boş saat ilanı oyuncuları rahatsız eder mi?",
+        "a": "Bir tesis günde en fazla 3 ilan verebilir, bildirim yalnızca o tesiste ya da yakında oynamış oyunculara gider ve her oyuncu bu bildirimi kapatabilir."
+      },
+      {
+        "q": "Verilerim güvende mi?",
+        "a": "Oturumlar kısa ömürlü anahtarla korunur. Tüm verilerini indirebilir, tüm cihazlardan çıkış yapabilir ve hesabını silebilirsin."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Bu akşamki maçın <em>kadrosu hazır mı?</em>",
+    "text": "Üye ol, maçını kur, davet linkini gruba at. Gerisini MatcBuddy halleder.",
+    "primary": "Hemen üye ol",
+    "secondary": "Zaten hesabım var"
+  },
+  "footer": {
+    "tagline": "Halı saha maçını kurmanın en kolay yolu.",
+    "product": "Ürün",
+    "account": "Hesap",
+    "terms": "Kullanım koşulları",
+    "forgot": "Şifremi unuttum",
+    "rights": "Tüm hakları saklıdır.",
+    "top": "Başa dön",
+    "pages": "Sayfalar"
+  },
+  "pages": {
+    "eyebrow": "Daha fazlası",
+    "title": "Sahanın iki yanı, <em>tek uygulama</em>",
+    "msg": {
+      "eyebrow": "Mesajlaşma",
+      "title": "Grup sohbeti <em>maçın yanında</em>",
+      "text": "Birebir ve grup mesajları, fotoğraflar, tepkiler ve görüldü bilgisi. Numara paylaşmadan, ayrı uygulamaya geçmeden.",
+      "go": "Mesajlaşmayı keşfet"
+    },
+    "biz": {
+      "eyebrow": "İşletmeler",
+      "title": "Halı sahanız için <em>tek panel</em>",
+      "text": "Takvim, talepler, fiyat kuralları, boş saat ilanları ve gelir-gider. Defter ve telefon trafiği yerine tek ekran.",
+      "go": "İşletme sayfasına git"
+    }
+  },
+  "msg": {
+    "docTitle": "Mesajlaşma · MatcBuddy",
+    "hero": {
+      "eyebrow": "Mesajlaşma",
+      "title": "Takım sohbeti, <br/><em>sahaya göre</em> tasarlandı",
+      "text": "Birebir mesajlar, maç grupları, fotoğraflar ve tepkiler… Hepsi kadronun ve maçın hemen yanında. Numara paylaşmaya, ayrı bir uygulamaya geçmeye gerek yok.",
+      "chips": [
+        "Anlık iletim",
+        "Görüldü ve yazıyor bilgisi",
+        "Kim yazabilir, sen seçersin"
+      ],
+      "primary": "Ücretsiz üye ol",
+      "secondary": "Canlı dene"
+    },
+    "reel": {
+      "eyebrow": "Her şey bir arada",
+      "title": "Grubun ihtiyacı olan <em>her şey</em>",
+      "hint": "Kaydırmaya devam et",
+      "items": [
+        {
+          "key": "groups",
+          "title": "Birebir ve grup",
+          "text": "Arkadaşınla birebir yaz ya da takip ettiklerinden “Perşembe Maçı” grubunu kur. Üye ekle, çıkar; grubu kuran otomatik eklenir."
+        },
+        {
+          "key": "react",
+          "title": "Tepki ve yanıt",
+          "text": "Mesaja dokun: emojiyle tepki ver, alıntılayarak yanıtla, kopyala ya da herkes için sil."
+        },
+        {
+          "key": "photo",
+          "title": "Fotoğraf",
+          "text": "Maçtan kareyi sürükleyip bırak ya da yapıştır, açıklama ekle. Gönder’e bastığında yüklenir."
+        },
+        {
+          "key": "seen",
+          "title": "Görüldü · yazıyor",
+          "text": "Mesajının ne zaman görüldüğünü, kimin o an yazdığını anında gör."
+        },
+        {
+          "key": "quick",
+          "title": "Hızlı başlangıç",
+          "text": "“Selam! 👋”, “Bu hafta maç var mı?” gibi hazır cümleler ve maç temalı emoji paketi."
+        },
+        {
+          "key": "comments",
+          "title": "Maç yorumları",
+          "text": "Her maçın kendi yorum akışı var. Kadro, skor ve yorumlar aynı sayfada, canlı güncellenir."
+        }
+      ]
+    },
+    "try": {
+      "eyebrow": "Kendin dene",
+      "title": "Ahmet’e <em>bir mesaj</em> at",
+      "text": "Bu bir demo sohbet: yaz ya da hazır cümlelerden birini seç. Bir mesaja dokunup tepki ver veya yanıtla.",
+      "placeholder": "Mesaj yaz…",
+      "quick": [
+        "Selam! 👋",
+        "Bu hafta maç var mı?",
+        "Perşembe akşamı boş musun?"
+      ],
+      "reply": "Yanıtla",
+      "replyingTo": "Yanıtlanıyor",
+      "cancel": "Vazgeç",
+      "seen": "Görüldü",
+      "sent": "Gönderildi",
+      "typing": "yazıyor…",
+      "online": "çevrimiçi",
+      "send": "Gönder",
+      "note": "Demo · mesajlar hiçbir yere gönderilmez",
+      "reset": "Sıfırla"
+    },
+    "privacy": {
+      "eyebrow": "Gizlilik",
+      "title": "Kim yazabilir, <em>sen seçersin</em>",
+      "text": "Ayarlar › Gizlilik bölümünden mesaj iznini belirle. Daha önce sana yazmış olduğun kişiler her zaman cevap verebilir.",
+      "options": [
+        {
+          "key": "everyone",
+          "title": "Herkes",
+          "desc": "Her oyuncu sana mesaj atabilir."
+        },
+        {
+          "key": "mates",
+          "title": "Arkadaşlarım ve birlikte maç yaptıklarım",
+          "desc": "Arkadaşların ve aynı maçta oynadığın oyuncular."
+        },
+        {
+          "key": "mutuals",
+          "title": "Sadece arkadaşlarım",
+          "desc": "Karşılıklı takipleştiğin oyuncular."
+        }
+      ],
+      "legend": {
+        "friend": "Arkadaş",
+        "mate": "Birlikte maç yaptığın",
+        "other": "Diğer oyuncular"
+      },
+      "count": "{{count}} / {{total}} kişi yazabilir",
+      "you": "Sen"
+    },
+    "live": {
+      "eyebrow": "Anlık",
+      "title": "Yazdığın an <em>orada</em>",
+      "text": "Mesajlar, maç yorumları ve bildirimler anlık bağlantıyla gelir. Bağlantı koparsa uygulama arka planda yenilemeye devam eder; konuşma yarıda kalmaz.",
+      "points": [
+        {
+          "title": "Sayfayı yenilemeden",
+          "text": "Yeni mesaj, yorum ve görüldü bilgisi kendiliğinden düşer."
+        },
+        {
+          "title": "Zil anında güncellenir",
+          "text": "Maç daveti, onay ya da yeni yorum: bildirimin hemen gelir."
+        },
+        {
+          "title": "Kesintiye dayanıklı",
+          "text": "Bağlantı giderse yeniden bağlanır, bu sırada yenilemeye devam eder."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Grubu taşı, <em>maçı kur</em>",
+      "text": "WhatsApp’ta kaybolan konuşmaları maçın yanına getir. Oyuncular için üyelik ücretsiz."
+    }
+  },
+  "biz": {
+    "docTitle": "İşletmeler · MatcBuddy",
+    "hero": {
+      "eyebrow": "MatcBuddy İşletme",
+      "title": "Tesisinizi <br/><em>tek ekrandan</em> yönetin",
+      "text": "Uygulamadan gelen talepler, telefonla alınan rezervasyonlar, fiyat kuralları, boş saat ilanları ve gelir-gider… Halı sahanızın bütün işi tek panelde.",
+      "primary": "Demo talep edin",
+      "secondary": "İşletme girişi",
+      "chips": [
+        "Tek takvim",
+        "Boş saat ilanı",
+        "Gelir & gider",
+        "Herkese açık yorumlar"
+      ]
+    },
+    "day": {
+      "eyebrow": "Bir gün",
+      "title": "Panelde <em>bir gün</em>",
+      "items": [
+        {
+          "time": "09:12",
+          "title": "Yeni talep",
+          "text": "Kurucunun güvenilirlik özeti talebin yanında: son 6 ayda gerçekleşen rezervasyon ve son dakika iptalleri. Tek dokunuşla onay."
+        },
+        {
+          "time": "13:40",
+          "title": "Telefon çaldı",
+          "text": "Takvimde boş saate tıklayın, harici rezervasyonu ekleyin ya da saati kapatın. Çakışma olmaz."
+        },
+        {
+          "time": "16:05",
+          "title": "Akşam bir saat boş",
+          "text": "İndirimli boş saat ilanı yayınlayın; yakında oynamış oyunculara bildirim gitsin."
+        },
+        {
+          "time": "21:00",
+          "title": "Sahalar dolu",
+          "text": "Haftalık sabit maçlar, uygulama maçları ve telefon rezervasyonları aynı takvimde."
+        },
+        {
+          "time": "23:30",
+          "title": "Gün kapanışı",
+          "text": "Gelir, gider ve tahsil edilmemiş tutarlar; geçen aya göre değişimle birlikte."
+        }
+      ]
+    },
+    "modules": {
+      "eyebrow": "Modüller",
+      "title": "Her iş için <em>bir ekran</em>",
+      "tabs": [
+        {
+          "key": "calendar",
+          "title": "Rezervasyon takvimi",
+          "text": "Uygulama maçları, telefonla gelen rezervasyonlar ve sabit maçlar tek haftalık görünümde. Boş saate tıklayıp ekleyin ya da kapatın."
+        },
+        {
+          "key": "requests",
+          "title": "Talepler",
+          "text": "Oyuncuların taleplerini onaylayın ya da reddedin. Kurucunun geçmişi kararınızı kolaylaştırır."
+        },
+        {
+          "key": "pricing",
+          "title": "Saatler ve fiyatlar",
+          "text": "Hafta içi, hafta sonu ve saat aralığına göre fiyat kuralları. Gece yarısını geçen çalışma saatleri desteklenir."
+        },
+        {
+          "key": "finance",
+          "title": "Gelir & gider",
+          "text": "Uygulama maçları ve harici rezervasyonlar gelir; personel, kira, elektrik gibi kalemler gider. Net kâr kendiliğinden çıkar."
+        },
+        {
+          "key": "reviews",
+          "title": "Yorumlar",
+          "text": "Oyuncuların değerlendirmelerini görün ve yanıtlayın. Yanıtlarınız herkese açık görünür."
+        },
+        {
+          "key": "settings",
+          "title": "Rezervasyon kuralları",
+          "text": "En az kaç saat önceden, en fazla kaç gün sonrasına rezervasyon alınacağını ve ücretsiz iptal süresini siz belirleyin."
+        }
+      ]
+    },
+    "deal": {
+      "eyebrow": "Boş saat ilanı",
+      "title": "Boş saat, <em>son dakika maçı</em> olsun",
+      "text": "Bugün boş kalan bir saate indirim tanımlayın. Tesisinizde ve yakınınızda son 6 ayda oynamış oyunculara telefon bildirimi gider; dokunan oyuncu maçı doğrudan uygulamadan kurar.",
+      "slot": "Bugün 15:00 · Saha 2",
+      "discount": "İndirim",
+      "base": "Normal saat ücreti",
+      "price": "İndirimli saat ücreti",
+      "perPlayer": "Kişi başı (14 oyuncu)",
+      "publish": "İlanı yayınla",
+      "published": "İlan yayında",
+      "again": "Tekrar dene",
+      "audience": "{{count}} oyuncuya bildirim gider",
+      "note": "Örnek değerler. İlan yalnızca o gün için geçerlidir; günlük ilan sayısı sınırlıdır."
+    },
+    "onboard": {
+      "eyebrow": "Yayına çıkış",
+      "title": "Beş adımda <em>oyunculara görünür</em>",
+      "text": "Profiliniz tamamlanınca tesisiniz oyunculara görünür ve rezervasyon almaya başlar. Eksik adımları panel size kendisi söyler.",
+      "steps": [
+        {
+          "title": "Tesis fotoğrafı",
+          "text": "En az bir fotoğraf ekleyin"
+        },
+        {
+          "title": "Aktif saha",
+          "text": "En az bir sahayı aktif edin"
+        },
+        {
+          "title": "Harita konumu",
+          "text": "Haritada tesisinizi işaretleyin"
+        },
+        {
+          "title": "Adres",
+          "text": "Açık adresinizi girin"
+        },
+        {
+          "title": "Açılış saatleri",
+          "text": "Haftalık çalışma saatlerinizi belirleyin"
+        }
+      ],
+      "done": "Tesisiniz yayında",
+      "progress": "Profil"
+    },
+    "faq": {
+      "eyebrow": "Sorular",
+      "title": "İşletmelerin <em>sık sorduğu</em>",
+      "items": [
+        {
+          "q": "Oyuncular rezervasyonu nasıl yapıyor?",
+          "a": "Oyuncu tesisinizi uygulamada bulur, boş saati seçer ve maçı kurarak talep gönderir. Talep panelinize düşer; siz onaylayınca rezervasyon kesinleşir."
+        },
+        {
+          "q": "Telefonla gelen rezervasyonları da girebilir miyim?",
+          "a": "Evet. Takvimde boş bir saate tıklayıp harici rezervasyon ekleyebilir ya da saati kapatabilirsiniz. Böylece uygulama aynı saate ikinci talebi almaz."
+        },
+        {
+          "q": "Fiyatları saate göre değiştirebilir miyim?",
+          "a": "Evet. Hafta içi, hafta sonu veya belirli günler ve saat aralıkları için fiyat kuralları tanımlarsınız; kural olmayan saatlerde sahanın taban fiyatı geçerlidir."
+        },
+        {
+          "q": "İptal ve ileri tarih kurallarını kim belirliyor?",
+          "a": "Siz. En az rezervasyon süresi, en fazla ileri tarih ve ücretsiz iptal süresini Ayarlar’dan belirlersiniz; boş bırakırsanız sistem varsayılanı kullanılır."
+        },
+        {
+          "q": "Boş saat ilanı kimlere gidiyor?",
+          "a": "Tesisinizde ve yakınınızda son 6 ayda oynamış oyunculara telefon bildirimi olarak gider. İlan yalnızca o gün için geçerlidir ve günlük ilan sayısı sınırlıdır."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Sahanız <em>dolsun</em>",
+      "text": "Demo için bize yazın, paneli birlikte inceleyelim. İşletme hesabınız varsa hemen giriş yapabilirsiniz."
+    }
+  }
+}
