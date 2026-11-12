@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://matcbuddy.runasp.net/api/:path*" },
-    { "source": "/hubs/:path*", "destination": "https://matcbuddy.runasp.net/hubs/:path*" },
-    { "source": "/media/:path*", "destination": "https://matcbuddy.runasp.net/media/:path*" },
-    { "source": "/m/:code", "destination": "https://matcbuddy.runasp.net/share/m/:code" },
+    { "source": "/api/:path*", "destination": "https://api.matcbuddy.com/api/:path*" },
+    { "source": "/hubs/:path*", "destination": "https://api.matcbuddy.com/hubs/:path*" },
+    { "source": "/media/:path*", "destination": "https://api.matcbuddy.com/media/:path*" },
+    { "source": "/m/:code", "destination": "https://api.matcbuddy.com/share/m/:code" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
