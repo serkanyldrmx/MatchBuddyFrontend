@@ -7,7 +7,7 @@ import { getToken } from './config';
 import { socialApi } from './social';
 
 /**
- * Oyuncu tercihleri (PlayerSettings) — sözleşme: MatchBuddy/docs/social-api.md + platform-api.md §6
+ * Oyuncu tercihleri (PlayerSettings) — sözleşme: MatcBuddy/docs/social-api.md + platform-api.md §6
  * GET/POST /api/Social/Settings: gizlilik, bildirimler, theme ('system' | 'light' | 'dark'), language ('tr' …).
  *
  * Ayarlar modül düzeyinde tek kaynakta tutulur: Ayarlar sayfası, tema seçici ve dil seçici aynı veriyi kullanır,

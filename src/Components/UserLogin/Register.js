@@ -69,7 +69,7 @@ const RegisterForm = () => {
       });
       success();
       setTimeout(() => {
-        navigate("/");
+        navigate("/login");
       }, 1500);
     } catch (err) {
       // Extract error message
@@ -315,7 +315,7 @@ const RegisterForm = () => {
       <SocialLogin onSuccess={finish} />
       {termsModal}
       <p className="mb-auth__switch">
-        {t('auth:register.haveAccount')} <Link to="/" className="mb-auth__link">{t('auth:register.signIn')}</Link>
+        {t('auth:register.haveAccount')} <Link to="/login" className="mb-auth__link">{t('auth:register.signIn')}</Link>
       </p>
     </AuthShell>
   );

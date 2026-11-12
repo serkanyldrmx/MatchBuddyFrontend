@@ -11,7 +11,7 @@ import { homePathFor, roleOf } from '../../utils/roles';
 const PrivateRoute = ({ role }) => {
   const user = getCurrentUser();
   if (!user || !getToken()) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
   if (roleOf(user) !== role) {
     return <Navigate to={homePathFor(user)} replace />;

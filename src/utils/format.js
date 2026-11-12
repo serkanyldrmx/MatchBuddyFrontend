@@ -115,7 +115,7 @@ const errorTemplate = (code) =>
 
 /**
  * API hata mesajını kullanıcıya gösterilebilir (çevrilmiş) metne çevirir.
- * Sunucu sözleşmesi (MatchBuddy/docs/platform-api.md §1): { success: false, code, message, errors, traceId }
+ * Sunucu sözleşmesi (MatcBuddy/docs/platform-api.md §1): { success: false, code, message, errors, traceId }
  *  - code varsa: errors:<code> çevirisi. Çeviri yer tutucu içeriyorsa ({{0}} …) sunucu mesajı tercih edilir
  *    (değerleri sunucu doldurur ve Accept-Language ile aynı dilde gelir). Çeviri yoksa sunucu mesajı, o da yoksa fallback.
  *  - code yoksa: sunucu mesajı; o da yoksa ağ / zaman aşımı / HTTP durumuna göre genel metin ya da fallback

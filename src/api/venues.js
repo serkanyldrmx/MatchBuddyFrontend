@@ -1,7 +1,7 @@
 import { api } from './config';
 import i18n, { intlLocale, localizedList, localizedMap } from '../i18n';
 
-// Anlaşmalı tesisler / işletme / rezervasyon — sözleşme: MatchBuddy/docs/venues-api.md
+// Anlaşmalı tesisler / işletme / rezervasyon — sözleşme: MatcBuddy/docs/venues-api.md
 
 export const SURFACE = localizedMap({
   1: 'venues:surface.artificialTurf',
@@ -99,7 +99,7 @@ export const ownerApi = {
   blocks: (stadiumId, from, to) => api.get('/api/Owner/Blocks', { params: { stadiumId, from, to } }).then(data),
   saveBlock: (payload) => api.post('/api/Owner/Blocks/Save', payload).then(data),
   deleteBlock: (slotBlockId, allFollowing = false) => api.post('/api/Owner/Blocks/Delete', { slotBlockId, allFollowing }).then(data),
-  /** Boş saat fırsatı (MatchBuddy/docs/venue-growth-api.md) */
+  /** Boş saat fırsatı (MatcBuddy/docs/venue-growth-api.md) */
   slotDealAudience: (stadiumId) => api.get('/api/Owner/SlotDeal/Audience', { params: { stadiumId } }).then(data),
   slotDeal: (payload) => api.post('/api/Owner/SlotDeal', payload).then(data),
   /** Önceki telefon müşterileri: [{ name, phone, bookings, lastAt, lastPrice, lastTitle }] */

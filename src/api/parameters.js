@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { api } from './config';
 
 /**
- * Sistem parametreleri — sözleşme: MatchBuddy/docs/platform-api.md §4
+ * Sistem parametreleri — sözleşme: MatcBuddy/docs/platform-api.md §4
  *  - Herkese açık değerler: GET /api/Parameters/Public (anonim, 5 dk HTTP önbelleği) → düz, tipli nesne.
  *  - Yönetici: GET/PUT /api/Admin/Parameters, GET /api/Admin/Parameters/{key}/History
  *

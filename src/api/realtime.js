@@ -2,7 +2,7 @@ import { HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/s
 import { API_BASE_URL, getToken, refreshSession } from './config';
 
 /**
- * Anlık mesajlaşma bağlantısı (SignalR, MatchBuddy/docs/realtime-api.md).
+ * Anlık mesajlaşma bağlantısı (SignalR, MatcBuddy/docs/realtime-api.md).
  * Sunucu yalnızca "değişti" sinyali yollar; ekranlar veriyi her zamanki REST çağrılarıyla yeniler.
  *  - "message"      { kind: 'user' | 'group', senderId, recipientId?, groupId? }
  *  - "matchComment" { matchId }   (joinMatch ile abone olunan maçlar için)

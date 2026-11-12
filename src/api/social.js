@@ -1,7 +1,7 @@
 import { api } from './config';
 import i18n from '../i18n';
 
-// Sosyal paket uç noktaları — sözleşme: MatchBuddy/docs/social-api.md
+// Sosyal paket uç noktaları — sözleşme: MatcBuddy/docs/social-api.md
 
 export const MESSAGE_PERMISSION = { EVERYONE: 0, MUTUALS: 1, MUTUALS_AND_TEAMMATES: 2 };
 export const PROFILE_VISIBILITY = { EVERYONE: 0, FOLLOWERS: 1, ONLY_ME: 2 };

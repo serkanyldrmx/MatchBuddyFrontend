@@ -1,7 +1,7 @@
 import i18n from '../i18n';
 import { getParam } from '../api/parameters';
 
-// Tarayıcı tarafında resim hazırlığı (yükleme öncesi küçültme) — sözleşme: MatchBuddy/docs/media-api.md §5
+// Tarayıcı tarafında resim hazırlığı (yükleme öncesi küçültme) — sözleşme: MatcBuddy/docs/media-api.md §5
 // Sunucu her resmi yine doğrular, döndürür, WebP'ye çevirir; burada amaç mobil veride hızlı yüklemedir.
 
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

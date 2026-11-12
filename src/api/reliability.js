@@ -1,7 +1,7 @@
 import { api } from './config';
 import { getParam } from './parameters';
 
-/** Güvenilirlik puanı — sözleşme: MatchBuddy/docs/reliability-api.md */
+/** Güvenilirlik puanı — sözleşme: MatcBuddy/docs/reliability-api.md */
 export const EXCUSE_REASONS = ['emergency', 'health', 'bereavement', 'work', 'transport', 'other'];
 
 export const reliabilityApi = {

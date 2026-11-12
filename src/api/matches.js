@@ -1,7 +1,7 @@
 import { api } from './config';
 
 // Maç katılımı / sonuç / MVP / puanlama uç noktaları
-// Sözleşme: MatchBuddy/docs/match-participation-api.md
+// Sözleşme: MatcBuddy/docs/match-participation-api.md
 
 export const PARTICIPANT_STATUS = { GOING: 1, WAITLIST: 2, DECLINED: 3 };
 export const SIDE = { HOME: 1, AWAY: 2 };
@@ -9,7 +9,7 @@ export const SIDE = { HOME: 1, AWAY: 2 };
 export const matchesApi = {
   /** Haftalık tekrarı durdur (kurucu / işletme) */
   stopRepeat: (matchId) => api.post('/api/Match/StopRepeat', { matchId }).then((r) => r.data),
-  // Harici (anlaşmasız) saha — sözleşme: MatchBuddy/docs/external-venues-api.md
+  // Harici (anlaşmasız) saha — sözleşme: MatcBuddy/docs/external-venues-api.md
   createExternal: (payload) => api.post('/api/Match/SaveExternalMatch', payload).then((r) => r.data),
   updateExternal: (payload) => api.post('/api/Match/UpdateExternalMatch', payload).then((r) => r.data),
   myExternalVenues: () => api.get('/api/Match/MyExternalVenues').then((r) => r.data || []),
@@ -22,6 +22,8 @@ export const matchesApi = {
   leave: (matchId, reasonCode, note) => api.post('/api/Match/Leave', { matchId, reasonCode: reasonCode || undefined, note }).then((r) => r.data),
   confirm: (matchId) => api.post('/api/Match/Confirm', { matchId }).then((r) => r.data),
   setSide: (matchId, playerId, side) => api.post('/api/Match/SetSide', { matchId, playerId, side }).then((r) => r.data),
+  /** Sahadaki diziliş: items = [{ playerId | guestId, side, slot }] (slot 0 = kaleci) */
+  arrangeLineup: (matchId, items) => api.post('/api/Match/ArrangeLineup', { matchId, items }).then((r) => r.data),
   submitResult: (payload) => api.post('/api/Match/SubmitResult', payload).then((r) => r.data),
   voteMvp: (matchId, votedPlayerId) => api.post('/api/Match/VoteMvp', { matchId, votedPlayerId }).then((r) => r.data),
   ratePlayers: (matchId, ratings) => api.post('/api/Match/RatePlayers', { matchId, ratings }).then((r) => r.data),

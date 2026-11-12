@@ -1,6 +1,6 @@
 import { api } from './config';
 
-// Maç davet linki — sözleşme: MatchBuddy/docs/engagement-api.md §3
+// Maç davet linki — sözleşme: MatcBuddy/docs/engagement-api.md §3
 
 /** Giriş / kayıttan sonra dönülecek davet kodu (useLoginFlow okur) */
 export const PENDING_INVITE_KEY = 'mb.pendingInvite';

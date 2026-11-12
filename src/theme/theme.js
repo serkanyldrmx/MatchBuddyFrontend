@@ -1,6 +1,6 @@
 import { theme as antdTheme } from 'antd';
 
-// Match Buddy tasarım sistemi — koyu ("gece maçı") ve açık ("gündüz maçı") tema.
+// MatcBuddy tasarım sistemi — koyu ("gece maçı") ve açık ("gündüz maçı") tema.
 // Renk değişiklikleri sadece buradan ve App.css'teki --mb-* değişkenlerinden yapılmalıdır.
 // İki dosyadaki değerler birbiriyle eşleşmelidir.
 

@@ -1,4 +1,4 @@
-// Kullanıcı rolleri (backend Players.Role) — sözleşme: MatchBuddy/docs/venues-api.md
+// Kullanıcı rolleri (backend Players.Role) — sözleşme: MatcBuddy/docs/venues-api.md
 export const ROLE = { PLAYER: 0, ADMIN: 1, OWNER: 2 };
 
 /** Eski oturumlarda `role` olmayabilir; isAdmin'den türet */

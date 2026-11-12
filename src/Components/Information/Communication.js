@@ -33,7 +33,7 @@ const Communication = () => {
               <div>
                 <Text strong>Serkan Yıldırım</Text>
                 <br />
-                <Text type="secondary">MatchBuddy</Text>
+                <Text type="secondary">MatcBuddy</Text>
               </div>
             </Space>
             <Descriptions column={1} size="small" bordered>
@@ -42,7 +42,7 @@ const Communication = () => {
                 <a href="tel:+905455218249">+90 545 521 82 49</a>
               </Descriptions.Item>
               <Descriptions.Item label={<Space><MailOutlined />{t('info:contact.email')}</Space>}>
-                <a href="mailto:bmserkanyildirim@matchbuddy.com">bmserkanyildirim@matchbuddy.com</a>
+                <a href="mailto:bmserkanyildirim@matcbuddy.com">bmserkanyildirim@matcbuddy.com</a>
               </Descriptions.Item>
             </Descriptions>
           </Card>

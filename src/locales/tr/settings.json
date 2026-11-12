@@ -55,8 +55,8 @@
     "desc": "Bu cihazda, uygulama kapalıyken de bildirim al. Aşağıdaki tercihler burada da geçerli.",
     "enabled": "Bu cihaz artık bildirim alacak.",
     "denied": "Bildirim izni verilmedi.",
-    "deniedHint": "Bildirim izni tarayıcı ayarlarından kapatılmış. Açmak için site ayarlarından MatchBuddy'ye izin ver.",
-    "iosInstall": "iPhone'da bildirim için önce Safari'de Paylaş → \"Ana Ekrana Ekle\" ile MatchBuddy'yi ekle, sonra oradan aç.",
+    "deniedHint": "Bildirim izni tarayıcı ayarlarından kapatılmış. Açmak için site ayarlarından MatcBuddy'ye izin ver.",
+    "iosInstall": "iPhone'da bildirim için önce Safari'de Paylaş → \"Ana Ekrana Ekle\" ile MatcBuddy'yi ekle, sonra oradan aç.",
     "unsupported": "Bu tarayıcı bildirimleri desteklemiyor.",
     "failed": "Bildirim açılamadı."
   },

@@ -1,12 +1,12 @@
 {
-  "copyright": "© 2024 MatchBuddy. Tüm hakları saklıdır.",
+  "copyright": "© 2024 MatcBuddy. Tüm hakları saklıdır.",
   "about": {
     "title": "Hakkında",
-    "subtitle": "MatchBuddy ve ekibi hakkında",
+    "subtitle": "MatcBuddy ve ekibi hakkında",
     "tagline": "Halı saha arkadaşını bul, eğlenceye katıl!",
     "whoWeAre": {
       "title": "Biz Kimiz?",
-      "text": "MatchBuddy, halı saha maçı yapmak isteyen ancak takım arkadaşlarını bulmakta zorlanan kişiler için oluşturulmuş bir sosyal platformdur. Amacımız, insanların hem spor yapmasını hem de sosyalleşmesini desteklemektir."
+      "text": "MatcBuddy, halı saha maçı yapmak isteyen ancak takım arkadaşlarını bulmakta zorlanan kişiler için oluşturulmuş bir sosyal platformdur. Amacımız, insanların hem spor yapmasını hem de sosyalleşmesini desteklemektir."
     },
     "mission": {
       "title": "Misyonumuz",
@@ -34,7 +34,7 @@
   },
   "aboutPage": {
     "title": "Hakkımızda",
-    "subtitle": "Match Buddy, spor severlerin halı saha rezervasyonlarını kolaylaştırmak ve ekipler arasında iletişim kurmalarını sağlamak için tasarlanmış bir platformdur.",
+    "subtitle": "MatcBuddy, spor severlerin halı saha rezervasyonlarını kolaylaştırmak ve ekipler arasında iletişim kurmalarını sağlamak için tasarlanmış bir platformdur.",
     "purposeTitle": "Amacımız",
     "purposeText": "Sporun birleştirici gücüne inanıyoruz. Kullanıcılarımızın daha kolay maç organize edebilmeleri, ekiplerini oluşturabilmeleri ve eğlenceli bir deneyim yaşamaları için buradayız.",
     "advantagesTitle": "Avantajlarımız",

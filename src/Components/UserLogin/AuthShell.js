@@ -1,7 +1,8 @@
 import React from 'react';
 import { CalendarOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons';
 import { Trans, useTranslation } from 'react-i18next';
-import Logo from '../../images/mutch_buddy_Logo.png';
+import { Link } from 'react-router-dom';
+import Logo from '../../images/logo.png';
 import './Login.css';
 
 // Metinler render anında çevrilir (auth:shell.features.<key>)
@@ -18,7 +19,7 @@ export function AuthBrand() {
         <img src={Logo} alt="" />
       </span>
       <span className="mb-auth__brand-name">
-        Match<em>Buddy</em>
+        Matc<em>Buddy</em>
       </span>
     </div>
   );
@@ -65,7 +66,10 @@ export default function AuthShell({ wide = false, title, subtitle, children }) {
         </section>
 
         <main className="mb-auth__card">
-          <AuthBrand />
+          {/* Marka tanıtım sitesine döner */}
+          <Link to="/" className="mb-auth__home" aria-label="MatcBuddy">
+            <AuthBrand />
+          </Link>
           <h1 className="mb-auth__title">{title}</h1>
           {subtitle && <p className="mb-auth__subtitle">{subtitle}</p>}
           {children}
@@ -73,7 +77,7 @@ export default function AuthShell({ wide = false, title, subtitle, children }) {
       </div>
 
       <footer className="mb-auth__credit">
-        © {new Date().getFullYear()} MatchBuddy · Serkan Yıldırım
+        © {new Date().getFullYear()} MatcBuddy · Serkan Yıldırım
       </footer>
     </div>
   );

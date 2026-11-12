@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../ui';
-import aboutImage from '../../images/top.png';
+import aboutImage from '../../images/logo.png';
 import mackolikIcon from '../../images/Mackolik.png';
 import sosyalHalisahaIcon from '../../images/sosyal_Halısaha.png';
 import beinSports from '../../images/bein_Sports.png';
@@ -51,7 +51,7 @@ function AboutPage() {
           <Card bordered={false}>
             <Row gutter={[24, 16]} align="middle">
               <Col xs={24} md={9} style={{ textAlign: 'center' }}>
-                <Image src={aboutImage} alt="Match Buddy" preview={false} style={{ maxHeight: 220, objectFit: 'contain' }} />
+                <Image src={aboutImage} alt="MatcBuddy" preview={false} style={{ maxHeight: 220, objectFit: 'contain' }} />
               </Col>
               <Col xs={24} md={15}>
                 <Title level={4}>{t('info:aboutPage.purposeTitle')}</Title>

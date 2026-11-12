@@ -1,7 +1,7 @@
 import { API_BASE_URL, api, getToken } from './api/config';
 
 /**
- * Telefona bildirim (Web Push) ve "ana ekrana ekle" — MatchBuddy/docs/push-api.md.
+ * Telefona bildirim (Web Push) ve "ana ekrana ekle" — MatcBuddy/docs/push-api.md.
  * public/sw.js bildirimi gösterir; burada izin, abonelik ve sunucuya kayıt yapılır.
  * iPhone'da bildirim yalnızca site "Ana Ekrana Ekle" ile uygulama gibi açıldığında çalışır (iOS 16.4+).
  */

@@ -1,6 +1,6 @@
 import { api } from './config';
 
-// Mesajlaşma — sözleşme: MatchBuddy/docs/external-venues-api.md ("Mesajlaşma") ve social-api.md
+// Mesajlaşma — sözleşme: MatcBuddy/docs/external-venues-api.md ("Mesajlaşma") ve social-api.md
 const data = (r) => r.data;
 
 /** Mesaj metni üst sınırı (sunucu: MESSAGE_TOO_LONG) */

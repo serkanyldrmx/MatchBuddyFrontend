@@ -10,7 +10,7 @@ import { mapsUrl, telUrl } from '../Components/Venues/ExternalVenueForm';
 
 const { Text } = Typography;
 
-// Harici saha satış listesi — sözleşme: MatchBuddy/docs/engagement-api.md §4
+// Harici saha satış listesi — sözleşme: MatcBuddy/docs/engagement-api.md §4
 const leadsApi = {
   list: (q) => api.get('/api/Admin/ExternalVenueLeads', { params: { q: q || undefined } }).then((r) => r.data || []),
   targets: (q) => api.get('/api/Admin/ExternalVenueLeads/Targets', { params: { q: q || undefined } }).then((r) => r.data || []),

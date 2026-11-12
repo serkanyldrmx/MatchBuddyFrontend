@@ -10,7 +10,7 @@ import { formatPrice } from '../../api/venues';
 import { PlayerAvatar } from '../../ui';
 import { apiErrorMessage, errorCode, fullName, getCurrentUser } from '../../utils/format';
 import { roleOf, ROLE } from '../../utils/roles';
-import logo from '../../images/mutch_buddy_Logo.png';
+import logo from '../../images/logo.png';
 import './MatchInvite.css';
 
 /**
@@ -87,7 +87,7 @@ export default function MatchInvite() {
   return (
     <div className="mb-invite">
       <div className="mb-invite__card">
-        <img src={logo} alt="MatchBuddy" className="mb-invite__logo" />
+        <img src={logo} alt="MatcBuddy" className="mb-invite__logo" />
         <div className="mb-invite__eyebrow">{t('invite:eyebrow', { name: invite.hostName || t('invite:someone') })}</div>
         <h1 className="mb-invite__title">{invite.matchName}</h1>
         {invite.homeTeam && (
@@ -145,7 +145,7 @@ export default function MatchInvite() {
             <Button type="primary" size="large" block icon={<UserAddOutlined />} onClick={() => goAuth('/register')}>
               {t('invite:registerAndJoin')}
             </Button>
-            <Button size="large" block icon={<LoginOutlined />} onClick={() => goAuth('/')}>
+            <Button size="large" block icon={<LoginOutlined />} onClick={() => goAuth('/login')}>
               {t('invite:loginAndJoin')}
             </Button>
             <p>{t('invite:authHint')}</p>

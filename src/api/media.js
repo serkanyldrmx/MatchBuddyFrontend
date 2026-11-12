@@ -1,7 +1,7 @@
 import { api } from './config';
 import i18n from '../i18n';
 
-// Medya yükleme — sözleşme: MatchBuddy/docs/media-api.md §4
+// Medya yükleme — sözleşme: MatcBuddy/docs/media-api.md §4
 
 /**
  * Mesaj resmi yükler (Pending medya). Dönüş: { success, mediaId, url, thumbUrl, largeUrl, width, height }

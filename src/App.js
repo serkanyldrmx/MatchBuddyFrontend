@@ -30,6 +30,9 @@ import AdminOsm from './admin/OsmCandidates';
 import AdminParameters from './admin/Parameters';
 import OwnerSettings from './owner/OwnerSettings';
 
+import Landing from './Components/Landing/Landing';
+import MessagingPage from './Components/Landing/MessagingPage';
+import BusinessPage from './Components/Landing/BusinessPage';
 import UserLogin from './Components/UserLogin/UserLogin';
 import RegisterForm from './Components/UserLogin/Register';
 import ForgotPassword from './Components/UserLogin/ForgotPassword';
@@ -73,8 +76,11 @@ function App() {
         <BrowserRouter>
           <MessagesProvider>
             <Routes>
-              {/* Giriş / kayıt */}
-              <Route path="/" element={<UserLogin />} />
+              {/* Tanıtım sitesi + giriş / kayıt */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/mesajlasma" element={<MessagingPage />} />
+              <Route path="/isletmeler" element={<BusinessPage />} />
+              <Route path="/login" element={<UserLogin />} />
               <Route path="/register" element={<RegisterForm />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/terms" element={<Terms />} />

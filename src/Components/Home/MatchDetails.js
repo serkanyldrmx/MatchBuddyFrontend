@@ -604,6 +604,21 @@ function MatchDetails() {
       () => matchesApi.updateGuest(g.guestId, g.side === SIDE.AWAY ? SIDE.HOME : SIDE.AWAY, g.name, g.note || undefined),
       t('match:details.guestMoved', { name: g.name })
     );
+  // Sahada sürükle-bırak ile kurulan diziliş (Pitch → düzenleme modu). Başarıda true döner.
+  const arrangeLineup = async (items) => {
+    setBusy(true);
+    try {
+      const res = await matchesApi.arrangeLineup(d.matchId, items);
+      message.success(res?.message || t('match:pitch.arrangeSaved'));
+      await load();
+      return true;
+    } catch (e) {
+      message.error(apiErrorMessage(e));
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
   const removeGuest = (g) => run(() => matchesApi.removeGuest(g.guestId), t('match:details.guestRemoved', { name: g.name }));
   const messageOwner = (ownerName) =>
     openMessages({
@@ -822,6 +837,7 @@ function MatchDetails() {
                     onEditGuest={editGuest}
                     onMoveGuest={moveGuest}
                     onRemoveGuest={removeGuest}
+                    onArrange={arrangeLineup}
                   />
                 </Col>
                 <Col xs={24} xl={7}>

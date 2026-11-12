@@ -11,7 +11,7 @@ import { mapsUrl, telUrl } from '../Venues/ExternalVenueForm';
 
 /**
  * Harici (anlaşmasız) sahadaki maçın saha kartı: telefon, adres, yol tarifi, ücret ve kişi başı pay.
- * Kurucu saati / süreyi / ücreti / saha bilgisini düzenleyebilir (MatchBuddy/docs/external-venues-api.md).
+ * Kurucu saati / süreyi / ücreti / saha bilgisini düzenleyebilir (MatcBuddy/docs/external-venues-api.md).
  */
 export default function ExternalVenueCard({ d, canEdit, reload }) {
   const { t } = useTranslation();

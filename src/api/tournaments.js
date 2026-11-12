@@ -1,6 +1,6 @@
 import { api } from './config';
 
-// Turnuva uç noktaları — sözleşme: MatchBuddy/docs/tournaments-api.md
+// Turnuva uç noktaları — sözleşme: MatcBuddy/docs/tournaments-api.md
 
 export const TOURNAMENT_FORMAT = { LEAGUE: 1, KNOCKOUT: 2 };
 export const TOURNAMENT_STATUS = { REGISTRATION: 0, ONGOING: 1, FINISHED: 2 };
