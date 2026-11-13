@@ -1,4 +1,4 @@
-import { Button, Form, Input, Select, Row, Col, message, Checkbox, Upload } from "antd";
+import { Button, Form, Input, Row, Col, message, Checkbox, Upload } from "antd";
 import { LockOutlined, UserOutlined, MailOutlined, HomeOutlined, NumberOutlined, UploadOutlined, ColumnHeightOutlined, DashboardOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useRef, useState } from "react";
@@ -11,13 +11,12 @@ import useLoginFlow from './useLoginFlow';
 import { apiErrorMessage } from '../../utils/format';
 import ImageCrop from "../../ui/ImageCrop";
 import { ACCEPTED_IMAGE_ACCEPT, imageError, prepareImage } from "../../utils/image";
+import { phoneDigits, phoneRule, toStoredPhone } from '../../utils/phone';
 
 const optionalInt = (v) => {
   const n = Math.round(parseFloat(String(v ?? '').replace(',', '.')));
   return Number.isFinite(n) && n > 0 ? n : 0;
 };
-
-const { Option } = Select;
 
 const RegisterForm = () => {
   const [form] = Form.useForm();
@@ -45,7 +44,7 @@ const RegisterForm = () => {
       playerSurname: values.lastName,
       userName: values.username,
       email: values.email,
-      phoneNumber: "0" + values.phone,
+      phoneNumber: toStoredPhone(values.phone), // isteğe bağlı
       password: values.password,
       address: values.address,
       // İsteğe bağlı alanlar: boşsa 0 (= belirtilmemiş; profil sayfaları 0'ı göstermez). Sunucu tam sayı bekler.
@@ -101,16 +100,6 @@ const RegisterForm = () => {
       error(errorMessage);
     }
   };
-
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle initialValue="90">
-      <Select style={{ width: 70 }}>
-        <Option value="90">+90</Option>
-        <Option value="80">+80</Option>
-        <Option value="70">+70</Option>
-      </Select>
-    </Form.Item>
-  );
 
   // Kırpmadan önce tür/boyut kontrolü; uygun değilse kırpma penceresi açılmaz
   const beforeCrop = (file) => {
@@ -232,12 +221,15 @@ const RegisterForm = () => {
             <Form.Item
               name="phone"
               label={t('auth:register.phone')}
-              rules={[{ required: true, message: t('auth:register.phoneRequired') }]}
+              extra={t('auth:register.optional')}
+              normalize={phoneDigits}
+              rules={[phoneRule(t)]}
             >
               <Input
-                addonBefore={prefixSelector}
+                addonBefore="0"
                 style={{ width: "100%" }}
-                placeholder={t('auth:register.phonePlaceholder')}
+                maxLength={10}
+                placeholder="5xx xxx xx xx"
                 inputMode="tel"
                 autoComplete="tel-national"
               />

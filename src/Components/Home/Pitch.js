@@ -11,6 +11,7 @@ import {
   EditOutlined,
   LoginOutlined,
   MessageOutlined,
+  PhoneOutlined,
   PictureOutlined,
   PlusOutlined,
   SaveOutlined,
@@ -24,6 +25,7 @@ import { intlLocale } from '../../i18n';
 import { fullName } from '../../utils/format';
 import { buildFormation, ROLE_LABELS, roleShort } from './formations';
 import LineupImageModal from './LineupImageModal';
+import { formatPhone } from '../../utils/phone';
 
 const COMPACT_QUERY = '(max-width: 720px)';
 
@@ -126,6 +128,18 @@ function PlayerToken({ p, role, me, canManage, mvpId, avatarSize, onSwap, onMess
   const navigate = useNavigate();
   const isMe = p.player.playerId === me?.playerId;
   const items = [{ key: 'profile', icon: <UserOutlined />, label: t('match:pitch.viewProfile'), onClick: () => navigate(`/player/${p.player.playerId}`) }];
+  // Numara yalnızca oyuncunun telefon ayarı izin veriyorsa gelir (Ayarlar → Gizlilik)
+  if (!isMe && p.phone) {
+    items.push({
+      key: 'call',
+      icon: <PhoneOutlined />,
+      label: (
+        <a href={`tel:${p.phone}`} className="mb-token-call">
+          {t('match:pitch.call')} <span className="mb-token-call__no">{formatPhone(p.phone)}</span>
+        </a>
+      ),
+    });
+  }
   if (!isMe) items.push({ key: 'msg', icon: <MessageOutlined />, label: t('match:pitch.sendMessage'), onClick: () => onMessage(p.player) });
   if (canManage) items.push({ key: 'swap', icon: <SwapOutlined />, label: t('match:pitch.moveToOtherTeam'), onClick: () => onSwap(p) });
 

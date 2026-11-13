@@ -71,6 +71,7 @@
       "minLength_one": "En az {{count}} karakter olmalıdır.",
       "minLength_other": "En az {{count}} karakter olmalıdır."
     },
-    "submit": "Değişiklikleri kaydet"
+    "submit": "Değişiklikleri kaydet",
+    "optional": "İsteğe bağlı"
   }
 }

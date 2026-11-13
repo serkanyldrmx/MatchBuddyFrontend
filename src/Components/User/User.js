@@ -9,6 +9,7 @@ import { playersApi } from '../../api/matches';
 import { PageLoader, PlayerAvatar, Stat } from '../../ui';
 import { apiErrorMessage, fullName, getCurrentUser } from '../../utils/format';
 import './User.css';
+import { formatPhone } from '../../utils/phone';
 
 function User() {
   const { message } = App.useApp();
@@ -114,7 +115,7 @@ function User() {
           <Card title={t('profile:contact.title')} style={{ marginBottom: 20 }}>
             <Descriptions column={1} size="small">
               <Descriptions.Item label={t('profile:fields.email')}>{player.email || '-'}</Descriptions.Item>
-              <Descriptions.Item label={t('profile:fields.phone')}>{player.phoneNumber || '-'}</Descriptions.Item>
+              <Descriptions.Item label={t('profile:fields.phone')}>{player.phoneNumber ? formatPhone(player.phoneNumber) : '-'}</Descriptions.Item>
               <Descriptions.Item label={t('profile:fields.address')}>{player.address || '-'}</Descriptions.Item>
             </Descriptions>
             <p className="mb-hint" style={{ textAlign: 'left' }}>{t('profile:contact.privateHint')}</p>

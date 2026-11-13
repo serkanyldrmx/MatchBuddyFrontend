@@ -11,6 +11,7 @@ import { apiErrorMessage, formErrorMessage, getCurrentUser, mediaUrl } from '../
 import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../../utils/image';
 import { usePublicParams } from '../../api/parameters';
 import './User.css';
+import { phoneDigits, phoneRule, toStoredPhone } from '../../utils/phone';
 
 const { Text } = Typography;
 
@@ -41,7 +42,7 @@ function UserUpdate() {
           playerSurname: r.data.playerSurname,
           userName: r.data.userName,
           email: r.data.email,
-          phoneNumber: r.data.phoneNumber,
+          phoneNumber: phoneDigits(r.data.phoneNumber),
           address: r.data.address,
           size: r.data.size || null,
           weight: r.data.weight || null,
@@ -88,7 +89,7 @@ function UserUpdate() {
         PlayerSurname: values.playerSurname,
         UserName: values.userName,
         Email: values.email,
-        PhoneNumber: values.phoneNumber,
+        PhoneNumber: toStoredPhone(values.phoneNumber), // isteğe bağlı
         Address: values.address,
         Size: values.size || 0,
         Weight: values.weight || 0,
@@ -167,12 +168,12 @@ function UserUpdate() {
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="phoneNumber" label={t('profile:fields.phone')} rules={[{ required: true, message: t('profile:edit.required.phone') }]}>
-                    <Input placeholder="+90 5xx xxx xx xx" maxLength={20} />
+                  <Form.Item name="phoneNumber" label={t('profile:fields.phone')} extra={t('profile:edit.optional')} normalize={phoneDigits} rules={[phoneRule(t)]}>
+                    <Input addonBefore="0" placeholder="5xx xxx xx xx" maxLength={10} inputMode="tel" autoComplete="tel-national" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="address" label={t('profile:fields.address')} rules={[{ required: true, message: t('profile:edit.required.address') }]}>
+                  <Form.Item name="address" label={t('profile:fields.address')} extra={t('profile:edit.optional')}>
                     <Input maxLength={200} />
                   </Form.Item>
                 </Col>
@@ -182,17 +183,17 @@ function UserUpdate() {
             <Card bordered={false} title={t('profile:edit.physical')}>
               <Row gutter={16}>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="age" label={t('profile:fields.age')} rules={[{ required: true, message: t('profile:edit.required.short') }]}>
+                  <Form.Item name="age" label={t('profile:fields.age')} extra={t('profile:edit.optional')}>
                     <InputNumber min={10} max={80} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="size" label={t('profile:fields.height')} rules={[{ required: true, message: t('profile:edit.required.short') }]}>
+                  <Form.Item name="size" label={t('profile:fields.height')} extra={t('profile:edit.optional')}>
                     <InputNumber min={120} max={230} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="weight" label={t('profile:fields.weight')} rules={[{ required: true, message: t('profile:edit.required.short') }]}>
+                  <Form.Item name="weight" label={t('profile:fields.weight')} extra={t('profile:edit.optional')}>
                     <InputNumber min={30} max={200} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>

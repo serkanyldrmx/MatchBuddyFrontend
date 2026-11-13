@@ -48,6 +48,22 @@
         "title": "Sadece ben",
         "desc": "İstatistiklerin herkesten gizlenir."
       }
+    },
+    "phone": {
+      "question": "Telefonumu maçta kim görebilir?",
+      "hint": "Numaran yalnızca aynı maçtaysanız gösterilir; sahada adına dokununca \"Ara\" çıkar. Numaranı Profili düzenle'den ekleyebilirsin.",
+      "nobody": {
+        "title": "Kimse",
+        "desc": "Numaran hiçbir maçta gösterilmez."
+      },
+      "managers": {
+        "title": "Sadece maç yöneticileri",
+        "desc": "Katıldığın maçı kuran kişi seni arayabilir."
+      },
+      "players": {
+        "title": "Maçtaki herkes",
+        "desc": "Maçı kuran ve kadrodaki oyuncular seni arayabilir."
+      }
     }
   },
   "push": {

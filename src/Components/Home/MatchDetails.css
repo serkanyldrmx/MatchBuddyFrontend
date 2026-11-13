@@ -1660,3 +1660,16 @@
   border-radius: 12px;
   background: var(--mb-primary-soft);
 }
+
+/* Sahadaki oyuncu menüsü: Ara */
+.mb-token-call {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  color: inherit;
+}
+.mb-token-call__no {
+  color: var(--mb-text-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}

@@ -4,5 +4,6 @@
   "email": "Geçerli bir e-posta girin.",
   "minLength": "En az {{count}} karakter olmalı.",
   "maxLength": "En fazla {{count}} karakter olabilir.",
-  "passwordMismatch": "Şifreler eşleşmiyor."
+  "passwordMismatch": "Şifreler eşleşmiyor.",
+  "phone": "Telefon numarası 10 haneli olmalı (5xx xxx xx xx)."
 }

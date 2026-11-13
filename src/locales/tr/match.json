@@ -83,7 +83,8 @@
     "arrangeHint": "Oyuncuyu sürükleyip istediğin yere bırak ya da önce oyuncuya, sonra gideceği yere dokun.",
     "arrangePickTarget": "Şimdi oyuncunun gideceği yere dokun (dolu yerde ikisi yer değiştirir).",
     "arrangeSave": "Dizilişi kaydet",
-    "arrangeSaved": "Diziliş kaydedildi."
+    "arrangeSaved": "Diziliş kaydedildi.",
+    "call": "Ara"
   },
   "post": {
     "resultSaved": "Maç sonucu kaydedildi. Oyunculara bildirim gönderildi.",

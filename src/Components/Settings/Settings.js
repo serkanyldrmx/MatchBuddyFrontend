@@ -28,6 +28,13 @@ const VISIBILITY_OPTIONS = [
   { value: PROFILE_VISIBILITY.ONLY_ME, ...opt('settings:privacy.visibility.onlyMe') },
 ];
 
+// Sunucu: PlayerSettings.PhoneVisibility (0 kimse, 1 maç yöneticileri, 2 maçtaki herkes)
+const PHONE_OPTIONS = [
+  { value: 0, ...opt('settings:privacy.phone.nobody') },
+  { value: 1, ...opt('settings:privacy.phone.managers'), recommended: true },
+  { value: 2, ...opt('settings:privacy.phone.players') },
+];
+
 const NOTIFY = [
   { key: 'notifyFollow', ...opt('settings:notifications.follow') },
   { key: 'notifyMatchInvite', ...opt('settings:notifications.matchInvite') },
@@ -283,6 +290,15 @@ export default function Settings() {
                 options={VISIBILITY_OPTIONS}
                 onChange={(v) => update({ profileVisibility: v })}
               />
+            </div>
+            <div className="mb-settings__group">
+              <h4>{t('settings:privacy.phone.question')}</h4>
+              <OptionCards
+                value={settings.phoneVisibility ?? 1}
+                options={PHONE_OPTIONS}
+                onChange={(v) => update({ phoneVisibility: v })}
+              />
+              <p className="mb-settings__hint">{t('settings:privacy.phone.hint')}</p>
             </div>
           </>
         )}
