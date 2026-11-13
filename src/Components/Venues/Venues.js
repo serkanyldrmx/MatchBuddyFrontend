@@ -111,6 +111,18 @@ export function FlyTo({ center, zoom }) {
   return null;
 }
 
+/** Konum izni yoksa haritayı tüm sahaları gösterecek şekilde açar (telefonda Türkiye geneli zoom'u sahaları dışarıda bırakıyordu) */
+function FitAll({ points }) {
+  const map = useMap();
+  const key = points.map((p) => p.join(',')).join('|');
+  useEffect(() => {
+    if (points.length === 1) map.setView(points[0], 13);
+    else if (points.length > 1) map.fitBounds(points, { padding: [28, 28], maxZoom: 13 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, map]);
+  return null;
+}
+
 export function Routing({ from, to }) {
   const map = useMap();
   useEffect(() => {
@@ -368,6 +380,7 @@ export default function Venues() {
             <Card styles={{ body: { padding: 12 } }}>
               <MapContainer center={userPosition || DEFAULT_CENTER} zoom={userPosition ? 12 : 6} className="mb-venue-map">
                 <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
+                {!userPosition && !selected?.coords && <FitAll points={list.filter((v) => v.coords).map((v) => v.coords)} />}
                 {selected?.coords && <FlyTo center={selected.coords} zoom={15} />}
                 {userPosition && (
                   <Marker position={userPosition} icon={markerIcon}>

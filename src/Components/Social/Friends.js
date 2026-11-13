@@ -9,6 +9,7 @@ import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, fullName } from '../../utils/format';
 import FollowButton, { PlayerLink } from './FollowButton';
 import './Friends.css';
+import { SwipeTabs } from '../../ui/Swipe';
 
 const TABS = ['friends', 'following', 'followers', 'discover'];
 
@@ -199,7 +200,7 @@ export default function Friends() {
   );
 
   return (
-    <>
+    <SwipeTabs>
       <PageHeader
         eyebrow={t('social:friends.eyebrow')}
         title={t('social:friends.title')}
@@ -311,6 +312,6 @@ export default function Friends() {
           )}
         </>
       )}
-    </>
+    </SwipeTabs>
   );
 }

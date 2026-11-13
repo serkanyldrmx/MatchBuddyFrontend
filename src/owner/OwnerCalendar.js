@@ -24,6 +24,7 @@ import {
   weekStart,
   ymd,
 } from './shared';
+import { SwipeTabs } from '../ui/Swipe';
 
 const SLOT = 30; // dakika
 const ROW_H = 26; // px / 30 dk
@@ -262,7 +263,8 @@ export default function OwnerCalendar() {
   };
 
   return (
-    <>
+    // Telefonda takvimi sağa / sola kaydırmak önceki / sonraki haftaya (güne) geçer
+    <SwipeTabs onSwipe={shift}>
       <PageHeader
         eyebrow={venue?.name}
         title={t('owner:calendar.title')}
@@ -521,6 +523,6 @@ export default function OwnerCalendar() {
           load(true);
         }}
       />
-    </>
+    </SwipeTabs>
   );
 }

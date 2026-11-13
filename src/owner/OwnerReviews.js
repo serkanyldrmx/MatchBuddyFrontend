@@ -7,6 +7,7 @@ import { useOwnerVenue } from '../layout/VenueLayout';
 import { EmptyState, PageHeader, PlayerAvatar } from '../ui';
 import { apiErrorMessage, formatDate, fromNow, fullName } from '../utils/format';
 import { Stars, WriteButton, asList, notifyOwnerChanged, useOwnerData } from './shared';
+import { SwipeTabs } from '../ui/Swipe';
 
 const { Text } = Typography;
 
@@ -137,7 +138,7 @@ export default function OwnerReviews() {
     });
 
   return (
-    <>
+    <SwipeTabs>
       <PageHeader
         eyebrow={venue?.name}
         title={t('owner:reviews.title')}
@@ -212,6 +213,6 @@ export default function OwnerReviews() {
           </Card>
         </Col>
       </Row>
-    </>
+    </SwipeTabs>
   );
 }

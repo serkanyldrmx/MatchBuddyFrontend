@@ -202,6 +202,17 @@
 }
 
 .lp-nav__drawer { display: none; }
+/* Açık menünün arkası: dokununca menü kapanır */
+.lp-nav__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 59; /* .lp-nav (60) altında, sayfanın üstünde */
+  border: 0;
+  padding: 0;
+  background: rgba(3, 6, 10, 0.55);
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+}
 
 .lp-nav__progress {
   position: absolute;

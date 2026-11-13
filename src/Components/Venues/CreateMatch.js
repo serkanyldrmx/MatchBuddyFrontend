@@ -34,6 +34,7 @@ import ShareMatchButton from '../Home/ShareMatchButton';
 import ShareToGroupModal from '../Home/ShareToGroupModal';
 import InviteModal from '../Invites/InviteModal';
 import './CreateMatch.css';
+import { useScrollTopOn } from '../../utils/scrollTop';
 
 // Sunucu hata kodları → sihirbazda dönülecek adım
 // Seçilen saat artık kullanılamıyor: saat seçimi sıfırlanır
@@ -175,6 +176,8 @@ export default function CreateMatch() {
   const initialStart = params.get('start') && dayjs(params.get('start')).isValid() ? dayjs(params.get('start')) : null;
 
   const [step, setStep] = useState(0);
+
+  useScrollTopOn(step); // adım değişince sayfanın başına
   // 'partner' = anlaşmalı tesiste rezervasyon, 'external' = telefonla ayarlanan başka bir saha
   const [venueMode, setVenueMode] = useState(params.get('external') === '1' && !params.get('stadiumId') ? 'external' : 'partner');
   const isExternal = venueMode === 'external';
@@ -654,6 +657,7 @@ export default function CreateMatch() {
             <label>{t('venues:createMatch.squad.playerCount')}</label>
             <InputNumber
               size="large"
+              inputMode="numeric"
               min={minPlayers}
               max={maxPlayers}
               value={players}
@@ -791,6 +795,7 @@ export default function CreateMatch() {
                 <span>{t('venues:createMatch.extras.perPair', { price: formatPrice(venue.prices?.cleatRentalPrice) })}</span>
               </div>
               <InputNumber
+                inputMode="numeric"
                 min={0}
                 max={players}
                 value={cleatCount}

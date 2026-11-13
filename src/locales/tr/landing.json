@@ -10,7 +10,9 @@
     "menu": "Menü",
     "messaging": "Mesajlaşma",
     "business": "İşletmeler",
-    "openApp": "Uygulamaya git"
+    "openApp": "Uygulamaya git",
+    "closeMenu": "Menüyü kapat",
+    "apply": "Başvur"
   },
   "hero": {
     "eyebrow": "Halı saha maçın artık tek uygulamada",
@@ -553,7 +555,7 @@
       "eyebrow": "MatcBuddy İşletme",
       "title": "Tesisinizi <br/><em>tek ekrandan</em> yönetin",
       "text": "Uygulamadan gelen talepler, telefonla alınan rezervasyonlar, fiyat kuralları, boş saat ilanları ve gelir-gider… Halı sahanızın bütün işi tek panelde.",
-      "primary": "Demo talep edin",
+      "primary": "Ücretsiz başvur",
       "secondary": "İşletme girişi",
       "chips": [
         "Tek takvim",

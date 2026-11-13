@@ -425,3 +425,22 @@
     display: none;
   }
 }
+
+/* Yan menüde Mesajlar + okunmamış sayısı */
+.mb-menu-messages {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+.mb-menu-messages .ant-badge-count {
+  box-shadow: none;
+}
+
+/* Yönetim paneli: işletme başvuruları */
+.mb-bizapps {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+}

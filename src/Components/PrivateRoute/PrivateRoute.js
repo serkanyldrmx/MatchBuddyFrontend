@@ -22,4 +22,23 @@ const PrivateRoute = ({ role }) => {
   return <Outlet />;
 };
 
+/** Giriş / kayıt sayfaları: oturum açıksa doğrudan uygulamaya (geri kaydırınca girişe düşmesin) */
+export const GuestOnly = ({ children }) => {
+  const user = getCurrentUser();
+  if (user && getToken()) return <Navigate to={homePathFor(user)} replace />;
+  return children;
+};
+
+/** Ana ekrana eklenen uygulama (PWA / iPhone uygulaması) tanıtım sitesini değil, uygulamayı açar */
+const isInstalledApp = () =>
+  !!window.Capacitor?.isNativePlatform?.() ||
+  window.matchMedia?.('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
+
+export const LandingGate = ({ children }) => {
+  if (!isInstalledApp()) return children;
+  const user = getCurrentUser();
+  return <Navigate to={user && getToken() ? homePathFor(user) : '/login'} replace />;
+};
+
 export default PrivateRoute;

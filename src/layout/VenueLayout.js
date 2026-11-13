@@ -26,6 +26,7 @@ import { Brand, useAppBodyClass, useCurrentUser } from './AppLayout';
 import { themeMenuItem } from '../theme/ThemeSwitch';
 import NotificationBell from './NotificationBell';
 import './layout.css';
+import useEdgeSwipe from './useEdgeSwipe';
 
 const { Sider, Header, Content } = Layout;
 const { Text } = Typography;
@@ -46,6 +47,7 @@ export default function VenueLayout() {
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.lg;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const openNav = useCallback(() => setMobileNavOpen(true), []);
   const user = useCurrentUser();
   useAppBodyClass();
   const { openMessages, unread } = useMessages();
@@ -100,6 +102,8 @@ export default function VenueLayout() {
   }, [venueId]);
 
   useEffect(() => setMobileNavOpen(false), [location.pathname]);
+  // Telefonda sol kenardan sağa kaydırma: menüyü aç
+  useEdgeSwipe(isMobile, openNav);
 
   const venues = useMemo(() => info?.venues || [], [info]);
   const venue = venues.find((v) => v.stadiumId === venueId) || null;
@@ -153,7 +157,7 @@ export default function VenueLayout() {
         danger: true,
         onClick: () => {
           logout();
-          window.location.href = '/';
+          window.location.href = '/login'; // çıkıştan sonra giriş ekranı
         },
       },
     ],

@@ -63,6 +63,7 @@ import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png'
 import './AdminResponsive.css';
 import './Businesses.css';
 import OwnerDetailModal from './OwnerDetailModal';
+import { useScrollTopOn } from '../utils/scrollTop';
 
 const { Text } = Typography;
 const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
@@ -257,6 +258,7 @@ function NewBusinessWizard({ open, onClose, onCreated }) {
   const MAX_PHOTO_MB = params.get('media.maxUploadMb');
   const MAX_PHOTOS = params.get('venue.createOwnerMaxPhotos');
   const [step, setStep] = useState(0);
+  useScrollTopOn(step); // adım değişince sayfanın başına
   const [photos, setPhotos] = useState([]); // { uid, file, url }
   const [photoError, setPhotoError] = useState(null);
   const [submitting, setSubmitting] = useState(false);

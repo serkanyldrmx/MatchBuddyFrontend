@@ -10,6 +10,7 @@ import { apiErrorMessage, formatDate, formatTime, fromNow, fullName, isPast } fr
 import MatchDetailDrawer from './MatchDetailDrawer';
 import useAdminData, { matchStadiumId, venueLabel } from './useAdminData';
 import './AdminResponsive.css';
+import { SwipeTabs } from '../ui/Swipe';
 
 const { Text } = Typography;
 
@@ -211,7 +212,7 @@ export default function Reservations() {
   ];
 
   return (
-    <>
+    <SwipeTabs>
       <PageHeader
         title={t('admin:reservations.title')}
         subtitle={t('admin:reservations.subtitle')}
@@ -287,6 +288,6 @@ export default function Reservations() {
         onStatusChange={updateStatus}
         actionLoading={busy && selected && busy.matchId === selected.matchId ? busy.status : null}
       />
-    </>
+    </SwipeTabs>
   );
 }

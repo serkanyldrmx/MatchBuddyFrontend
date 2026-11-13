@@ -244,5 +244,31 @@
     "city": "İl",
     "district": "İlçe",
     "address": "Adres"
+  },
+  "bizApps": {
+    "eyebrow": "İşletmeler",
+    "title": "İşletme başvuruları",
+    "subtitle": "İşletmeler sayfasındaki formdan gelen başvurular. Başvuranı arayın, uygunsa hesabı İşletmeler bölümünden açıp durumu \"Hesap açıldı\" yapın.",
+    "status": {
+      "new": "Yeni",
+      "contacted": "Arandı / görüşülüyor",
+      "converted": "Hesap açıldı",
+      "rejected": "Olumsuz"
+    },
+    "filters": {
+      "open_one": "Bekleyen ({{count}})",
+      "open_other": "Bekleyen ({{count}})",
+      "converted": "Hesap açılanlar",
+      "all": "Tümü"
+    },
+    "pitches_one": "{{count}} saha",
+    "pitches_other": "{{count}} saha",
+    "notePlaceholder": "Görüşme notu (yalnızca yöneticiler görür)",
+    "saveNote": "Notu kaydet",
+    "createAccount": "Hesap oluştur",
+    "empty": "Başvuru yok.",
+    "loadError": "Başvurular yüklenemedi.",
+    "saveError": "Kaydedilemedi.",
+    "reload": "Yenile"
   }
 }

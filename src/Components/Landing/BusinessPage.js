@@ -14,7 +14,7 @@ import {
   ExclamationCircleFilled,
   FieldTimeOutlined,
   LoginOutlined,
-  MailOutlined,
+  ShopOutlined,
   MessageOutlined,
   PictureOutlined,
   SafetyCertificateFilled,
@@ -29,7 +29,8 @@ import { Avatar, PEOPLE, Phone } from './LandingMocks';
 import { formatTRY, prefersReducedMotion, useCountUp, useInView, useVisible } from './landingHooks';
 import './Business.css';
 
-const CONTACT = 'mailto:bmserkanyildirim@matcbuddy.com?subject=MatcBuddy%20i%C5%9Fletme%20demo';
+// Üyelik başvurusu formu (yönetici arayıp hesabı açar)
+const APPLY = '/isletme-basvuru';
 const MONTHS = ['Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas'];
 
 /* =========================================================
@@ -188,9 +189,9 @@ function BizHero() {
         <RevealText as="h1" className="lp-display" text={t('biz.hero.title')} />
         <p className="lp-lead">{t('biz.hero.text')}</p>
         <div className="lp-actions is-center">
-          <a href={CONTACT} className="lp-btn is-primary is-lg">
-            <MailOutlined /> {t('biz.hero.primary')}
-          </a>
+          <Link to={APPLY} className="lp-btn is-primary is-lg">
+            <ShopOutlined /> {t('biz.hero.primary')}
+          </Link>
           <Link to="/login" className="lp-btn is-ghost is-lg">
             <LoginOutlined /> {t('biz.hero.secondary')}
           </Link>
@@ -877,7 +878,7 @@ export default function BusinessPage() {
         title={t('biz.cta.title')}
         text={t('biz.cta.text')}
         actions={[
-          { href: CONTACT, label: t('biz.hero.primary'), icon: <MailOutlined />, primary: true },
+          { to: APPLY, label: t('biz.hero.primary'), icon: <ShopOutlined />, primary: true },
           { to: '/login', label: t('biz.hero.secondary'), icon: <LoginOutlined /> },
         ]}
       />

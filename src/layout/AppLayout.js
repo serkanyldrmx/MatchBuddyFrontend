@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Badge, Button, Drawer, Dropdown, Grid, Layout, Menu, Tooltip, Typography } from 'antd';
 import { Trans, useTranslation } from 'react-i18next';
@@ -31,6 +31,7 @@ import InvitesButton from './InvitesButton';
 import { themeMenuItem } from '../theme/ThemeSwitch';
 import Logo from '../images/logo.png';
 import './layout.css';
+import useEdgeSwipe from './useEdgeSwipe';
 
 const { Sider, Header, Content } = Layout;
 const { Text } = Typography;
@@ -48,6 +49,8 @@ const MENU = [
   { key: '/venues', icon: <EnvironmentOutlined />, labelKey: 'layout:nav.venues' },
   { key: '/teamAICreate', icon: <RobotOutlined />, labelKey: 'layout:nav.aiTeam' },
 ];
+
+const MESSAGES_KEY = '__messages';
 
 // Detay sayfaları hangi menü öğesine ait?
 const activeKey = (path) => {
@@ -181,6 +184,7 @@ export default function AppLayout() {
   // Alt sekme çubuğu sadece telefonlarda (< 768 px)
   const isPhone = screens.md === false;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const openNav = useCallback(() => setMobileNavOpen(true), []);
   const user = useCurrentUser();
   const { openMessages, isOpen: messagesOpen, unread } = useMessages();
   const { t } = useTranslation();
@@ -208,14 +212,37 @@ export default function AppLayout() {
   }, [location.search, location.pathname, openMessages, navigate]);
 
   useEffect(() => setMobileNavOpen(false), [location.pathname]);
+  // Telefonda sol kenardan sağa kaydırma: menüyü aç
+  useEdgeSwipe(isMobile, openNav);
 
   const menu = (
     <Menu
       theme="dark"
       mode="inline"
       selectedKeys={[activeKey(location.pathname)]}
-      items={MENU.map(({ labelKey, ...m }) => ({ ...m, label: t(labelKey) }))}
-      onClick={({ key }) => navigate(key)}
+      items={[
+        ...MENU.slice(0, 1).map(({ labelKey, ...m }) => ({ ...m, label: t(labelKey) })),
+        // Mesajlar: sayfa değil panel; okunmamış sayısıyla menüde görünür olsun
+        {
+          key: MESSAGES_KEY,
+          icon: <MessageOutlined />,
+          label: (
+            <span className="mb-menu-messages">
+              {t('layout:header.messages')}
+              {unread > 0 && <Badge count={unread} size="small" overflowCount={99} />}
+            </span>
+          ),
+        },
+        ...MENU.slice(1).map(({ labelKey, ...m }) => ({ ...m, label: t(labelKey) })),
+      ]}
+      onClick={({ key }) => {
+        if (key === MESSAGES_KEY) {
+          setMobileNavOpen(false);
+          openMessages();
+          return;
+        }
+        navigate(key);
+      }}
     />
   );
 
@@ -236,7 +263,7 @@ export default function AppLayout() {
         danger: true,
         onClick: () => {
           logout();
-          window.location.href = '/';
+          window.location.href = '/login'; // çıkıştan sonra giriş ekranı
         },
       },
     ],

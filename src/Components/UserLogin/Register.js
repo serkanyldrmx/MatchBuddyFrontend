@@ -137,7 +137,6 @@ const RegisterForm = () => {
         name="register"
         className="mb-auth__form"
         onFinish={onFinish}
-        initialValues={{ prefix: "90" }}
         scrollToFirstError
       >
         <h3 className="mb-auth__section"><span>01</span> {t('auth:register.sections.account')}</h3>

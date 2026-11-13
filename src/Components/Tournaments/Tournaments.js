@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Button, Progress, Segmented, Skeleton } from 'antd';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { CalendarOutlined, CrownFilled, EnvironmentOutlined, PlusOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons';
 import { api } from '../../api/config';
 import { tournamentsApi, TOURNAMENT_STATUS } from '../../api/tournaments';
 import { EmptyState, MetaItem, PageHeader, PlayerAvatar } from '../../ui';
-import { apiErrorMessage, formatDateTime, fullName, getCurrentUser } from '../../utils/format';
+import { apiErrorMessage, formatDateTime, getCurrentUser } from '../../utils/format';
 import { PlayerLink } from '../Social/FollowButton';
 import CreateTournamentModal from './CreateTournamentModal';
 import { FORMAT_LABEL, FormatIcon, TournamentStatusChip } from './tournamentUtils';
@@ -84,11 +84,8 @@ function TournamentCard({ t: tour, onOpen }) {
       <div className="mb-tr-card__footer">
         <PlayerAvatar player={tour.createdBy} size={26} />
         <span>
-          <Trans
-            i18nKey="tournaments:card.organizedBy"
-            values={{ name: fullName(tour.createdBy) }}
-            components={{ link: <PlayerLink player={tour.createdBy} /> }}
-          />
+          {/* İsim bir kez: PlayerLink adı kendisi yazar (Trans ile birlikte iki kez çıkıyordu) */}
+          <PlayerLink player={tour.createdBy} /> {t('tournaments:card.organizes')}
         </span>
       </div>
     </div>

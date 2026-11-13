@@ -12,7 +12,7 @@ import { apiErrorMessage, fullName } from '../../utils/format';
  * onChange(nextState): { iFollow, isMutual }
  */
 export default function FollowButton({ player, size = 'middle', block, onChange }) {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { t } = useTranslation();
   const [iFollow, setIFollow] = useState(!!player?.iFollow);
   const [busy, setBusy] = useState(false);
@@ -20,8 +20,25 @@ export default function FollowButton({ player, size = 'middle', block, onChange 
 
   useEffect(() => setIFollow(!!player?.iFollow), [player?.iFollow]);
 
-  const toggle = async (e) => {
+  // Takibi bırakmak (arkadaşlığı bitirmek) onay ister: telefonda "Takibi bırak" uyarısı (hover) görünmez,
+  // tek dokunuşla arkadaşlık bitmesin
+  const onClick = (e) => {
     e?.stopPropagation();
+    if (!iFollow) {
+      toggle();
+      return;
+    }
+    modal.confirm({
+      title: t('social:follow.unfollowConfirm', { name: fullName(player) }),
+      content: player?.followsMe ? t('social:follow.unfollowFriendHint') : undefined,
+      okText: t('social:follow.unfollow'),
+      okButtonProps: { danger: true },
+      cancelText: t('common:actions.cancel'),
+      onOk: toggle,
+    });
+  };
+
+  const toggle = async () => {
     setBusy(true);
     try {
       if (iFollow) {
@@ -48,7 +65,7 @@ export default function FollowButton({ player, size = 'middle', block, onChange 
         size={size}
         block={block}
         loading={busy}
-        onClick={toggle}
+        onClick={onClick}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         danger={hover}
@@ -60,7 +77,7 @@ export default function FollowButton({ player, size = 'middle', block, onChange 
     );
   }
   return (
-    <Button type="primary" size={size} block={block} loading={busy} onClick={toggle} icon={<UserAddOutlined />}>
+    <Button type="primary" size={size} block={block} loading={busy} onClick={onClick} icon={<UserAddOutlined />}>
       {player?.followsMe ? t('social:follow.followBack') : t('social:follow.follow')}
     </Button>
   );

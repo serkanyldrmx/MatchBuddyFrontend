@@ -10,6 +10,7 @@ import { markNotificationRead, NotificationRow, NOTIFICATIONS_CHANGED } from '..
 import { EmptyState, PageHeader } from '../../ui';
 import { apiErrorMessage, getCurrentUser } from '../../utils/format';
 import './Notification.css';
+import { SwipeTabs } from '../../ui/Swipe';
 
 // Bugün / Dün / Bu hafta / Daha önce
 const groupOf = (date) => {
@@ -91,7 +92,7 @@ const NotificationList = () => {
   };
 
   return (
-    <>
+    <SwipeTabs>
       <PageHeader
         title={t('notifications:list.title')}
         subtitle={t('notifications:list.subtitle')}
@@ -134,7 +135,7 @@ const NotificationList = () => {
         )}
         <p className="mb-hint mb-notif-hint">{t('notifications:list.tapHint')}</p>
       </Card>
-    </>
+    </SwipeTabs>
   );
 };
 

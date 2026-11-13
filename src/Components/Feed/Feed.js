@@ -134,11 +134,11 @@ function ActivityCard({ item, me }) {
   switch (item.type) {
     case ACTIVITY.MATCH_CREATED:
       headline = sentence('matchCreated');
-      body = item.match && <MiniFixture match={item.match} showJoin={!isMine} />;
+      body = item.match && <MiniFixture match={item.match} showJoin={!isMine && !item.match.inMatch} />;
       break;
     case ACTIVITY.JOINED_MATCH:
       headline = sentence('joinedMatch');
-      body = item.match && <MiniFixture match={item.match} showJoin={!isMine} />;
+      body = item.match && <MiniFixture match={item.match} showJoin={!isMine && !item.match.inMatch} />;
       break;
     case ACTIVITY.SCORED:
       headline = sentence('scored');

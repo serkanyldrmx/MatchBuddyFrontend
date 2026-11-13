@@ -211,6 +211,7 @@ export default function ExternalVenueForm({ value, onChange, savedVenues, durati
             <label>{t('venues:external.price')}</label>
             <InputNumber
               size="large"
+              inputMode="numeric"
               min={0}
               max={100000}
               step={50}

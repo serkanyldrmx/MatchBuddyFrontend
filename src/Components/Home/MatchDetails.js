@@ -70,6 +70,8 @@ import { NoShowCard, SubstituteCard, WithdrawalsCard } from './ReliabilityPanels
 import { roleShort, ROLE_LABELS } from './formations';
 import Pitch, { guestInitials, sideRoster } from './Pitch';
 import './MatchDetails.css';
+import { SwipeTabs } from '../../ui/Swipe';
+import { mapsUrl } from '../Venues/ExternalVenueForm';
 
 const homeName = (d) => d.homeTeam?.teamName || i18n.t('match:sides.home');
 const awayName = (d) =>
@@ -614,7 +616,12 @@ function MatchDetails() {
   const canJoin = !closed && !d.myStatus;
   const hoursLeft = date.diff(dayjs(), 'hour');
 
-  const join = () => run(() => matchesApi.join(d.matchId), t('match:actions.joined'));
+  // Sahada boş bir yere dokunulduysa { side, slot } gelir (düğmeden gelen tıklama olayı yok sayılır)
+  const join = (pos) =>
+    run(
+      () => (Number.isInteger(pos?.side) ? matchesApi.join(d.matchId, pos.side, pos.slot) : matchesApi.join(d.matchId)),
+      t('match:actions.joined')
+    );
   // "Maça gelemiyorum": mazeret + ceza önizlemesi (docs/reliability-api.md)
   const leave = () => setLeaveOpen(true);
   const confirmAttendance = () => run(() => matchesApi.confirm(d.matchId), t('match:details.confirmed'));
@@ -861,222 +868,236 @@ function MatchDetails() {
         <WeatherBadge matchId={d.matchId} matchDate={d.matchDate} closed={closed} compact={false} />
       </div>
 
-      <Tabs
-        activeKey={tab}
-        onChange={setTab}
-        className="mb-match-tabs"
-        items={[
-          {
-            key: 'lineup',
-            label: t('match:details.tabs.lineup', { count: rosterCount }),
-            children: (
-              <Row gutter={[20, 20]}>
-                <Col xs={24} xl={17}>
-                  <Pitch
-                    detail={d}
-                    me={me}
-                    perSide={perSide}
-                    homeLabel={homeName(d)}
-                    awayLabel={awayName(d)}
-                    closed={closed}
-                    canJoin={canJoin}
-                    onJoin={join}
-                    onSwap={swap}
-                    onMessage={msg}
-                    onAddGuest={(side) => openGuestModal(side)}
-                    onEditGuest={editGuest}
-                    onMoveGuest={moveGuest}
-                    onRemoveGuest={removeGuest}
-                    onArrange={arrangeLineup}
-                  />
-                </Col>
-                <Col xs={24} xl={7}>
-                  {d.canManage && d.repeatWeekly && (
-                    <Button
-                      block
-                      icon={<SyncOutlined />}
-                      loading={busy}
-                      style={{ marginBottom: 12 }}
-                      onClick={() => run(() => matchesApi.stopRepeat(d.matchId), t('match:repeat.stopped'))}
-                    >
-                      {t('match:repeat.stop')}
-                    </Button>
-                  )}
-                  {d.canManage && !closed && going.length >= 2 && (
-                    <Button block icon={<RobotOutlined />} loading={busy} onClick={balanceSides} style={{ marginBottom: 12 }}>
-                      {t('match:details.actions.balanceTeams')}
-                    </Button>
-                  )}
-                  {d.canManage && !closed && waitlist.length === 0 && d.capacity - rosterCount > 0 && (
-                    <SubstituteCard detail={d} openSpots={d.capacity - rosterCount} />
-                  )}
-                  <WithdrawalsCard detail={d} reload={load} />
-                  <Card title={t('match:details.waitlistTitle', { count: waitlist.length })} size="small">
-                    {waitlist.length === 0 ? (
-                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.waitlistEmpty')} />
-                    ) : (
-                      <ol className="mb-waitlist">
-                        {waitlist.map((p) => (
-                          <li key={p.player.playerId}>
-                            <PlayerAvatar player={p.player} size={30} />
-                            <span>{p.player.playerId === me?.playerId ? t('match:pitch.you') : <PlayerLink player={p.player} />}</span>
-                            {d.canManage && <ReliabilityBadge reliability={p.reliability} compact />}
-                          </li>
-                        ))}
-                      </ol>
-                    )}
-                  </Card>
-                  {guests.length > 0 && (
-                    <Card title={t('match:details.guestsTitle', { count: guests.length })} size="small" className="mb-guest-card">
-                      <ul className="mb-guest-list">
-                        {[...homeRoster.guests, ...awayRoster.guests].map((g) => (
-                          <li key={g.guestId}>
-                            <span className={`mb-guest-list__avatar is-${g.side === SIDE.AWAY ? 'away' : 'home'}`}>{guestInitials(g.name)}</span>
-                            <span className="mb-guest-list__text">
-                              <strong>{g.name}</strong>
-                              <small>
-                                {g.side === SIDE.AWAY ? awayName(d) : homeName(d)}
-                                {g.note ? ` · ${g.note}` : ''}
-                              </small>
-                            </span>
-                            {canManageGuests && (
-                              <span className="mb-guest-list__actions">
-                                <Tooltip title={t('common:actions.edit')}>
-                                  <Button
-                                    type="text"
-                                    size="small"
-                                    icon={<EditOutlined />}
-                                    onClick={() => editGuest(g)}
-                                    aria-label={t('common:actions.edit')}
-                                  />
-                                </Tooltip>
-                                <Popconfirm
-                                  title={t('match:guest.removeTitle')}
-                                  description={t('match:guest.removeDescription', { name: g.name })}
-                                  okText={t('match:guest.remove')}
-                                  okButtonProps={{ danger: true }}
-                                  cancelText={t('common:actions.cancel')}
-                                  onConfirm={() => removeGuest(g)}
-                                >
-                                  <Button
-                                    type="text"
-                                    size="small"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    aria-label={t('match:guest.remove')}
-                                  />
-                                </Popconfirm>
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </Card>
-                  )}
-                  <div className="mb-legend">
-                    <span><CheckCircleFilled style={{ color: 'var(--mb-pitch)' }} /> {t('match:details.legend.confirmed')}</span>
-                    <span><CrownFilled style={{ color: 'var(--mb-gold)' }} /> {t('match:details.legend.mvp')}</span>
-                    <span><span className="mb-legend__guest" /> {t('match:details.legend.guest')}</span>
-                    <span>
-                      <span className="mb-legend__pos">{roleShort('KL')}</span>{' '}
-                      {[ROLE_LABELS.KL, ...['DF', 'OS', 'FV'].map((r) => `${roleShort(r)} ${ROLE_LABELS[r]}`)].join(' · ')}
-                    </span>
-                    {d.canManage && <span><SwapOutlined /> {t('match:details.legend.swap')}</span>}
-                    {canManageGuests && <span><UserAddOutlined /> {t('match:details.legend.addGuest')}</span>}
-                  </div>
-                </Col>
-              </Row>
-            ),
-          },
-          {
-            key: 'post',
-            label: t('match:details.tabs.post'),
-            children: d.isPast ? (
-              <>
-                <NoShowCard key={d.matchId} detail={d} me={me} reload={load} />
-                <WithdrawalsCard detail={d} reload={load} />
-                <PostMatch detail={d} me={me} reload={load} />
-              </>
-            ) : (
-              <Card>
-                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.postEmpty')} />
-              </Card>
-            ),
-          },
-          {
-            key: 'comments',
-            label: t('match:details.tabs.comments'),
-            children: (
-              <Card>
-                <MatchComments matchId={d.matchId} />
-              </Card>
-            ),
-          },
-          {
-            key: 'info',
-            label: t('match:details.tabs.info'),
-            children: (
-              <Row gutter={[20, 20]}>
-                {d.venue && (
-                  <Col xs={24} lg={10}>
-                    {d.venue.isExternal ? (
-                      <ExternalVenueCard d={d} canEdit={!!d.canManage && !closed} reload={load} />
-                    ) : (
-                      <ReservationCard d={d} onMessageOwner={messageOwner} />
-                    )}
+      <SwipeTabs>
+        <Tabs
+          activeKey={tab}
+          onChange={setTab}
+          className="mb-match-tabs"
+          items={[
+            {
+              key: 'lineup',
+              label: t('match:details.tabs.lineup', { count: rosterCount }),
+              children: (
+                <Row gutter={[20, 20]}>
+                  <Col xs={24} xl={17}>
+                    <Pitch
+                      detail={d}
+                      me={me}
+                      perSide={perSide}
+                      homeLabel={homeName(d)}
+                      awayLabel={awayName(d)}
+                      closed={closed}
+                      canJoin={canJoin}
+                      onJoin={join}
+                      onSwap={swap}
+                      onMessage={msg}
+                      onAddGuest={(side) => openGuestModal(side)}
+                      onEditGuest={editGuest}
+                      onMoveGuest={moveGuest}
+                      onRemoveGuest={removeGuest}
+                      onArrange={arrangeLineup}
+                    />
                   </Col>
-                )}
-                <Col xs={24} lg={d.venue ? 14 : 24}>
-                  <Card
-                    title={t('match:details.info.title')}
-                    extra={
-                      d.canManage && (
-                        <span className="mb-info-actions">
-                          {!closed && (
-                            <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>
-                              {t('match:edit.button')}
-                            </Button>
-                          )}
-                          {!d.isPast && (
-                            <Button danger onClick={remove}>
-                              {t('match:details.actions.deleteMatch')}
-                            </Button>
-                          )}
-                        </span>
-                      )
-                    }
-                  >
-                <Descriptions column={{ xs: 1, md: 2 }}>
-                  <Descriptions.Item label={t('match:details.info.venue')}>{d.venue?.name || d.stadium?.stadiumName}</Descriptions.Item>
-                  {d.stadium?.openingTime && d.stadium?.closingTime && (
-                    <Descriptions.Item label={t('match:details.info.hours')}>
-                      {d.stadium.openingTime.slice(0, 5)} – {d.stadium.closingTime.slice(0, 5)}
-                    </Descriptions.Item>
+                  <Col xs={24} xl={7}>
+                    {d.canManage && d.repeatWeekly && (
+                      <Button
+                        block
+                        icon={<SyncOutlined />}
+                        loading={busy}
+                        style={{ marginBottom: 12 }}
+                        onClick={() => run(() => matchesApi.stopRepeat(d.matchId), t('match:repeat.stopped'))}
+                      >
+                        {t('match:repeat.stop')}
+                      </Button>
+                    )}
+                    {d.canManage && !closed && going.length >= 2 && (
+                      <Button block icon={<RobotOutlined />} loading={busy} onClick={balanceSides} style={{ marginBottom: 12 }}>
+                        {t('match:details.actions.balanceTeams')}
+                      </Button>
+                    )}
+                    {d.canManage && !closed && waitlist.length === 0 && d.capacity - rosterCount > 0 && (
+                      <SubstituteCard detail={d} openSpots={d.capacity - rosterCount} />
+                    )}
+                    <WithdrawalsCard detail={d} reload={load} />
+                    <Card title={t('match:details.waitlistTitle', { count: waitlist.length })} size="small">
+                      {waitlist.length === 0 ? (
+                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.waitlistEmpty')} />
+                      ) : (
+                        <ol className="mb-waitlist">
+                          {waitlist.map((p) => (
+                            <li key={p.player.playerId}>
+                              <PlayerAvatar player={p.player} size={30} />
+                              <span>{p.player.playerId === me?.playerId ? t('match:pitch.you') : <PlayerLink player={p.player} />}</span>
+                              {d.canManage && <ReliabilityBadge reliability={p.reliability} compact />}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </Card>
+                    {guests.length > 0 && (
+                      <Card title={t('match:details.guestsTitle', { count: guests.length })} size="small" className="mb-guest-card">
+                        <ul className="mb-guest-list">
+                          {[...homeRoster.guests, ...awayRoster.guests].map((g) => (
+                            <li key={g.guestId}>
+                              <span className={`mb-guest-list__avatar is-${g.side === SIDE.AWAY ? 'away' : 'home'}`}>{guestInitials(g.name)}</span>
+                              <span className="mb-guest-list__text">
+                                <strong>{g.name}</strong>
+                                <small>
+                                  {g.side === SIDE.AWAY ? awayName(d) : homeName(d)}
+                                  {g.note ? ` · ${g.note}` : ''}
+                                </small>
+                              </span>
+                              {canManageGuests && (
+                                <span className="mb-guest-list__actions">
+                                  <Tooltip title={t('common:actions.edit')}>
+                                    <Button
+                                      type="text"
+                                      size="small"
+                                      icon={<EditOutlined />}
+                                      onClick={() => editGuest(g)}
+                                      aria-label={t('common:actions.edit')}
+                                    />
+                                  </Tooltip>
+                                  <Popconfirm
+                                    title={t('match:guest.removeTitle')}
+                                    description={t('match:guest.removeDescription', { name: g.name })}
+                                    okText={t('match:guest.remove')}
+                                    okButtonProps={{ danger: true }}
+                                    cancelText={t('common:actions.cancel')}
+                                    onConfirm={() => removeGuest(g)}
+                                  >
+                                    <Button
+                                      type="text"
+                                      size="small"
+                                      danger
+                                      icon={<DeleteOutlined />}
+                                      aria-label={t('match:guest.remove')}
+                                    />
+                                  </Popconfirm>
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </Card>
+                    )}
+                    <div className="mb-legend">
+                      <span><CheckCircleFilled style={{ color: 'var(--mb-pitch)' }} /> {t('match:details.legend.confirmed')}</span>
+                      <span><CrownFilled style={{ color: 'var(--mb-gold)' }} /> {t('match:details.legend.mvp')}</span>
+                      <span><span className="mb-legend__guest" /> {t('match:details.legend.guest')}</span>
+                      <span>
+                        <span className="mb-legend__pos">{roleShort('KL')}</span>{' '}
+                        {[ROLE_LABELS.KL, ...['DF', 'OS', 'FV'].map((r) => `${roleShort(r)} ${ROLE_LABELS[r]}`)].join(' · ')}
+                      </span>
+                      {d.canManage && <span><SwapOutlined /> {t('match:details.legend.swap')}</span>}
+                      {canManageGuests && <span><UserAddOutlined /> {t('match:details.legend.addGuest')}</span>}
+                    </div>
+                  </Col>
+                </Row>
+              ),
+            },
+            {
+              key: 'post',
+              label: t('match:details.tabs.post'),
+              children: d.isPast ? (
+                <>
+                  <NoShowCard key={d.matchId} detail={d} me={me} reload={load} />
+                  <WithdrawalsCard detail={d} reload={load} />
+                  <PostMatch detail={d} me={me} reload={load} />
+                </>
+              ) : (
+                <Card>
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('match:details.postEmpty')} />
+                </Card>
+              ),
+            },
+            {
+              key: 'comments',
+              label: t('match:details.tabs.comments'),
+              children: (
+                <Card>
+                  <MatchComments matchId={d.matchId} />
+                </Card>
+              ),
+            },
+            {
+              key: 'info',
+              label: t('match:details.tabs.info'),
+              children: (
+                <Row gutter={[20, 20]}>
+                  {d.venue && (
+                    <Col xs={24} lg={10}>
+                      {d.venue.isExternal ? (
+                        <ExternalVenueCard d={d} canEdit={!!d.canManage && !closed} reload={load} />
+                      ) : (
+                        <ReservationCard d={d} onMessageOwner={messageOwner} />
+                      )}
+                    </Col>
                   )}
-                  <Descriptions.Item label={t('match:details.info.address')} span={2}>{d.stadium?.address || '-'}</Descriptions.Item>
-                  <Descriptions.Item label={t('match:details.info.capacity')}>{t('match:players', { count: d.capacity })}</Descriptions.Item>
-                  <Descriptions.Item label={t('match:details.info.date')}>{date.format('DD MMMM YYYY, HH:mm')}</Descriptions.Item>
-                  {d.homeTeam && (
-                    <Descriptions.Item label={t('match:details.info.matchup')} span={2}>
-                      {t('match:details.info.versus', {
-                        home: d.homeTeam.teamName,
-                        away: d.awayTeam?.teamName || t('match:sides.seekingOpponent'),
-                      })}
+                  <Col xs={24} lg={d.venue ? 14 : 24}>
+                    <Card
+                      title={t('match:details.info.title')}
+                      extra={
+                        d.canManage && (
+                          <span className="mb-info-actions">
+                            {!closed && (
+                              <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>
+                                {t('match:edit.button')}
+                              </Button>
+                            )}
+                            {!d.isPast && (
+                              <Button danger onClick={remove}>
+                                {t('match:details.actions.deleteMatch')}
+                              </Button>
+                            )}
+                          </span>
+                        )
+                      }
+                    >
+                  <Descriptions column={{ xs: 1, md: 2 }}>
+                    <Descriptions.Item label={t('match:details.info.venue')}>{d.venue?.name || d.stadium?.stadiumName}</Descriptions.Item>
+                    {d.stadium?.openingTime && d.stadium?.closingTime && (
+                      <Descriptions.Item label={t('match:details.info.hours')}>
+                        {d.stadium.openingTime.slice(0, 5)} – {d.stadium.closingTime.slice(0, 5)}
+                      </Descriptions.Item>
+                    )}
+                    <Descriptions.Item label={t('match:details.info.address')} span={2}>
+                      {d.stadium?.address || '-'}
+                      {mapsUrl({ name: d.venue?.name || d.stadium?.stadiumName, address: d.stadium?.address, location: d.stadium?.location }) && (
+                        <a
+                          className="mb-directions"
+                          href={mapsUrl({ name: d.venue?.name || d.stadium?.stadiumName, address: d.stadium?.address, location: d.stadium?.location })}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <EnvironmentOutlined /> {t('match:details.info.directions')}
+                        </a>
+                      )}
                     </Descriptions.Item>
-                  )}
-                  {d.description && (
-                    <Descriptions.Item label={t('match:details.info.description')} span={2}>
-                      {d.description}
-                    </Descriptions.Item>
-                  )}
-                </Descriptions>
-                  </Card>
-                </Col>
-              </Row>
-            ),
-          },
-        ]}
-      />
+                    <Descriptions.Item label={t('match:details.info.capacity')}>{t('match:players', { count: d.capacity })}</Descriptions.Item>
+                    <Descriptions.Item label={t('match:details.info.date')}>{date.format('DD MMMM YYYY, HH:mm')}</Descriptions.Item>
+                    {d.homeTeam && (
+                      <Descriptions.Item label={t('match:details.info.matchup')} span={2}>
+                        {t('match:details.info.versus', {
+                          home: d.homeTeam.teamName,
+                          away: d.awayTeam?.teamName || t('match:sides.seekingOpponent'),
+                        })}
+                      </Descriptions.Item>
+                    )}
+                    {d.description && (
+                      <Descriptions.Item label={t('match:details.info.description')} span={2}>
+                        {d.description}
+                      </Descriptions.Item>
+                    )}
+                  </Descriptions>
+                    </Card>
+                  </Col>
+                </Row>
+              ),
+            },
+          ]}
+        />
+      </SwipeTabs>
 
       <Modal
         open={claimOpen}
@@ -1126,7 +1147,14 @@ function MatchDetails() {
         onSaved={load}
       />
 
-      <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} kind="match" targetId={d.matchId} title={d.matchName} />
+      <InviteModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        kind="match"
+        targetId={d.matchId}
+        title={d.matchName}
+        excludeIds={d.participants.map((p) => p.player.playerId)}
+      />
       <ShareToGroupModal open={groupShareOpen} matchId={d.matchId} matchName={d.matchName} onClose={() => setGroupShareOpen(false)} />
     </>
   );

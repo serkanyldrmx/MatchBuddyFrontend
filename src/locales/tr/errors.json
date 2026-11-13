@@ -294,5 +294,7 @@
   "MATCH_CAPACITY_BELOW_ROSTER": "Kadroda şu an {{0}} kişi var; oyuncu sayısı bundan az olamaz.",
   "TEAM_CREATOR_ONLY": "Bu işlemi yalnızca takımı kuran oyuncu yapabilir.",
   "TEAM_NOT_MEMBER": "Bu takımda değilsin.",
-  "TEAM_LAST_MEMBER": "Takımda kalan son oyuncusun; ayrılmak yerine takımı silebilirsin."
+  "TEAM_LAST_MEMBER": "Takımda kalan son oyuncusun; ayrılmak yerine takımı silebilirsin.",
+  "BIZAPP_NOT_FOUND": "Başvuru bulunamadı.",
+  "BIZAPP_CONSENT_REQUIRED": "Devam etmek için aydınlatma metnini onaylayın."
 }

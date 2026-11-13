@@ -7,6 +7,7 @@ import AuthShell from './AuthShell';
 import { authApi } from '../../api/auth';
 import { usePublicParam } from '../../api/parameters';
 import { applyFieldErrors, apiErrorMessage } from '../../utils/format';
+import { useScrollTopOn } from '../../utils/scrollTop';
 
 /**
  * Şifremi unuttum: 1) kullanıcı adı / e-posta / telefon + kanal (e-posta ya da SMS) → 6 haneli kod
@@ -16,6 +17,7 @@ export default function ForgotPassword() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  useScrollTopOn(step); // adım değişince sayfanın başına
   const [identifier, setIdentifier] = useState('');
   const [channel, setChannel] = useState('email');
   const [loading, setLoading] = useState(false);

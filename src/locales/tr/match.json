@@ -218,7 +218,8 @@
       "date": "Tarih",
       "matchup": "Eşleşme",
       "versus": "{{home}} vs {{away}}",
-      "description": "Açıklama"
+      "description": "Açıklama",
+      "directions": "Yol tarifi"
     },
     "claimModal": {
       "title": "Takımınla rakip ol",
@@ -339,7 +340,7 @@
     "rosterNote_other": "Kadroda şu an {{count}} kişi var; oyuncu sayısı bunun altına inemez. Artırırsan yedekteki oyuncular kadroya alınır.",
     "description": "Açıklama",
     "descriptionPlaceholder": "Örn. Herkes 150 ₺ getirsin, beyaz ve renkli forma.",
-    "externalHint": "Saha, saat ve ücret bilgisini \"Bilgi\" sekmesindeki saha kartından değiştirebilirsin.",
+    "externalHint": "Saha, saat ve ücret bilgisini \"Saha bilgisi\" sekmesindeki saha kartından değiştirebilirsin.",
     "venueHint": "Saha ve saat tesis rezervasyonuna bağlı; değiştirmek için tesisle mesajlaş ya da yeni saat seç.",
     "saved": "Maç bilgileri güncellendi.",
     "failed": "Maç güncellenemedi."

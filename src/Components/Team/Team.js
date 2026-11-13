@@ -9,17 +9,23 @@ import { apiErrorMessage, getCurrentUser } from '../../utils/format';
 import PlayerSelectionPopup from './PlayerSelectionPopup';
 import InviteModal from '../Invites/InviteModal';
 import './Team.css';
+import { SwipeTabs } from '../../ui/Swipe';
 
 const { Text, Title } = Typography;
 
 // GetTeamList cevabı oyuncuları paralel diziler olarak döner; tek listeye çevir
-const membersOf = (team) =>
-  (team.playerId || []).map((id, i) => ({
-    playerId: id,
-    userName: team.playerName?.[i],
-    playerName: team.playerName?.[i],
-    profilePictureUrl: team.profilePictureUrl?.[i],
-  }));
+const membersOf = (team) => {
+  const seen = new Set();
+  // Aynı oyuncu iki kez kayıtlıysa bir kez göster
+  return (team.playerId || [])
+    .map((id, i) => ({
+      playerId: id,
+      userName: team.playerName?.[i],
+      playerName: team.playerName?.[i],
+      profilePictureUrl: team.profilePictureUrl?.[i],
+    }))
+    .filter((m) => (seen.has(m.playerId) ? false : seen.add(m.playerId)));
+};
 
 const Team = () => {
   const { message, modal } = App.useApp();
@@ -108,7 +114,7 @@ const Team = () => {
   };
 
   return (
-    <>
+    <SwipeTabs>
       <PageHeader
         title={t('team:list.title')}
         subtitle={t('team:list.subtitle')}
@@ -250,9 +256,10 @@ const Team = () => {
         kind="team"
         targetId={inviting?.teamId}
         title={inviting?.teamName}
+        excludeIds={inviting?.playerId}
       />
       <PlayerSelectionPopup visible={!!editing} team={editing} onClose={() => setEditing(null)} onSave={load} />
-    </>
+    </SwipeTabs>
   );
 };
 

@@ -15,6 +15,7 @@ import {
   ScheduleOutlined,
   WarningOutlined,
   ShopOutlined,
+  SolutionOutlined,
   GlobalOutlined,
   PhoneOutlined,
 } from '@ant-design/icons';
@@ -24,6 +25,8 @@ import { fullName, isPast } from '../utils/format';
 import { Brand, useAppBodyClass, useCurrentUser } from './AppLayout';
 import { themeMenuItem } from '../theme/ThemeSwitch';
 import './layout.css';
+import useEdgeSwipe from './useEdgeSwipe';
+import { bizAppsApi } from '../admin/BusinessApplications';
 
 const { Sider, Header, Content } = Layout;
 const { Text } = Typography;
@@ -32,6 +35,16 @@ export const RESERVATIONS_CHANGED = 'mb:reservations-changed';
 const BASE = '/adminPanel';
 
 /** Bekleyen (onay bekleyen ve tarihi geçmemiş) rezervasyon sayısı */
+/** Bekleyen işletme başvurusu sayısı (menü rozeti) */
+function useNewApplications() {
+  const { pathname } = useLocation();
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    bizAppsApi.newCount().then(setCount).catch(() => {});
+  }, [pathname]);
+  return count;
+}
+
 function usePendingCount() {
   const [count, setCount] = useState(0);
   const load = useCallback(() => {
@@ -55,12 +68,16 @@ export default function AdminLayout() {
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.lg;
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const openNav = useCallback(() => setMobileNavOpen(true), []);
   const user = useCurrentUser();
   useAppBodyClass();
   const pending = usePendingCount();
+  const newApps = useNewApplications();
   const { t } = useTranslation();
 
   useEffect(() => setMobileNavOpen(false), [location.pathname]);
+  // Telefonda sol kenardan sağa kaydırma: menüyü aç
+  useEdgeSwipe(isMobile, openNav);
 
   const items = [
     { key: BASE, icon: <AppstoreOutlined />, label: t('layout:admin.menu.overview') },
@@ -76,6 +93,15 @@ export default function AdminLayout() {
     { key: `${BASE}/matches`, icon: <CalendarOutlined />, label: t('layout:admin.menu.matches') },
     { key: `${BASE}/reports`, icon: <WarningOutlined />, label: t('layout:admin.menu.reports') },
     { key: `${BASE}/businesses`, icon: <ShopOutlined />, label: t('layout:admin.menu.businesses') },
+    {
+      key: `${BASE}/applications`,
+      icon: <SolutionOutlined />,
+      label: (
+        <span className="mb-menu-badge">
+          {t('layout:admin.menu.applications')} <Badge count={newApps} size="small" />
+        </span>
+      ),
+    },
     { key: `${BASE}/osm`, icon: <GlobalOutlined />, label: t('layout:admin.menu.osm') },
     { key: `${BASE}/leads`, icon: <PhoneOutlined />, label: t('layout:admin.menu.leads') },
     { key: `${BASE}/parameters`, icon: <ControlOutlined />, label: t('layout:admin.menu.parameters') },
@@ -127,7 +153,7 @@ export default function AdminLayout() {
         danger: true,
         onClick: () => {
           logout();
-          window.location.href = '/';
+          window.location.href = '/login'; // çıkıştan sonra giriş ekranı
         },
       },
     ],

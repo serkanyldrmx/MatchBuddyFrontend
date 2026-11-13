@@ -12,6 +12,7 @@ import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } f
 import { usePublicParams } from '../../api/parameters';
 import './User.css';
 import { phoneDigits, phoneRule, toStoredPhone } from '../../utils/phone';
+import ChangePasswordModal from '../Settings/ChangePasswordModal';
 
 const { Text } = Typography;
 
@@ -27,7 +28,7 @@ function UserUpdate() {
   const rejectedRef = useRef(null); // kırpma öncesi reddedilen dosya
   const params = usePublicParams();
   const maxMb = params.get('media.maxUploadMb');
-  const passwordMin = params.get('security.passwordMinLength');
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   useEffect(() => {
     // Formu sunucudaki güncel profil ile doldur
@@ -95,7 +96,7 @@ function UserUpdate() {
         Weight: values.weight || 0,
         Age: values.age || 0,
         UserScore: user.userScore || 0,
-        Password: values.password || '', // boş: mevcut şifre korunur
+        Password: '', // şifre ayrı pencereden (mevcut şifre sorulur) değişir
       };
       const fd = new FormData();
       fd.append('playerModel', JSON.stringify(model));
@@ -152,7 +153,7 @@ function UserUpdate() {
                 </Col>
                 <Col xs={24} sm={12}>
                   <Form.Item name="userName" label={t('profile:fields.userName')} rules={[{ required: true, whitespace: true, message: t('profile:edit.required.userName') }]}>
-                    <Input prefix="@" maxLength={25} />
+                    <Input prefix="@" maxLength={25} autoCapitalize="none" autoCorrect="off" autoComplete="username" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
@@ -164,16 +165,16 @@ function UserUpdate() {
                       { type: 'email', message: t('validation:email') },
                     ]}
                   >
-                    <Input maxLength={100} />
+                    <Input maxLength={100} inputMode="email" autoCapitalize="none" autoComplete="email" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="phoneNumber" label={t('profile:fields.phone')} extra={t('profile:edit.optional')} normalize={phoneDigits} rules={[phoneRule(t)]}>
+                  <Form.Item name="phoneNumber" label={t('profile:fields.phone')} normalize={phoneDigits} rules={[phoneRule(t)]}>
                     <Input addonBefore="0" placeholder="5xx xxx xx xx" maxLength={10} inputMode="tel" autoComplete="tel-national" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="address" label={t('profile:fields.address')} extra={t('profile:edit.optional')}>
+                  <Form.Item name="address" label={t('profile:fields.address')}>
                     <Input maxLength={200} />
                   </Form.Item>
                 </Col>
@@ -183,18 +184,18 @@ function UserUpdate() {
             <Card bordered={false} title={t('profile:edit.physical')}>
               <Row gutter={16}>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="age" label={t('profile:fields.age')} extra={t('profile:edit.optional')}>
-                    <InputNumber min={10} max={80} style={{ width: '100%' }} />
+                  <Form.Item name="age" label={t('profile:fields.age')}>
+                    <InputNumber inputMode="numeric" min={10} max={80} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="size" label={t('profile:fields.height')} extra={t('profile:edit.optional')}>
-                    <InputNumber min={120} max={230} style={{ width: '100%' }} />
+                  <Form.Item name="size" label={t('profile:fields.height')}>
+                    <InputNumber inputMode="numeric" min={120} max={230} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={8}>
-                  <Form.Item name="weight" label={t('profile:fields.weight')} extra={t('profile:edit.optional')}>
-                    <InputNumber min={30} max={200} style={{ width: '100%' }} />
+                  <Form.Item name="weight" label={t('profile:fields.weight')}>
+                    <InputNumber inputMode="numeric" min={30} max={200} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -202,30 +203,18 @@ function UserUpdate() {
           </Col>
 
           <Col xs={24} lg={8}>
-            <Card bordered={false} title={t('profile:edit.password.title')} style={{ marginBottom: 24 }}>
-              <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-                {t('profile:edit.password.hint')}
-              </Text>
-              <Form.Item name="password" label={t('profile:edit.password.new')} rules={[{ min: passwordMin, message: t('profile:edit.password.minLength', { count: passwordMin }) }]} hasFeedback>
-                <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
-              </Form.Item>
-              <Form.Item
-                name="confirm"
-                label={t('profile:edit.password.confirm')}
-                dependencies={['password']}
-                hasFeedback
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator: (_, v) =>
-                      !getFieldValue('password') || getFieldValue('password') === v
-                        ? Promise.resolve()
-                        : Promise.reject(new Error(t('validation:passwordMismatch'))),
-                  }),
-                ]}
-              >
-                <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
-              </Form.Item>
-            </Card>
+            {/* Şifre burada değil: mevcut şifreyi soran "Şifre değiştir" penceresi (Ayarlar ile aynı) */}
+            {getCurrentUser()?.hasPassword !== false && (
+              <Card bordered={false} title={t('profile:edit.password.title')} style={{ marginBottom: 24 }}>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                  {t('profile:edit.password.moved')}
+                </Text>
+                <Button icon={<LockOutlined />} onClick={() => setPasswordOpen(true)}>
+                  {t('profile:edit.password.change')}
+                </Button>
+              </Card>
+            )}
+            <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
             <Card bordered={false}>
               <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
                 <Button onClick={() => navigate('/user')}>{t('common:actions.cancel')}</Button>

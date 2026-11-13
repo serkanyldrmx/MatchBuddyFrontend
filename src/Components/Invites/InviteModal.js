@@ -12,7 +12,7 @@ import './Invites.css';
  * Takip ettiklerini bir maça ya da takıma davet etme penceresi.
  * kind: "match" | "team", targetId: matchId / teamId, title: maç/takım adı
  */
-export default function InviteModal({ open, onClose, kind = 'match', targetId, title }) {
+export default function InviteModal({ open, onClose, kind = 'match', targetId, title, excludeIds }) {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -36,10 +36,13 @@ export default function InviteModal({ open, onClose, kind = 'match', targetId, t
 
   const list = useMemo(() => {
     const q = search.trim().toLowerCase();
+    // Zaten kadroda / takımda olanlar listelenmez
+    const skip = new Set(excludeIds || []);
     return people
+      .filter((p) => !skip.has(p.playerId))
       .filter((p) => !q || `${fullName(p)} ${p.userName || ''}`.toLowerCase().includes(q))
       .sort((a, b) => Number(!!b.isMutual) - Number(!!a.isMutual) || fullName(a).localeCompare(fullName(b), 'tr'));
-  }, [people, search]);
+  }, [people, search, excludeIds]);
 
   const toggle = (id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 

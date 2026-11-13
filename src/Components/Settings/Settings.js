@@ -205,7 +205,7 @@ export default function Settings() {
       // oturum zaten kapanmış olabilir
     }
     logout();
-    window.location.href = '/';
+    window.location.href = '/login';
   };
 
   const deleteAccount = async () => {

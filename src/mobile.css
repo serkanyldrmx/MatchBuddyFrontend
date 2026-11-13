@@ -337,3 +337,31 @@
     max-width: calc(100vw - 16px);
   }
 }
+
+/* Üstten çıkan bildirim balonları (giriş başarılı vb.) çentik / kamera altında kalmasın.
+   Ana ekrana eklenen uygulamada sayfa çentiğin altına kadar uzanır (viewport-fit=cover). */
+.ant-message {
+  top: calc(8px + env(safe-area-inset-top)) !important;
+}
+.ant-notification-top,
+.ant-notification-topLeft,
+.ant-notification-topRight {
+  top: calc(24px + env(safe-area-inset-top)) !important;
+}
+
+/* Kaydırarak sekme değiştirme sarmalayıcısı (ui/Swipe.js): yerleşime etkisi yok */
+.mb-swipe {
+  display: contents;
+}
+
+/* Telefonda sekmeler ve küçük düğmeler parmakla rahat basılsın */
+@media (max-width: 767px) {
+  body.mb-app .ant-tabs-tab {
+    min-height: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  body.mb-app .ant-btn-sm {
+    min-height: 34px;
+  }
+}

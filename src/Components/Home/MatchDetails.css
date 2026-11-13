@@ -260,7 +260,8 @@
 }
 
 .mb-pitch.is-editing .mb-pitch__field {
-  touch-action: none;
+  /* Telefonda sahanın boş yerlerinden sayfa kaydırılabilsin; sadece oyuncuyu tutunca sürüklenir */
+  touch-action: pan-y;
   outline: 2px dashed rgba(var(--mb-primary-rgb), 0.6);
   outline-offset: 3px;
 }
@@ -271,6 +272,12 @@
   -webkit-user-select: none;
   touch-action: none;
   border-radius: 14px;
+}
+
+/* Boş yer sürüklenmez: üzerinden sayfa kaydırılabilir (dokununca seçili oyuncu buraya gelir) */
+.mb-pslot.is-editing.is-vacant {
+  cursor: pointer;
+  touch-action: pan-y;
 }
 
 .mb-pslot.is-editing:focus-visible {
@@ -1672,4 +1679,17 @@
   color: var(--mb-text-2);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Saha bilgisi: yol tarifi bağlantısı */
+.mb-directions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(var(--mb-primary-rgb), 0.12);
+  font-weight: 600;
+  white-space: nowrap;
 }

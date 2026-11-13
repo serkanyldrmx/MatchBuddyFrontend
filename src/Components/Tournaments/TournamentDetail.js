@@ -24,6 +24,7 @@ import { DateModal, ResultModal } from './FixtureModals';
 import { FormatChip, isKnockout, isLeague, roundName, TournamentStatusChip } from './tournamentUtils';
 import '../Home/MatchDetails.css';
 import './Tournaments.css';
+import { SwipeTabs } from '../../ui/Swipe';
 
 /* ---------------- Fikstür satırı ---------------- */
 function FixtureRow({ f, myTeamIds, canManage, ongoing, onResult, onDate }) {
@@ -568,7 +569,9 @@ export default function TournamentDetail() {
         )}
       </section>
 
-      <Tabs activeKey={activeTab} onChange={setTab} className="mb-match-tabs" items={tabs} />
+      <SwipeTabs>
+        <Tabs activeKey={activeTab} onChange={setTab} className="mb-match-tabs" items={tabs} />
+      </SwipeTabs>
 
       <ResultModal
         fixture={resultFixture}

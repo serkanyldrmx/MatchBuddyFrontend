@@ -45,7 +45,8 @@
     "teams": "Takımlar",
     "teamCount_one": "{{count}}/{{max}} takım",
     "teamCount_other": "{{count}}/{{max}} takım",
-    "organizedBy": "<link>{{name}}</link> düzenliyor"
+    "organizedBy": "<link>{{name}}</link> düzenliyor",
+    "organizes": "düzenliyor"
   },
   "create": {
     "ok": "Oluştur",

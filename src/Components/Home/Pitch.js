@@ -122,6 +122,9 @@ function PitchMarkings() {
   );
 }
 
+// Dokunmatik ekranda üzerine gelme yok: ipuçları dokununca açılıp ekranda kalıyordu
+const IS_TOUCH = typeof window !== 'undefined' && window.matchMedia?.('(hover: none)').matches;
+
 /* ---------------- Oyuncu ---------------- */
 function PlayerToken({ p, role, me, canManage, mvpId, avatarSize, onSwap, onMessage }) {
   const { t } = useTranslation();
@@ -264,15 +267,17 @@ function GuestToken({ g, role, manage, onEdit, onMove, onRemove }) {
 }
 
 /* ---------------- Boş yer ---------------- */
-function EmptySlot({ role, side, manage, canJoin, onJoin, onAddGuest }) {
+function EmptySlot({ role, side, index, manage, canJoin, onJoin, onAddGuest }) {
   const { t } = useTranslation();
   const label = manage ? t('common:actions.add') : canJoin ? t('match:actions.joinShort') : t('match:pitch.emptySlot');
+  // Dokunulan takıma ve mevkiye katıl
+  const joinHere = () => onJoin({ side, slot: index });
   const button = (
     <button
       type="button"
       className="mb-token-btn"
       disabled={!manage && !canJoin}
-      onClick={manage ? undefined : onJoin}
+      onClick={manage ? undefined : joinHere}
       aria-label={`${ROLE_LABELS[role]} · ${label}`}
     >
       <div className="mb-token is-empty">
@@ -290,7 +295,7 @@ function EmptySlot({ role, side, manage, canJoin, onJoin, onAddGuest }) {
   if (!manage) return button;
 
   const items = [];
-  if (canJoin) items.push({ key: 'join', icon: <LoginOutlined />, label: t('match:actions.join'), onClick: onJoin });
+  if (canJoin) items.push({ key: 'join', icon: <LoginOutlined />, label: t('match:actions.join'), onClick: joinHere });
   items.push({ key: 'guest', icon: <UserAddOutlined />, label: t('match:guest.addByName'), onClick: () => onAddGuest(side) });
   return (
     <Dropdown menu={{ items }} trigger={['click']}>
@@ -573,6 +578,7 @@ function Pitch({
           `is-${s.key}`,
           `is-line-${slot.line}`,
           'is-editing',
+          entry ? '' : 'is-vacant',
           isDragged ? 'is-dragging' : '',
           sameSpot(selected, spot) ? 'is-selected' : '',
           sameSpot(dragging?.over, spot) ? 'is-drop' : '',
@@ -609,7 +615,7 @@ function Pitch({
       let content;
       if (!entry) {
         content = (
-          <EmptySlot role={slot.role} side={s.side} manage={manage} canJoin={canJoin} onJoin={onJoin} onAddGuest={onAddGuest} />
+          <EmptySlot role={slot.role} side={s.side} index={index} manage={manage} canJoin={canJoin} onJoin={onJoin} onAddGuest={onAddGuest} />
         );
       } else if (entry.kind === 'player') {
         content = (
@@ -646,7 +652,7 @@ function Pitch({
         {!editing && (
           <span className="mb-pitch__tools">
             {home.roster.count + away.roster.count > 0 && (
-              <Tooltip title={t('match:lineupImage.tooltip')}>
+              <Tooltip title={t('match:lineupImage.tooltip')} trigger={IS_TOUCH ? [] : ['hover']}>
                 <Button size="small" icon={<PictureOutlined />} className="mb-pitch__add" onClick={() => setImageOpen(true)}>
                   {t('match:lineupImage.button')}
                 </Button>

@@ -8,7 +8,7 @@ import { ThemeProvider } from './theme/ThemeContext';
 import { MessagesProvider } from './messaging/MessagesContext';
 import AppLayout from './layout/AppLayout';
 import AdminLayout from './layout/AdminLayout';
-import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
+import PrivateRoute, { GuestOnly, LandingGate } from './Components/PrivateRoute/PrivateRoute';
 import { ROLE } from './utils/roles';
 import VenueLayout from './layout/VenueLayout';
 import OwnerDashboard from './owner/OwnerDashboard';
@@ -25,6 +25,7 @@ import VenueDetail from './Components/Venues/VenueDetail';
 import CreateMatch from './Components/Venues/CreateMatch';
 import MatchInvite from './Components/Invite/MatchInvite';
 import AdminExternalLeads from './admin/ExternalLeads';
+import AdminBusinessApplications from './admin/BusinessApplications';
 import AdminBusinesses from './admin/Businesses';
 import AdminOsm from './admin/OsmCandidates';
 import AdminParameters from './admin/Parameters';
@@ -33,6 +34,7 @@ import OwnerSettings from './owner/OwnerSettings';
 import Landing from './Components/Landing/Landing';
 import MessagingPage from './Components/Landing/MessagingPage';
 import BusinessPage from './Components/Landing/BusinessPage';
+import BusinessApply from './Components/Landing/BusinessApply';
 import UserLogin from './Components/UserLogin/UserLogin';
 import RegisterForm from './Components/UserLogin/Register';
 import ForgotPassword from './Components/UserLogin/ForgotPassword';
@@ -65,6 +67,7 @@ import Reservations from './admin/Reservations';
 import AdminMatches from './admin/AdminMatches';
 import Stadium from './Components/Stadium/Stadium';
 import StadiumIsAdmin from './Components/Stadium/StadiumIsAdmin';
+import { RouteScrollTop } from './utils/scrollTop';
 
 function App() {
   // Dil değişince antd bileşen metinleri (DatePicker, Table vb.) de güncellenir
@@ -74,14 +77,16 @@ function App() {
     <ThemeProvider locale={antdLocaleFor(i18n.language)}>
       <AntApp>
         <BrowserRouter>
+          <RouteScrollTop />
           <MessagesProvider>
             <Routes>
               {/* Tanıtım sitesi + giriş / kayıt */}
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<LandingGate><Landing /></LandingGate>} />
               <Route path="/mesajlasma" element={<MessagingPage />} />
               <Route path="/isletmeler" element={<BusinessPage />} />
-              <Route path="/login" element={<UserLogin />} />
-              <Route path="/register" element={<RegisterForm />} />
+              <Route path="/isletme-basvuru" element={<BusinessApply />} />
+              <Route path="/login" element={<GuestOnly><UserLogin /></GuestOnly>} />
+              <Route path="/register" element={<GuestOnly><RegisterForm /></GuestOnly>} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/terms" element={<Terms />} />
               {/* Maç davet linki: giriş gerekmez (docs/engagement-api.md §3) */}
@@ -135,6 +140,7 @@ function App() {
                   <Route path="contact" element={<Communication />} />
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="businesses" element={<AdminBusinesses />} />
+                  <Route path="applications" element={<AdminBusinessApplications />} />
                   <Route path="osm" element={<AdminOsm />} />
                   <Route path="leads" element={<AdminExternalLeads />} />
                   <Route path="parameters" element={<AdminParameters />} />

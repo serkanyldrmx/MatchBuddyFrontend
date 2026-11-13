@@ -26,6 +26,7 @@ import { PlayerLink } from '../Social/FollowButton';
 import SlotPicker, { DateStrip } from './SlotPicker';
 import { AMENITY_ICONS, directionsUrl, markerIcon, parseLocation, TILE_ATTR, TILE_URL, VenueRating } from './Venues';
 import './VenueDetail.css';
+import { SwipeTabs } from '../../ui/Swipe';
 
 const hhmm = (t) => (t ? String(t).slice(0, 5) : '--:--');
 
@@ -241,252 +242,254 @@ export default function VenueDetail() {
         </div>
       </section>
 
-      <Tabs
-        activeKey={tab}
-        onChange={setTab}
-        className="mb-vd-tabs"
-        items={[
-          {
-            key: 'slots',
-            label: t('venues:shared.pickTime'),
-            children: (
-              <Row gutter={[20, 20]}>
-                <Col xs={24} xl={17}>
-                  <Card>
-                    <DateStrip value={date} onChange={setDate} />
-                    <SlotPicker stadiumId={v.stadiumId} date={date} pitches={pitches} onSelect={pickSlot} />
-                  </Card>
-                </Col>
-                <Col xs={24} xl={7}>
-                  <div className="mb-vd-side">
-                    <div className="mb-vd-howto">
-                      <h4>{t('venues:detail.howTo.title')}</h4>
-                      <ol>
-                        <li>{t('venues:detail.howTo.step1')}</li>
-                        <li>{t('venues:detail.howTo.step2')}</li>
-                        <li>{t('venues:detail.howTo.step3')}</li>
-                      </ol>
-                      <p className="mb-hint">{t('venues:shared.paymentOnSite')}</p>
-                    </div>
-                    {cancellation}
-                    {(v.campaigns || []).slice(0, 2).map((c) => (
-                      <CampaignCard key={c.campaignId} c={c} pitches={pitches} />
-                    ))}
-                  </div>
-                </Col>
-              </Row>
-            ),
-          },
-          {
-            key: 'pitches',
-            label: t('venues:detail.tabs.pitches', { count: pitches.length }),
-            children: pitches.length ? (
-              <Row gutter={[16, 16]}>
-                {pitches.map((p) => (
-                  <Col key={p.pitchId} xs={24} sm={12} xl={8}>
-                    <div className="mb-pitch-card">
-                      <div className="mb-pitch-card__field mb-pitch-bg">
-                        <span className="mb-pitch-card__size">
-                          {p.playersPerSide}+{p.playersPerSide}
-                        </span>
+      <SwipeTabs>
+        <Tabs
+          activeKey={tab}
+          onChange={setTab}
+          className="mb-vd-tabs"
+          items={[
+            {
+              key: 'slots',
+              label: t('venues:shared.pickTime'),
+              children: (
+                <Row gutter={[20, 20]}>
+                  <Col xs={24} xl={17}>
+                    <Card>
+                      <DateStrip value={date} onChange={setDate} />
+                      <SlotPicker stadiumId={v.stadiumId} date={date} pitches={pitches} onSelect={pickSlot} />
+                    </Card>
+                  </Col>
+                  <Col xs={24} xl={7}>
+                    <div className="mb-vd-side">
+                      <div className="mb-vd-howto">
+                        <h4>{t('venues:detail.howTo.title')}</h4>
+                        <ol>
+                          <li>{t('venues:detail.howTo.step1')}</li>
+                          <li>{t('venues:detail.howTo.step2')}</li>
+                          <li>{t('venues:detail.howTo.step3')}</li>
+                        </ol>
+                        <p className="mb-hint">{t('venues:shared.paymentOnSite')}</p>
                       </div>
-                      <div className="mb-pitch-card__body">
-                        <h3>{p.name}</h3>
-                        <div className="mb-pitch-card__tags">
-                          <span>{SURFACE[p.surface] || t('common:pitch')}</span>
-                          <span>
-                            {p.isIndoor ? <HomeOutlined /> : <SunOutlined />} {p.isIndoor ? t('common:indoor') : t('common:outdoor')}
-                          </span>
-                          <span>
-                            <TeamOutlined /> {t('venues:detail.pitchCard.players', { count: p.playersPerSide * 2 })}
-                          </span>
-                        </div>
-                        <div className="mb-pitch-card__price">
-                          <strong>{formatPrice(p.basePrice)}</strong> <span>{t('venues:detail.pitchCard.priceFromSuffix')}</span>
-                        </div>
-                      </div>
+                      {cancellation}
+                      {(v.campaigns || []).slice(0, 2).map((c) => (
+                        <CampaignCard key={c.campaignId} c={c} pitches={pitches} />
+                      ))}
                     </div>
                   </Col>
-                ))}
-              </Row>
-            ) : (
-              <Card>
-                <EmptyState description={t('venues:detail.noPitchInfo')} />
-              </Card>
-            ),
-          },
-          {
-            key: 'prices',
-            label: t('venues:detail.tabs.prices'),
-            children: (
-              <Row gutter={[20, 20]}>
-                <Col xs={24} lg={12}>
-                  <Card title={<span><ClockCircleOutlined /> {t('venues:detail.prices.openingHours')}</span>}>
-                    <table className="mb-vd-hours">
-                      <tbody>
-                        {DAYS.map((name, i) => {
-                          const h = hours.find((x) => x.dayOfWeek === i);
-                          return (
-                            <tr key={name} className={i === todayIdx ? 'is-today' : ''}>
-                              <td>{name}</td>
-                              <td>{!h ? '-' : h.isClosed ? <span className="mb-vd-hours__closed">{t('venues:shared.closed')}</span> : `${hhmm(h.openTime)} – ${hhmm(h.closeTime)}`}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </Card>
-                </Col>
-                <Col xs={24} lg={12}>
-                  <Card title={t('venues:detail.prices.title')}>
-                    <div className="mb-vd-pricelist">
-                      {pitches.map((p) => (
-                        <div key={p.pitchId}>
-                          <span>{t('venues:detail.prices.hourly', { name: p.name })}</span>
-                          <strong>{formatPrice(p.basePrice)}</strong>
+                </Row>
+              ),
+            },
+            {
+              key: 'pitches',
+              label: t('venues:detail.tabs.pitches', { count: pitches.length }),
+              children: pitches.length ? (
+                <Row gutter={[16, 16]}>
+                  {pitches.map((p) => (
+                    <Col key={p.pitchId} xs={24} sm={12} xl={8}>
+                      <div className="mb-pitch-card">
+                        <div className="mb-pitch-card__field mb-pitch-bg">
+                          <span className="mb-pitch-card__size">
+                            {p.playersPerSide}+{p.playersPerSide}
+                          </span>
                         </div>
-                      ))}
-                      {v.amenities?.cleatRental && v.prices?.cleatRentalPrice != null && (
-                        <div>
-                          <span>{AMENITY_ICONS.cleatRental} {t('venues:detail.prices.cleatRentalPair')}</span>
-                          <strong>{formatPrice(v.prices.cleatRentalPrice)}</strong>
-                        </div>
-                      )}
-                      {v.amenities?.camera && v.prices?.cameraPrice != null && (
-                        <div>
-                          <span>{AMENITY_ICONS.camera} {t('venues:amenities.camera')}</span>
-                          <strong>{formatPrice(v.prices.cameraPrice)}</strong>
-                        </div>
-                      )}
-                    </div>
-                    <p className="mb-hint" style={{ marginTop: 12 }}>
-                      {t('venues:detail.prices.note')}
-                    </p>
-                  </Card>
-                </Col>
-                <Col xs={24}>
-                  <h3 className="mb-vd-subtitle">{t('venues:detail.prices.activeCampaigns')}</h3>
-                  {(v.campaigns || []).length ? (
-                    <Row gutter={[16, 16]}>
-                      {v.campaigns.map((c) => (
-                        <Col key={c.campaignId} xs={24} md={12}>
-                          <CampaignCard c={c} pitches={pitches} />
-                        </Col>
-                      ))}
-                    </Row>
-                  ) : (
-                    <Card>
-                      <EmptyState description={t('venues:detail.prices.noCampaigns')} />
-                    </Card>
-                  )}
-                </Col>
-                {v.cancellationPolicy && <Col xs={24}>{cancellation}</Col>}
-              </Row>
-            ),
-          },
-          {
-            key: 'reviews',
-            label: t('venues:detail.tabs.reviews', { count: v.reviewCount || 0 }),
-            children: (
-              <Row gutter={[20, 20]}>
-                <Col xs={24} lg={8}>
-                  <Card>
-                    <div className="mb-vd-score">
-                      <strong>{v.reviewCount ? Number(v.rating || 0).toFixed(1) : '-'}</strong>
-                      <Rate disabled allowHalf value={Math.round((v.rating || 0) * 2) / 2} />
-                      <span>{t('venues:detail.reviews.count', { count: v.reviewCount || 0 })}</span>
-                    </div>
-                    <div className="mb-vd-bars">
-                      {[5, 4, 3, 2, 1].map((n) => {
-                        const c = breakdown[n] || breakdown[String(n)] || 0;
-                        return (
-                          <div key={n} className="mb-vd-bars__row">
-                            <span>{n}</span>
-                            <Progress
-                              percent={totalReviews ? Math.round((c / totalReviews) * 100) : 0}
-                              showInfo={false}
-                              size="small"
-                              strokeColor="var(--mb-gold)"
-                              trailColor="var(--mb-surface-2)"
-                            />
-                            <em>{c}</em>
+                        <div className="mb-pitch-card__body">
+                          <h3>{p.name}</h3>
+                          <div className="mb-pitch-card__tags">
+                            <span>{SURFACE[p.surface] || t('common:pitch')}</span>
+                            <span>
+                              {p.isIndoor ? <HomeOutlined /> : <SunOutlined />} {p.isIndoor ? t('common:indoor') : t('common:outdoor')}
+                            </span>
+                            <span>
+                              <TeamOutlined /> {t('venues:detail.pitchCard.players', { count: p.playersPerSide * 2 })}
+                            </span>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </Card>
-                </Col>
-                <Col xs={24} lg={16}>
-                  <Card>
-                    {(v.reviews || []).length === 0 ? (
-                      <EmptyState description={t('venues:detail.reviews.empty')} />
-                    ) : (
-                      <div className="mb-vd-reviews">
-                        {v.reviews.map((r) => (
-                          <div key={r.reviewId} className="mb-vd-review">
-                            <PlayerAvatar player={r.player} size={40} />
-                            <div className="mb-vd-review__body">
-                              <div className="mb-vd-review__head">
-                                {r.player ? <PlayerLink player={r.player} /> : <strong>{t('venues:detail.reviews.player')}</strong>}
-                                <Rate disabled value={r.rating} className="mb-vd-review__rate" />
-                                <span>{fromNow(r.createdAt)}</span>
-                              </div>
-                              {r.comment && <p>{r.comment}</p>}
-                              {r.ownerReply && (
-                                <div className="mb-vd-review__reply">
-                                  <strong>{t('venues:detail.reviews.ownerReply')}</strong>
-                                  {r.repliedAt && <span> · {fromNow(r.repliedAt)}</span>}
-                                  <p>{r.ownerReply}</p>
-                                </div>
-                              )}
-                            </div>
+                          <div className="mb-pitch-card__price">
+                            <strong>{formatPrice(p.basePrice)}</strong> <span>{t('venues:detail.pitchCard.priceFromSuffix')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              ) : (
+                <Card>
+                  <EmptyState description={t('venues:detail.noPitchInfo')} />
+                </Card>
+              ),
+            },
+            {
+              key: 'prices',
+              label: t('venues:detail.tabs.prices'),
+              children: (
+                <Row gutter={[20, 20]}>
+                  <Col xs={24} lg={12}>
+                    <Card title={<span><ClockCircleOutlined /> {t('venues:detail.prices.openingHours')}</span>}>
+                      <table className="mb-vd-hours">
+                        <tbody>
+                          {DAYS.map((name, i) => {
+                            const h = hours.find((x) => x.dayOfWeek === i);
+                            return (
+                              <tr key={name} className={i === todayIdx ? 'is-today' : ''}>
+                                <td>{name}</td>
+                                <td>{!h ? '-' : h.isClosed ? <span className="mb-vd-hours__closed">{t('venues:shared.closed')}</span> : `${hhmm(h.openTime)} – ${hhmm(h.closeTime)}`}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </Card>
+                  </Col>
+                  <Col xs={24} lg={12}>
+                    <Card title={t('venues:detail.prices.title')}>
+                      <div className="mb-vd-pricelist">
+                        {pitches.map((p) => (
+                          <div key={p.pitchId}>
+                            <span>{t('venues:detail.prices.hourly', { name: p.name })}</span>
+                            <strong>{formatPrice(p.basePrice)}</strong>
                           </div>
                         ))}
+                        {v.amenities?.cleatRental && v.prices?.cleatRentalPrice != null && (
+                          <div>
+                            <span>{AMENITY_ICONS.cleatRental} {t('venues:detail.prices.cleatRentalPair')}</span>
+                            <strong>{formatPrice(v.prices.cleatRentalPrice)}</strong>
+                          </div>
+                        )}
+                        {v.amenities?.camera && v.prices?.cameraPrice != null && (
+                          <div>
+                            <span>{AMENITY_ICONS.camera} {t('venues:amenities.camera')}</span>
+                            <strong>{formatPrice(v.prices.cameraPrice)}</strong>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </Card>
-                </Col>
-              </Row>
-            ),
-          },
-          {
-            key: 'location',
-            label: t('venues:detail.tabs.location'),
-            children: (
-              <Row gutter={[20, 20]}>
-                <Col xs={24} lg={16}>
-                  <Card styles={{ body: { padding: 12 } }}>
-                    {coords ? (
-                      <MapContainer center={coords} zoom={15} className="mb-vd-map" scrollWheelZoom={false}>
-                        <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
-                        <Marker position={coords} icon={markerIcon} />
-                      </MapContainer>
+                      <p className="mb-hint" style={{ marginTop: 12 }}>
+                        {t('venues:detail.prices.note')}
+                      </p>
+                    </Card>
+                  </Col>
+                  <Col xs={24}>
+                    <h3 className="mb-vd-subtitle">{t('venues:detail.prices.activeCampaigns')}</h3>
+                    {(v.campaigns || []).length ? (
+                      <Row gutter={[16, 16]}>
+                        {v.campaigns.map((c) => (
+                          <Col key={c.campaignId} xs={24} md={12}>
+                            <CampaignCard c={c} pitches={pitches} />
+                          </Col>
+                        ))}
+                      </Row>
                     ) : (
-                      <EmptyState description={t('venues:detail.location.noLocation')} />
+                      <Card>
+                        <EmptyState description={t('venues:detail.prices.noCampaigns')} />
+                      </Card>
                     )}
-                  </Card>
-                </Col>
-                <Col xs={24} lg={8}>
-                  <Card title={t('venues:detail.location.address')}>
-                    <p className="mb-vd-address">{v.address}</p>
-                    <p className="mb-hint">{[v.district, v.city].filter(Boolean).join(', ')}</p>
-                    {coords && (
-                      <Button type="primary" block icon={<CompassOutlined />} href={directionsUrl(coords)} target="_blank" rel="noopener noreferrer">
-                        {t('venues:detail.location.directions')}
-                      </Button>
-                    )}
-                    {v.phone && (
-                      <Button block style={{ marginTop: 8 }} icon={<PhoneOutlined />} href={`tel:${v.phone.replace(/\s/g, '')}`}>
-                        {v.phone}
-                      </Button>
-                    )}
-                  </Card>
-                </Col>
-              </Row>
-            ),
-          },
-        ]}
-      />
+                  </Col>
+                  {v.cancellationPolicy && <Col xs={24}>{cancellation}</Col>}
+                </Row>
+              ),
+            },
+            {
+              key: 'reviews',
+              label: t('venues:detail.tabs.reviews', { count: v.reviewCount || 0 }),
+              children: (
+                <Row gutter={[20, 20]}>
+                  <Col xs={24} lg={8}>
+                    <Card>
+                      <div className="mb-vd-score">
+                        <strong>{v.reviewCount ? Number(v.rating || 0).toFixed(1) : '-'}</strong>
+                        <Rate disabled allowHalf value={Math.round((v.rating || 0) * 2) / 2} />
+                        <span>{t('venues:detail.reviews.count', { count: v.reviewCount || 0 })}</span>
+                      </div>
+                      <div className="mb-vd-bars">
+                        {[5, 4, 3, 2, 1].map((n) => {
+                          const c = breakdown[n] || breakdown[String(n)] || 0;
+                          return (
+                            <div key={n} className="mb-vd-bars__row">
+                              <span>{n}</span>
+                              <Progress
+                                percent={totalReviews ? Math.round((c / totalReviews) * 100) : 0}
+                                showInfo={false}
+                                size="small"
+                                strokeColor="var(--mb-gold)"
+                                trailColor="var(--mb-surface-2)"
+                              />
+                              <em>{c}</em>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col xs={24} lg={16}>
+                    <Card>
+                      {(v.reviews || []).length === 0 ? (
+                        <EmptyState description={t('venues:detail.reviews.empty')} />
+                      ) : (
+                        <div className="mb-vd-reviews">
+                          {v.reviews.map((r) => (
+                            <div key={r.reviewId} className="mb-vd-review">
+                              <PlayerAvatar player={r.player} size={40} />
+                              <div className="mb-vd-review__body">
+                                <div className="mb-vd-review__head">
+                                  {r.player ? <PlayerLink player={r.player} /> : <strong>{t('venues:detail.reviews.player')}</strong>}
+                                  <Rate disabled value={r.rating} className="mb-vd-review__rate" />
+                                  <span>{fromNow(r.createdAt)}</span>
+                                </div>
+                                {r.comment && <p>{r.comment}</p>}
+                                {r.ownerReply && (
+                                  <div className="mb-vd-review__reply">
+                                    <strong>{t('venues:detail.reviews.ownerReply')}</strong>
+                                    {r.repliedAt && <span> · {fromNow(r.repliedAt)}</span>}
+                                    <p>{r.ownerReply}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  </Col>
+                </Row>
+              ),
+            },
+            {
+              key: 'location',
+              label: t('venues:detail.tabs.location'),
+              children: (
+                <Row gutter={[20, 20]}>
+                  <Col xs={24} lg={16}>
+                    <Card styles={{ body: { padding: 12 } }}>
+                      {coords ? (
+                        <MapContainer center={coords} zoom={15} className="mb-vd-map" scrollWheelZoom={false}>
+                          <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
+                          <Marker position={coords} icon={markerIcon} />
+                        </MapContainer>
+                      ) : (
+                        <EmptyState description={t('venues:detail.location.noLocation')} />
+                      )}
+                    </Card>
+                  </Col>
+                  <Col xs={24} lg={8}>
+                    <Card title={t('venues:detail.location.address')}>
+                      <p className="mb-vd-address">{v.address}</p>
+                      <p className="mb-hint">{[v.district, v.city].filter(Boolean).join(', ')}</p>
+                      {coords && (
+                        <Button type="primary" block icon={<CompassOutlined />} href={directionsUrl(coords)} target="_blank" rel="noopener noreferrer">
+                          {t('venues:detail.location.directions')}
+                        </Button>
+                      )}
+                      {v.phone && (
+                        <Button block style={{ marginTop: 8 }} icon={<PhoneOutlined />} href={`tel:${v.phone.replace(/\s/g, '')}`}>
+                          {v.phone}
+                        </Button>
+                      )}
+                    </Card>
+                  </Col>
+                </Row>
+              ),
+            },
+          ]}
+        />
+      </SwipeTabs>
     </>
   );
 }

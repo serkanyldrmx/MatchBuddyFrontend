@@ -69,7 +69,9 @@
       "new": "Yeni şifre",
       "confirm": "Yeni şifre (tekrar)",
       "minLength_one": "En az {{count}} karakter olmalıdır.",
-      "minLength_other": "En az {{count}} karakter olmalıdır."
+      "minLength_other": "En az {{count}} karakter olmalıdır.",
+      "moved": "Güvenliğin için şifre değiştirirken mevcut şifren sorulur.",
+      "change": "Şifre değiştir"
     },
     "submit": "Değişiklikleri kaydet",
     "optional": "İsteğe bağlı"

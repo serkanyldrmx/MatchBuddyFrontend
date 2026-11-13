@@ -22,7 +22,8 @@ export const matchesApi = {
     api.post('/api/Match/ShareToGroups', { matchId, groupIds, note }).then((r) => r.data),
   feed: () => api.get('/api/Match/GetMatchFeed').then((r) => r.data || []),
   detail: (matchId) => api.get(`/api/Match/GetMatchDetail?matchId=${matchId}`).then((r) => r.data),
-  join: (matchId) => api.post('/api/Match/Join', { matchId }).then((r) => r.data),
+  // side/slot: sahada dokunulan boş yer (verilmezse sunucu takımı kendisi seçer)
+  join: (matchId, side, slot) => api.post('/api/Match/Join', { matchId, side, slot }).then((r) => r.data),
   /** reasonCode: emergency|health|bereavement|work|transport|other (isteğe bağlı) → { message, penalty, newScore } */
   leave: (matchId, reasonCode, note) => api.post('/api/Match/Leave', { matchId, reasonCode: reasonCode || undefined, note }).then((r) => r.data),
   confirm: (matchId) => api.post('/api/Match/Confirm', { matchId }).then((r) => r.data),

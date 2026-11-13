@@ -12,7 +12,9 @@
     "friends": "Arkadaşsınız",
     "following": "Takiptesin",
     "followBack": "Geri takip et",
-    "follow": "Takip et"
+    "follow": "Takip et",
+    "unfollowConfirm": "{{name}} takibini bırakmak istiyor musun?",
+    "unfollowFriendHint": "Karşılıklı takip bittiği için artık arkadaş görünmeyeceksiniz."
   },
   "friends": {
     "eyebrow": "Topluluk",

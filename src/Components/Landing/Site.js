@@ -300,6 +300,14 @@ function Nav({ sections }) {
     };
   }, [sections]);
 
+  // Telefonda açık menü: dışarı dokununca, Esc ile ya da sayfa kaydırılınca kapanır
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
   const isActive = (to) => {
     const [path, hash] = to.split('#');
     if (hash) return pathname === '/' && active === hash;
@@ -307,6 +315,9 @@ function Nav({ sections }) {
   };
 
   return (
+    <>
+    {/* Menünün arkası (header'ın dışında: backdrop-filter sabit konumlu çocukları header'a hapseder) */}
+    {open && <button type="button" className="lp-nav__scrim" aria-label={t('nav.closeMenu')} onClick={() => setOpen(false)} />}
     <header className={`lp-nav ${scrolled ? 'is-scrolled' : ''} ${open ? 'is-open' : ''}`}>
       <div className="lp-wrap lp-nav__row">
         <Link to="/" onClick={go('/#top')} className="lp-nav__brand" aria-label="MatcBuddy">
@@ -330,9 +341,16 @@ function Nav({ sections }) {
               <Link to="/login" className="lp-btn is-ghost is-sm">
                 {t('nav.login')}
               </Link>
-              <Link to="/register" className="lp-btn is-primary is-sm">
-                {t('nav.register')}
-              </Link>
+              {/* İşletmeler sayfasında oyuncu kaydı değil işletme başvurusu */}
+              {pathname.startsWith('/isletme') ? (
+                <Link to="/isletme-basvuru" className="lp-btn is-primary is-sm">
+                  {t('nav.apply')}
+                </Link>
+              ) : (
+                <Link to="/register" className="lp-btn is-primary is-sm">
+                  {t('nav.register')}
+                </Link>
+              )}
             </>
           )}
           <button
@@ -355,6 +373,7 @@ function Nav({ sections }) {
       </nav>
       <span className="lp-nav__progress" ref={barRef} aria-hidden="true" />
     </header>
+    </>
   );
 }
 

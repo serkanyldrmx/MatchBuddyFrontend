@@ -33,6 +33,7 @@ import {
   useReservationResponder,
   ymd,
 } from './shared';
+import { SwipeTabs } from '../ui/Swipe';
 
 const { Text } = Typography;
 
@@ -364,7 +365,7 @@ export default function OwnerReservations() {
   ];
 
   return (
-    <>
+    <SwipeTabs>
       <PageHeader
         eyebrow={venue?.name}
         title={t('owner:reservations.title')}
@@ -488,6 +489,6 @@ export default function OwnerReservations() {
       />
       <ReservationDrawer open={Boolean(selected)} reservation={selected} onClose={() => setSelected(null)} responder={responder} />
       {responder.modal}
-    </>
+    </SwipeTabs>
   );
 }
