@@ -17,6 +17,7 @@ import {
   SearchOutlined,
   SunOutlined,
   TeamOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,9 @@ import { bookingUserCountRange, getParam, usePublicParams } from '../../api/para
 import SlotPicker, { DateStrip } from './SlotPicker';
 import ExternalVenueForm, { EMPTY_EXTERNAL, ExternalReceipt, externalStart } from './ExternalVenueForm';
 import { AMENITY_ICONS, VenueRating } from './Venues';
+import ShareMatchButton from '../Home/ShareMatchButton';
+import ShareToGroupModal from '../Home/ShareToGroupModal';
+import InviteModal from '../Invites/InviteModal';
 import './CreateMatch.css';
 
 // Sunucu hata kodları → sihirbazda dönülecek adım
@@ -207,6 +211,9 @@ export default function CreateMatch() {
   const [quoting, setQuoting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(null);
+  // Başarı ekranı: kadroyu toplamak için gruba gönder / arkadaş davet et
+  const [doneGroupOpen, setDoneGroupOpen] = useState(false);
+  const [doneInviteOpen, setDoneInviteOpen] = useState(false);
 
   /* ---------- Veri ---------- */
   useEffect(() => {
@@ -475,7 +482,40 @@ export default function CreateMatch() {
               {t('venues:createMatch.done.myCalendar')}
             </Button>,
           ]}
-        />
+        >
+          {done.matchId && (
+            <div className="mb-cm-gather">
+              <strong className="mb-cm-gather__title">{t('venues:createMatch.done.gatherTitle')}</strong>
+              <p className="mb-hint">{t('venues:createMatch.done.gatherText')}</p>
+              <div className="mb-cm-gather__actions">
+                <Button type="primary" size="large" icon={<TeamOutlined />} onClick={() => setDoneGroupOpen(true)}>
+                  {t('match:shareGroup.button')}
+                </Button>
+                <Button size="large" icon={<UserAddOutlined />} onClick={() => setDoneInviteOpen(true)}>
+                  {t('venues:createMatch.done.inviteFriends')}
+                </Button>
+                <ShareMatchButton matchId={done.matchId} />
+              </div>
+            </div>
+          )}
+        </Result>
+        {done.matchId && (
+          <>
+            <ShareToGroupModal
+              open={doneGroupOpen}
+              matchId={done.matchId}
+              matchName={matchName.trim()}
+              onClose={() => setDoneGroupOpen(false)}
+            />
+            <InviteModal
+              open={doneInviteOpen}
+              onClose={() => setDoneInviteOpen(false)}
+              kind="match"
+              targetId={done.matchId}
+              title={matchName.trim()}
+            />
+          </>
+        )}
       </Card>
     );
   }

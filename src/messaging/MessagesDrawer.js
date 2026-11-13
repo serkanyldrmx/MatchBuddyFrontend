@@ -25,7 +25,7 @@ import { onRealtime } from '../api/realtime';
 import { PlayerAvatar } from '../ui';
 import { apiErrorMessage, isErrorCode, fullName, getCurrentUser, mediaUrl } from '../utils/format';
 import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../utils/image';
-import { EmojiPicker, MessageMenu, ReactionChips, ReplyQuote, TypingDots, useLongPress, useTyping } from './MessageExtras';
+import { EmojiPicker, MessageMenu, MessageText, ReactionChips, ReplyQuote, TypingDots, useLongPress, useTyping } from './MessageExtras';
 import './messages.css';
 
 const { Text } = Typography;
@@ -1004,7 +1004,7 @@ function Conversation({ me, target, onRead, onNavigate }) {
                     ) : (
                       <>
                         {m.imageUrl && <BubbleImage url={m.imageUrl} onLoad={onImageLoad} />}
-                        {m.matchMessage && <div className="mb-bubble__text">{m.matchMessage}</div>}
+                        {m.matchMessage && <MessageText text={m.matchMessage} onNavigate={onNavigate} />}
                       </>
                     )}
                     <div className="mb-bubble__meta">

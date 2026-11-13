@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Button, Card, Col, Input, Row, Segmented, Select, Skeleton, Space, Spin } from 'antd';
 import {
@@ -78,6 +78,12 @@ function Home() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiOrder, setAiOrder] = useState(null); // matchId -> { rank, message }
   const [filter, setFilter] = useState('upcoming');
+  // "Açık maçlar": filtreyi değiştir ve listeye kaydır (telefonda liste uzun başlığın altında kalıyordu)
+  const filtersRef = useRef(null);
+  const showOpen = () => {
+    setFilter('open');
+    requestAnimationFrame(() => filtersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
   const [search, setSearch] = useState('');
   const [stadiumFilter, setStadiumFilter] = useState();
   const [pendingInvites, setPendingInvites] = useState(0);
@@ -185,7 +191,7 @@ function Home() {
             <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => navigate('/matches/new')}>
               {t('home:hero.createMatch')}
             </Button>
-            <Button size="large" icon={<SearchOutlined />} onClick={() => setFilter('open')} className="mb-ghost-btn">
+            <Button size="large" icon={<SearchOutlined />} onClick={showOpen} className="mb-ghost-btn">
               {t('home:hero.seeOpen')}
             </Button>
           </Space>
@@ -223,7 +229,7 @@ function Home() {
               <span className="mb-next__label">{t('home:next.label')}</span>
               <h3>{t('home:next.emptyTitle')}</h3>
               <p>{t('home:next.emptyText')}</p>
-              <Button type="primary" onClick={() => setFilter('open')}>
+              <Button type="primary" onClick={showOpen}>
                 {t('home:next.findMatch')}
               </Button>
             </div>
@@ -288,7 +294,7 @@ function Home() {
             </Button>
           </div>
 
-          <div className="mb-filters">
+          <div className="mb-filters" ref={filtersRef}>
             <Segmented options={filterOptions} value={filter} onChange={setFilter} />
             <Space wrap className="mb-filters__search">
               <Input

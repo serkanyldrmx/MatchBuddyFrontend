@@ -1,31 +1,45 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { App, Badge, Button, Card, List, Segmented, Skeleton, Typography } from 'antd';
-import { BellOutlined, CheckOutlined } from '@ant-design/icons';
+import { App, Button, Card, Segmented, Skeleton } from 'antd';
+import { BellOutlined, CheckOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 import { api } from '../../api/config';
-import { NOTIFICATIONS_CHANGED } from '../../layout/NotificationBell';
-import { NOTIFICATION_TYPES } from '../../layout/notificationTypes';
+import { onRealtime } from '../../api/realtime';
+import { markNotificationRead, NotificationRow, NOTIFICATIONS_CHANGED } from '../../layout/NotificationBell';
 import { EmptyState, PageHeader } from '../../ui';
-import { apiErrorMessage, formatDateTime, fromNow, getCurrentUser } from '../../utils/format';
+import { apiErrorMessage, getCurrentUser } from '../../utils/format';
 import './Notification.css';
 
-const { Text } = Typography;
+// Bugün / Dün / Bu hafta / Daha önce
+const groupOf = (date) => {
+  const d = dayjs(date);
+  const today = dayjs().startOf('day');
+  if (!d.isBefore(today)) return 'today';
+  if (!d.isBefore(today.subtract(1, 'day'))) return 'yesterday';
+  if (!d.isBefore(today.subtract(6, 'day'))) return 'week';
+  return 'older';
+};
+const GROUP_ORDER = ['today', 'yesterday', 'week', 'older'];
 
 const NotificationList = () => {
   const { message } = App.useApp();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [markingAll, setMarkingAll] = useState(false);
 
   const load = useCallback(async () => {
     const me = getCurrentUser();
     try {
       const res = await api.get(`/api/Notifications/GetNotificationsByPlayerId?playerId=${me?.playerId}`);
-      setItems(
-        (res.data || []).sort((a, b) => new Date(b.notification?.createdAt) - new Date(a.notification?.createdAt))
-      );
+      setItems((res.data || []).sort((a, b) => new Date(b.notification?.createdAt) - new Date(a.notification?.createdAt)));
+      setFailed(false);
     } catch (e) {
+      setFailed(true);
       message.error(apiErrorMessage(e, t('notifications:list.loadFailed')));
     } finally {
       setLoading(false);
@@ -34,20 +48,47 @@ const NotificationList = () => {
 
   useEffect(() => {
     load();
+    const off = onRealtime('notification', load);
+    return off;
   }, [load]);
-
-  const markRead = async (ids) => {
-    try {
-      await Promise.all(ids.map((id) => api.post(`/api/Notifications/MarkAsRead?playerNotificationId=${id}`)));
-      setItems((list) => list.map((n) => (ids.includes(n.playerNotificationId) ? { ...n, isRead: true } : n)));
-      window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED));
-    } catch (e) {
-      message.error(apiErrorMessage(e, t('notifications:list.updateFailed')));
-    }
-  };
 
   const unread = items.filter((n) => !n.isRead);
   const visible = useMemo(() => (filter === 'unread' ? items.filter((n) => !n.isRead) : items), [items, filter]);
+  const groups = useMemo(() => {
+    const map = {};
+    visible.forEach((n) => {
+      const g = groupOf(n.notification?.createdAt);
+      (map[g] = map[g] || []).push(n);
+    });
+    return GROUP_ORDER.filter((g) => map[g]?.length).map((g) => ({ key: g, items: map[g] }));
+  }, [visible]);
+
+  const markAll = async () => {
+    setMarkingAll(true);
+    try {
+      try {
+        await api.post('/api/Notifications/MarkAllAsRead');
+      } catch (e) {
+        // Eski sunucu: tek tek işaretle
+        if (e?.response?.status !== 404) throw e;
+        await Promise.all(unread.map((n) => api.post(`/api/Notifications/MarkAsRead?playerNotificationId=${n.playerNotificationId}`)));
+      }
+      setItems((list) => list.map((n) => ({ ...n, isRead: true })));
+      window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED));
+    } catch (e) {
+      message.error(apiErrorMessage(e, t('notifications:list.updateFailed')));
+    } finally {
+      setMarkingAll(false);
+    }
+  };
+
+  const openItem = (n, link) => {
+    if (!n.isRead) {
+      setItems((list) => list.map((x) => (x.playerNotificationId === n.playerNotificationId ? { ...x, isRead: true } : x)));
+      markNotificationRead(n);
+    }
+    if (link) navigate(link);
+  };
 
   return (
     <>
@@ -56,14 +97,14 @@ const NotificationList = () => {
         subtitle={t('notifications:list.subtitle')}
         icon={<BellOutlined />}
         extra={
-          <Button icon={<CheckOutlined />} disabled={!unread.length} onClick={() => markRead(unread.map((n) => n.playerNotificationId))}>
+          <Button icon={<CheckOutlined />} disabled={!unread.length} loading={markingAll} onClick={markAll}>
             {t('notifications:list.markAllRead')}
           </Button>
         }
       />
-      <Card bordered={false}>
+      <Card bordered={false} className="mb-notif-card">
         <Segmented
-          style={{ marginBottom: 8 }}
+          className="mb-notif-filter"
           value={filter}
           onChange={setFilter}
           options={[
@@ -73,46 +114,25 @@ const NotificationList = () => {
         />
         {loading ? (
           <Skeleton active avatar paragraph={{ rows: 4 }} />
+        ) : failed && items.length === 0 ? (
+          <EmptyState description={t('notifications:list.loadFailed')}>
+            <Button icon={<ReloadOutlined />} onClick={load}>
+              {t('notifications:list.retry')}
+            </Button>
+          </EmptyState>
         ) : visible.length === 0 ? (
           <EmptyState description={filter === 'unread' ? t('notifications:list.emptyUnread') : t('notifications:list.empty')} />
         ) : (
-          <List
-            dataSource={visible}
-            renderItem={(n) => {
-              const type = NOTIFICATION_TYPES[n.notification?.type] || NOTIFICATION_TYPES.default;
-              return (
-                <List.Item
-                  className={`mb-notif-row ${n.isRead ? '' : 'is-unread'}`}
-                  actions={
-                    n.isRead
-                      ? []
-                      : [
-                          <Button key="read" size="small" type="link" onClick={() => markRead([n.playerNotificationId])}>
-                            {t('notifications:list.markRead')}
-                          </Button>,
-                        ]
-                  }
-                >
-                  <List.Item.Meta
-                    avatar={
-                      <Badge dot={!n.isRead} offset={[-2, 2]}>
-                        <span className="mb-notif-icon" style={{ background: type.bg, color: type.color, width: 40, height: 40, fontSize: 18 }}>
-                          {type.icon}
-                        </span>
-                      </Badge>
-                    }
-                    title={<Text strong={!n.isRead}>{n.notification?.text}</Text>}
-                    description={
-                      <Text type="secondary" style={{ fontSize: 12 }} title={formatDateTime(n.notification?.createdAt)}>
-                        {type.label} · {fromNow(n.notification?.createdAt)}
-                      </Text>
-                    }
-                  />
-                </List.Item>
-              );
-            }}
-          />
+          groups.map((g) => (
+            <section key={g.key} className="mb-notif-group">
+              <h3 className="mb-notif-group__title">{t(`notifications:groups.${g.key}`)}</h3>
+              {g.items.map((n) => (
+                <NotificationRow key={n.playerNotificationId} n={n} onOpen={openItem} />
+              ))}
+            </section>
+          ))
         )}
+        <p className="mb-hint mb-notif-hint">{t('notifications:list.tapHint')}</p>
       </Card>
     </>
   );

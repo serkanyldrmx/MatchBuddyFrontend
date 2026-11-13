@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Radio, message } from 'antd';
+import { Alert, Button, Form, Input, Radio, message } from 'antd';
 import { LockOutlined, MailOutlined, MessageOutlined, NumberOutlined, UserOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
@@ -20,11 +20,37 @@ export default function ForgotPassword() {
   const [channel, setChannel] = useState('email');
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  // Sunucuda gerçekten kurulu kanallar (GET /api/Auth/Providers → channels). null = henüz bilinmiyor.
+  const [channels, setChannels] = useState(null);
+  const [requestForm] = Form.useForm();
   const [resetForm] = Form.useForm();
   const resendSeconds = Number(usePublicParam('auth.codeResendCooldownSeconds')) || 60;
   const codeMinutes = Number(usePublicParam('auth.codeTtlMinutes')) || 15;
   const minLength = Number(usePublicParam('security.passwordMinLength')) || 6;
   const needLetterDigit = usePublicParam('auth.passwordRequireLetterAndDigit') === true;
+
+  useEffect(() => {
+    let alive = true;
+    authApi
+      .providers()
+      .then((r) => {
+        if (!alive || !r?.channels) return;
+        setChannels(r.channels);
+        // Varsayılan kanal kapalıysa açık olana geç
+        if (!r.channels.email && r.channels.sms) {
+          setChannel('sms');
+          requestForm.setFieldsValue({ channel: 'sms' });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [requestForm]);
+
+  const emailOff = channels ? !channels.email : false;
+  const smsOff = channels ? !channels.sms : false;
+  const noChannel = emailOff && smsOff;
 
   useEffect(() => {
     if (cooldown <= 0) return undefined;
@@ -77,12 +103,24 @@ export default function ForgotPassword() {
     >
       {step === 1 ? (
         <Form
+          form={requestForm}
           layout="vertical"
           className="mb-auth__form"
           requiredMark={false}
           initialValues={{ channel: 'email' }}
           onFinish={(v) => sendCode(v.identifier, v.channel)}
         >
+          {noChannel && (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={t('auth:forgot.unavailableTitle')}
+              description={
+                <Trans i18nKey="auth:forgot.unavailableText" components={{ a: <Link to="/communication" /> }} />
+              }
+            />
+          )}
           <Form.Item
             name="identifier"
             label={t('auth:forgot.identifier')}
@@ -93,12 +131,17 @@ export default function ForgotPassword() {
           </Form.Item>
           <Form.Item name="channel" label={t('auth:forgot.channel')}>
             <Radio.Group optionType="button" buttonStyle="solid" size="large" style={{ display: 'flex' }}>
-              <Radio.Button value="email" style={{ flex: 1, textAlign: 'center' }}><MailOutlined /> {t('auth:forgot.email')}</Radio.Button>
-              <Radio.Button value="sms" style={{ flex: 1, textAlign: 'center' }}><MessageOutlined /> {t('auth:forgot.sms')}</Radio.Button>
+              <Radio.Button value="email" disabled={emailOff} style={{ flex: 1, textAlign: 'center' }}><MailOutlined /> {t('auth:forgot.email')}</Radio.Button>
+              <Radio.Button value="sms" disabled={smsOff} style={{ flex: 1, textAlign: 'center' }}><MessageOutlined /> {t('auth:forgot.sms')}</Radio.Button>
             </Radio.Group>
           </Form.Item>
+          {!noChannel && (emailOff || smsOff) && (
+            <p className="mb-hint" style={{ marginTop: -8 }}>
+              {emailOff ? t('auth:forgot.emailOff') : t('auth:forgot.smsOff')}
+            </p>
+          )}
           <Form.Item className="mb-auth__submit">
-            <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+            <Button type="primary" htmlType="submit" size="large" block loading={loading} disabled={noChannel}>
               {t('auth:forgot.sendCode')}
             </Button>
           </Form.Item>
@@ -137,6 +180,7 @@ export default function ForgotPassword() {
               {t('auth:forgot.resetSubmit')}
             </Button>
           </Form.Item>
+          <p className="mb-hint">{t(`auth:forgot.notReceived.${channel}`)}</p>
           <div className="mb-auth__row">
             <Button type="link" className="mb-auth__link" style={{ padding: 0 }} onClick={() => setStep(1)}>
               {t('auth:forgot.changeMethod')}

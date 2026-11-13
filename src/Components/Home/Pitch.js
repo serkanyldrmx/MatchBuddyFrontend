@@ -11,6 +11,7 @@ import {
   EditOutlined,
   LoginOutlined,
   MessageOutlined,
+  PictureOutlined,
   PlusOutlined,
   SaveOutlined,
   SwapOutlined,
@@ -22,6 +23,7 @@ import { PlayerAvatar, ReliabilityBadge } from '../../ui';
 import { intlLocale } from '../../i18n';
 import { fullName } from '../../utils/format';
 import { buildFormation, ROLE_LABELS, roleShort } from './formations';
+import LineupImageModal from './LineupImageModal';
 
 const COMPACT_QUERY = '(max-width: 720px)';
 
@@ -375,7 +377,10 @@ function Pitch({
   // Diziliş düzenleme: { [side]: entry[] } taslağı; null = düzenleme kapalı
   const [draft, setDraft] = useState(null);
   const [saving, setSaving] = useState(false);
-  const editing = !!draft && manage;
+  const [imageOpen, setImageOpen] = useState(false);
+  // Diziliş düzenleme kadrodaki herkese açık (canArrange); misafir ekleme/silme yalnızca yöneticide
+  const arrange = !!(detail.canArrange ?? detail.canManage) && !closed;
+  const editing = !!draft && arrange;
 
   const placed = useMemo(
     () =>
@@ -618,24 +623,33 @@ function Pitch({
     })
   );
 
-  const canArrange = manage && !!onArrange && home.roster.count + away.roster.count > 0;
+  const canArrange = arrange && !!onArrange && home.roster.count + away.roster.count > 0;
 
   return (
     <div className={`mb-pitch ${editing ? 'is-editing' : ''}`}>
       <div className="mb-pitch__head">
         {teamLabel(home, homeLabel)}
-        {manage && !editing && (
+        {!editing && (
           <span className="mb-pitch__tools">
+            {home.roster.count + away.roster.count > 0 && (
+              <Tooltip title={t('match:lineupImage.tooltip')}>
+                <Button size="small" icon={<PictureOutlined />} className="mb-pitch__add" onClick={() => setImageOpen(true)}>
+                  {t('match:lineupImage.button')}
+                </Button>
+              </Tooltip>
+            )}
             {canArrange && (
               <Button size="small" icon={<DragOutlined />} className="mb-pitch__add" onClick={startEdit}>
                 {t('match:pitch.arrange')}
               </Button>
             )}
-            <Tooltip title={freeTotal <= 0 ? t('match:pitch.noFreeSpots') : undefined}>
-              <Button size="small" icon={<UserAddOutlined />} className="mb-pitch__add" disabled={freeTotal <= 0} onClick={() => onAddGuest()}>
-                {t('match:guest.addByName')}
-              </Button>
-            </Tooltip>
+            {manage && (
+              <Tooltip title={freeTotal <= 0 ? t('match:pitch.noFreeSpots') : undefined}>
+                <Button size="small" icon={<UserAddOutlined />} className="mb-pitch__add" disabled={freeTotal <= 0} onClick={() => onAddGuest()}>
+                  {t('match:guest.addByName')}
+                </Button>
+              </Tooltip>
+            )}
           </span>
         )}
         <span className="mb-pitch__head-away">{teamLabel(away, awayLabel)}</span>
@@ -669,6 +683,16 @@ function Pitch({
       </div>
 
       <div className="mb-pitch__foot">{teamLabel(away, awayLabel)}</div>
+
+      <LineupImageModal
+        open={imageOpen}
+        onClose={() => setImageOpen(false)}
+        sides={sides}
+        detail={detail}
+        homeLabel={homeLabel}
+        awayLabel={awayLabel}
+        perSide={perSide}
+      />
     </div>
   );
 }

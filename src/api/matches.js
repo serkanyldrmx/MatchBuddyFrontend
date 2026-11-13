@@ -9,12 +9,17 @@ export const SIDE = { HOME: 1, AWAY: 2 };
 export const matchesApi = {
   /** Haftalık tekrarı durdur (kurucu / işletme) */
   stopRepeat: (matchId) => api.post('/api/Match/StopRepeat', { matchId }).then((r) => r.data),
+  /** Maç bilgilerini düzenle (kurucu / admin): { matchId, matchName, description, userCount } */
+  update: (payload) => api.post('/api/Match/UpdateMatch', payload).then((r) => r.data),
   // Harici (anlaşmasız) saha — sözleşme: MatcBuddy/docs/external-venues-api.md
   createExternal: (payload) => api.post('/api/Match/SaveExternalMatch', payload).then((r) => r.data),
   updateExternal: (payload) => api.post('/api/Match/UpdateExternalMatch', payload).then((r) => r.data),
   myExternalVenues: () => api.get('/api/Match/MyExternalVenues').then((r) => r.data || []),
   /** Davet linki — docs/engagement-api.md §3: { code, url, text } */
   shareLink: (matchId) => api.post('/api/Match/ShareLink', { matchId }).then((r) => r.data),
+  /** Maçı sohbet gruplarına gönder → { groupIds, message } */
+  shareToGroups: (matchId, groupIds, note) =>
+    api.post('/api/Match/ShareToGroups', { matchId, groupIds, note }).then((r) => r.data),
   feed: () => api.get('/api/Match/GetMatchFeed').then((r) => r.data || []),
   detail: (matchId) => api.get(`/api/Match/GetMatchDetail?matchId=${matchId}`).then((r) => r.data),
   join: (matchId) => api.post('/api/Match/Join', { matchId }).then((r) => r.data),

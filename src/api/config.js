@@ -55,6 +55,13 @@ const skipsRefresh = (url) => NO_REFRESH_PATHS.some((p) => (url || '').includes(
 const handleUnauthorized = () => {
   clearSession();
   if (!['/', '/login'].includes(window.location.pathname)) {
+    // Girişten sonra kaldığı sayfaya dönsün (utils/returnTo.js ile aynı anahtar)
+    try {
+      const path = `${window.location.pathname}${window.location.search}`;
+      if (path.startsWith('/') && !path.startsWith('//')) sessionStorage.setItem('mb:returnTo', path);
+    } catch {
+      /* yok say */
+    }
     window.location.href = '/login';
   }
 };

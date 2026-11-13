@@ -196,6 +196,17 @@ export default function AppLayout() {
     }
   }, [location.pathname, openMessages, navigate]);
 
+  // Mesaj bildirimi / push: ?messages=1 mesaj panelini açar
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('messages') === '1') {
+      openMessages();
+      params.delete('messages');
+      const rest = params.toString();
+      navigate(`${location.pathname}${rest ? `?${rest}` : ''}`, { replace: true });
+    }
+  }, [location.search, location.pathname, openMessages, navigate]);
+
   useEffect(() => setMobileNavOpen(false), [location.pathname]);
 
   const menu = (

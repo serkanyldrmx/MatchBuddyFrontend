@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Popover, Tooltip } from 'antd';
-import { CopyOutlined, DeleteOutlined, RollbackOutlined, SmileOutlined } from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined, RightOutlined, RollbackOutlined, SmileOutlined, TrophyOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { invokeRealtime, onRealtime } from '../api/realtime';
 
@@ -210,5 +211,62 @@ export function TypingDots() {
       <i />
       <i />
     </span>
+  );
+}
+
+/* ---------------- Mesaj metni: bağlantılar + maç kartı ---------------- */
+
+const URL_RE = /(https?:\/\/[^\s<>"']+)/g;
+// Uygulamanın maç bağlantıları: davet linki (/m/KOD, /davet/KOD) ya da maç detayı (/match-details/ID)
+const SHARE_RE = /\/(?:m|davet)\/([A-Za-z0-9]{4,16})(?=[/?#]|$)/;
+const DETAIL_RE = /\/match-details\/(\d+)(?=[/?#]|$)/;
+
+/** Mesajdaki ilk maç bağlantısının uygulama içi yolu (yoksa null) */
+export function matchLinkOf(text) {
+  if (!text) return null;
+  const urls = text.match(URL_RE) || [];
+  for (const raw of urls) {
+    try {
+      const u = new URL(raw);
+      const share = u.pathname.match(SHARE_RE);
+      if (share) return `/davet/${share[1]}`;
+      const detail = u.pathname.match(DETAIL_RE);
+      if (detail) return `/match-details/${detail[1]}`;
+    } catch {
+      /* geçersiz adres: atla */
+    }
+  }
+  return null;
+}
+
+/**
+ * Sohbet balonundaki metin: adresler tıklanabilir; maç bağlantısı varsa altında "Maçı aç / katıl" kartı.
+ * onNavigate: uygulama içi bağlantıya gidilirken (mesaj panelini kapatmak için) çağrılır.
+ */
+export function MessageText({ text, onNavigate }) {
+  const { t } = useTranslation();
+  const matchPath = matchLinkOf(text);
+  const parts = text.split(URL_RE);
+  return (
+    <>
+      <div className="mb-bubble__text">
+        {parts.map((part, i) =>
+          i % 2 === 1 ? (
+            <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="mb-bubble__link">
+              {part}
+            </a>
+          ) : (
+            <React.Fragment key={i}>{part}</React.Fragment>
+          )
+        )}
+      </div>
+      {matchPath && (
+        <Link to={matchPath} onClick={onNavigate} className="mb-bubble__match">
+          <TrophyOutlined className="mb-bubble__match-icon" />
+          <span>{matchPath.startsWith('/davet/') ? t('messages:chat.matchJoin') : t('messages:chat.matchOpen')}</span>
+          <RightOutlined />
+        </Link>
+      )}
+    </>
   );
 }

@@ -1,29 +1,139 @@
-.mb-notif-row.ant-list-item {
-  padding: 14px 12px;
-  border-radius: 10px;
+.mb-notif-card .ant-card-body {
+  padding: 16px;
 }
 
-.mb-notif-row.is-unread {
+.mb-notif-filter {
+  margin-bottom: 8px;
+}
+
+.mb-notif-group + .mb-notif-group {
+  margin-top: 12px;
+}
+
+.mb-notif-group__title {
+  margin: 8px 4px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mb-text-2);
+}
+
+/* Tıklanabilir bildirim satırı (liste sayfası + zil açılır penceresi) */
+.mb-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mb-notif-item:hover,
+.mb-notif-item:focus-visible {
   background: var(--mb-primary-soft);
+  outline: none;
+}
+
+.mb-notif-item.is-unread {
+  background: var(--mb-primary-soft);
+}
+
+.mb-notif-item.is-static {
+  cursor: default;
+}
+
+.mb-notif-item .mb-notif-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.mb-notif-item.is-compact {
+  padding: 10px;
+}
+
+.mb-notif-item.is-compact .mb-notif-icon {
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+}
+
+.mb-notif-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mb-notif-item__text {
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.mb-notif-item.is-compact .mb-notif-item__text {
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mb-notif-item__meta.ant-typography {
+  font-size: 12px;
+}
+
+.mb-notif-item__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--mb-primary);
+}
+
+.mb-notif-item__chevron {
+  flex: none;
+  align-self: center;
+  font-size: 12px;
+  color: var(--mb-text-2);
+}
+
+.mb-notif-hint {
+  margin: 12px 4px 0;
+}
+
+/* Zil açılır penceresi: ekran genişliğini asla aşmaz */
+.mb-notif-popover {
+  width: min(380px, calc(100vw - 32px));
+}
+
+.mb-notif-popover__list {
+  max-height: min(60vh, 440px);
+  overflow-y: auto;
+  margin: 0 -4px;
 }
 
 /* ---------- Telefon ---------- */
 @media (max-width: 767px) {
-  .mb-notif-row.ant-list-item {
+  .mb-notif-card .ant-card-body {
+    padding: 10px 6px;
+  }
+  .mb-notif-item {
     padding: 12px 10px;
+    min-height: 56px;
   }
-  .mb-notif-row .ant-list-item-meta-title {
-    overflow-wrap: anywhere;
-  }
-  /* "Okundu" aksiyonu: metne daha çok yer kalsın, rahat dokunulsun */
-  .mb-notif-row .ant-list-item-action {
-    margin-inline-start: 8px;
-  }
-  .mb-notif-row .ant-list-item-action > li {
-    padding: 0;
-  }
-  .mb-notif-row .ant-list-item-action .ant-btn {
-    height: 40px;
-    padding-inline: 12px;
+  .mb-notif-filter {
+    margin: 0 4px 8px;
   }
 }

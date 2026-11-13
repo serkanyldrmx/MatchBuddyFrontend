@@ -288,5 +288,8 @@
   "VENUE_START_END_DATE_REQUIRED": "Başlangıç ve bitiş tarihi gerekli.",
   "VENUE_START_END_TIME_REQUIRED": "Başlangıç ve bitiş zamanı gerekli.",
   "VENUE_START_TIME_REQUIRED": "Başlangıç zamanı gerekli.",
-  "VENUE_USERNAME_TAKEN": "Bu kullanıcı adı zaten kullanılıyor."
+  "VENUE_USERNAME_TAKEN": "Bu kullanıcı adı zaten kullanılıyor.",
+  "AUTH_CHANNEL_UNAVAILABLE": "Şu an bu yolla kod gönderemiyoruz. Diğer yöntemi dene ya da destek ekibine yaz.",
+  "MATCH_EDIT_CLOSED": "Oynanmış ya da reddedilmiş maç düzenlenemez.",
+  "MATCH_CAPACITY_BELOW_ROSTER": "Kadroda şu an {{0}} kişi var; oyuncu sayısı bundan az olamaz."
 }

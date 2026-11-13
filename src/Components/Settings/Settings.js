@@ -7,9 +7,10 @@ import { authApi } from '../../api/auth';
 import { emit, MESSAGE_PERMISSION, PROFILE_VISIBILITY, socialApi, SOCIAL_CHANGED } from '../../api/social';
 import { availableLanguages, changePlayerLanguage, loadPlayerSettings, usePlayerSettings } from '../../api/playerSettings';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
-import { apiErrorMessage, fullName } from '../../utils/format';
+import { apiErrorMessage, fullName, getCurrentUser } from '../../utils/format';
 import ThemeSwitch from '../../theme/ThemeSwitch';
-import { disablePush, enablePush, getPushState } from '../../pwa';
+import { disablePush, enablePush, getPushState, isNativeApp } from '../../pwa';
+import ChangePasswordModal from './ChangePasswordModal';
 import './Settings.css';
 
 // Metinler render sırasında çevrilir (settings:privacy.* / settings:notifications.*)
@@ -46,6 +47,10 @@ function PushToggle() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (isNativeApp()) {
+      setState('native');
+      return;
+    }
     getPushState().then(setState).catch(() => setState('unsupported'));
   }, []);
 
@@ -64,7 +69,12 @@ function PushToggle() {
   };
 
   if (state == null) return null;
-  const hint = { 'ios-install': 'settings:push.iosInstall', denied: 'settings:push.deniedHint', unsupported: 'settings:push.unsupported' }[state];
+  const hint = {
+    'ios-install': 'settings:push.iosInstall',
+    denied: 'settings:push.deniedHint',
+    unsupported: 'settings:push.unsupported',
+    native: 'settings:push.nativeApp',
+  }[state];
   return (
     <div className="mb-settings__switch mb-settings__switch--push">
       <div>
@@ -106,6 +116,9 @@ export default function Settings() {
   const [blockedLoading, setBlockedLoading] = useState(true);
   const [unblocking, setUnblocking] = useState(null);
 
+  // Google / Facebook ile açılan hesapta şifre yoktur: silme onayında şifre istenmez (sunucu da istemez)
+  const hasPassword = getCurrentUser()?.hasPassword !== false;
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');
@@ -161,7 +174,7 @@ export default function Settings() {
   };
 
   const confirmWord = t('settings:deleteAccount.confirmWord');
-  const canDelete = password && confirmText.trim().toLocaleUpperCase(i18n.language) === confirmWord.toLocaleUpperCase(i18n.language);
+  const canDelete = (!hasPassword || password) && confirmText.trim().toLocaleUpperCase(i18n.language) === confirmWord.toLocaleUpperCase(i18n.language);
 
   // KVKK: kişisel verilerin JSON olarak indirilmesi (docs/auth-api.md, /api/Me/Export)
   const exportData = async () => {
@@ -191,7 +204,7 @@ export default function Settings() {
   const deleteAccount = async () => {
     setDeleting(true);
     try {
-      await socialApi.deleteAccount(password);
+      await socialApi.deleteAccount(hasPassword ? password : undefined);
       logout();
       window.location.href = '/';
     } catch (e) {
@@ -327,6 +340,15 @@ export default function Settings() {
           </div>
           <Button icon={<DownloadOutlined />} onClick={exportData}>{t('settings:account.exportButton')}</Button>
         </div>
+        {hasPassword && (
+          <div className="mb-settings__danger-row">
+            <div>
+              <strong>{t('settings:password.title')}</strong>
+              <span>{t('settings:password.description')}</span>
+            </div>
+            <Button icon={<LockOutlined />} onClick={() => setPasswordOpen(true)}>{t('settings:password.button')}</Button>
+          </div>
+        )}
         <div className="mb-settings__danger-row">
           <div>
             <strong>{t('settings:account.logoutAllTitle')}</strong>
@@ -362,15 +384,17 @@ export default function Settings() {
           message={t('settings:deleteAccount.alertTitle')}
           description={t('settings:deleteAccount.alertDescription')}
         />
-        <div className="mb-settings__field">
-          <label htmlFor="mb-delete-password">{t('settings:deleteAccount.password')}</label>
-          <Input.Password
-            id="mb-delete-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
-        </div>
+        {hasPassword && (
+          <div className="mb-settings__field">
+            <label htmlFor="mb-delete-password">{t('settings:deleteAccount.password')}</label>
+            <Input.Password
+              id="mb-delete-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
+          </div>
+        )}
         <div className="mb-settings__field">
           <label htmlFor="mb-delete-confirm">
             <Trans i18nKey="settings:deleteAccount.typeToConfirm" values={{ word: confirmWord }} components={{ b: <strong /> }} />
@@ -378,6 +402,7 @@ export default function Settings() {
           <Input id="mb-delete-confirm" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder={confirmWord} />
         </div>
       </Modal>
+      <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
     </div>
   );
 }

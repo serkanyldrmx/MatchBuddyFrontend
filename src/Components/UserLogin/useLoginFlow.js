@@ -6,6 +6,7 @@ import { saveSession } from '../../api/config';
 import { authApi } from '../../api/auth';
 import { apiErrorMessage } from '../../utils/format';
 import { homePathFor, roleOf, ROLE } from '../../utils/roles';
+import { takeReturnTo } from '../../utils/returnTo';
 
 /**
  * Giriş yanıtı (AuthLoginResponse) sonrası ortak akış — kullanıcı adı/şifre, Google ve Facebook için aynı:
@@ -33,6 +34,12 @@ export default function useLoginFlow() {
     const pendingInvite = localStorage.getItem('mb.pendingInvite');
     if (pendingInvite && roleOf(player) === ROLE.PLAYER) {
       navigate(`/davet/${pendingInvite}`, { replace: true });
+      return;
+    }
+    // Bildirimden / linkten gelindiyse o sayfaya dön (yalnızca oyuncu sayfaları)
+    const back = takeReturnTo();
+    if (back && roleOf(player) === ROLE.PLAYER && !back.startsWith('/adminPanel') && !back.startsWith('/venue/')) {
+      navigate(back, { replace: true });
       return;
     }
     navigate(homePathFor(player), { replace: true });

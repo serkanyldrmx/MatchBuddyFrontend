@@ -12,6 +12,11 @@ import { apiErrorMessage } from '../../utils/format';
 import ImageCrop from "../../ui/ImageCrop";
 import { ACCEPTED_IMAGE_ACCEPT, imageError, prepareImage } from "../../utils/image";
 
+const optionalInt = (v) => {
+  const n = Math.round(parseFloat(String(v ?? '').replace(',', '.')));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+};
+
 const { Option } = Select;
 
 const RegisterForm = () => {
@@ -43,9 +48,10 @@ const RegisterForm = () => {
       phoneNumber: "0" + values.phone,
       password: values.password,
       address: values.address,
-      size: parseFloat(values.size),
-      weight: parseFloat(values.weight),
-      age: parseInt(values.age),
+      // İsteğe bağlı alanlar: boşsa 0 (= belirtilmemiş; profil sayfaları 0'ı göstermez). Sunucu tam sayı bekler.
+      size: optionalInt(values.size),
+      weight: optionalInt(values.weight),
+      age: optionalInt(values.age),
       matchNotificationPermission: values.matchNotificationPermission ? 1 : 0,
       userScore: 0,
       // KVKK: güncel kullanım koşulları + aydınlatma metni sürümü (docs/auth-api.md)
@@ -241,20 +247,19 @@ const RegisterForm = () => {
             <Form.Item
               name="address"
               label={t('auth:register.address')}
-              rules={[{ required: true, message: t('auth:register.addressRequired') }]}
+              extra={t('auth:register.optional')}
             >
               <Input prefix={<HomeOutlined />} placeholder={t('auth:register.addressPlaceholder')} autoComplete="address-level2" />
             </Form.Item>
           </Col>
         </Row>
 
-        <h3 className="mb-auth__section"><span>03</span> {t('auth:register.sections.physical')}</h3>
+        <h3 className="mb-auth__section"><span>03</span> {t('auth:register.sections.physical')} <small>{t('auth:register.optionalShort')}</small></h3>
         <Row gutter={16}>
           <Col xs={24} sm={8}>
             <Form.Item
               name="size"
               label={t('auth:register.height')}
-              rules={[{ required: true, message: t('auth:register.heightRequired') }]}
             >
               <Input prefix={<ColumnHeightOutlined />} placeholder={t('auth:register.heightPlaceholder')} inputMode="decimal" />
             </Form.Item>
@@ -263,7 +268,6 @@ const RegisterForm = () => {
             <Form.Item
               name="weight"
               label={t('auth:register.weight')}
-              rules={[{ required: true, message: t('auth:register.weightRequired') }]}
             >
               <Input prefix={<DashboardOutlined />} placeholder={t('auth:register.weightPlaceholder')} inputMode="decimal" />
             </Form.Item>
@@ -272,7 +276,6 @@ const RegisterForm = () => {
             <Form.Item
               name="age"
               label={t('auth:register.age')}
-              rules={[{ required: true, message: t('auth:register.ageRequired') }]}
             >
               <Input prefix={<NumberOutlined />} placeholder={t('auth:register.agePlaceholder')} inputMode="numeric" />
             </Form.Item>

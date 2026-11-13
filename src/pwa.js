@@ -9,6 +9,9 @@ import { API_BASE_URL, api, getToken } from './api/config';
 export const pushSupported = () =>
   typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 
+/** iPhone uygulaması (Capacitor kabuğu) içinde mi? Orada web push yoktur. */
+export const isNativeApp = () => !!window.Capacitor?.isNativePlatform?.();
+
 export const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent || '');
 export const isStandalone = () =>
   window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;

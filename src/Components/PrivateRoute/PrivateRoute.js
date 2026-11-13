@@ -1,8 +1,9 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getToken } from '../../api/config';
 import { getCurrentUser } from '../../utils/format';
 import { homePathFor, roleOf } from '../../utils/roles';
+import { rememberReturnTo } from '../../utils/returnTo';
 
 /**
  * Rol bazlı rota koruması (yetki kontrolü asıl olarak sunucuda yapılır).
@@ -10,7 +11,9 @@ import { homePathFor, roleOf } from '../../utils/roles';
  */
 const PrivateRoute = ({ role }) => {
   const user = getCurrentUser();
+  const location = useLocation();
   if (!user || !getToken()) {
+    rememberReturnTo(`${location.pathname}${location.search}`);
     return <Navigate to="/login" replace />;
   }
   if (roleOf(user) !== role) {

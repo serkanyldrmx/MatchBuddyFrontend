@@ -204,7 +204,10 @@
       "teamInvited": "Takım arkadaşlarına davet gönderildi.",
       "goToMatch": "Maç merkezine git",
       "backHome": "Fikstüre dön",
-      "myCalendar": "Takvimim"
+      "myCalendar": "Takvimim",
+      "gatherTitle": "Kadroda şimdilik sadece sen varsın",
+      "gatherText": "Maçı grubuna gönder, arkadaşlarını davet et ya da linki WhatsApp’ta paylaş; katılanlar kadroya otomatik eklenir.",
+      "inviteFriends": "Arkadaş davet et"
     },
     "viewVenue": "Tesisi incele",
     "slot": {

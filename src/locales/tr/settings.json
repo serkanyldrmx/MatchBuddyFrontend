@@ -58,7 +58,8 @@
     "deniedHint": "Bildirim izni tarayıcı ayarlarından kapatılmış. Açmak için site ayarlarından MatcBuddy'ye izin ver.",
     "iosInstall": "iPhone'da bildirim için önce Safari'de Paylaş → \"Ana Ekrana Ekle\" ile MatcBuddy'yi ekle, sonra oradan aç.",
     "unsupported": "Bu tarayıcı bildirimleri desteklemiyor.",
-    "failed": "Bildirim açılamadı."
+    "failed": "Bildirim açılamadı.",
+    "nativeApp": "Uygulama bildirimleri yakında geliyor. Şimdilik maç hatırlatmaları ve davetler uygulamadaki bildirim zilinde görünür."
   },
   "notifications": {
     "title": "Bildirimler",
@@ -116,5 +117,20 @@
     "logoutAllTitle": "Tüm cihazlardan çıkış",
     "logoutAllDescription": "Bu ve diğer tüm cihazlardaki oturumların kapanır.",
     "logoutAllButton": "Çıkış yap"
+  },
+  "password": {
+    "title": "Şifre değiştir",
+    "description": "Mevcut şifreni girerek yeni bir şifre belirle. Diğer cihazlardaki oturumların kapanır.",
+    "button": "Şifre değiştir",
+    "current": "Mevcut şifre",
+    "new": "Yeni şifre",
+    "confirm": "Yeni şifre (tekrar)",
+    "required": "Bu alan gerekli.",
+    "min": "Şifre en az {{count}} karakter olmalı.",
+    "letterDigit": "Şifre en az bir harf ve bir rakam içermeli.",
+    "mismatch": "Şifreler eşleşmiyor.",
+    "hint": "Şifreni unuttuysan çıkış yapıp giriş ekranındaki “Şifremi unuttum” bağlantısını kullan.",
+    "saved": "Şifren değiştirildi.",
+    "failed": "Şifre değiştirilemedi."
   }
 }

@@ -1180,3 +1180,37 @@
     -webkit-touch-callout: none;
   }
 }
+
+/* Mesajdaki bağlantılar ve maç kartı */
+.mb-bubble__link {
+  color: inherit;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.mb-bubble__match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(var(--mb-pitch-rgb), 0.16);
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mb-bubble__match:hover {
+  background: rgba(var(--mb-pitch-rgb), 0.26);
+  color: inherit;
+}
+
+.mb-bubble__match > span {
+  flex: 1;
+  text-align: left;
+}
+
+.mb-bubble__match-icon {
+  color: var(--mb-gold);
+}

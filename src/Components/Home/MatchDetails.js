@@ -43,6 +43,7 @@ import {
   VideoCameraOutlined,
   RobotOutlined,
   SyncOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Trans, useTranslation } from 'react-i18next';
@@ -63,6 +64,8 @@ import ExternalVenueCard from './ExternalVenueCard';
 import WeatherBadge from '../../ui/WeatherBadge';
 import ShareMatchButton from './ShareMatchButton';
 import LeaveMatchModal from './LeaveMatchModal';
+import EditMatchModal from './EditMatchModal';
+import ShareToGroupModal from './ShareToGroupModal';
 import { NoShowCard, SubstituteCard, WithdrawalsCard } from './ReliabilityPanels';
 import { roleShort, ROLE_LABELS } from './formations';
 import Pitch, { guestInitials, sideRoster } from './Pitch';
@@ -474,6 +477,7 @@ function MatchDetails() {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState('lineup');
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -484,19 +488,22 @@ function MatchDetails() {
   // Misafir oyuncu modalı: { open, guest?, side? }
   const [guestModal, setGuestModal] = useState({ open: false });
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [groupShareOpen, setGroupShareOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const d = await matchesApi.detail(matchId);
       if (!d) setNotFound(true);
       setDetail(d);
+      setLoadError(null);
     } catch (e) {
       if (e?.response?.status === 404) setNotFound(true);
-      else message.error(apiErrorMessage(e, t('match:details.loadFailed')));
+      else setLoadError(apiErrorMessage(e, t('match:details.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [matchId, message, t]);
+  }, [matchId, t]);
 
   useEffect(() => {
     load();
@@ -550,6 +557,33 @@ function MatchDetails() {
 
   if (loading) {
     return <PageLoader caption={t('match:details.loading')} />;
+  }
+  // Geçmiş yoksa (bildirimden / linkten doğrudan açıldıysa) geri tuşu ana sayfaya döner
+  const goBack = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/home'));
+
+  if (!notFound && !detail && loadError) {
+    return (
+      <Result
+        status="warning"
+        title={t('match:details.loadErrorTitle')}
+        subTitle={loadError}
+        extra={[
+          <Button
+            key="retry"
+            type="primary"
+            onClick={() => {
+              setLoading(true);
+              load();
+            }}
+          >
+            {t('match:details.retry')}
+          </Button>,
+          <Button key="home" onClick={() => navigate('/home')}>
+            {t('match:details.backToFixture')}
+          </Button>,
+        ]}
+      />
+    );
   }
   if (notFound || !detail) {
     return (
@@ -633,7 +667,13 @@ function MatchDetails() {
   const remove = () =>
     modal.confirm({
       title: t('match:details.deleteTitle'),
-      content: t('match:details.deleteContent'),
+      content: (
+        <>
+          <p style={{ marginBottom: 8 }}>{t('match:details.deleteContent')}</p>
+          {going.length > 1 && <p style={{ marginBottom: 8 }}>{t('match:details.deleteNotify', { count: going.length - 1 })}</p>}
+          {going.length > 1 && hoursLeft < 24 && <p className="mb-hint" style={{ margin: 0 }}>{t('match:details.deletePenalty')}</p>}
+        </>
+      ),
       okText: t('common:actions.delete'),
       okButtonProps: { danger: true },
       cancelText: t('common:actions.cancel'),
@@ -685,7 +725,7 @@ function MatchDetails() {
       {/* ---------- Skor tabelası ---------- */}
       <section className="mb-match-hero mb-pitch-bg">
         <div className="mb-match-hero__top">
-          <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} className="mb-ghost-link">
+          <Button type="text" icon={<ArrowLeftOutlined />} onClick={goBack} className="mb-ghost-link">
             {t('match:details.backLink')}
           </Button>
           <div className="mb-match-hero__chips">
@@ -773,7 +813,17 @@ function MatchDetails() {
                 {t('match:details.actions.invite')}
               </Button>
             )}
+            {canInvite && (
+              <Button size="large" icon={<TeamOutlined />} onClick={() => setGroupShareOpen(true)} className="mb-ghost-btn">
+                {t('match:shareGroup.button')}
+              </Button>
+            )}
             {!closed && <ShareMatchButton matchId={d.matchId} className="mb-ghost-btn" />}
+            {d.canManage && !closed && (
+              <Button size="large" icon={<EditOutlined />} onClick={() => setEditOpen(true)} className="mb-ghost-btn">
+                {t('match:edit.button')}
+              </Button>
+            )}
             {primaryAction}
           </div>
         </div>
@@ -981,9 +1031,18 @@ function MatchDetails() {
                     title={t('match:details.info.title')}
                     extra={
                       d.canManage && (
-                        <Button danger onClick={remove}>
-                          {t('match:details.actions.deleteMatch')}
-                        </Button>
+                        <span className="mb-info-actions">
+                          {!closed && (
+                            <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>
+                              {t('match:edit.button')}
+                            </Button>
+                          )}
+                          {!d.isPast && (
+                            <Button danger onClick={remove}>
+                              {t('match:details.actions.deleteMatch')}
+                            </Button>
+                          )}
+                        </span>
                       )
                     }
                   >
@@ -1050,6 +1109,7 @@ function MatchDetails() {
       </Modal>
 
       <LeaveMatchModal matchId={d.matchId} open={leaveOpen} onClose={() => setLeaveOpen(false)} onLeft={load} />
+      <EditMatchModal open={editOpen} detail={d} rosterCount={rosterCount} onClose={() => setEditOpen(false)} onSaved={load} />
       <GuestModal
         open={guestModal.open}
         matchId={d.matchId}
@@ -1067,6 +1127,7 @@ function MatchDetails() {
       />
 
       <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} kind="match" targetId={d.matchId} title={d.matchName} />
+      <ShareToGroupModal open={groupShareOpen} matchId={d.matchId} matchName={d.matchName} onClose={() => setGroupShareOpen(false)} />
     </>
   );
 }

@@ -229,7 +229,12 @@
       "empty": "Rakip olabileceğin bir takımın yok.",
       "createTeam": "Takım kur"
     },
-    "balanced": "Oyuncular güçlerine göre iki dengeli takıma ayrıldı."
+    "balanced": "Oyuncular güçlerine göre iki dengeli takıma ayrıldı.",
+    "loadErrorTitle": "Maç yüklenemedi",
+    "retry": "Tekrar dene",
+    "deleteNotify_one": "Kadrodaki {{count}} oyuncuya maçın iptal edildiği bildirilecek.",
+    "deleteNotify_other": "Kadrodaki {{count}} oyuncuya maçın iptal edildiği bildirilecek.",
+    "deletePenalty": "Maça 24 saatten az kaldığı için iptal, güvenilirlik puanını düşürebilir."
   },
   "leave": {
     "title": "Maça gelemiyorum",
@@ -319,5 +324,59 @@
     "copied": "Davet linki kopyalandı.",
     "title": "Maça davet",
     "failed": "Davet linki oluşturulamadı."
+  },
+  "edit": {
+    "button": "Düzenle",
+    "title": "Maçı düzenle",
+    "name": "Maç adı",
+    "nameRequired": "Maç adı gerekli.",
+    "nameLength": "Maç adı 2–100 karakter olmalı.",
+    "userCount": "Oyuncu sayısı (iki takım toplam)",
+    "userCountHint": "Takım başına {{perSide}} kişi · en az {{min}}, en çok {{max}}",
+    "userCountRange": "Oyuncu sayısı {{min}} ile {{max}} arasında olmalı.",
+    "rosterNote_one": "Kadroda şu an {{count}} kişi var; oyuncu sayısı bunun altına inemez. Artırırsan yedekteki oyuncular kadroya alınır.",
+    "rosterNote_other": "Kadroda şu an {{count}} kişi var; oyuncu sayısı bunun altına inemez. Artırırsan yedekteki oyuncular kadroya alınır.",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "Örn. Herkes 150 ₺ getirsin, beyaz ve renkli forma.",
+    "externalHint": "Saha, saat ve ücret bilgisini \"Bilgi\" sekmesindeki saha kartından değiştirebilirsin.",
+    "venueHint": "Saha ve saat tesis rezervasyonuna bağlı; değiştirmek için tesisle mesajlaş ya da yeni saat seç.",
+    "saved": "Maç bilgileri güncellendi.",
+    "failed": "Maç güncellenemedi."
+  },
+  "shareGroup": {
+    "button": "Gruba gönder",
+    "title": "Maçı gruba gönder",
+    "intro": "“{{name}}” maçının bilgileri ve katılma linki seçtiğin gruplara mesaj olarak gider. Gruptaki arkadaşlarına da bildirim düşer.",
+    "loadFailed": "Grupların yüklenemedi.",
+    "pickOne": "En az bir grup seç.",
+    "send": "Gönder",
+    "sendTo_one": "{{count}} gruba gönder",
+    "sendTo_other": "{{count}} gruba gönder",
+    "sent_one": "Maç {{count}} gruba gönderildi.",
+    "sent_other": "Maç {{count}} gruba gönderildi.",
+    "failed": "Maç gruba gönderilemedi.",
+    "noGroups": "Henüz bir sohbet grubun yok. Mesajlar bölümünden arkadaşlarınla bir grup kurabilirsin.",
+    "createGroup": "Grup kur",
+    "members_one": "{{count}} üye",
+    "members_other": "{{count}} üye",
+    "notePlaceholder": "İsteğe bağlı not, örn. “Kaleci lazım, gelen yazsın!”"
+  },
+  "lineupImage": {
+    "button": "Resim",
+    "tooltip": "Dizilişi resim olarak paylaş",
+    "title": "Diziliş resmi",
+    "kicker": "⚽ MAÇ KADROSU",
+    "missing_one": "Kadro {{total}}/{{capacity}} · {{count}} kişi eksik!",
+    "missing_other": "Kadro {{total}}/{{capacity}} · {{count}} kişi eksik!",
+    "full_one": "Kadro tamam · {{total}} oyuncu",
+    "full_other": "Kadro tamam · {{total}} oyuncu",
+    "cta": "Katılmak için MatcBuddy’de maçı aç",
+    "share": "Paylaş",
+    "download": "İndir",
+    "hint": "Telefonda resme basılı tutarak da kaydedebilirsin. WhatsApp grubuna ya da hikâyene gönder!",
+    "shareText": "{{name}} — diziliş",
+    "alt": "{{name}} diziliş resmi",
+    "failed": "Resim oluşturulamadı.",
+    "shareFailed": "Paylaşılamadı; resmi indirip gönderebilirsin."
   }
 }
