@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
@@ -29,17 +29,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AMENITIES, formatPrice, venuesApi } from '../../api/venues';
 import { EmptyState, PageHeader } from '../../ui';
 import { apiErrorMessage, mediaUrl } from '../../utils/format';
-import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
-import SelectedLocationIcon from '../../images/Vector-Location-PNG-Free-Image.png';
+import { MbMap, venuePinIcon } from '../../ui/map/mapKit';
 import './Venues.css';
 
 /* =================== Ortak yardımcılar (VenueDetail / CreateMatch de kullanır) =================== */
 
 export const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
-export const markerIcon = new L.Icon({ iconUrl: LocationIcon, iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34] });
-export const selectedMarkerIcon = new L.Icon({ iconUrl: SelectedLocationIcon, iconSize: [44, 66], iconAnchor: [22, 66], popupAnchor: [0, -60] });
-export const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-export const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 /** "lat, lon" metnini güvenli şekilde çözer */
 export const parseLocation = (loc) => {
@@ -218,6 +213,7 @@ export default function Venues() {
 
   // Harita
   const [userPosition, setUserPosition] = useState(null);
+  const [userAccuracy, setUserAccuracy] = useState(null);
   const [selected, setSelected] = useState(null);
   const [route, setRoute] = useState(false);
 
@@ -239,7 +235,10 @@ export default function Venues() {
   useEffect(() => {
     if (view !== 'map' || userPosition) return;
     navigator.geolocation?.getCurrentPosition(
-      (p) => setUserPosition([p.coords.latitude, p.coords.longitude]),
+      (p) => {
+        setUserPosition([p.coords.latitude, p.coords.longitude]);
+        setUserAccuracy(p.coords.accuracy);
+      },
       () => {}
     );
   }, [view, userPosition]);
@@ -378,22 +377,32 @@ export default function Venues() {
           </Col>
           <Col xs={{ span: 24, order: 1 }} lg={{ span: 16, order: 2 }}>
             <Card styles={{ body: { padding: 12 } }}>
-              <MapContainer center={userPosition || DEFAULT_CENTER} zoom={userPosition ? 12 : 6} className="mb-venue-map">
-                <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
+              <MbMap
+                center={userPosition || DEFAULT_CENTER}
+                zoom={userPosition ? 12 : 6}
+                className="mb-venue-map"
+                userLocation={userPosition ? { latlng: userPosition, accuracy: userAccuracy } : null}
+                onLocate={(loc) => {
+                  setUserPosition(loc.latlng);
+                  setUserAccuracy(loc.accuracy);
+                }}
+              >
                 {!userPosition && !selected?.coords && <FitAll points={list.filter((v) => v.coords).map((v) => v.coords)} />}
                 {selected?.coords && <FlyTo center={selected.coords} zoom={15} />}
-                {userPosition && (
-                  <Marker position={userPosition} icon={markerIcon}>
-                    <Popup>{t('venues:list.yourLocation')}</Popup>
-                  </Marker>
-                )}
                 {list
                   .filter((v) => v.coords)
                   .map((v) => (
                     <Marker
                       key={v.stadiumId}
                       position={v.coords}
-                      icon={selected?.stadiumId === v.stadiumId ? selectedMarkerIcon : markerIcon}
+                      title={v.name}
+                      icon={venuePinIcon({
+                        active: selected?.stadiumId === v.stadiumId,
+                        hot: !!v.hasActiveCampaign,
+                        hotLabel: t('common:map.campaign'),
+                        badge: selected?.stadiumId === v.stadiumId && v.minPrice != null ? `${formatPrice(v.minPrice)}+` : null,
+                      })}
+                      zIndexOffset={selected?.stadiumId === v.stadiumId ? 1000 : 0}
                       eventHandlers={{ click: () => select(v) }}
                     >
                       <Popup>
@@ -404,7 +413,7 @@ export default function Venues() {
                     </Marker>
                   ))}
                 {route && userPosition && selected?.coords && <Routing from={userPosition} to={selected.coords} />}
-              </MapContainer>
+              </MbMap>
             </Card>
 
             {selected && (

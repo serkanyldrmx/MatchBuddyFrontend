@@ -71,7 +71,9 @@ import { roleShort, ROLE_LABELS } from './formations';
 import Pitch, { guestInitials, sideRoster } from './Pitch';
 import './MatchDetails.css';
 import { SwipeTabs } from '../../ui/Swipe';
+import MatchReminderCard from './MatchReminderCard';
 import { mapsUrl } from '../Venues/ExternalVenueForm';
+import VenueMiniMap from '../../ui/map/VenueMiniMap';
 
 const homeName = (d) => d.homeTeam?.teamName || i18n.t('match:sides.home');
 const awayName = (d) =>
@@ -899,6 +901,7 @@ function MatchDetails() {
                     />
                   </Col>
                   <Col xs={24} xl={7}>
+                    <MatchReminderCard detail={d} />
                     {d.canManage && d.repeatWeekly && (
                       <Button
                         block
@@ -1090,6 +1093,7 @@ function MatchDetails() {
                       </Descriptions.Item>
                     )}
                   </Descriptions>
+                  <VenueMiniMap location={d.stadium?.location} name={d.venue?.name || d.stadium?.stadiumName} />
                     </Card>
                   </Col>
                 </Row>

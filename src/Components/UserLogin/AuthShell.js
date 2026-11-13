@@ -12,16 +12,17 @@ const FEATURES = [
   { key: 'mvp', icon: <TrophyOutlined /> },
 ];
 
+/** Logo: tanıtım sayfasına götürür (ana ekrana eklenen uygulamada LandingGate girişe / uygulamaya yönlendirir) */
 export function AuthBrand() {
   return (
-    <div className="mb-auth__brand">
+    <Link to="/" className="mb-auth__brand" aria-label="MatcBuddy">
       <span className="mb-auth__brand-mark">
         <img src={Logo} alt="" />
       </span>
       <span className="mb-auth__brand-name">
         Matc<em>Buddy</em>
       </span>
-    </div>
+    </Link>
   );
 }
 

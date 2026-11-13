@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { MapContainer, Marker, TileLayer } from 'react-leaflet';
+import { Marker } from 'react-leaflet';
 import { Alert, App, Button, Card, Col, Image, Progress, Rate, Result, Row, Skeleton, Tabs } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -24,7 +24,8 @@ import { EmptyState, PlayerAvatar } from '../../ui';
 import { apiErrorMessage, formatDate, fromNow, mediaUrl } from '../../utils/format';
 import { PlayerLink } from '../Social/FollowButton';
 import SlotPicker, { DateStrip } from './SlotPicker';
-import { AMENITY_ICONS, directionsUrl, markerIcon, parseLocation, TILE_ATTR, TILE_URL, VenueRating } from './Venues';
+import { AMENITY_ICONS, directionsUrl, parseLocation, VenueRating } from './Venues';
+import { appleDirectionsUrl, isIOS, MbMap, venuePinIcon } from '../../ui/map/mapKit';
 import './VenueDetail.css';
 import { SwipeTabs } from '../../ui/Swipe';
 
@@ -459,10 +460,9 @@ export default function VenueDetail() {
                   <Col xs={24} lg={16}>
                     <Card styles={{ body: { padding: 12 } }}>
                       {coords ? (
-                        <MapContainer center={coords} zoom={15} className="mb-vd-map" scrollWheelZoom={false}>
-                          <TileLayer url={TILE_URL} attribution={TILE_ATTR} />
-                          <Marker position={coords} icon={markerIcon} />
-                        </MapContainer>
+                        <MbMap center={coords} zoom={15} className="mb-vd-map" scrollWheelZoom={false}>
+                          <Marker position={coords} icon={venuePinIcon({ active: true })} title={v.name} keyboard={false} />
+                        </MbMap>
                       ) : (
                         <EmptyState description={t('venues:detail.location.noLocation')} />
                       )}
@@ -475,6 +475,11 @@ export default function VenueDetail() {
                       {coords && (
                         <Button type="primary" block icon={<CompassOutlined />} href={directionsUrl(coords)} target="_blank" rel="noopener noreferrer">
                           {t('venues:detail.location.directions')}
+                        </Button>
+                      )}
+                      {coords && isIOS() && (
+                        <Button block style={{ marginTop: 8 }} href={appleDirectionsUrl(coords)} target="_blank" rel="noopener noreferrer">
+                          {t('common:map.appleMaps')}
                         </Button>
                       )}
                       {v.phone && (

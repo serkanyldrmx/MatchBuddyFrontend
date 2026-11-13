@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import {
@@ -59,7 +58,7 @@ import { EmptyState, PageHeader } from '../ui';
 import { apiErrorMessage, applyFieldErrors, errorCode, fieldErrorsOf, formErrorMessage, formatDate } from '../utils/format';
 import { ACCEPTED_IMAGE_ACCEPT, ACCEPTED_IMAGE_TYPES, prepareImage } from '../utils/image';
 import { usePublicParams } from '../api/parameters';
-import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
+import { venuePinIcon } from '../ui/map/mapKit';
 import './AdminResponsive.css';
 import './Businesses.css';
 import OwnerDetailModal from './OwnerDetailModal';
@@ -68,12 +67,7 @@ import { useScrollTopOn } from '../utils/scrollTop';
 const { Text } = Typography;
 const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
 
-const pinIcon = new L.Icon({
-  iconUrl: LocationIcon,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+const pinIcon = venuePinIcon({ active: true });
 
 /* ---------------- Yardımcılar ---------------- */
 

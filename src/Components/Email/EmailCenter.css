@@ -1,0 +1,69 @@
+/* E-posta merkezi (yönetim / işletme paneli) */
+.mb-email-list {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+}
+
+.mb-email-card {
+  background: var(--mb-surface-2, rgba(255, 255, 255, 0.03));
+}
+
+.mb-email-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 16px;
+}
+
+.mb-email-field {
+  cursor: pointer;
+  font-family: Consolas, ui-monospace, monospace;
+  margin: 0;
+}
+
+.mb-email-button-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 12px;
+}
+
+.mb-email-schedule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  margin-top: 16px;
+}
+
+.mb-email-preview {
+  width: 100%;
+  height: min(70vh, 640px);
+  border: 0;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
+
+@media (max-width: 575px) {
+  .mb-email-button-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* Maç detayı: hatırlatma kartı */
+.mb-reminder {
+  margin-bottom: 12px;
+}
+
+.mb-reminder__opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.mb-reminder__hint {
+  display: block;
+  font-size: 12px;
+}

@@ -296,5 +296,14 @@
   "TEAM_NOT_MEMBER": "Bu takımda değilsin.",
   "TEAM_LAST_MEMBER": "Takımda kalan son oyuncusun; ayrılmak yerine takımı silebilirsin.",
   "BIZAPP_NOT_FOUND": "Başvuru bulunamadı.",
-  "BIZAPP_CONSENT_REQUIRED": "Devam etmek için aydınlatma metnini onaylayın."
+  "BIZAPP_CONSENT_REQUIRED": "Devam etmek için aydınlatma metnini onaylayın.",
+  "EMAIL_TEMPLATE_NOT_FOUND": "Şablon bulunamadı.",
+  "EMAIL_SYSTEM_TEMPLATE": "Sistem şablonu silinemez; isterseniz pasif yapabilirsiniz.",
+  "EMAIL_CAMPAIGN_NOT_FOUND": "Gönderim bulunamadı.",
+  "EMAIL_CAMPAIGN_LOCKED": "Gönderim sürüyor; bitince düzenleyebilirsiniz.",
+  "EMAIL_INVALID_URL": "Düğme bağlantısı http(s) ile başlamalı.",
+  "EMAIL_INVALID_SCHEDULE": "Gönderim zamanı geçmişte ya da 6 aydan ileride olamaz.",
+  "EMAIL_OWNER_TOO_FREQUENT": "Müşterilerinize en fazla 7 günde bir e-posta gönderebilirsiniz.",
+  "EMAIL_NO_ADDRESS": "Hesabında e-posta adresi yok. Profili düzenle'den ekleyebilirsin.",
+  "EMAIL_NOT_IN_MATCH": "Hatırlatma için maçta olman gerekiyor."
 }

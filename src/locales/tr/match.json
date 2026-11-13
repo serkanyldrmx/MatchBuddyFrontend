@@ -380,5 +380,16 @@
     "alt": "{{name}} diziliş resmi",
     "failed": "Resim oluşturulamadı.",
     "shareFailed": "Paylaşılamadı; resmi indirip gönderebilirsin."
+  },
+  "reminder": {
+    "title": "Hatırlatma",
+    "hint": "Maçtan önce e-posta ile hatırlatalım:",
+    "hours_one": "{{count}} saat önce",
+    "hours_other": "{{count}} saat önce",
+    "days_one": "{{count}} gün önce",
+    "days_other": "{{count}} gün önce",
+    "noEmail": "E-posta hatırlatıcı için hesabına e-posta ekle.",
+    "addEmail": "Profili düzenle",
+    "addToCalendar": "Takvime ekle"
   }
 }

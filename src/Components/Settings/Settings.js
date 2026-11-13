@@ -310,6 +310,13 @@ export default function Settings() {
         ) : settings ? (
           <div className="mb-settings__switches">
             <PushToggle />
+            <div className="mb-settings__switch">
+              <div>
+                <strong>{t('settings:notifications.marketing.title')}</strong>
+                <span>{t('settings:notifications.marketing.desc')}</span>
+              </div>
+              <Switch checked={!!settings.marketingConsent} onChange={(v) => update({ marketingConsent: v })} />
+            </div>
             {NOTIFY.map((n) => (
               <div key={n.key} className="mb-settings__switch">
                 <div>

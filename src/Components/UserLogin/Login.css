@@ -646,3 +646,10 @@
 .mb-auth__home:hover {
   opacity: 0.85;
 }
+
+/* Logo bağlantısı: yazı rengi / alt çizgi değişmesin */
+a.mb-auth__brand,
+a.mb-auth__brand:hover {
+  color: inherit;
+  text-decoration: none;
+}

@@ -106,6 +106,10 @@
     "deals": {
       "title": "Saha fırsatları",
       "desc": "Oynadığın ve yakındaki sahalar boş saatlerini indirimle duyurduğunda."
+    },
+    "marketing": {
+      "title": "Kampanya ve duyuru e-postaları",
+      "desc": "Tesis kampanyaları, yeni özellikler ve duyurular. Maç hatırlatmaları bundan bağımsızdır."
     }
   },
   "blocked": {

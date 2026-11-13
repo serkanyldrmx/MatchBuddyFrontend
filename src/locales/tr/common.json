@@ -80,5 +80,21 @@
     },
     "tip": "Güvenilirlik: {{score}}/100 · {{label}} · {{count}} maç",
     "tipNew": "Yeni oyuncu: henüz {{count}} maç tamamladı"
+  },
+  "map": {
+    "locateMe": "Konumuma git",
+    "locating": "Konumun bulunuyor…",
+    "locationDenied": "Konum izni verilmedi. Tarayıcı ayarlarından izin verebilirsin.",
+    "locationUnavailable": "Konumun şu an alınamadı. Biraz sonra tekrar dene.",
+    "locationUnsupported": "Tarayıcın konum özelliğini desteklemiyor.",
+    "youAreHere": "Buradasın",
+    "accuracy": "Yaklaşık {{meters}} m doğrulukla",
+    "fullscreen": "Tam ekran",
+    "exitFullscreen": "Tam ekrandan çık",
+    "twoFingerHint": "Haritayı kaydırmak için iki parmak kullan",
+    "campaign": "Kampanya",
+    "directionsGoogle": "Yol tarifi (Google Haritalar)",
+    "appleMaps": "Apple Haritalar",
+    "venueLocation": "Saha konumu"
   }
 }

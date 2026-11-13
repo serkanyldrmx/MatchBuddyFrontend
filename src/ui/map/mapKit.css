@@ -1,0 +1,352 @@
+/* =================== Ortak harita kiti (mapKit.js) =================== */
+
+/* Temaya uyan altlık (OSM karoları): koyu temada ters çevrilmiş "gece" görünümü */
+.mb-map--themed .leaflet-tile-pane {
+  filter: saturate(0.85) contrast(1.02);
+}
+
+[data-theme='dark'] .mb-map--themed .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55);
+}
+
+.mb-map--themed {
+  background: var(--mb-surface-2);
+}
+
+/* ---------- Kontroller ---------- */
+.leaflet-bar.mb-map-ctl {
+  border: 1px solid var(--mb-border-strong);
+  box-shadow: var(--mb-shadow, 0 4px 14px rgba(0, 0, 0, 0.25));
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mb-map-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: var(--mb-surface);
+  color: var(--mb-text);
+  font-size: 17px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mb-map-btn:hover {
+  background: var(--mb-surface-2);
+  color: var(--mb-primary);
+}
+
+.mb-map-btn:focus-visible {
+  outline: 2px solid var(--mb-primary);
+  outline-offset: -2px;
+}
+
+.mb-map-btn[aria-pressed='true'] {
+  color: var(--mb-primary);
+}
+
+.leaflet-touch .leaflet-bar.mb-map-ctl {
+  border: 1px solid var(--mb-border-strong);
+}
+
+.leaflet-touch .mb-map-btn {
+  width: 40px;
+  height: 40px;
+}
+
+/* ---------- Saha iğnesi ---------- */
+.mb-pin-wrap {
+  background: none;
+  border: 0;
+}
+
+.mb-pin {
+  position: relative;
+  transform-origin: 50% 100%;
+  transition: transform 0.18s ease;
+}
+
+.mb-pin svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+
+.mb-pin__body {
+  fill: var(--mb-primary-fill);
+  stroke: var(--mb-primary-ink);
+  stroke-width: 1.4;
+}
+
+.mb-pin__hole {
+  fill: var(--mb-primary-ink);
+}
+
+.mb-pin__ball {
+  fill: var(--mb-primary-fill);
+}
+
+.mb-pin__seam {
+  fill: none;
+  stroke: var(--mb-primary-fill);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+
+/* yer gölgesi */
+.mb-pin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 40%;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  filter: blur(1.5px);
+  z-index: -1;
+}
+
+.leaflet-marker-icon:hover .mb-pin:not(.is-active),
+.leaflet-marker-icon:focus-visible .mb-pin:not(.is-active) {
+  transform: scale(1.12);
+}
+
+.leaflet-marker-icon.mb-pin-wrap:focus-visible {
+  outline: none;
+}
+
+.leaflet-marker-icon.mb-pin-wrap:focus-visible .mb-pin__body {
+  stroke: var(--mb-text);
+  stroke-width: 2.2;
+}
+
+/* seçili iğne: büyük, beyaz çerçeve ve hale */
+.mb-pin.is-active .mb-pin__body {
+  stroke: #fff;
+  stroke-width: 1.8;
+}
+
+.mb-pin.is-active svg {
+  filter: drop-shadow(0 0 6px rgba(var(--mb-primary-fill-rgb), 0.75)) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
+}
+
+.mb-pin.is-active::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 34px;
+  height: 14px;
+  margin-left: -17px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--mb-primary-fill-rgb), 0.85);
+  animation: mb-pin-ring 1.6s ease-out infinite;
+  z-index: -1;
+}
+
+.mb-pin.is-active {
+  animation: mb-pin-drop 0.35s cubic-bezier(0.3, 1.5, 0.6, 1);
+}
+
+@keyframes mb-pin-drop {
+  from {
+    transform: translateY(-10px) scale(0.85);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes mb-pin-ring {
+  from {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* fiyat vb. rozet */
+.mb-pin__badge {
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mb-surface);
+  color: var(--mb-text);
+  border: 1px solid var(--mb-border-strong);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.mb-pin.is-active .mb-pin__badge {
+  background: var(--mb-primary-fill);
+  color: var(--mb-primary-ink);
+  border-color: transparent;
+}
+
+/* kampanya rozeti */
+.mb-pin__hot {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--mb-gold-fill);
+  color: var(--mb-gold-ink);
+  border: 1.5px solid var(--mb-primary-ink);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  z-index: 1;
+}
+
+.mb-pin.is-active .mb-pin__hot {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+
+/* ---------- Kullanıcı konumu ---------- */
+.mb-user-loc {
+  background: none;
+  border: 0;
+}
+
+.mb-user-loc__dot,
+.mb-user-loc__pulse {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+}
+
+.mb-user-loc__dot {
+  background: #3b82f6;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.mb-user-loc__pulse {
+  background: rgba(59, 130, 246, 0.45);
+  animation: mb-user-pulse 2s ease-out infinite;
+}
+
+@keyframes mb-user-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* ---------- Telefon ipucu ---------- */
+.mb-map-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.mb-map-hint.is-on {
+  opacity: 1;
+}
+
+/* ---------- Tam ekran ---------- */
+.leaflet-container.mb-map--fs {
+  border-radius: 0;
+}
+
+.leaflet-container.mb-map--fs:not(:fullscreen) {
+  position: fixed !important;
+  inset: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 2000 !important;
+}
+
+.mb-map--fs .leaflet-top {
+  top: env(safe-area-inset-top, 0px);
+}
+
+.mb-map--fs .leaflet-left {
+  left: env(safe-area-inset-left, 0px);
+}
+
+.mb-map--fs .leaflet-bottom {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body.mb-map-fs-lock {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-pin,
+  .mb-pin.is-active,
+  .mb-pin.is-active::before,
+  .mb-user-loc__pulse {
+    animation: none;
+    transition: none;
+  }
+  .mb-user-loc__pulse {
+    opacity: 0.35;
+    transform: scale(1.8);
+  }
+}
+
+/* ---------- Mini harita (maç detayı) ---------- */
+.mb-minimap {
+  margin-top: 16px;
+}
+
+.mb-minimap__map {
+  height: 220px;
+  width: 100%;
+  border: 1px solid var(--mb-border);
+}
+
+.mb-minimap__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+@media (max-width: 575px) {
+  .mb-minimap__actions .ant-btn {
+    flex: 1 1 100%;
+  }
+}

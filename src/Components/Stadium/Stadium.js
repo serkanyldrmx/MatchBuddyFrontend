@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
@@ -12,26 +12,11 @@ import { adminVenuesApi } from '../../api/venues';
 import { EmptyState, PageHeader } from '../../ui';
 import { apiErrorMessage } from '../../utils/format';
 import { useThemeMode } from '../../theme/ThemeContext';
-import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
-import SelectedLocationIcon from '../../images/Vector-Location-PNG-Free-Image.png';
+import { MbMap, venuePin, venuePinIcon } from '../../ui/map/mapKit';
 import './StadiumAdmin.css';
 
 const { Text } = Typography;
 const DEFAULT_CENTER = [39.9334, 32.8597]; // Ankara
-
-const customIcon = new L.Icon({
-  iconUrl: LocationIcon,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
-
-const selectedCustomIcon = new L.Icon({
-  iconUrl: SelectedLocationIcon,
-  iconSize: [40, 60],
-  iconAnchor: [20, 60],
-  popupAnchor: [0, -60],
-});
 
 /** "lat, lon" metnini [lat, lon] dizisine çevirir; geçersizse null */
 export function parseLocation(location) {
@@ -251,20 +236,17 @@ function Stadium() {
         <Col xs={24} lg={15}>
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
             <Card bordered={false} styles={{ body: { padding: 8 } }} ref={mapCardRef}>
-              <MapContainer center={initialCenter} zoom={userPosition ? 13 : 6} className="mb-map">
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
+              <MbMap
+                center={initialCenter}
+                zoom={userPosition ? 13 : 6}
+                className="mb-map"
+                userLocation={userPosition ? { latlng: userPosition } : null}
+                onLocate={(loc) => setUserPosition(loc.latlng)}
+              >
                 {selected?.coords ? (
                   <FlyTo position={selected.coords} zoom={15} />
                 ) : (
                   userPosition && <FlyTo position={userPosition} zoom={12} />
-                )}
-                {userPosition && (
-                  <Marker position={userPosition} icon={customIcon}>
-                    <Popup>{t('venues:stadium.list.yourLocation')}</Popup>
-                  </Marker>
                 )}
                 {stadiums
                   .filter((s) => s.coords)
@@ -272,7 +254,9 @@ function Stadium() {
                     <Marker
                       key={s.stadiumId}
                       position={s.coords}
-                      icon={s.stadiumId === selectedId ? selectedCustomIcon : customIcon}
+                      icon={s.stadiumId === selectedId ? venuePinIcon({ active: true }) : venuePin}
+                      zIndexOffset={s.stadiumId === selectedId ? 1000 : 0}
+                      title={s.stadiumName}
                       eventHandlers={{ click: () => setSelectedId(s.stadiumId) }}
                     >
                       <Popup>
@@ -285,7 +269,7 @@ function Stadium() {
                     </Marker>
                   ))}
                 {userPosition && selected?.coords && <Routing from={userPosition} to={selected.coords} />}
-              </MapContainer>
+              </MbMap>
             </Card>
             <Card bordered={false} title={t('venues:stadium.list.selectedTitle')}>
               {selected ? (

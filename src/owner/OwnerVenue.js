@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Alert, App, Card, Col, Form, Input, InputNumber, Popconfirm, Row, Switch, Typography, Upload } from 'antd';
 import { CameraOutlined, DeleteOutlined, HomeOutlined, PictureOutlined, SaveOutlined, StarFilled, StarOutlined, UploadOutlined } from '@ant-design/icons';
@@ -12,12 +11,12 @@ import ImageCrop from '../ui/ImageCrop';
 import { apiErrorMessage, formErrorMessage, isErrorCode, mediaUrl } from '../utils/format';
 import { ACCEPTED_IMAGE_ACCEPT, imageError, preparedImageError, prepareImage } from '../utils/image';
 import { usePublicParams } from '../api/parameters';
-import LocationIcon from '../images/Location-fotor-bg-remover-2025030545851.png';
+import { venuePinIcon } from '../ui/map/mapKit';
 import { WriteButton, notifyOwnerChanged } from './shared';
 
 const { Text } = Typography;
 
-const markerIcon = new L.Icon({ iconUrl: LocationIcon, iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34] });
+const markerIcon = venuePinIcon({ active: true });
 const DEFAULT_CENTER = [39.0, 35.0];
 
 // Detail.amenities anahtarı → Venue/Update alanı

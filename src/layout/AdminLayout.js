@@ -102,6 +102,7 @@ export default function AdminLayout() {
         </span>
       ),
     },
+    { key: `${BASE}/email`, icon: <MailOutlined />, label: t('layout:admin.menu.email') },
     { key: `${BASE}/osm`, icon: <GlobalOutlined />, label: t('layout:admin.menu.osm') },
     { key: `${BASE}/leads`, icon: <PhoneOutlined />, label: t('layout:admin.menu.leads') },
     { key: `${BASE}/parameters`, icon: <ControlOutlined />, label: t('layout:admin.menu.parameters') },

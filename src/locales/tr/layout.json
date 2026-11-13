@@ -66,7 +66,8 @@
       "contact": "İletişim",
       "parameters": "Parametreler",
       "leads": "Satış Fırsatları",
-      "applications": "İşletme başvuruları"
+      "applications": "İşletme başvuruları",
+      "email": "E-posta merkezi"
     }
   },
   "venue": {
@@ -83,7 +84,8 @@
       "pricing": "Saatler ve Fiyatlar",
       "campaigns": "Kampanyalar",
       "reviews": "Yorumlar",
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "email": "E-posta gönderimleri"
     },
     "membershipInactive": "Üyeliğiniz aktif değil",
     "membershipInactiveDesc": "Tesisleriniz oyunculara görünmüyor ve değişiklik yapamazsınız. Yenilemek için MatcBuddy ile iletişime geçin.",

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { Alert, App, Button, Card, Col, Form, Grid, Input, Row, Select, Space, TimePicker, Typography } from 'antd';
@@ -11,7 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { PageHeader } from '../../ui';
 import { apiErrorMessage } from '../../utils/format';
-import LocationIcon from '../../images/Location-fotor-bg-remover-2025030545851.png';
+import { UserLocationMarker, venuePinIcon } from '../../ui/map/mapKit';
 import './StadiumAdmin.css';
 
 const { Text } = Typography;
@@ -21,12 +20,7 @@ const DEFAULT_VALUES = {
   closingTime: dayjs('23:00', 'HH:mm'),
 };
 
-const customIcon = new L.Icon({
-  iconUrl: LocationIcon,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+const customIcon = venuePinIcon({ active: true });
 
 /** Haritayı verilen merkeze taşır */
 function MapView({ center, zoom }) {
@@ -276,11 +270,7 @@ function StadiumIsAdmin() {
                 />
                 <MapView center={view.center} zoom={view.zoom} />
                 <ClickPicker onPick={pickPosition} />
-                {userPosition && (
-                  <Marker position={userPosition} icon={customIcon} opacity={0.6}>
-                    <Popup>{t('venues:stadium.add.yourLocation')}</Popup>
-                  </Marker>
-                )}
+                <UserLocationMarker position={userPosition} />
                 {selectedPosition && (
                   <Marker position={selectedPosition} icon={customIcon}>
                     <Popup>{t('venues:stadium.add.selectedLocation')}</Popup>

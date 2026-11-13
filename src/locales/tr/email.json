@@ -1,0 +1,84 @@
+{
+  "eyebrow": "Yönetim",
+  "eyebrowOwner": "İşletme",
+  "title": "E-posta merkezi",
+  "subtitle": "Oyunculara ve işletmelere tek seferlik ya da düzenli (haftalık / aylık) e-posta gönderin, şablonları düzenleyin. Hoş geldin ve maç hatırlatma e-postaları da buradaki şablonlardan gider.",
+  "subtitleOwner": "Tesisinizde oynamış ve kampanya e-postası almayı kabul etmiş oyunculara duyuru ve kampanya gönderin.",
+  "loadError": "E-posta merkezi yüklenemedi.",
+  "tabs": {
+    "campaigns": "Gönderimler",
+    "templates_one": "Şablonlar ({{count}})",
+    "templates_other": "Şablonlar ({{count}})"
+  },
+  "status": {
+    "0": "Planlandı",
+    "1": "Gönderiliyor",
+    "2": "Gönderildi",
+    "3": "İptal"
+  },
+  "audience": {
+    "consented": "Kampanya e-postası almayı kabul eden oyuncular",
+    "owners": "İşletme hesapları",
+    "allService": "Tüm oyuncular (yalnızca hizmet duyurusu)",
+    "venueCustomers": "Tesisimde oynamış oyuncular (izin verenler)",
+    "allServiceWarning": "Bu kitle izin aramaz: yalnızca bakım, kural değişikliği gibi hizmet duyuruları için kullanın; kampanya / reklam içermemeli.",
+    "ownerRules": "Yalnızca kampanya e-postası almayı kabul eden müşterilerinize gider, en fazla 7 günde bir gönderebilirsiniz. Her e-postada abonelikten çıkma bağlantısı bulunur."
+  },
+  "campaign": {
+    "new": "Yeni gönderim",
+    "empty": "Henüz gönderim yok.",
+    "audience": "Kime",
+    "recipients_one": "{{count}} alıcı",
+    "recipients_other": "{{count}} alıcı",
+    "fromTemplate": "Şablondan doldur",
+    "fromTemplatePlaceholder": "Şablon seçin (isteğe bağlı)",
+    "when": "Ne zaman",
+    "now": "Hemen",
+    "later": "İleri tarih",
+    "at": "Gönderim zamanı",
+    "repeat": "Tekrar",
+    "repeatOnce": "Tek sefer",
+    "repeatWeekly": "Her hafta",
+    "repeatMonthly": "Her ay",
+    "schedule": "Planla",
+    "sendNow": "Gönder",
+    "saved": "Gönderim planlandı.",
+    "saveError": "Gönderim kaydedilemedi.",
+    "nextAt": "Sıradaki: {{date}}",
+    "lastAt": "Son gönderim: {{date}}",
+    "sentCount_one": "{{count}} e-posta gönderildi",
+    "sentCount_other": "{{count}} e-posta gönderildi",
+    "cancel": "İptal et",
+    "cancelConfirm": "Bu gönderim iptal edilsin mi?"
+  },
+  "template": {
+    "new": "Yeni şablon",
+    "name": "Şablon adı",
+    "active": "Etkin",
+    "on": "Etkin",
+    "off": "Kapalı",
+    "systemTag": "Sistem",
+    "empty": "Şablon yok.",
+    "deleteConfirm": "\"{{name}}\" şablonu silinsin mi?",
+    "systemHint": "Sistem şablonu: silinemez, metnini değiştirebilir ya da kapatabilirsiniz.",
+    "system": {
+      "welcome": "Kayıt olan ve e-postası olan her oyuncuya otomatik gider. Kapatırsanız hoş geldin e-postası gönderilmez.",
+      "match_reminder": "Oyuncuların maç sayfasında açtığı \"E-posta hatırlatıcı\" bu şablonla gider. {{mac}}, {{tarih}}, {{saat}}, {{saha}}, {{adres}}, {{kalan}}, {{link}} alanları dolu gelir."
+    }
+  },
+  "form": {
+    "subject": "Konu",
+    "subjectPlaceholder": "Örn. Bu hafta sonu kampanyalı saatler",
+    "body": "Metin",
+    "bodyHint": "Düz metin; boş satır yeni paragraf başlatır. Aşağıdaki alanlara dokunarak kişiye özel bilgi ekleyebilirsiniz.",
+    "fields": "Alanlar:",
+    "buttonText": "Düğme yazısı",
+    "buttonTextPlaceholder": "Örn. Hemen ayırt",
+    "buttonUrl": "Düğme bağlantısı",
+    "preview": "Önizle",
+    "sendTest": "Kendime test gönder"
+  },
+  "test": {
+    "sent": "Test e-postası gönderildi."
+  }
+}
