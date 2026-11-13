@@ -98,7 +98,10 @@ const PlayerSelectionPopup = ({ visible, onClose, team, onSave }) => {
     }
     setSaving(true);
     try {
-      await api.post('/api/Team/SaveTeamByPlayerId', { teamId: team.teamId, playerIds: selected });
+      // Kurucu kadrodan çıkarılamaz (sunucu da korur); ayrılmak için "Takımdan ayrıl"
+      const creator = team.createdByPlayerId;
+      const ids = creator && (team.playerId || []).includes(creator) && !selected.includes(creator) ? [...selected, creator] : selected;
+      await api.post('/api/Team/SaveTeamByPlayerId', { teamId: team.teamId, playerIds: ids });
       message.success(t('team:editSquad.success'));
       onSave?.();
       onClose();

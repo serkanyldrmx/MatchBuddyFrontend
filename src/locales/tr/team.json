@@ -29,7 +29,16 @@
     "youSuffix": " (sen)",
     "morePlayers_one": "+{{count}} oyuncu daha",
     "morePlayers_other": "+{{count}} oyuncu daha",
-    "emptySquad": "Kadro boş"
+    "emptySquad": "Kadro boş",
+    "creator": "Takımın kurucusu",
+    "leave": "Takımdan ayrıl",
+    "leaveConfirm": {
+      "title": "Takımdan ayrıl",
+      "content": "\"{{name}}\" takımından ayrılacaksın.",
+      "creator": "\"{{name}}\" takımından ayrılacaksın. Takımı sen kurdun; kuruculuk takımdaki en eski oyuncuya geçecek."
+    },
+    "leaveSuccess": "\"{{name}}\" takımından ayrıldın.",
+    "leaveError": "Takımdan ayrılamadın."
   },
   "create": {
     "back": "Takımlara dön",

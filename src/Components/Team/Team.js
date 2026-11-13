@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { App, Avatar, Button, Card, Dropdown, Input, Segmented, Skeleton, Tooltip, Typography } from 'antd';
-import { DeleteOutlined, EditOutlined, MoreOutlined, PlusOutlined, RobotOutlined, SearchOutlined, SendOutlined, TeamOutlined } from '@ant-design/icons';
+import { CrownOutlined, DeleteOutlined, EditOutlined, LogoutOutlined, MoreOutlined, PlusOutlined, RobotOutlined, SearchOutlined, SendOutlined, TeamOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/config';
 import { EmptyState, PageHeader, PlayerAvatar } from '../../ui';
@@ -53,7 +53,9 @@ const Team = () => {
   }, [load]);
 
   const isMember = (t) => (t.playerId || []).includes(me?.playerId);
-  const canManage = (t) => me?.isAdmin === 1 || isMember(t);
+  // Silme / kadro düzenleme kurucuya ait; kurucusu bilinmeyen eski takımlarda her üye (sunucu kuralıyla aynı)
+  const isCreator = (t) => (t.createdByPlayerId ? t.createdByPlayerId === me?.playerId : isMember(t));
+  const canManage = (t) => me?.isAdmin === 1 || isCreator(t);
   const myCount = teams.filter(isMember).length;
 
   const list = useMemo(() => {
@@ -81,6 +83,29 @@ const Team = () => {
         }
       },
     });
+
+  const leave = (team) => {
+    const othersLeft = (team.playerId || []).length > 1;
+    const creator = team.createdByPlayerId === me?.playerId;
+    modal.confirm({
+      title: t('team:list.leaveConfirm.title'),
+      content: creator && othersLeft
+        ? t('team:list.leaveConfirm.creator', { name: team.teamName })
+        : t('team:list.leaveConfirm.content', { name: team.teamName }),
+      okText: t('team:list.leave'),
+      okButtonProps: { danger: true },
+      cancelText: t('common:actions.cancel'),
+      onOk: async () => {
+        try {
+          await api.post(`/api/Team/LeaveTeam?teamId=${team.teamId}`);
+          message.success(t('team:list.leaveSuccess', { name: team.teamName }));
+          load();
+        } catch (e) {
+          message.error(apiErrorMessage(e, t('team:list.leaveError')));
+        }
+      },
+    });
+  };
 
   return (
     <>
@@ -149,7 +174,7 @@ const Team = () => {
                     </Title>
                     <Text type="secondary">{t('team:list.players', { count: members.length })}</Text>
                   </div>
-                  {canManage(team) && (
+                  {(canManage(team) || isMember(team)) && (
                     <Dropdown
                       trigger={['click']}
                       menu={{
@@ -157,9 +182,16 @@ const Team = () => {
                           ...(isMember(team)
                             ? [{ key: 'invite', icon: <SendOutlined />, label: t('team:list.invite'), onClick: () => setInviting(team) }]
                             : []),
-                          { key: 'edit', icon: <EditOutlined />, label: t('team:list.editSquad'), onClick: () => setEditing(team) },
+                          ...(canManage(team)
+                            ? [{ key: 'edit', icon: <EditOutlined />, label: t('team:list.editSquad'), onClick: () => setEditing(team) }]
+                            : []),
                           { type: 'divider' },
-                          { key: 'delete', icon: <DeleteOutlined />, label: t('team:list.deleteConfirm.title'), danger: true, onClick: () => remove(team) },
+                          ...(isMember(team) && (team.playerId || []).length > 1
+                            ? [{ key: 'leave', icon: <LogoutOutlined />, label: t('team:list.leave'), danger: true, onClick: () => leave(team) }]
+                            : []),
+                          ...(canManage(team)
+                            ? [{ key: 'delete', icon: <DeleteOutlined />, label: t('team:list.deleteConfirm.title'), danger: true, onClick: () => remove(team) }]
+                            : []),
                         ],
                       }}
                     >
@@ -181,17 +213,24 @@ const Team = () => {
                     <Text key={m.playerId} type="secondary" className="mb-team-tile__member">
                       @{m.userName}
                       {m.playerId === me?.playerId && t('team:list.youSuffix')}
+                      {m.playerId === team.createdByPlayerId && (
+                        <Tooltip title={t('team:list.creator')}>
+                          <CrownOutlined style={{ color: 'var(--mb-gold)', marginLeft: 4 }} aria-label={t('team:list.creator')} />
+                        </Tooltip>
+                      )}
                     </Text>
                   ))}
                   {members.length > 4 && <Text type="secondary">{t('team:list.morePlayers', { count: members.length - 4 })}</Text>}
                   {members.length === 0 && <Text type="secondary">{t('team:list.emptySquad')}</Text>}
                 </div>
 
-                {canManage(team) && (
+                {(canManage(team) || isMember(team)) && (
                   <div className="mb-team-tile__actions" style={{ display: 'flex', gap: 8 }}>
-                    <Button block icon={<EditOutlined />} onClick={() => setEditing(team)}>
-                      {t('team:list.editSquad')}
-                    </Button>
+                    {canManage(team) && (
+                      <Button block icon={<EditOutlined />} onClick={() => setEditing(team)}>
+                        {t('team:list.editSquad')}
+                      </Button>
+                    )}
                     {isMember(team) && (
                       <Button block icon={<SendOutlined />} onClick={() => setInviting(team)}>
                         {t('team:list.invite')}
