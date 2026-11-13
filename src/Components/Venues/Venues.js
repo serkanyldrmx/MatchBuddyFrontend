@@ -111,8 +111,28 @@ function FitAll({ points }) {
   const map = useMap();
   const key = points.map((p) => p.join(',')).join('|');
   useEffect(() => {
-    if (points.length === 1) map.setView(points[0], 13);
-    else if (points.length > 1) map.fitBounds(points, { padding: [28, 28], maxZoom: 13 });
+    const fit = () => {
+      // Harita gizli sekmede kurulduysa boyutu 0'dır: önce boyutu yenile, sonra sığdır
+      map.invalidateSize();
+      if (points.length === 1) map.setView(points[0], 13);
+      else if (points.length > 1) map.fitBounds(points, { padding: [28, 28], maxZoom: 13 });
+    };
+    fit();
+    // Sekme açılınca / ekran döndürülünce kap görünür olur: bir kez daha sığdır
+    const el = map.getContainer();
+    let done = el.clientWidth > 0;
+    const ro = new ResizeObserver(() => {
+      if (!done && el.clientWidth > 0) {
+        done = true;
+        fit();
+      }
+    });
+    ro.observe(el);
+    const t = setTimeout(fit, 400);
+    return () => {
+      ro.disconnect();
+      clearTimeout(t);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, map]);
   return null;

@@ -1066,7 +1066,9 @@ function MatchDetails() {
                     )}
                     <Descriptions.Item label={t('match:details.info.address')} span={2}>
                       {d.stadium?.address || '-'}
-                      {mapsUrl({ name: d.venue?.name || d.stadium?.stadiumName, address: d.stadium?.address, location: d.stadium?.location }) && (
+                      {/* Konumu olan sahada büyük harita + yol tarifi düğmesi aşağıda; burada yalnızca konumsuz sahalar için */}
+                      {!d.stadium?.location &&
+                        mapsUrl({ name: d.venue?.name || d.stadium?.stadiumName, address: d.stadium?.address, location: d.stadium?.location }) && (
                         <a
                           className="mb-directions"
                           href={mapsUrl({ name: d.venue?.name || d.stadium?.stadiumName, address: d.stadium?.address, location: d.stadium?.location })}
