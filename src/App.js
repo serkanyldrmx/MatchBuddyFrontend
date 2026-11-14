@@ -68,6 +68,7 @@ import AdminMatches from './admin/AdminMatches';
 import Stadium from './Components/Stadium/Stadium';
 import StadiumIsAdmin from './Components/Stadium/StadiumIsAdmin';
 import { RouteScrollTop } from './utils/scrollTop';
+import EmailCenter from './Components/Email/EmailCenter';
 
 function App() {
   // Dil değişince antd bileşen metinleri (DatePicker, Table vb.) de güncellenir
@@ -144,6 +145,7 @@ function App() {
                   <Route path="osm" element={<AdminOsm />} />
                   <Route path="leads" element={<AdminExternalLeads />} />
                   <Route path="parameters" element={<AdminParameters />} />
+                  <Route path="email" element={<EmailCenter area="Admin" />} />
                 </Route>
                 <Route path="/stadiumIsAdmin" element={<Navigate to="/adminPanel/stadiums/new" replace />} />
               </Route>
@@ -158,6 +160,7 @@ function App() {
                   <Route path="pitches" element={<OwnerPitches />} />
                   <Route path="pricing" element={<OwnerPricing />} />
                   <Route path="campaigns" element={<OwnerCampaigns />} />
+                  <Route path="email" element={<EmailCenter area="Owner" />} />
                   <Route path="reviews" element={<OwnerReviews />} />
                   <Route path="finance" element={<OwnerFinance />} />
                   <Route path="settings" element={<OwnerSettings />} />
