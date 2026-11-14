@@ -1,27 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  App,
-  Button,
-  Card,
-  DatePicker,
-  Empty,
-  Form,
-  Input,
-  Modal,
-  Radio,
-  Select,
-  Skeleton,
-  Space,
-  Switch,
-  Tabs,
-  Tag,
-  Typography,
-} from 'antd';
-import { EditOutlined, EyeOutlined, MailOutlined, PlusOutlined, SendOutlined, StopOutlined } from '@ant-design/icons';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, App, Button, Card, DatePicker, Empty, Form, Input, Modal, Radio, Select, Skeleton, Space, Switch, Tabs, Tag, Typography } from 'antd';
+import { AppstoreAddOutlined, CopyOutlined, EditOutlined, EyeOutlined, MailOutlined, PlusOutlined, SendOutlined, StopOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { AUDIENCE, CAMPAIGN_STATUS, EMAIL_FIELDS, emailApi } from '../../api/email';
+import { AUDIENCE, CAMPAIGN_STATUS, EMAIL_FIELDS, EMAIL_FORMATS, emailApi } from '../../api/email';
 import { PageHeader } from '../../ui';
 import { SwipeTabs } from '../../ui/Swipe';
 import { apiErrorMessage } from '../../utils/format';
@@ -30,6 +12,15 @@ import './EmailCenter.css';
 const { Text, Paragraph } = Typography;
 
 const STATUS_COLOR = { 0: 'blue', 1: 'gold', 2: 'green', 3: 'default' };
+
+/** E-posta önizlemesi (sunucunun ürettiği HTML, korumalı iframe) */
+function PreviewModal({ preview, onClose }) {
+  return (
+    <Modal open={!!preview} onCancel={onClose} footer={null} title={preview?.subject} width={680} destroyOnClose className="mb-email-preview-modal">
+      {preview && <iframe title="preview" className="mb-email-preview" sandbox="" srcDoc={preview.html} />}
+    </Modal>
+  );
+}
 
 /** Konu / gövde / düğme alanları + yardımcılar (önizleme, kendine test) — şablon ve gönderim formu ortak */
 function ContentFields({ area, form }) {
@@ -65,10 +56,27 @@ function ContentFields({ area, form }) {
       setBusy(false);
     }
   };
-  const insert = (field) => {
+  const bodyRef = useRef(null);
+  // İmlecin olduğu yere ekler; satır biçimleri yeni satıra gelir
+  const insertText = (text, line = false) => {
     const body = form.getFieldValue('body') || '';
-    form.setFieldsValue({ body: `${body}{{${field}}}` });
+    const el = bodyRef.current?.resizableTextArea?.textArea;
+    const start = el && document.activeElement === el ? el.selectionStart : body.length;
+    const end = el && document.activeElement === el ? el.selectionEnd : body.length;
+    const before = body.slice(0, start);
+    const pre = line && before.length > 0 && !before.endsWith('\n') ? '\n' : '';
+    const next = `${before}${pre}${text}${body.slice(end)}`;
+    form.setFieldsValue({ body: next });
+    const pos = before.length + pre.length + text.length;
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.focus();
+      el.setSelectionRange(pos, pos);
+    });
   };
+  const insert = (field) => insertText(`{{${field}}}`);
+  // Düğmeye basınca odak kaybolmasın (imleç konumu korunur)
+  const keepFocus = (e) => e.preventDefault();
 
   return (
     <>
@@ -81,12 +89,20 @@ function ContentFields({ area, form }) {
         extra={t('email:form.bodyHint')}
         rules={[{ required: true, whitespace: true, message: t('validation:required') }, { max: 5000 }]}
       >
-        <Input.TextArea rows={8} maxLength={5000} showCount />
+        <Input.TextArea ref={bodyRef} rows={10} maxLength={5000} showCount />
       </Form.Item>
+      <div className="mb-email-fields">
+        <Text type="secondary">{t('email:form.formats')}</Text>
+        {EMAIL_FORMATS.map((f) => (
+          <Tag key={f.key} className="mb-email-format" onMouseDown={keepFocus} onClick={() => insertText(f.snippet, f.line)}>
+            {t(`email:form.format.${f.key}`)}
+          </Tag>
+        ))}
+      </div>
       <div className="mb-email-fields">
         <Text type="secondary">{t('email:form.fields')}</Text>
         {EMAIL_FIELDS.map((f) => (
-          <Tag key={f} className="mb-email-field" onClick={() => insert(f)}>
+          <Tag key={f} className="mb-email-field" onMouseDown={keepFocus} onClick={() => insert(f)}>
             {`{{${f}}}`}
           </Tag>
         ))}
@@ -107,15 +123,13 @@ function ContentFields({ area, form }) {
           {t('email:form.sendTest')}
         </Button>
       </Space>
-      <Modal open={!!preview} onCancel={() => setPreview(null)} footer={null} title={preview?.subject} width={640} destroyOnClose>
-        {preview && <iframe title="preview" className="mb-email-preview" sandbox="" srcDoc={preview.html} />}
-      </Modal>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
     </>
   );
 }
 
 /** Toplu / düzenli gönderim oluşturma */
-function CampaignModal({ area, open, onClose, onSaved, templates }) {
+function CampaignModal({ area, open, onClose, onSaved, templates, starters, initial }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -129,7 +143,8 @@ function CampaignModal({ area, open, onClose, onSaved, templates }) {
     if (!open) return;
     form.resetFields();
     form.setFieldsValue({ audience: isOwner ? AUDIENCE.VENUE_CUSTOMERS : AUDIENCE.CONSENTED, when: 'now', repeat: 'once' });
-  }, [open, form, isOwner]);
+    if (initial) form.setFieldsValue({ subject: initial.subject, body: initial.body, buttonText: initial.buttonText, buttonUrl: initial.buttonUrl });
+  }, [open, form, isOwner, initial]);
 
   useEffect(() => {
     if (!open || audience === undefined) return;
@@ -141,7 +156,7 @@ function CampaignModal({ area, open, onClose, onSaved, templates }) {
   }, [open, area, audience]);
 
   const fromTemplate = (id) => {
-    const tpl = templates.find((x) => x.emailTemplateId === id);
+    const tpl = String(id).startsWith('s:') ? starters.find((x) => `s:${x.key}` === id) : templates.find((x) => x.emailTemplateId === id);
     if (tpl) form.setFieldsValue({ subject: tpl.subject, body: tpl.body, buttonText: tpl.buttonText, buttonUrl: tpl.buttonUrl });
   };
 
@@ -188,13 +203,20 @@ function CampaignModal({ area, open, onClose, onSaved, templates }) {
       destroyOnClose
     >
       <Form form={form} layout="vertical" onFinish={save} requiredMark={false}>
-        {templates.length > 0 && (
+        {templates.length + starters.length > 0 && (
           <Form.Item label={t('email:campaign.fromTemplate')}>
             <Select
               allowClear
+              showSearch
+              optionFilterProp="label"
               placeholder={t('email:campaign.fromTemplatePlaceholder')}
               onChange={fromTemplate}
-              options={templates.map((x) => ({ value: x.emailTemplateId, label: x.name }))}
+              options={[
+                ...(templates.length
+                  ? [{ label: t('email:campaign.myTemplates'), options: templates.map((x) => ({ value: x.emailTemplateId, label: x.name })) }]
+                  : []),
+                ...(starters.length ? [{ label: t('email:starters.title'), options: starters.map((x) => ({ value: `s:${x.key}`, label: x.name })) }] : []),
+              ]}
             />
           </Form.Item>
         )}
@@ -271,7 +293,7 @@ function TemplateModal({ area, template, open, onClose, onSaved }) {
     <Modal
       open={open}
       onCancel={onClose}
-      title={template ? template.name : t('email:template.new')}
+      title={template?.emailTemplateId ? template.name : t('email:template.new')}
       okText={t('common:actions.save')}
       onOk={() => form.submit()}
       confirmLoading={saving}
@@ -279,7 +301,9 @@ function TemplateModal({ area, template, open, onClose, onSaved }) {
       destroyOnClose
     >
       <Form form={form} layout="vertical" onFinish={save} requiredMark={false}>
-        {template?.isSystem && <Alert type="info" showIcon message={t(`email:template.system.${template.key}`, t('email:template.systemHint'))} style={{ marginBottom: 16 }} />}
+        {template?.isSystem && (
+          <Alert type="info" showIcon message={t(`email:template.system.${template.key}`, t('email:template.systemHint'))} style={{ marginBottom: 16 }} />
+        )}
         <Form.Item name="name" label={t('email:template.name')} rules={[{ required: true, whitespace: true, message: t('validation:required') }, { max: 100 }]}>
           <Input maxLength={100} />
         </Form.Item>
@@ -302,16 +326,20 @@ export default function EmailCenter({ area = 'Admin' }) {
   const [tab, setTab] = useState('campaigns');
   const [campaigns, setCampaigns] = useState(null);
   const [templates, setTemplates] = useState([]);
+  const [starters, setStarters] = useState([]);
   const [error, setError] = useState(null);
   const [campaignOpen, setCampaignOpen] = useState(false);
+  const [campaignInitial, setCampaignInitial] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [editing, setEditing] = useState(undefined); // undefined: kapalı, null: yeni, obje: düzenle
 
   const load = useCallback(() => {
     setError(null);
-    Promise.all([emailApi.campaigns(area), emailApi.templates(area)])
-      .then(([c, tp]) => {
+    Promise.all([emailApi.campaigns(area), emailApi.templates(area), emailApi.starters(area).catch(() => [])])
+      .then(([c, tp, st]) => {
         setCampaigns(c);
         setTemplates(tp);
+        setStarters(st);
       })
       .catch((e) => setError(apiErrorMessage(e, t('email:loadError'))));
   }, [area, t]);
@@ -352,6 +380,18 @@ export default function EmailCenter({ area = 'Admin' }) {
       },
     });
 
+  const openCampaign = (content = null) => {
+    setCampaignInitial(content);
+    setCampaignOpen(true);
+  };
+  const showPreview = async (content) => {
+    try {
+      setPreview(await emailApi.preview(area, content));
+    } catch (e) {
+      message.error(apiErrorMessage(e));
+    }
+  };
+
   const audienceLabel = useMemo(
     () => ({
       [AUDIENCE.CONSENTED]: t('email:audience.consented'),
@@ -359,7 +399,7 @@ export default function EmailCenter({ area = 'Admin' }) {
       [AUDIENCE.ALL_SERVICE]: t('email:audience.allService'),
       [AUDIENCE.VENUE_CUSTOMERS]: t('email:audience.venueCustomers'),
     }),
-    [t]
+    [t],
   );
 
   const campaignList =
@@ -367,7 +407,7 @@ export default function EmailCenter({ area = 'Admin' }) {
       <Skeleton active />
     ) : campaigns.length === 0 ? (
       <Empty description={t('email:campaign.empty')}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCampaignOpen(true)}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => openCampaign()}>
           {t('email:campaign.new')}
         </Button>
       </Empty>
@@ -436,6 +476,38 @@ export default function EmailCenter({ area = 'Admin' }) {
     </div>
   );
 
+  const starterList = (
+    <>
+      <Paragraph type="secondary">{t('email:starters.hint')}</Paragraph>
+      <div className="mb-email-list">
+        {starters.map((st) => (
+          <Card key={st.key} size="small" bordered={false} className="mb-email-card mb-email-starter">
+            <Space direction="vertical" size={6} style={{ width: '100%' }}>
+              <Space wrap style={{ justifyContent: 'space-between', width: '100%' }}>
+                <Text strong>{st.name}</Text>
+                <Tag color="lime">{t(`email:starters.category.${st.category}`, st.category)}</Tag>
+              </Space>
+              <Text type="secondary" ellipsis>
+                {st.subject}
+              </Text>
+              <Space wrap size={6}>
+                <Button size="small" icon={<EyeOutlined />} onClick={() => showPreview(st)}>
+                  {t('email:form.preview')}
+                </Button>
+                <Button size="small" icon={<CopyOutlined />} onClick={() => setEditing({ ...st, isActive: true })}>
+                  {t('email:starters.copy')}
+                </Button>
+                <Button size="small" type="primary" icon={<SendOutlined />} onClick={() => openCampaign(st)}>
+                  {t('email:starters.send')}
+                </Button>
+              </Space>
+            </Space>
+          </Card>
+        ))}
+      </div>
+    </>
+  );
+
   return (
     <SwipeTabs>
       <PageHeader
@@ -447,7 +519,7 @@ export default function EmailCenter({ area = 'Admin' }) {
           <Button key="tpl" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
             {t('email:template.new')}
           </Button>,
-          <Button key="new" type="primary" icon={<SendOutlined />} onClick={() => setCampaignOpen(true)}>
+          <Button key="new" type="primary" icon={<SendOutlined />} onClick={() => openCampaign()}>
             {t('email:campaign.new')}
           </Button>,
         ]}
@@ -466,12 +538,39 @@ export default function EmailCenter({ area = 'Admin' }) {
             items={[
               { key: 'campaigns', label: t('email:tabs.campaigns'), children: campaignList },
               { key: 'templates', label: t('email:tabs.templates', { count: templates.length }), children: templateList },
+              {
+                key: 'starters',
+                label: (
+                  <span>
+                    <AppstoreAddOutlined /> {t('email:tabs.starters', { count: starters.length })}
+                  </span>
+                ),
+                children: starterList,
+              },
             ]}
           />
         </Card>
       )}
-      <CampaignModal area={area} open={campaignOpen} onClose={() => setCampaignOpen(false)} onSaved={load} templates={templates} />
-      <TemplateModal area={area} template={editing} open={editing !== undefined} onClose={() => setEditing(undefined)} onSaved={load} />
+      <CampaignModal
+        area={area}
+        open={campaignOpen}
+        onClose={() => setCampaignOpen(false)}
+        onSaved={load}
+        templates={templates}
+        starters={starters}
+        initial={campaignInitial}
+      />
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+      <TemplateModal
+        area={area}
+        template={editing}
+        open={editing !== undefined}
+        onClose={() => setEditing(undefined)}
+        onSaved={() => {
+          load();
+          setTab('templates');
+        }}
+      />
     </SwipeTabs>
   );
 }

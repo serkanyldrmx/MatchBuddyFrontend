@@ -3,6 +3,7 @@ import { api } from './config';
 // E-posta merkezi — sözleşme: MatcBuddy/docs/email-api.md
 // area: 'Admin' (yönetim paneli) | 'Owner' (işletme paneli)
 export const emailApi = {
+  starters: (area) => api.get(`/api/Email/${area}/Starters`).then((r) => r.data || []),
   templates: (area) => api.get(`/api/Email/${area}/Templates`).then((r) => r.data || []),
   saveTemplate: (area, body) => api.post(`/api/Email/${area}/Templates`, body).then((r) => r.data),
   deleteTemplate: (area, id) => api.post(`/api/Email/${area}/Templates/Delete`, null, { params: { id } }).then((r) => r.data),
@@ -22,4 +23,14 @@ export const AUDIENCE = { CONSENTED: 0, OWNERS: 1, ALL_SERVICE: 2, VENUE_CUSTOME
 // Sunucu: EmailCampaignStatus
 export const CAMPAIGN_STATUS = { SCHEDULED: 0, SENDING: 1, DONE: 2, CANCELLED: 3 };
 // Şablonda kullanılabilen alanlar (MatcBuddy.Business.Email.EmailLayout.Fields)
-export const EMAIL_FIELDS = ['ad', 'soyad', 'kullanici', 'site', 'mac', 'tarih', 'saat', 'saha', 'adres', 'kalan', 'link'];
+export const EMAIL_FIELDS = ['ad', 'soyad', 'kullanici', 'site', 'tesis', 'mac', 'tarih', 'saat', 'saha', 'adres', 'kalan', 'link'];
+// Metin biçimleri (sunucu: EmailLayout) — düğmeyle imlecin olduğu yere eklenir
+export const EMAIL_FORMATS = [
+  { key: 'heading', snippet: '# Başlık', line: true },
+  { key: 'sub', snippet: '## Ara başlık', line: true },
+  { key: 'bullet', snippet: '- Madde', line: true },
+  { key: 'callout', snippet: '> Öne çıkan bilgi', line: true },
+  { key: 'info', snippet: '| Etiket: değer', line: true },
+  { key: 'bold', snippet: '**kalın yazı**', line: false },
+  { key: 'rule', snippet: '---', line: true },
+];

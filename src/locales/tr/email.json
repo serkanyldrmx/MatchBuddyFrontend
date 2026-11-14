@@ -8,7 +8,9 @@
   "tabs": {
     "campaigns": "Gönderimler",
     "templates_one": "Şablonlar ({{count}})",
-    "templates_other": "Şablonlar ({{count}})"
+    "templates_other": "Şablonlar ({{count}})",
+    "starters_one": "Hazır şablonlar ({{count}})",
+    "starters_other": "Hazır şablonlar ({{count}})"
   },
   "status": {
     "0": "Planlandı",
@@ -49,7 +51,8 @@
     "sentCount_one": "{{count}} e-posta gönderildi",
     "sentCount_other": "{{count}} e-posta gönderildi",
     "cancel": "İptal et",
-    "cancelConfirm": "Bu gönderim iptal edilsin mi?"
+    "cancelConfirm": "Bu gönderim iptal edilsin mi?",
+    "myTemplates": "Şablonlarım"
   },
   "template": {
     "new": "Yeni şablon",
@@ -63,22 +66,49 @@
     "systemHint": "Sistem şablonu: silinemez, metnini değiştirebilir ya da kapatabilirsiniz.",
     "system": {
       "welcome": "Kayıt olan ve e-postası olan her oyuncuya otomatik gider. Kapatırsanız hoş geldin e-postası gönderilmez.",
-      "match_reminder": "Oyuncuların maç sayfasında açtığı \"E-posta hatırlatıcı\" bu şablonla gider. {{mac}}, {{tarih}}, {{saat}}, {{saha}}, {{adres}}, {{kalan}}, {{link}} alanları dolu gelir."
+      "match_reminder": "Oyuncuların maç sayfasında açtığı \"Hatırlatma\" bu şablonla gider. Maç adı, tarih, saat, saha, adres, kalan süre ve maç bağlantısı alanları dolu gelir."
     }
   },
   "form": {
     "subject": "Konu",
     "subjectPlaceholder": "Örn. Bu hafta sonu kampanyalı saatler",
     "body": "Metin",
-    "bodyHint": "Düz metin; boş satır yeni paragraf başlatır. Aşağıdaki alanlara dokunarak kişiye özel bilgi ekleyebilirsiniz.",
+    "bodyHint": "Boş satır yeni paragraf başlatır. Biçim düğmeleriyle başlık, madde, vurgu kutusu ve bilgi kartı ekleyebilir; alanlara dokunarak kişiye özel bilgi koyabilirsiniz. Önizle ile son halini görün.",
     "fields": "Alanlar:",
     "buttonText": "Düğme yazısı",
     "buttonTextPlaceholder": "Örn. Hemen ayırt",
     "buttonUrl": "Düğme bağlantısı",
     "preview": "Önizle",
-    "sendTest": "Kendime test gönder"
+    "sendTest": "Kendime test gönder",
+    "formats": "Biçim:",
+    "format": {
+      "heading": "Büyük başlık",
+      "sub": "Ara başlık",
+      "bullet": "• Madde",
+      "callout": "Vurgu kutusu",
+      "info": "Bilgi satırı",
+      "bold": "Kalın",
+      "rule": "Ayraç"
+    }
   },
   "test": {
     "sent": "Test e-postası gönderildi."
+  },
+  "starters": {
+    "title": "Hazır şablonlar",
+    "hint": "Hazır metinlerden birini seçin: önizleyin, kendi şablonlarınıza kopyalayıp düzenleyin ya da doğrudan gönderime başlayın. Köşeli parantezli [alanları] kendi bilgilerinizle değiştirmeyi unutmayın.",
+    "copy": "Şablonlarıma ekle",
+    "send": "Bununla gönder",
+    "category": {
+      "matches": "Maçlar",
+      "engagement": "Etkileşim",
+      "announcement": "Duyuru",
+      "service": "Hizmet",
+      "business": "İşletmeler",
+      "campaign": "Kampanya",
+      "events": "Etkinlik",
+      "news": "Haber",
+      "loyalty": "Sadakat"
+    }
   }
 }

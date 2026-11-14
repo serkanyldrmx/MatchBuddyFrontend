@@ -17,6 +17,16 @@
   margin: -8px 0 16px;
 }
 
+.mb-email-format {
+  cursor: pointer;
+  margin: 0;
+  font-weight: 600;
+}
+
+.mb-email-starter {
+  border-left: 3px solid var(--mb-primary-fill, #c6f432);
+}
+
 .mb-email-field {
   cursor: pointer;
   font-family: Consolas, ui-monospace, monospace;
@@ -38,10 +48,10 @@
 
 .mb-email-preview {
   width: 100%;
-  height: min(70vh, 640px);
+  height: min(75vh, 760px);
   border: 0;
   border-radius: 8px;
-  background: #f3f4f6;
+  background: #eef2ea;
 }
 
 @media (max-width: 575px) {
